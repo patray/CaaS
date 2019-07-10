@@ -1,0 +1,1089 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="lxc1506547203185"> </a>
+	  <h1>SAX</h1>
+
+	  <p style="line-height: 1em;">The SAX (Symbolic Aggregate approXimation) function transforms a time series data item into a smaller sequence of symbols that can then be analyzed using Teradata Introduction to nPath or Shapelet Functions, or by other hashing or regular-expression pattern matching algorithms.</p>
+   <p style="line-height: 1em;">The SAX algorithm was developed by Eamonn Keogh and Jessica Lin in 2002. For information about the SAX algorithm, see:<ul>
+         <li>http://www.cs.ucr.edu/~eamonn/SAX.htm</li>
+         <li>https://cs.gmu.edu/~jessica/sax.htm</li>
+      </ul>
+   </p>
+
+   <a name="qda1506547569526"> </a>
+   <h2>SAX Syntax (Single Input)</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.7</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SAX (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable PARTITION BY <i>key</i> ORDER BY <i>order_columns</i>
+  USING
+  TargetColumns ({ '<i>target_column</i>' | <i>target_column_range</i> }[,...])
+  [ TimeColumn ('<i>time_column</i>') ]
+  [ WindowType ( { 'global' | 'sliding' } ) ]
+  [ OutputType ( { 'string' | 'bytes' | 'bitmap' | 'characters' } ) ]
+  [ Mean (<i>mean_value</i> [,...]) ]
+  [ STDev (<i>stdev_value</i> [,...]) ]
+  [ WindowSize (<i>window_size</i>) ]
+  [ OutputFrequency (<i>output_frequency</i>) ]
+  [ PointsPerSymbol (<i>points_per_symbol</i> [,...]) ]
+  [ SymbolsPerWindow (<i>symbols_per_window</i> [,...]) ]
+  [ AlphabetSize (<i>alphabet_size</i> [,...]) ]
+  [ BitmapLevel (<i>bitmap_level</i> [,...]) ]
+  [ OutputStats ({ 'true'|'yes'|'t'|'y'|'1'|'false'|'no'|'f'|'n'|'0' }) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="osc1506547644081"> </a>
+   <h2>SAX Syntax (Multiple Inputs)</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.7</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SAX (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable PARTITION BY <i>key</i> ORDER BY <i>order_columns</i> 
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS MeanStats PARTITION BY <i>key</i> 
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS STDevStats PARTITION BY <i>key</i>
+  USING
+  TargetColumns ({ '<i>target_column</i>' | <i>target_column_range</i> }[,...])
+  [ TimeColumn ('<i>time_column</i>') ]
+  [ WindowType ( { 'global' | 'sliding' } ) ]
+  [ OutputType ( { 'string' | 'bytes' | 'bitmap' | 'characters' } ) ]
+  [ WindowSize (<i>window_size</i>) ]
+  [ OutputFrequency (<i>output_frequency</i>) ]
+  [ PointsPerSymbol (<i>points_per_symbol</i> [,...]) ]
+  [ SymbolsPerWindow (<i>symbols_per_window</i> [,...]) ]
+  [ AlphabetSize (<i>alphabet_size</i> [,...]) ]
+  [ BitmapLevel (<i>bitmap_level</i> [,...]) ]
+  [ OutputStats ({ 'true'|'yes'|'t'|'y'|'1'|'false'|'no'|'f'|'n'|'0' }) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="zml1506547931244"> </a>
+	  <h2>SAX Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumns</dt>
+      <dd>Specify the names of the InputTable columns that contain the time series data to transform.</dd>
+      <dt>TimeColumn</dt>
+      <dd>[Optional] Specify the name of the InputTable column that contains the time axis of the data.</dd>
+      <dt>WindowType</dt>
+      <dd>[Optional] Specify how much data the function processes at one time:<a name="table_mqj_1ky_fdb"> </a>
+         <table class="introtable">
+            <a name="table_mqj_1ky_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'global'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Function computes SAX code using single mean and standard deviation for entire data set.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'sliding'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Function recomputes mean and standard deviation for sliding window of data set.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>OutputType</dt>
+      <dd>[Optional] Specify how the function outputs the results:<a name="table_lvr_gky_fdb"> </a>
+         <table class="introtable">
+            <a name="table_lvr_gky_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'string'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Function outputs list of SAX codes for each window.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'bytes'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Function outputs list of SAX codes as compact byte arrays (which humans cannot read).</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'bitmap'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Function outputs JSON representation of  SAX bitmap.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'characters'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Function outputs one character for each line.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>Mean</dt>
+      <dd>[Optional][Single-input syntax only] Specify the global mean values that the function uses to calculate the SAX code for every partition. A <i>mean_value</i> has the data type DOUBLE PRECISION.<p style="line-height: 1em;">If Mean specifies only one value and TargetColumns specifies multiple columns, the specified value applies to every <i>target_column</i>.</p>
+         <p style="line-height: 1em;">If Mean specifies multiple values, it must specify a value for each <i>target_column</i>. The <i>n</i>th <i>mean_value</i> corresponds to the <i>n</i>th <i>target_column</i>.</p>
+         <p>
+            <b>Tip:</b>  To specify a different global mean value for each partition, use the multiple-input syntax and put the values in the MeanStats table.</p>
+      </dd>
+      <dt>STDev</dt>
+      <dd>[Optional][Single-input syntax only] Specify the global standard deviation values that the function uses to calculate the SAX code for every partition. A <i>stdev_value</i> has the data type DOUBLE PRECISION and its value must be greater than 0.<p style="line-height: 1em;">If STDev specifies only one value and TargetColumns specifies multiple columns, the specified value applies to every <i>target_column</i>.</p>
+         <p style="line-height: 1em;">If STDev specifies multiple values, it must specify a value for each <i>target_column</i>. The <i>n</i>th <i>stdev_value</i> corresponds to the <i>n</i>th <i>target_column</i>.</p>
+         <p>
+            <b>Tip:</b>  To specify a different global standard deviation value for each partition, use the multiple-input syntax and put the values in the STDevStats table.</p>
+      </dd>
+      <dt>WindowSize</dt>
+      <dd>[Required if WindowType is 'sliding', disallowed otherwise.] Specify the size of the sliding window. The value must be an integer greater than 0.</dd>
+      <dt>OutputFrequency</dt>
+      <dd>[Optional] Specify the number of data points that the window slides between successive outputs. The value must be an integer greater than 0.</dd>
+      <dd>Default: 1<p>
+            <b>Note:</b>  WindowType value must be 'sliding' and OutputType value cannot be 'characters'. If WindowType is 'sliding' and OutputType value is 'characters', OutputFrequency is automatically set to the value of WindowSize, so that a single character is assigned to each time point. If the number of data points in the time series is not an integer multiple of the window size, the function ignores the leftover parts.</p>
+      </dd>
+      <dt>PointsPerSymbol</dt>
+      <dd>[Optional] Specify the number of data points to convert into one SAX symbol. Each value must be an integer greater than 0.</dd>
+      <dd>Default: 1<p>
+            <b>Note:</b>  WindowType value must be 'global'.</p>
+      </dd>
+      <dt>SymbolsPerWindow</dt>
+      <dd>[Optional] Specify the number of SAX symbols to create for each window. Each value must be an integer greater than 0.<p>
+            <b>Note:</b>  WindowType value must be 'sliding'.</p>
+      </dd>
+      <dd>Default: <i>window_size</i> (the value of WindowSize)</dd>
+      <dt>AlphabetSize</dt>
+      <dd>[Optional] Specify the number of symbols in the SAX alphabet. The value must be an integer in the range [2, 20].</dd>
+      <dd>Default: 4</dd>
+      <dt>BitmapLevel</dt>
+      <dd>[Optional] Specify the number of consecutive symbols to convert to one symbol on a bitmap. For bitmap level 1, the bitmap contains the symbols 'a', 'b', 'c', and so on; for bitmap level 2, the bitmap contains the symbols 'aa', 'ab', 'ac', and so on. The input value must be an integer in the range [1, 4].</dd>
+      <dd>Default: 2<p>
+            <b>Note:</b>  OutputType value must be 'bitmap'.</p>
+      </dd>
+      <dt>OutputStats</dt>
+      <dd>[Optional] Specify whether the function prints the mean and standard deviation.</dd>
+      <dd>Default: 'false'<p>
+            <b>Note:</b>  OutputType value must be 'string'.</p>
+      </dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the input table columns that are to appear in the output table. For each sequence in the input table, SAX choose the value corresponding to the first time point in the sequence to output as the accumulate value.</dd>
+   </div>
+
+
+	
+   <a name="viy1506548087732"> </a>
+   <h2>SAX Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_udz_pgs_wcb"> </a>
+   <table class="introtable">
+      <a name="table_udz_pgs_wcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Required by both versions.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">MeanStats</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Required by multiple-input version, disallowed by single-input version.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">STDevStats</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Required by multiple-input version, disallowed by single-input version.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_hnn_fgs_wcb"> </a>
+   <h3>InputTable Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N1001A_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1001A_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BYTEINT, SMALLINT, INTEGER, BIGINT, NUMERIC, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears one or more times.] Time series data to transform.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>time_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BYTEINT, SMALLINT, INTEGER, BIGINT, NUMERIC, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with TimeColumn syntax element.] Time axis of data.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_xyv_ggs_wcb"> </a>
+   <h3>MeanStats Schema</h3>
+   <p style="line-height: 1em;">The MeanStats table must have every <i>target_column</i> and partition column (in key) that InputTable has.</p>
+   <p style="line-height: 1em;">The MeanStats table has the global means of each <i>target_column</i> of InputTable. Each row of the MeanStats table specifies the global means for one input partition.</p>
+
+   <a name="section_hxg_hgs_wcb"> </a>
+   <h3>STDevStats Schema</h3>
+   <p style="line-height: 1em;">The STDevStats table must have every <i>target_column</i> and partition column (in key) that InputTable has.</p>
+   <p style="line-height: 1em;">The STDevStats table has the global standard deviations of each <i>target_column</i> of InputTable. Each row of the STDevStats table specifies the global means for one input partition.</p>
+
+   <a name="pga1506548200228"> </a>
+   <h2>SAX Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The output table format depends on the OutputType syntax element. For OutputType ('string') or OutputType ('bytes'), the format also depends on the WindowType syntax element.</p>
+
+   <a name="section_cxb_dss_wcb"> </a>
+   <h3>Output Table Schema, OutputType ('string') or OutputType ('bytes')</h3>
+   <p style="line-height: 1em;">For WindowType ('global'), the table has one row for each partition. For WindowType ('sliding'), the table has multiple rows for each partition.</p>
+   <a name="table_N1001B_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1001B_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column copied from InputTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>time_column</i>_start</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Numeric or time SQL data type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Point on time axis where window starts.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>time_column</i>_end</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Numeric or time SQL data type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Point on time axis where window ends.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>_saxcode</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CLOB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SAX code for <i>target_column</i> for window.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>_mean</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with OutputStats value of 'true', 'yes', 't', 'y', or '1'.] Mean value used to calculate SAX value for window.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>_stdev</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with OutputStats value of 'true', 'yes', 't', 'y', or '1'.] Standard deviation value used to calculate SAX value for window.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ppk_2ss_wcb"> </a>
+   <h3>Output Table Schema, OutputType ('bitmap')</h3>
+   <p style="line-height: 1em;">The table has one row for each partition.</p>
+   <a name="table_N100A3_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100A3_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column copied from InputTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>time_column</i>start</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Numeric or time SQL data type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains point on time axis where window starts.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>time_column</i>_end</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Numeric or time SQL data type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains point on time axis where window ends.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>_bitmap</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains bitmap value for <i>n</i>th window, a JSON string containing key-value pairs of form "xx":<i>d</i>, where "xx" is a SAX code and <i>d</i> is a value between 0.00 and 1.00.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_gql_fss_wcb"> </a>
+   <h3>Output Table Schema, OutputType ('characters')</h3>
+   <p style="line-height: 1em;">The table has one row for each SAX symbol. You can input this output table to the function HMMUnsupervised.</p>
+   <a name="table_N10119_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10119_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column copied from InputTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>value_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column name from InputTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>time_column</i>_start</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Numeric or time SQL data type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Point on time axis where window starts.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>time_column</i>_end</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Numeric or time SQL data type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Point on time axis where window ends.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">saxchar</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CHARACTER(1)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Character value for window.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="dqo1506548285698"> </a>
+   <h2>SAX Examples</h2>
+   <a name="elm1523563946962"> </a>
+	  <h3>SAX Example: Global Window, Default Output</h3>
+
+	  <a name="section_j45_rvd_p2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: financial_data3, as in VARMAX Example: No Exogenous Model</li>
+   </ul>
+
+
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SAX (
+  ON finance_data3 PARTITION BY id ORDER BY period
+  USING
+  TargetColumns ('expenditure', 'income', 'investment')
+  TimeColumn ('period')
+  <b>WindowType ('global')</b> 
+  OutputStats ('true')
+  Accumulate ('id')
+) AS dt ORDER BY id;</tt>
+   </pre>
+		
+   <a name="section_skm_z4d_mdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id period_start period_end expenditure_saxcode                      expenditure_mean   expenditure_stdev  income_saxcode                           income_mean        income_stdev       investment_saxcode                       investment_mean   investment_stdev   
+ -- ------------ ---------- ---------------------------------------- ------------------ ------------------ ---------------------------------------- ------------------ ------------------ ---------------------------------------- ----------------- ------------------ 
+  1 1960q1       1969q4     aaaabbbbbbbbbbbbbbbbbbbbbbbbbbbcccccdddd              714.2  385.0403375471997 aaaabbbbbbbbbbbbbbbbbbbbbbbbbbbcccccdddd              811.2  449.6825204861415 aaaaaaabbbbbabbbbbbbbcccccccbbbcbbccdddd             301.0 130.70871903116955
+  2 1970q1       1979q4     ddddddddaaaaaaaaaaaabbbbbbbbbbbccccccccd             1355.6 404.84228014730854 ddddddddaaaaaaaaaaaabbbbbbbbbbcccccccccc           1589.275  470.7790590456389 ddddddddaaaaaaaabbbbbbbbcbbbcbbbbbbbbccc           556.675 142.19982103562646
+  3 1980q1       1982q4     aaaacccddddd                             2045.1666666666667  256.6124893627928 aaaacccddddd                             2387.4166666666665 317.49658790817546 aaaacddccccc                             759.0833333333334 113.35259417437517</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="ley1523564023304"> </a>
+	  <h3>SAX Example: Sliding Window, Default Output</h3>
+
+	  <a name="section_kr2_3vd_p2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: financial_data3, as in VARMAX Example: No Exogenous Model</li>
+   </ul>
+
+   <a name="section_vrs_dpd_mdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SAX (
+  ON finance_data3 PARTITION BY id ORDER BY period
+  USING
+  TargetColumns ('expenditure')
+  TimeColumn ('period')
+  <b>WindowType ('sliding')</b> 
+  WindowSize (20)
+  OutputStats ('true')
+  Accumulate ('id')
+) AS dt ORDER BY 1, 2;</tt>
+   </pre>
+   <a name="section_skm_z4d_mdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id period_start period_end expenditure_saxcode  expenditure_mean expenditure_stdev  
+ -- ------------ ---------- -------------------- ---------------- ------------------ 
+  1 1960q1       1964q4     aaaaaabbbcccccdddddd           507.65 56.465429572811686
+  1 1960q2       1965q1     aaaaaabbbbcccccddddd           517.75  57.08338775768973
+  1 1960q3       1965q2     aaaaaabbbbccccdddddd           528.65  58.43419600848437
+  1 1960q4       1965q3     aaaaaabbbbbccccddddd            539.6  60.25507185466199
+  1 1961q1       1965q4     aaaaabbbbbbccccddddd            550.6  62.68501037980077
+  1 1961q2       1966q1     aaaaaabbbbbccccddddd            561.6  65.02420601915138
+  1 1961q3       1966q2     aaaaaabbbbcccccddddd            573.0   65.8858662265366
+  1 1961q4       1966q3     aaaaaaabbbbcccdddddd            583.9  67.52847352666971
+  1 1962q1       1966q4     aaaaaaabbbbcccdddddd           593.95  67.30486413954085
+  1 1962q2       1967q1     aaaaaaabbbbccddddddd            604.3  67.52707059511755
+  1 1962q3       1967q2     aaaaaabbbbcccddddddd           613.75  66.85717298052154
+  1 1962q4       1967q3     aaaaaaabbbccdddddddd            623.4  65.92771160820578
+  1 1963q1       1967q4     aaaaaaabbcccdddddddd            632.9  64.67969664349684
+  1 1963q2       1968q1     aaaaaabbbcccdddddddd           642.65  62.86516481620384
+  1 1963q3       1968q2     aaaaaabbbcccdcdddddd           653.05  61.83805249878237
+  1 1963q4       1968q3     aaaaaabbcccccccddddd           663.65  60.68145906027865
+  1 1964q1       1968q4     aaaaabbbccccccccdddd           674.85 60.242732691215465
+  1 1964q2       1969q1     bbbbbbbbbbbbbbbbcccd           734.85 250.77926444122951
+  1 1964q3       1969q2     bbbbbbbbbbbbbbbbbbdd            796.5 343.55211050374726
+  1 1964q4       1969q3     bbbbbbbbbbbbbbbbbddd           858.75  409.8081547312236
+  1 1965q1       1969q4     bbbbbbbbbbbbbbbbdddd           920.75 459.68477471552524
+  2 1970q1       1974q4     ddddddddaaaaaaaaabbb          1361.05  555.2160769513644
+  2 1970q2       1975q1     dddddddaaaaaaabbbbbb           1321.6  543.5625563185705
+  2 1970q3       1975q2     ddddddaaaaaabbbbbbbb           1278.8  524.1698800559747
+  2 1970q4       1975q3     dddddaaaaabbbbbbbbbb          1238.65 500.42931831736115
+  2 1971q1       1975q4     ddddaaaaabbbbbbbbbbb           1197.6  467.8177107873493
+  2 1971q2       1976q1     dddaaaabbbbbbbbbbbcc          1155.35 421.61297730451696
+  2 1971q3       1976q2     ddaaaabbbbbbbbbbcccc           1114.0  365.4449342924321
+  2 1971q4       1976q3     daaaabbbbbbbbccccccc           1071.0 284.76305940202286
+  2 1972q1       1976q4     aaaaaabbbbccccdddddd           1028.3 152.20488269365566
+  2 1972q2       1977q1     aaaaaabbbbccccdddddd          1053.15 153.19415785205337
+  2 1972q3       1977q2     aaaaaabbbbccccdddddd           1078.2 153.33609455942508
+  2 1972q4       1977q3     aaaaaabbbbbccddddddd           1104.1 154.19601332821765
+  2 1973q1       1977q4     aaaaaabbbbccccdddddd          1129.75 153.77080518198434
+  2 1973q2       1978q1     aaaaaabbbbccccdddddd           1155.8  153.5432735163129
+  2 1973q3       1978q2     aaaaaabbbbccccdddddd          1183.15 155.22624405075726
+  2 1973q4       1978q3     aaaaaaabbcccccdddddd           1210.7 157.55804277187843
+  2 1974q1       1978q4     aaaaaabbbbccccdddddd           1238.1 160.74756280382127
+  2 1974q2       1979q1     aaaaaabbbbcccccddddd           1266.4 163.27580798662123
+  2 1974q3       1979q2     aaaaaabbbbcccccddddd           1294.1 165.00778291054277
+  2 1974q4       1979q3     aaaaabbbbbbcccdddddd           1321.8 165.54585944368188
+  2 1975q1       1979q4     aaaaaabbbbccccdddddd          1350.15  167.6105369756414</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="cxb1523564069943"> </a>
+	  <h3>SAX Example: Sliding Window, Bitmap Output</h3>
+
+	  <a name="section_kr2_3vd_p2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: financial_data3, as in VARMAX Example: No Exogenous Model</li>
+   </ul>
+
+   <a name="section_zk2_gpd_mdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SAX (
+  ON finance_data3 PARTITION BY id ORDER BY period
+  USING
+  TargetColumns ('expenditure', 'income', 'investment')
+  TimeColumn ('period')
+  OutputType ('bitmap')
+  <b>BitmapLevel (1)</b> 
+  WindowType ('sliding')
+  WindowSize (20)
+  Accumulate ('id')
+) AS dt;</tt>
+   </pre>
+   <a name="section_skm_z4d_mdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id period_start period_end expenditure_bitmap                   income_bitmap                        investment_bitmap                    
+ -- ------------ ---------- ------------------------------------ ------------------------------------ ------------------------------------ 
+  1 1960q1       1969q4     {"a":0.81,"b":1.0,"c":0.55,"d":0.87} {"a":0.79,"b":1.0,"c":0.54,"d":0.87} {"a":0.72,"b":1.0,"c":0.52,"d":0.9} 
+  2 1970q1       1979q4     {"a":1.0,"b":0.98,"c":0.53,"d":0.93} {"a":1.0,"b":0.95,"c":0.52,"d":0.91} {"a":0.83,"b":1.0,"c":0.83,"d":0.79}
+  3 1980q1       1982q4     {"a":0.0,"b":0.0,"c":0.0,"d":0.0}    {"a":0.0,"b":0.0,"c":0.0,"d":0.0}    {"a":0.0,"b":0.0,"c":0.0,"d":0.0}</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="kbk1523564115900"> </a>
+	  <h3>SAX Example: Sliding Window, Character Output</h3>
+
+	  <a name="section_kr2_3vd_p2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: financial_data3, as in VARMAX Example: No Exogenous Model</li>
+   </ul>
+
+   <a name="section_tdb_jpd_mdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SAX (
+  ON finance_data3 PARTITION BY id ORDER BY period
+  USING
+  TargetColumns ('expenditure', 'income', 'investment')
+  TimeColumn ('period')
+  <b>OutputType ('characters')</b> 
+  WindowType ('global')
+  Accumulate ('id')
+) AS dt;</tt>
+   </pre>
+   <a name="section_skm_z4d_mdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id value_column period_start period_end saxchar 
+ -- ------------ ------------ ---------- ------- 
+  1 expenditure  1960q1       1960q1     a      
+  1 expenditure  1960q2       1960q2     a      
+  1 expenditure  1960q3       1960q3     a      
+  1 expenditure  1960q4       1960q4     a      
+  1 expenditure  1961q1       1961q1     b      
+  1 expenditure  1961q2       1961q2     b      
+  1 expenditure  1961q3       1961q3     b      
+  1 expenditure  1961q4       1961q4     b      
+  1 expenditure  1962q1       1962q1     b      
+  1 expenditure  1962q2       1962q2     b      
+  1 expenditure  1962q3       1962q3     b      
+  1 expenditure  1962q4       1962q4     b      
+  1 expenditure  1963q1       1963q1     b      
+  1 expenditure  1963q2       1963q2     b      
+  1 expenditure  1963q3       1963q3     b      
+  1 expenditure  1963q4       1963q4     b      
+  1 expenditure  1964q1       1964q1     b      
+  1 expenditure  1964q2       1964q2     b      
+  1 expenditure  1964q3       1964q3     b      
+  1 expenditure  1964q4       1964q4     b      
+  1 expenditure  1965q1       1965q1     b      
+  1 expenditure  1965q2       1965q2     b      
+  1 expenditure  1965q3       1965q3     b      
+  1 expenditure  1965q4       1965q4     b      
+  1 expenditure  1966q1       1966q1     b      
+  1 expenditure  1966q2       1966q2     b      
+  1 expenditure  1966q3       1966q3     b      
+  1 expenditure  1966q4       1966q4     b      
+  1 expenditure  1967q1       1967q1     b      
+  1 expenditure  1967q2       1967q2     b      
+  1 expenditure  1967q3       1967q3     b      
+  1 expenditure  1967q4       1967q4     c      
+  1 expenditure  1968q1       1968q1     c      
+  1 expenditure  1968q2       1968q2     c      
+  1 expenditure  1968q3       1968q3     c      
+  1 expenditure  1968q4       1968q4     c      
+  1 expenditure  1969q1       1969q1     d      
+  1 expenditure  1969q2       1969q2     d      
+  1 expenditure  1969q3       1969q3     d      
+  1 expenditure  1969q4       1969q4     d      
+  1 income       1960q1       1960q1     a      
+  1 income       1960q2       1960q2     a      
+  1 income       1960q3       1960q3     a      
+  1 income       1960q4       1960q4     a      
+  1 income       1961q1       1961q1     b      
+  1 income       1961q2       1961q2     b      
+  1 income       1961q3       1961q3     b      
+  1 income       1961q4       1961q4     b      
+  1 income       1962q1       1962q1     b      
+  1 income       1962q2       1962q2     b      
+  1 income       1962q3       1962q3     b      
+  1 income       1962q4       1962q4     b      
+  1 income       1963q1       1963q1     b      
+  1 income       1963q2       1963q2     b      
+  1 income       1963q3       1963q3     b      
+  1 income       1963q4       1963q4     b      
+  1 income       1964q1       1964q1     b      
+  1 income       1964q2       1964q2     b      
+  1 income       1964q3       1964q3     b      
+  1 income       1964q4       1964q4     b      
+  1 income       1965q1       1965q1     b      
+  1 income       1965q2       1965q2     b      
+  1 income       1965q3       1965q3     b      
+  1 income       1965q4       1965q4     b      
+  1 income       1966q1       1966q1     b      
+  1 income       1966q2       1966q2     b      
+  1 income       1966q3       1966q3     b      
+  1 income       1966q4       1966q4     b      
+  1 income       1967q1       1967q1     b      
+  1 income       1967q2       1967q2     b      
+  1 income       1967q3       1967q3     b      
+  1 income       1967q4       1967q4     c      
+  1 income       1968q1       1968q1     c      
+  1 income       1968q2       1968q2     c      
+  1 income       1968q3       1968q3     c      
+  1 income       1968q4       1968q4     c      
+  1 income       1969q1       1969q1     d      
+  1 income       1969q2       1969q2     d      
+  1 income       1969q3       1969q3     d      
+  1 income       1969q4       1969q4     d      
+  1 investment   1960q1       1960q1     a      
+  1 investment   1960q2       1960q2     a      
+  1 investment   1960q3       1960q3     a      
+  1 investment   1960q4       1960q4     a      
+  1 investment   1961q1       1961q1     a      
+  1 investment   1961q2       1961q2     a      
+  1 investment   1961q3       1961q3     a      
+  1 investment   1961q4       1961q4     b      
+  1 investment   1962q1       1962q1     b      
+  1 investment   1962q2       1962q2     b      
+  1 investment   1962q3       1962q3     b      
+  1 investment   1962q4       1962q4     b      
+  1 investment   1963q1       1963q1     a      
+  1 investment   1963q2       1963q2     b      
+  1 investment   1963q3       1963q3     b      
+  1 investment   1963q4       1963q4     b      
+  1 investment   1964q1       1964q1     b      
+  1 investment   1964q2       1964q2     b      
+  1 investment   1964q3       1964q3     b      
+  1 investment   1964q4       1964q4     b      
+  1 investment   1965q1       1965q1     b      
+  1 investment   1965q2       1965q2     c      
+  1 investment   1965q3       1965q3     c      
+  1 investment   1965q4       1965q4     c      
+  1 investment   1966q1       1966q1     c      
+  1 investment   1966q2       1966q2     c      
+  1 investment   1966q3       1966q3     c      
+  1 investment   1966q4       1966q4     c      
+  1 investment   1967q1       1967q1     b      
+  1 investment   1967q2       1967q2     b      
+  1 investment   1967q3       1967q3     b      
+  1 investment   1967q4       1967q4     c      
+  1 investment   1968q1       1968q1     b      
+  1 investment   1968q2       1968q2     b      
+  1 investment   1968q3       1968q3     c      
+  1 investment   1968q4       1968q4     c      
+  1 investment   1969q1       1969q1     d      
+  1 investment   1969q2       1969q2     d      
+  1 investment   1969q3       1969q3     d      
+  1 investment   1969q4       1969q4     d      
+  2 expenditure  1970q1       1970q1     d      
+  2 expenditure  1970q2       1970q2     d      
+  2 expenditure  1970q3       1970q3     d      
+  2 expenditure  1970q4       1970q4     d      
+  2 expenditure  1971q1       1971q1     d      
+  2 expenditure  1971q2       1971q2     d      
+  2 expenditure  1971q3       1971q3     d      
+  2 expenditure  1971q4       1971q4     d      
+  2 expenditure  1972q1       1972q1     a      
+  2 expenditure  1972q2       1972q2     a      
+  2 expenditure  1972q3       1972q3     a      
+  2 expenditure  1972q4       1972q4     a      
+  2 expenditure  1973q1       1973q1     a      
+  2 expenditure  1973q2       1973q2     a      
+  2 expenditure  1973q3       1973q3     a      
+  2 expenditure  1973q4       1973q4     a      
+  2 expenditure  1974q1       1974q1     a      
+  2 expenditure  1974q2       1974q2     a      
+  2 expenditure  1974q3       1974q3     a      
+  2 expenditure  1974q4       1974q4     a      
+  2 expenditure  1975q1       1975q1     b      
+  2 expenditure  1975q2       1975q2     b      
+  2 expenditure  1975q3       1975q3     b      
+  2 expenditure  1975q4       1975q4     b      
+  2 expenditure  1976q1       1976q1     b      
+  2 expenditure  1976q2       1976q2     b      
+  2 expenditure  1976q3       1976q3     b      
+  2 expenditure  1976q4       1976q4     b      
+  2 expenditure  1977q1       1977q1     b      
+  2 expenditure  1977q2       1977q2     b      
+  2 expenditure  1977q3       1977q3     b      
+  2 expenditure  1977q4       1977q4     c      
+  2 expenditure  1978q1       1978q1     c      
+  2 expenditure  1978q2       1978q2     c      
+  2 expenditure  1978q3       1978q3     c      
+  2 expenditure  1978q4       1978q4     c      
+  2 expenditure  1979q1       1979q1     c      
+  2 expenditure  1979q2       1979q2     c      
+  2 expenditure  1979q3       1979q3     c      
+  2 expenditure  1979q4       1979q4     d      
+  2 income       1970q1       1970q1     d      
+  2 income       1970q2       1970q2     d      
+  2 income       1970q3       1970q3     d      
+  2 income       1970q4       1970q4     d      
+  2 income       1971q1       1971q1     d      
+  2 income       1971q2       1971q2     d      
+  2 income       1971q3       1971q3     d      
+  2 income       1971q4       1971q4     d      
+  2 income       1972q1       1972q1     a      
+  2 income       1972q2       1972q2     a      
+  2 income       1972q3       1972q3     a      
+  2 income       1972q4       1972q4     a      
+  2 income       1973q1       1973q1     a      
+  2 income       1973q2       1973q2     a      
+  2 income       1973q3       1973q3     a      
+  2 income       1973q4       1973q4     a      
+  2 income       1974q1       1974q1     a      
+  2 income       1974q2       1974q2     a      
+  2 income       1974q3       1974q3     a      
+  2 income       1974q4       1974q4     a      
+  2 income       1975q1       1975q1     b      
+  2 income       1975q2       1975q2     b      
+  2 income       1975q3       1975q3     b      
+  2 income       1975q4       1975q4     b      
+  2 income       1976q1       1976q1     b      
+  2 income       1976q2       1976q2     b      
+  2 income       1976q3       1976q3     b      
+  2 income       1976q4       1976q4     b      
+  2 income       1977q1       1977q1     b      
+  2 income       1977q2       1977q2     b      
+  2 income       1977q3       1977q3     c      
+  2 income       1977q4       1977q4     c      
+  2 income       1978q1       1978q1     c      
+  2 income       1978q2       1978q2     c      
+  2 income       1978q3       1978q3     c      
+  2 income       1978q4       1978q4     c      
+  2 income       1979q1       1979q1     c      
+  2 income       1979q2       1979q2     c      
+  2 income       1979q3       1979q3     c      
+  2 income       1979q4       1979q4     c      
+  2 investment   1970q1       1970q1     d      
+  2 investment   1970q2       1970q2     d      
+  2 investment   1970q3       1970q3     d      
+  2 investment   1970q4       1970q4     d      
+  2 investment   1971q1       1971q1     d      
+  2 investment   1971q2       1971q2     d      
+  2 investment   1971q3       1971q3     d      
+  2 investment   1971q4       1971q4     d      
+  2 investment   1972q1       1972q1     a      
+  2 investment   1972q2       1972q2     a      
+  2 investment   1972q3       1972q3     a      
+  2 investment   1972q4       1972q4     a      
+  2 investment   1973q1       1973q1     a      
+  2 investment   1973q2       1973q2     a      
+  2 investment   1973q3       1973q3     a      
+  2 investment   1973q4       1973q4     a      
+  2 investment   1974q1       1974q1     b      
+  2 investment   1974q2       1974q2     b      
+  2 investment   1974q3       1974q3     b      
+  2 investment   1974q4       1974q4     b      
+  2 investment   1975q1       1975q1     b      
+  2 investment   1975q2       1975q2     b      
+  2 investment   1975q3       1975q3     b      
+  2 investment   1975q4       1975q4     b      
+  2 investment   1976q1       1976q1     c      
+  2 investment   1976q2       1976q2     b      
+  2 investment   1976q3       1976q3     b      
+  2 investment   1976q4       1976q4     b      
+  2 investment   1977q1       1977q1     c      
+  2 investment   1977q2       1977q2     b      
+  2 investment   1977q3       1977q3     b      
+  2 investment   1977q4       1977q4     b      
+  2 investment   1978q1       1978q1     b      
+  2 investment   1978q2       1978q2     b      
+  2 investment   1978q3       1978q3     b      
+  2 investment   1978q4       1978q4     b      
+  2 investment   1979q1       1979q1     b      
+  2 investment   1979q2       1979q2     c      
+  2 investment   1979q3       1979q3     c      
+  2 investment   1979q4       1979q4     c      
+  3 expenditure  1980q1       1980q1     a      
+  3 expenditure  1980q2       1980q2     a      
+  3 expenditure  1980q3       1980q3     a      
+  3 expenditure  1980q4       1980q4     a      
+  3 expenditure  1981q1       1981q1     c      
+  3 expenditure  1981q2       1981q2     c      
+  3 expenditure  1981q3       1981q3     c      
+  3 expenditure  1981q4       1981q4     d      
+  3 expenditure  1982q1       1982q1     d      
+  3 expenditure  1982q2       1982q2     d      
+  3 expenditure  1982q3       1982q3     d      
+  3 expenditure  1982q4       1982q4     d      
+  3 income       1980q1       1980q1     a      
+  3 income       1980q2       1980q2     a      
+  3 income       1980q3       1980q3     a      
+  3 income       1980q4       1980q4     a      
+  3 income       1981q1       1981q1     c      
+  3 income       1981q2       1981q2     c      
+  3 income       1981q3       1981q3     c      
+  3 income       1981q4       1981q4     d      
+  3 income       1982q1       1982q1     d      
+  3 income       1982q2       1982q2     d      
+  3 income       1982q3       1982q3     d      
+  3 income       1982q4       1982q4     d      
+  3 investment   1980q1       1980q1     a      
+  3 investment   1980q2       1980q2     a      
+  3 investment   1980q3       1980q3     a      
+  3 investment   1980q4       1980q4     a      
+  3 investment   1981q1       1981q1     c      
+  3 investment   1981q2       1981q2     d      
+  3 investment   1981q3       1981q3     d      
+  3 investment   1981q4       1981q4     c      
+  3 investment   1982q1       1982q1     c      
+  3 investment   1982q2       1982q2     c      
+  3 investment   1982q3       1982q3     c      
+  3 investment   1982q4       1982q4     c</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="nrw1506551776225"> </a>
+   <h3>SAX Example: Multiple-Input Version</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">In the multiple-input version, the mean and standard deviation statistics are applied globally with MeanStats and the STDevStats tables, respectively.</p>
+
+   <a name="section_wqg_gvd_p2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: financial_data3, as in VARMAX Example: No Exogenous Model</li>
+   </ul>
+
+   <a name="section_htv_kpd_mdb"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">The statistics are created from a query on InputTable table finance_data3 and grouped by column id.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SAX (
+  ON finance_data3 AS InputTable PARTITION BY id ORDER BY period
+  ON (SELECT id, AVG (expenditure) AS expenditure,
+    AVG (income) AS income,
+    AVG (investment) AS investment
+  FROM finance_data3 GROUP BY id
+  ) AS meanstats PARTITION BY id
+  ON (SELECT id, STDDEV_SAMP (expenditure) AS expenditure,
+    STDDEV_SAMP (income) AS income,
+    STDDEV_SAMP (investment) AS investment
+  FROM finance_data3 GROUP BY id
+  ) AS stdevstats PARTITION BY id
+  USING
+  TargetColumns ('expenditure', 'income', 'investment')
+  TimeColumn ('period')
+  WindowType ('global')
+  OutputStats ('true')
+  Accumulate ('id')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_skm_z4d_mdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id period_start period_end expenditure_saxcode                      expenditure_mean   expenditure_stdev  income_saxcode                           income_mean        income_stdev      investment_saxcode                       investment_mean   investment_stdev   
+ -- ------------ ---------- ---------------------------------------- ------------------ ------------------ ---------------------------------------- ------------------ ----------------- ---------------------------------------- ----------------- ------------------ 
+  1 1960q1       1969q4     aaaabbbbbbbbbbbbbbbbbbbbbbbbbbbcccccdddd              714.2  385.0403375471998 aaaabbbbbbbbbbbbbbbbbbbbbbbbbbbcccccdddd              811.2 449.6825204861417 aaaaaaabbbbbabbbbbbbbcccccccbbbcbbccdddd             301.0 130.70871903116958
+  2 1970q1       1979q4     ddddddddaaaaaaaaaaaabbbbbbbbbbbccccccccd             1355.6  404.8422801473085 ddddddddaaaaaaaaaaaabbbbbbbbbbcccccccccc           1589.275 470.7790590456392 ddddddddaaaaaaaabbbbbbbbcbbbcbbbbbbbbccc           556.675 142.19982103562614
+  3 1980q1       1982q4     aaaacccddddd                             2045.1666666666667 256.61248936279327 aaaacccddddd                             2387.4166666666665 317.4965879081747 aaaacddccccc                             759.0833333333334 113.35259417437523</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

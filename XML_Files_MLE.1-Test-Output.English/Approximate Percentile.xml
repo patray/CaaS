@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="zea1507654518162"> </a>
+	  <h1>Approximate Percentile</h1>
+
+	  <p style="line-height: 1em;">The Approximate Percentile function, composed of ApproxPercentileReduce and ApproxPercentileMap, computes approximate percentiles for one or more columns of data. The <i>n</i>th percentile is the smallest value in a data set that is greater than <i>n</i>% of the values. The larger the data set, the more accurate the approximate percentile.</p>
+   <p style="line-height: 1em;">The Approximate Percentile function is based on an algorithm developed by Greenwald and Khanna. The function gives <i>e</i>-approximate quantile summaries of a set of <i>N</i> elements, where <i>e</i> is the error (the desired accuracy of the approximation). Given any rank <i>r</i>, an <i>e</i>-approximate summary returns a value whose rank <i>r'</i> is in the interval [<i>r</i> - <i>e</i>
+      <sup>
+         <i>N</i>
+      </sup>, <i>r</i> + <i>e</i>
+      <sup>
+         <i>N</i>
+      </sup>]. The algorithm has a worst-case space requirement of <i>O</i>((1/<i>e</i>) * log(<i>e</i>
+      <sup>
+         <i>N</i>
+      </sup>)).</p>
+   <p style="line-height: 1em;">When running the Approximate Percentile function, you specify <i>e</i> with the ErrorRate parameter.</p>
+
+   <a name="cgv1507654696218"> </a>
+   <h2>Approximate Percentile Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>ApproxPercentileReduce version 1.6, ApproxPercentileMap version 1.5</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ApproxPercentileReduce (
+  ON ([ SELECT * FROM ] ApproxPercentileMap (
+    ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+    USING
+    TargetColumns ('<i>target_column</i>' [,...])
+    [ ErrorRate (<i>error</i>) ]
+    [ GroupByColumns ('<i>group_column</i>' [,...]) ]
+    ) AS <i>alias_1</i>
+  ) PARTITION BY [ 1 | <i>group_column</i> [,...]]
+  USING
+  [ Percentile (<i>percentile</i> [,...]) ]
+  [ TargetColumns ('<i>target_column</i>' [,...]) ]
+  [ GroupByColumns ('<i>group_column</i>' [,...]) ]
+) AS <i>alias_2</i>;</tt>
+   </pre>
+   <a name="pdi1507654711236"> </a>
+	  <h2>Approximate Percentile Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumns</dt>
+      <dd>Specify the names of the input columns for which to compute approximate percentiles.<p style="line-height: 1em;">If you specify only one <i>target_column</i> in the ApproxPercentileMap function, you can omit this syntax element in the ApproxPercentileReduce function.</p>
+         <p style="line-height: 1em;">If you specify more than one <i>target_column</i> in the ApproxPercentileMap function, you must specify this syntax element in the ApproxPercentileReduce function. In ApproxPercentileReduce, this syntax element must specify at least one <i>target_column</i> that it specifies in ApproxPercentileMap. Only the target columns specified in ApproxPercentileReduce appear in the output table.</p>
+      </dd>
+      <dt>ErrorRate</dt>
+      <dd>[Optional] Specify the error (desired accuracy) of the approximation; that the quantile is to be correct within <i>error</i>%. The <i>error</i> must be in the range [.01, 50]. Lower error is more accurate but takes longer to compute.</dd>
+      <dd>Default: 1</dd>
+      <dt>Percentile</dt>
+      <dd>[Optional] Specify the approximate percentiles to compute. Each <i>percentile</i> is an INTEGER.</dd>
+      <dd>Default behavior: The function computes the percentiles 0, 25, 50, 75, and 100.</dd>
+      <dt>GroupByColumns</dt>
+      <dd>[Optional] Specify the names of the input columns by which to group the data. <p style="line-height: 1em;">If you specify this syntax element, the function computes the approximate percentile for each group in each column. For example, if the target columns are State, Town, and Population, the function computes the approximate percentile for the population of each state.</p>
+         <p style="line-height: 1em;">If you omit this syntax element, the function computes the approximate percentile for the entire column. For example, if the target columns are State, Town, and Population, the function computes the approximate percentile for the population across all towns.</p>
+         <p style="line-height: 1em;">To specify this syntax element, you must do so in both the ApproxPercentileMap and the ApproxPercentileReduce functions, and specify each <i>group_column</i> in the PARTITION BY clause.</p>
+      </dd>
+   </div>
+
+
+	
+   <a name="ijz1507654914680"> </a>
+   <h2>Approximate Percentile Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>ApproxPercentileMap Input Table Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SMALLINT, INTEGER, BIGINT, NUMERIC, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>target_column</i>.] Column for which to compute approximate percentile.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>group_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>group_column</i>.] Column by which to group data.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="snl1507654927196"> </a>
+   <h2>Approximate Percentile Output</h2>
+   <a name="section_dmn_pqt_wcb"> </a>
+   <h3>ApproxPercentileReduce Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>group_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>group_column</i>.] Column by which to group data.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>percentile</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">With GroupByColumns syntax element, approximate percentile of group; otherwise, entire column.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>value</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Value of percentile, correct within <i>error</i>%.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="rem1507655042089"> </a>
+   <h2>Approximate Percentile Example</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example calculates the approximate percentiles 0, 25, 50, 75, and 100 within a 2% error rate for four brands of crackers.</p>
+
+   <a name="section_qhf_135_ndb"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">The input table is cracker, as in the Approximate Cardinality Example.</p>
+
+   <a name="section_qjn_135_ndb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ApproxPercentileReduce (
+  ON ApproxPercentileMap (
+    ON cracker AS InputTable
+    USING
+    TargetColumns('pricesunshine','pricekeebler', 'pricenabisco','priceprivate')
+    GroupByColumns('choice')
+    ErrorRate(2)
+  ) AS InputTable PARTITION BY choice
+  USING
+  GroupByColumns('choice')
+  Percentile(0,25,50,75,100)
+  TargetColumns('pricesunshine','pricekeebler', 'pricenabisco','priceprivate')
+) AS dt order by choice,percentiles;</tt>
+   </pre>
+   <a name="section_xdy_135_ndb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ choice   percentiles pricesunshine pricekeebler pricenabisco priceprivate 
+ -------- ----------- ------------- ------------ ------------ ------------ 
+ keebler          0.0     49.000001         88.0         88.0         38.0
+ keebler         25.0     88.999999    99.000001    99.000001    58.999997
+ keebler         50.0     97.000003        109.0        109.0    64.999998
+ keebler         75.0         105.0        109.0        125.0    77.999997
+ keebler        100.0         129.0        135.0        129.0    95.999998
+ nabisco          0.0     49.000001         88.0          0.0         38.0
+ nabisco         25.0     88.999999        105.0    99.000001    61.000001
+ nabisco         50.0     97.000003        115.0        103.0    64.999998
+ nabisco         75.0         105.0        121.0    119.00001    77.999997
+ nabisco        100.0         129.0        139.0    169.00001        115.0
+ private          0.0     49.000001         88.0    88.999999         38.0
+ private         25.0     88.999999        109.0    99.000001    55.000001
+ private         50.0     98.000002        113.0        109.0    58.999997
+ private         75.0         109.0        121.0        125.0    79.000002
+ private        100.0         129.0        135.0        129.0        115.0
+ sunshine         0.0     49.000001         88.0         88.0    49.000001
+ sunshine        25.0     79.000002    107.00001    99.000001    61.000001
+ sunshine        50.0     88.999999        109.0        109.0    64.999998
+ sunshine        75.0     97.000003        121.0    119.00001    77.999997
+ sunshine       100.0         129.0        135.0        129.0    95.999998
+</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

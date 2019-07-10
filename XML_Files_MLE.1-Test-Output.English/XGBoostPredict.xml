@@ -1,0 +1,1182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="yuw1507743806357"> </a>
+	  <h1>XGBoostPredict</h1>
+
+	  <p style="line-height: 1em;">The XGBoostPredict function applies the model output by the XGBoost function to a new data set, outputting predicted labels for each data point.</p>
+   <p>
+      <b>Note:</b>  XGBoostPredict outputs the probability that each observation is in the <i>predicted</i> class. To use XGBoostPredict output as input to the Receiver Operating Characteristic (ROC) function, you must first transform it to show the probability that each observation is in the <i>positive</i> class. One way to do this is to change the probability to (1- current probability) when the predicted class is negative.</p>
+   <a name="xoa1507743710169"> </a>
+	  <h2>XGBoostPredict Syntax</h2>
+
+	  <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 2.4</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM XGBoostPredict (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable [ PARTITION BY ANY ] 
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS ModelTable DIMENSION ORDER BY tree_id, iter, class_num
+  [ USING
+    [ IDColumn ('<i>id_column</i>') ]
+    [ AttributeNameColumn ('<i>attribute_name_column</i>') ]
+    [ AttributeValueColumn ('<i>attribute_value_column</i>') ]
+    [ NumBoostedTrees (<i>num_trees</i>) ]
+    [ IterNum (<i>iterations</i>) ]
+    <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+  ]
+) AS <i>alias</i>;</tt>
+   </pre>
+
+   <a name="rwh1507743718101"> </a>
+	  <h2>XGBoostPredict Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>IDColumn</dt>
+      <dd>[Optional] Specify the name of the InputTable column that contains a unique identifier for each data point in the input data set.</dd>
+      <dt>AttributeNameColumn</dt>
+      <dd>[Required for sparse format input data.] Specify the name of the InputTable column that contains the names of the predictors in the sparse format input data set.</dd>
+      <dt>AttributeValueColumn</dt>
+      <dd>[Required for sparse format input data.] Specify the name of the InputTable column that contains the values of the predictors in the sparse-format input data set.</dd>
+      <dt>NumBoostedTrees</dt>
+      <dd>[Optional] Specify the number of parallel boosted trees to consider during prediction. The <i>num_trees</i> is an INTEGER value of at least 1 and cannot exceed the number of parallel boosted trees in the training model. A lower <i>num_trees</i> value might improve function run time but decrease prediction accuracy.</dd>
+      <dd>Default behavior: The function considers all trees in the training model during prediction.</dd>
+      <dt>IterNum</dt>
+      <dd>[Optional] Specify the number of iterations for each boosted tree to consider during prediction. The <i>iterations</i> must be at least 1 and cannot exceed the number of parallel boosted trees in the training model.</dd>
+      <dd>Default behavior: The function considers all subtrees (iterations) in the training model during prediction.</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the input columns to copy to the output table.</dd>
+   </div>
+
+		
+
+	
+   <a name="wrv1507743721442"> </a>
+	  <h2>XGBoostPredict Input</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <a name="table_lzx_k4k_ycb"> </a>
+   <table class="introtable">
+      <a name="table_lzx_k4k_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains data set on which to apply model. Schema depends on input format (sparse or dense).<p>
+                  <b>Note:</b>  This table must have same format as XGBoost Input InputTable used to create model table.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ModelTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">XGBoost Output OutputTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ckw_g4k_ycb"> </a>
+   <h3>InputTable Schema for Dense Input</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Unique data point identifier. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>numeric_input_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Numeric</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>numeric_input_column</i> in XGBoost function call that created model table.] Numeric predictor variable for data point.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>categorical_input_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>categorical_input_column</i> in XGBoost function call that created model table.] Categorical predictor variable for data point.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_eyn_34k_ycb"> </a>
+   <h3>InputTable Schema for Sparse Input</h3>
+   <a name="table_vrb_cnq_tcb"> </a>
+   <table class="introtable">
+      <a name="table_vrb_cnq_tcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Unique identifier for data point. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>response_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Response variable for data point. If this value is NULL, function ignores this observation.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>attribute_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Attribute name.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>value_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Attribute value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+	
+   <a name="afp1507743725347"> </a>
+	  <h2>XGBoostPredict Output</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>XGBoostPredict Output Table Schema</h3>
+   <p style="line-height: 1em;">The table has a set of predictions for each data point. The output table schema is the same for dense and sparse input.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column copied from InputTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column copied from InputTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>prediction</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Predicted value of data point, predicted by model.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">confidence_lower</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Lower bound of confidence interval.<p style="line-height: 1em; margin: 0px;">
+                  <br/>confidence_lower and confidence_upper have the same value, which is the probability of the predicted class.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">confidence_upper</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Upper bound of confidence interval.<p style="line-height: 1em; margin: 0px;">
+                  <br/>confidence_lower and confidence_upper have the same value, which is the probability of the predicted class.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from InputTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+		
+
+	
+   <a name="ksm1510703196996"> </a>
+   <h2>XGBoostPredict Examples</h2>
+   <a name="dys1507743729177"> </a>
+	  <h3>XGBoostPredict Example: Binary Classification</h3>
+
+	  <a name="section_ixf_fqw_42b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: housing_test_binary</li>
+      <li>ModelTable: xgboost_model, from XGBoost Example: Binary Classification</li>
+   </ul>
+   <a name="table_lxc_crw_42b"> </a>
+   <table class="introtable">
+      <a name="table_lxc_crw_42b"> </a>
+      <h4 style="text-align: center;">InputTable: housing_test_binary</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">sn</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">price</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">lotsize</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">bedrooms</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">bathrms</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">stories</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">driveway</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">recroom</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">fullbase</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">gashw</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">airco</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">garagepl</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">prefarea</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">homestyle</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">27000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1700</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">37900</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3185</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">540</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">85000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7320</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Eclectic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_uvp_fqw_42b"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE housing_predict AS (
+  SELECT * FROM XGBoostPredict (
+    ON housing_test_binary AS InputTable PARTITION BY ANY
+    ON xgboost_model AS ModelTable DIMENSION ORDER BY tree_id, iter, class_num
+    USING
+    IDColumn ('sn')
+    NumBoostedTrees (1)
+    Accumulate ('homestyle')
+  ) AS dt
+) WITH DATA;
+ </tt>
+   </pre>
+   <a name="section_zjc_gqw_42b"> </a>
+   <h4>Output</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM housing_predict ORDER BY 1;</tt>
+   </pre>
+   <pre>
+      <tt>
+ sn  homestyle prediction confidence_lower confidence_upper 
+ --- --------- ---------- ---------------- ---------------- 
+  13 classic   classic                 1.0              1.0
+  16 classic   classic                 1.0              1.0
+  25 classic   classic                 1.0              1.0
+  38 eclectic  eclectic                1.0              1.0
+  53 eclectic  eclectic                1.0              1.0
+ 111 classic   classic                 1.0              1.0
+ 117 eclectic  eclectic                1.0              1.0
+ 132 classic   classic                 1.0              1.0
+ 140 classic   classic                 1.0              1.0
+ 142 classic   classic                 1.0              1.0
+ 157 eclectic  eclectic                1.0              1.0
+ 161 eclectic  eclectic                1.0              1.0
+ 176 eclectic  eclectic                1.0              1.0
+ 177 eclectic  eclectic                1.0              1.0
+ 195 classic   classic                 1.0              1.0
+ 198 classic   classic                 1.0              1.0
+ 224 eclectic  eclectic                1.0              1.0
+ 234 classic   classic                 1.0              1.0
+ 237 classic   classic                 1.0              1.0
+ 239 classic   classic                 1.0              1.0
+ 249 classic   classic                 1.0              1.0
+ 251 classic   classic                 1.0              1.0
+ 254 eclectic  eclectic                1.0              1.0
+ 255 eclectic  eclectic                1.0              1.0
+ 260 classic   classic                 1.0              1.0
+ 274 eclectic  eclectic                1.0              1.0
+ 294 classic   classic                 1.0              1.0
+ 301 eclectic  eclectic                1.0              1.0
+ 306 eclectic  eclectic                1.0              1.0
+ 317 eclectic  eclectic                1.0              1.0
+ 340 eclectic  eclectic                1.0              1.0
+ 353 eclectic  eclectic                1.0              1.0
+ 355 eclectic  eclectic                1.0              1.0
+ 364 eclectic  eclectic                1.0              1.0
+ 401 eclectic  eclectic                1.0              1.0
+ 403 eclectic  eclectic                1.0              1.0
+ 408 eclectic  eclectic                1.0              1.0
+ 411 eclectic  eclectic                1.0              1.0
+ 440 eclectic  eclectic                1.0              1.0
+ 441 eclectic  eclectic                1.0              1.0
+ 443 eclectic  eclectic                1.0              1.0
+ 459 classic   classic                 1.0              1.0
+ 463 classic   classic                 1.0              1.0
+ 469 eclectic  eclectic                1.0              1.0
+ 472 eclectic  eclectic                1.0              1.0
+ 540 eclectic  eclectic                1.0              1.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="kap1507743747557"> </a>
+	  <h3>XGBoostPredict Example: Multiple-Class Classification</h3>
+
+	  <a name="section_ixf_fqw_42b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: iris_test, created in DecisionTree Example: Create Model</li>
+      <li>ModelTable: xgboost_model, output by XGBoost Example: Multiple-Class Classification</li>
+   </ul>
+
+   <a name="section_uvp_fqw_42b"> </a>
+   <h4>SQL Call</h4>
+   <pre>
+      <tt>
+CREATE MULTISET TABLE iris_predict AS (
+  SELECT * FROM XGBoostPredict (
+    ON iris_test AS InputTable PARTITION BY ANY
+    ON xgboost_model AS ModelTable DIMENSION ORDER BY tree_id, iter, class_num
+    USING
+    IDColumn ('id')
+    NumBoostedTrees (2)
+    Accumulate ('species')
+  ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_zjc_gqw_42b"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The table iris_predict is similar to the following table, but has 120 rows.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM iris_predict ORDER BY 1;</tt>
+   </pre>
+   <pre>
+      <tt>
+ id  species prediction confidence_lower confidence_upper 
+ --- ------- ---------- ---------------- ---------------- 
+   5       1 1                       1.0              1.0
+  10       1 1                       1.0              1.0
+  15       1 1                       1.0              1.0
+  20       1 1                       1.0              1.0
+  25       1 1                       1.0              1.0
+  30       1 1                       1.0              1.0
+  35       1 1                       1.0              1.0
+  40       1 1                       1.0              1.0
+  45       1 1                       1.0              1.0
+  50       1 1                       1.0              1.0
+  55       2 2                       1.0              1.0
+  60       2 2                       1.0              1.0
+  65       2 2                       1.0              1.0
+  70       2 2                       1.0              1.0
+  75       2 2                       1.0              1.0
+  80       2 2                       1.0              1.0
+  85       2 2                       1.0              1.0
+  90       2 2                       1.0              1.0
+  95       2 2                       1.0              1.0
+ 100       2 2                       1.0              1.0
+ 105       3 3                       1.0              1.0
+ 110       3 3                       1.0              1.0
+ 115       3 3                       1.0              1.0
+ 120       3 3                       1.0              1.0
+ 125       3 3                       1.0              1.0
+ 130       3 3                       1.0              1.0
+ 135       3 3                       1.0              1.0
+ 140       3 3                       1.0              1.0
+ 145       3 3                       1.0              1.0
+ 150       3 3                       1.0              1.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="ypw1517848985195"> </a>
+	  <h3>XGBoostPredict Example: Sparse Input Format</h3>
+   <a name="section_ixf_fqw_42b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: sparse_housing_test_binary, created by inputting housing_test_binary (input table for XGBoostPredict Example: Binary Classification) to the Unpivoting function:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE sparse_housing_test_binary;</tt>
+         </pre>
+         <pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE sparse_housing_test_binary AS ( 
+  SELECT sn,homestyle, attribute, value_col FROM 
+    Unpivoting (
+      ON housing_test_binary
+      USING
+      TargetColumns (
+        'price','lotsize','bedrooms','bathrms','stories',
+        'garagepl','driveway','recroom','fullbase','gashw','airco','prefarea'
+      )
+      Accumulate ('sn','homestyle')
+    ) AS dt
+) WITH DATA;</tt>
+         </pre>
+      </li>
+      <li>ModelTable: sparse_housing_xgboost_model, output by XGBoost Example: Sparse Input Format</li>
+   </ul>
+   <a name="table_vfr_55w_42b"> </a>
+   <table class="introtable">
+      <a name="table_vfr_55w_42b"> </a>
+      <h4 style="text-align: center;">InputTable: sparse_housing_test_binary</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">sn</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">homestyle</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">attribute</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">value_col</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">price</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">27000.0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">lotsize</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1700.0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">bedrooms</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">bathrms</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">stories</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">garagepl</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">driveway</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">recroom</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">fullbase</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">gashw</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">airco</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">prefarea</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">price</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">42000.0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">lotsize</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4960.0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">bedrooms</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">bathrms</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">stories</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">garagepl</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">driveway</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">recroom</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">fullbase</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_uvp_fqw_42b"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE sparse_housing_predict AS (
+  SELECT * FROM XGBoost_Predict (
+    ON sparse_housing_test_binary AS InputTable PARTITION BY sn
+    ON sparse_housing_xgboost_model AS ModelTable DIMENSION ORDER BY tree_id, iter, class_num
+    USING
+    AttributeNameColumn ('attribute')
+    AttributeValueColumn ('value_col')
+    IDColumn ('sn')
+    NumBoostedTrees (1)
+    Accumulate ('homestyle')
+  ) AS dt
+) WITH DATA;
+</tt>
+   </pre>
+   <a name="section_zjc_gqw_42b"> </a>
+   <h4>Output</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM sparse_housing_predict ORDER BY 1;</tt>
+   </pre>
+   <pre>
+      <tt>
+ sn  homestyle prediction confidence_lower confidence_upper 
+ --- --------- ---------- ---------------- ---------------- 
+  13 classic   classic                 1.0              1.0
+  16 classic   classic                 1.0              1.0
+  25 classic   classic                 1.0              1.0
+  38 eclectic  eclectic                1.0              1.0
+  53 eclectic  eclectic                1.0              1.0
+ 111 classic   classic                 1.0              1.0
+ 117 eclectic  eclectic                1.0              1.0
+ 132 classic   classic                 1.0              1.0
+ 140 classic   classic                 1.0              1.0
+ 142 classic   classic                 1.0              1.0
+ 157 eclectic  eclectic                1.0              1.0
+ 161 eclectic  eclectic                1.0              1.0
+ 176 eclectic  eclectic                1.0              1.0
+ 177 eclectic  eclectic                1.0              1.0
+ 195 classic   classic                 1.0              1.0
+ 198 classic   classic                 1.0              1.0
+ 224 eclectic  eclectic                1.0              1.0
+ 234 classic   classic                 1.0              1.0
+ 237 classic   classic                 1.0              1.0
+ 239 classic   classic                 1.0              1.0
+ 249 classic   classic                 1.0              1.0
+ 251 classic   classic                 1.0              1.0
+ 254 eclectic  eclectic                1.0              1.0
+ 255 eclectic  eclectic                1.0              1.0
+ 260 classic   classic                 1.0              1.0
+ 274 eclectic  eclectic                1.0              1.0
+ 294 classic   classic                 1.0              1.0
+ 301 eclectic  eclectic                1.0              1.0
+ 306 eclectic  eclectic                1.0              1.0
+ 317 eclectic  eclectic                1.0              1.0
+ 340 eclectic  eclectic                1.0              1.0
+ 353 eclectic  eclectic                1.0              1.0
+ 355 eclectic  eclectic                1.0              1.0
+ 364 eclectic  eclectic                1.0              1.0
+ 401 eclectic  eclectic                1.0              1.0
+ 403 eclectic  eclectic                1.0              1.0
+ 408 eclectic  eclectic                1.0              1.0
+ 411 eclectic  eclectic                1.0              1.0
+ 440 eclectic  eclectic                1.0              1.0
+ 441 eclectic  eclectic                1.0              1.0
+ 443 eclectic  eclectic                1.0              1.0
+ 459 classic   classic                 1.0              1.0
+ 463 classic   classic                 1.0              1.0
+ 469 eclectic  eclectic                1.0              1.0
+ 472 eclectic  eclectic                1.0              1.0
+ 540 eclectic  eclectic                1.0              1.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="ubv1518210150683"> </a>
+	  <h2>XGBoostPredict Troubleshooting</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Problem: Function runs slowly or runs out of memory.</h3>
+
+   <a name="section_wyr_3z5_5cb"> </a>
+   <h3>Workarounds:</h3>
+   <p style="line-height: 1em;">Decrease the memory footprint of the model by decreasing the value of these syntax elements:<ul>
+         <li>NumBoostedTrees (the number of parallel boosted trees to consider during prediction)</li>
+         <li>IterNum (the number of iterations for each boosted tree to consider during prediction)</li>
+      </ul>
+   </p>
+
+
+	
+</t:intro>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="copyright" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.rights.owner" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.Type" content="task" />
+<meta name="DC.Title" content="Determining if Data Skew Might Impact Performance" />
+<meta name="abstract" content="Learn how data skew slows down Machine Learning Engine analytic functions, how to tell if you have it, and what to do about it." />
+<meta name="description" content="Learn how data skew slows down Machine Learning Engine analytic functions, how to tell if you have it, and what to do about it." />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="hrf1550170185805" />
+<meta name="DC.Language" content="en-us" />
+
+<link rel="stylesheet" type="text/css" href="css/normal_styles.css" />
+<title>Determining if Data Skew Might Impact Performance</title>
+</head>
+<body id="hrf1550170185805">
+<h1 class="title topictitle1" id="ariaid-title1">Determining if Data Skew Might Impact Performance</h1>
+
+	<div class="body taskbody">
+		<div class="section context" id="hrf1550170185805__context_N10010_N1000D_N10001">In some cases, transfer of data between <span class="keyword">NewSQL Engine</span> and <span class="keyword">ML Engine</span> results in uneven distribution of data across <span class="keyword">ML Engine</span> worker nodes, which can significantly decrease the performance (calculation speed) of some analytic functions.<p class="p">If you observe slow performance, use this procedure to examine the distribution of data across workers.</p>
+</div>
+
+		<ol class="ol steps"><li class="li step stepexpand" id="hrf1550170185805__step_N10027_N10024_N1000D_N10001"><span class="ph cmd">Examine the distribution of data across workers:</span><div class="itemgroup info"><pre class="pre codeblock"><code>SELECT * FROM forest_data_distn@coprocessor (ON <var class="keyword varname">input_table</var>);</code></pre></div><div class="itemgroup stepresult"><p class="p">The output is similar to this:</p>
+<pre class="pre screen"> task_index | ip_address  | row_count 
+------------+-------------+-----------
+          0 | 172.24.0.15 |        10
+          1 | 172.24.0.15 |        10
+          2 | 172.24.1.17 |        10
+          3 | 172.24.1.17 |        10
+(4 rows)</pre>
+<div class="note note" id="hrf1550170185805__note_N1003F_N10036_N10027_N10024_N1000D_N10001"><span class="notetitle">Note</span><div class="notebody">This cluster has two worker nodes, each of which has two vworkers.</div></div>
+</div></li>
+<li class="li step stepexpand" id="hrf1550170185805__step_N10045_N10024_N1000D_N10001"><span class="ph cmd">Calculate a rough estimation of the data skew:</span><ol type="a" class="ol substeps" id="hrf1550170185805__substeps_y52_yyg_5gb"><li class="li substep"><span class="ph cmd">Calculate mean of row_count values (<var class="keyword varname">m</var>).</span></li>
+<li class="li substep"><span class="ph cmd">Find row_count value farthest from mean (<var class="keyword varname">d</var>).</span></li>
+<li class="li substep"><span class="ph cmd">Calculate skew, defined as (|<var class="keyword varname">m</var>-<var class="keyword varname">d</var>|)/<var class="keyword varname">d</var>.</span></li>
+</ol>
+<div class="itemgroup stepxmp"><p class="p">Example:</p>
+<pre class="pre screen"> task_index | ip_address  | row_count 
+------------+-------------+-----------
+          0 | 172.24.0.15 |        500
+          1 | 172.24.0.15 |        400
+          2 | 172.24.1.17 |        400
+          3 | 172.24.1.17 |        600
+(4 rows)
+</pre>
+<ol class="ol" type="a" id="hrf1550170185805__ol_kpr_yzg_5gb"><li class="li">Calculate mean of row_count values:<p class="p"><var class="keyword varname">m</var> = (500+400+400+600)/4 = 475</p>
+</li>
+<li class="li">The row_count value farthest from mean value 475 is 600 (<var class="keyword varname">d</var> = 600).</li>
+<li class="li">Calculate skew:<p class="p">(|<var class="keyword varname">m</var>-<var class="keyword varname">d</var>|)/<var class="keyword varname">d</var> =(|475-600|)/600 = 125/600 = 0.21</p>
+</li>
+</ol>
+</div></li>
+</ol>
+<div class="section postreq" id="hrf1550170185805__postreq_bs3_2zg_5gb"><div class="tasklabel"><span class="sectiontitle tasklabel">Postrequisite</span></div>If the skew is greater than 0.1, Teradata recommends using the UniqueID syntax element to ensure that the data are evenly distributed.</div>
+
+	</div>
+
+</body>
+</html>

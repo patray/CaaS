@@ -1,0 +1,1118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="umc1507760750165"> </a>
+	  <h1>NaiveBayesTextClassifierTrainer</h1>
+
+	
+		<p style="line-height: 1em;">The NaiveBayesTextClassifierTrainer function takes training data as input
+			and outputs a model table.</p>
+
+	
+   <a name="qqo1507321550862"> </a>
+   <h2>NaiveBayesTextClassifierTrainer Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>NaiveBayesTextClassifierTrainer version 1.8, NaiveBayesTextClassifierInternal version 1.6</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NaiveBayesTextClassifierTrainer (
+  ON NaiveBayesTextClassifierInternal (
+  ON <i>input_table</i> AS InputTable PARTITION BY <i>doc_category_column</i> 
+      [ ON <i>categories_table</i> AS CategoriesTable DIMENSION ]
+      [ ON <i>stop_words_table</i> AS StopWords DIMENSION ]
+      USING
+      TokenColumn ('<i>token_column</i>')
+      [ ModelType ({ 'Multinomial' | 'Bernoulli' }) ]
+      [ DocIDColumns ({ '<i>doc_id_column</i>' | <i>doc_id_column_range</i> }[,...])]
+      DocCategoryColumn ('<i>doc_category_column</i>')
+      [ CategoryColumn ('<i>category_column</i>') | Categories ('<i>category</i>' [,...]) ]
+      [ StopWordsColumn ('<i>stop_words_column</i>') | StopWordsList ('<i>word</i>' [,...]) ]
+  ) AS <i>alias_1</i> PARTITION BY 1
+) AS <i>alias_2</i>;</tt>
+   </pre>
+   <a name="sqd1507321614930"> </a>
+	  <h2>NaiveBayesTextClassifierTrainer Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TokenColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the tokens to classify.</dd>
+      <dt>ModelType</dt>
+      <dd>[Optional] Specify the model type of the text classifier.</dd>
+      <dd>Default: 'Multinomial'. See the sections that follow this table.</dd>
+      <dt>DocIDColumn</dt>
+      <dd>[Required if ModelType is 'Bernoulli', unnecessary otherwise.] Specify the names of the token table columns that contain the document identifier.</dd>
+      <dt>DocCategoryColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the document category.</dd>
+      <dt>CategoryColumn</dt>
+      <dd>[Optional] Use only if you specify CategoriesTable. Specify the name of the CategoriesTable column that contains the prediction categories to use in the model.</dd>
+      <dd>Default: First column of CategoriesTable</dd>
+      <dd>If you omit both CategoriesTable and CategoryColumn, the function uses all categories specified by DocCategoryColumn.</dd>
+      <dt>Categories</dt>
+      <dd>[Optional] Specify the prediction categories to use in the model.</dd>
+      <dd>Default: All categories specified by DocCategoryColumn.</dd>
+      <dt>StopWordsColumn</dt>
+      <dd>[Optional] Specify the name of the StopWords table column that contains the stop words.</dd>
+      <dd>Default: First column of StopWords table</dd>
+      <dt>StopWordsList</dt>
+      <dd>[Optional] Specify either this syntax element or the StopWords table, but not both.<p style="line-height: 1em;">Specify words to ignore (such as <i>a</i>, <i>an</i>, and <i>the</i>).</p>
+      </dd>
+   </div>
+
+   <a name="section_N100D3_N1000C_N10001"> </a>
+   <h3>Multinomial (default) Model Formula</h3>
+   <a name="fig_etf_dfc_tw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <a name="table_N100E0_N100D4_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100E0_N100D4_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Expression</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>p</i>(<i>C</i>
+               <sub>i</sub>|<i>D</i>)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Probability that new document <i>D</i> is classified to category <i>i</i>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>TC</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Total token count (including duplicate tokens)</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>T</i>
+               <sub>j</sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of token <i>j</i> in category <i>i</i> (including duplicate tokens)</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>TC</i>
+               <sub>i</sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Token count in category <i>i</i> (including duplicate tokens)</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>TC</i>
+               <sub>ji</sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of token j in category i (including duplicate tokens)</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">|<i>V</i>|</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of unique tokens in training set <i>V</i>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ft5_s4l_w2b"> </a>
+   <h3>Bernoulli Model Formula</h3>
+   <a name="fig_wjl_lfc_tw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <a name="table_N1016E_N100D4_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1016E_N100D4_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Expression</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>p</i>(<i>C</i>
+               <sub>i</sub>|<i>D</i>)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Probability that new document <i>D</i> is classified to category <i>i</i>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>DC</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Total document count</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>DC</i>
+               <sub>i</sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Document count in category <i>i</i>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>V</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of unique tokens in training set <i>V</i>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>T</i>
+               <sub>k</sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Token in <i>V</i> that is not in document <i>D</i>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>DC</i>
+               <sub>ji</sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Document count in category <i>i</i> that contains token <i>j</i>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>DC</i>
+               <sub>ki</sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Document count in category <i>i</i> that contains token <i>k</i>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">|<i>C</i>|</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of unique categories in category set <i>C</i>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+
+	
+   <a name="pts1507321694172"> </a>
+   <h2>NaiveBayesTextClassifierTrainer Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_gfr_2jc_ycb"> </a>
+   <table class="introtable">
+      <a name="table_gfr_2jc_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains classified training tokens. Usually output by a tokenizing function, such as TextTokenizer or TextParser.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CategoriesTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Contains prediction categories to use in model, which you can also specify with Categories syntax element. If you omit both this table and Categories syntax element, function uses all categories specified by DocCategoryColumn syntax element.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">StopWords</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Contains stop words (<i>a</i>, <i>an</i>, <i>the</i>, and so on). You can specify stop words with either this table or StopWordsList syntax element.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_wsz_y3c_ycb"> </a>
+   <h3>InputTable Schema</h3>
+   <a name="table_N10023_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10023_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>doc_id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CHARACTER, VARCHAR, INTEGER, or SMALLINT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>doc_id_column</i>.] Identifier of document that contains classified training tokens.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>token_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CHARACTER or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classified training token.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>doc_category_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CHARACTER or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Category of document.<p>
+                  <b>Note:</b>  Partition table by this column.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_y4k_bjc_ycb"> </a>
+   <h3>CategoriesTable Schema</h3>
+   <a name="table_N1008D_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1008D_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>category_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CHARACTER or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Prediction category.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_zrx_cjc_ycb"> </a>
+   <h3>StopWords Schema</h3>
+   <a name="table_N100C7_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100C7_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>stop_words_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CHARACTER or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Stop word.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="dbf1507321746644"> </a>
+   <h2>NaiveBayesTextClassifierTrainer Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Model Table Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">token</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classified training token.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">category</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Prediction category for token.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">prob</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Probability that token is in category.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_msd_hkc_ycb"> </a>
+   <h3>Model Table Example</h3>
+   <a name="table_N10070_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10070_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">TOKEN</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">CATEGORY</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">PROBABILITY</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">NAIVE_BAYES_PRIOR_PROBABILITY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">C000008</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">NAIVE_BAYES_MISSING_TOKEN_PROBABILITY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">C000008</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0555555555555556</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">NAIVE_BAYES_PRIOR_PROBABILITY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">C000013</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">NAIVE_BAYES_MISSING_TOKEN_PROBABILITY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">C000013</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0555555555555556</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">bank</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">C000008</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">bank</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">C000013</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">bank</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">C000020</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">bank</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">C000022</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">bank</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">C000024</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">bank</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">C000007</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">transportation</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="fbx1510779271711"> </a>
+   <h2>NaiveBayesTextClassifierTrainer Example</h2>
+   <a name="section_cnz_s5f_pdb"> </a>
+   <h3>Input</h3>
+   <ul>
+      <li>input: Created by applying the TextTokenizer function to the training table complaints, a log of vehicle complaints<p style="line-height: 1em;">In complaints, the category column indicates whether the car has been in a crash.</p>
+      </li>
+   </ul>
+   <a name="table_nfm_fvf_pdb"> </a>
+   <table class="introtable">
+      <a name="table_nfm_fvf_pdb"> </a>
+      <h4 style="text-align: center;">complaints</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">doc_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">text_data</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">category</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">consumer was driving approximately 45 mph hit a deer with the front bumper and then ran into an embankment head-on passenger's side air bag did deploy hit windshield and deployed outward. driver's side airbag cover opened but did not inflate it was still folded causing injuries.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">crash</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">when vehicle was involved in a crash totalling vehicle driver's side/ passenger's side air bags did not deploy. vehicle was making a left turn and was hit by a ford f350 traveling about 35 mph on the front passenger's side. driver hit his head-on the steering wheel. hurt his knee and received neck and back injuries.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">crash</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">consumer has experienced following problems; 1.) both lower ball joints wear out excessively; 2.) head gasket leaks; and 3.) cruise control would shut itself off while driving without foot pressing on brake pedal.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no_crash</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_sgn_t5f_pdb"> </a>
+   <h3>SQL Call</h3>
+   <p style="line-height: 1em;">This call creates the model table, complaints_tokens_model, by calling NaiveBayesTextClassifierTrainer. It creates the NaiveBayesTextClassifierTrainer input table, token, by applying TextTokenizer to the table complaints.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE complaints_tokens_model AS (
+  SELECT * FROM <b>NaiveBayesTextClassifierTrainer</b> (
+    ON NaiveBayesTextClassifierInternal (
+      ON (
+        SELECT doc_id, lower(token) AS token, category FROM <b>TextTokenizer</b> (
+          ON <b>complaints</b> AS "input" PARTITION BY ANY
+          USING
+          TextColumn ('text_data')
+          OutputByWord ('true')
+          Accumulate ('doc_id', 'category')
+        ) AS dt1
+      ) AS <b>InputTable</b> PARTITION BY category
+      USING
+      TokenColumn ('token')
+      ModelType ('Bernoulli')
+      DocIDColumns ('doc_id')
+      DocCategoryColumn ('category')
+    ) AS dt2 PARTITION BY 1
+  ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_c4x_t5f_pdb"> </a>
+   <h3>Output</h3>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM complaints_tokens_model ORDER BY prob desc;</tt>
+   </pre>
+   <pre>
+      <tt>
+ token                                 category  prob                 
+ ------------------------------------- --------- -------------------- 
+ NAIVE_BAYES_TEXT_MODEL_TYPE           BERNOULLI                  1.0
+ .                                     no_crash    0.9411764705882353
+ .                                     crash       0.8571428571428571
+ NAIVE_BAYES_PRIOR_PROBABILITY         no_crash                  0.75
+ a                                     crash       0.7142857142857143
+ and                                   crash       0.7142857142857143
+ the                                   no_crash    0.7058823529411765
+ vehicle                               no_crash    0.5882352941176471
+ driver's                              crash       0.5714285714285714
+ side                                  crash       0.5714285714285714
+ did                                   crash       0.5714285714285714
+ deploy                                crash       0.5714285714285714
+ hit                                   crash       0.5714285714285714
+ head-on                               crash       0.5714285714285714
+ not                                   crash       0.5714285714285714
+ approximately                         crash       0.5714285714285714
+ mph                                   crash       0.5714285714285714
+ air                                   crash       0.5714285714285714
+ vehicle                               crash       0.5714285714285714
+ passenger's                           crash       0.5714285714285714
+ and                                   no_crash    0.5294117647058824
+ to                                    no_crash   0.47058823529411764
+ airbags                               crash      0.42857142857142855
+ at                                    crash      0.42857142857142855
+ another                               crash      0.42857142857142855
+ injuries                              crash      0.42857142857142855
+ on                                    crash      0.42857142857142855
+ deployed                              crash      0.42857142857142855
+ into                                  crash      0.42857142857142855
+ consumer                              crash      0.42857142857142855
+ to                                    crash      0.42857142857142855
+ was                                   crash      0.42857142857142855
+ bags                                  crash      0.42857142857142855
+ the                                   crash      0.42857142857142855
+ driver                                crash      0.42857142857142855
+ front                                 crash      0.42857142857142855
+ in                                    crash      0.42857142857142855
+ was                                   no_crash    0.4117647058823529
+ on                                    no_crash   0.35294117647058826
+ manufacturer                          no_crash   0.35294117647058826
+ consumer                              no_crash   0.35294117647058826
+ when                                  no_crash   0.35294117647058826
+ has                                   no_crash   0.35294117647058826
+ is                                    no_crash   0.35294117647058826
+ a                                     no_crash   0.29411764705882354
+ in                                    no_crash   0.29411764705882354
+ not                                   no_crash   0.29411764705882354
+ dealer                                no_crash   0.29411764705882354
+ outward                               crash       0.2857142857142857
+ 70mph                                 crash       0.2857142857142857
+ impact                                crash       0.2857142857142857
+ rear                                  crash       0.2857142857142857
+ neck                                  crash       0.2857142857142857
+ wheel                                 crash       0.2857142857142857
+ knee                                  crash       0.2857142857142857
+ truck                                 crash       0.2857142857142857
+ airbag                                crash       0.2857142857142857
+ by                                    crash       0.2857142857142857
+ about                                 crash       0.2857142857142857
+ turn                                  crash       0.2857142857142857
+ left                                  crash       0.2857142857142857
+ forward                               crash       0.2857142857142857
+ it                                    crash       0.2857142857142857
+ injuries.dealer                       crash       0.2857142857142857
+ involved                              crash       0.2857142857142857
+ week                                  crash       0.2857142857142857
+ traveling                             crash       0.2857142857142857
+ idle                                  crash       0.2857142857142857
+ side/                                 crash       0.2857142857142857
+ car                                   crash       0.2857142857142857
+ but                                   crash       0.2857142857142857
+ rearended                             crash       0.2857142857142857
+ incident                              crash       0.2857142857142857
+ folded                                crash       0.2857142857142857
+ occasions                             crash       0.2857142857142857
+ with                                  crash       0.2857142857142857
+ making                                crash       0.2857142857142857
+ bag                                   crash       0.2857142857142857
+ raced                                 crash       0.2857142857142857
+ engine                                crash       0.2857142857142857
+ back                                  crash       0.2857142857142857
+ 50                                    crash       0.2857142857142857
+ 80                                    crash       0.2857142857142857
+ one                                   crash       0.2857142857142857
+ cover                                 crash       0.2857142857142857
+ slowing                               crash       0.2857142857142857
+ 35                                    crash       0.2857142857142857
+ received                              crash       0.2857142857142857
+ driving                               crash       0.2857142857142857
+ park                                  crash       0.2857142857142857
+ upon                                  crash       0.2857142857142857
+ totalling                             crash       0.2857142857142857
+ fence                                 crash       0.2857142857142857
+ hurt                                  crash       0.2857142857142857
+ when                                  crash       0.2857142857142857
+ mphand                                crash       0.2857142857142857
+ f350                                  crash       0.2857142857142857
+ then                                  crash       0.2857142857142857
+ his                                   crash       0.2857142857142857
+ ran                                   crash       0.2857142857142857
+ sustained                             crash       0.2857142857142857
+ has                                   crash       0.2857142857142857
+ condition                             crash       0.2857142857142857
+ 65                                    crash       0.2857142857142857
+ dual                                  crash       0.2857142857142857
+ neither                               crash       0.2857142857142857
+ an                                    crash       0.2857142857142857
+ or                                    crash       0.2857142857142857
+ deer                                  crash       0.2857142857142857
+ for                                   crash       0.2857142857142857
+ 45                                    crash       0.2857142857142857
+ embankment                            crash       0.2857142857142857
+ still                                 crash       0.2857142857142857
+ why                                   crash       0.2857142857142857
+ lurched                               crash       0.2857142857142857
+ prior                                 crash       0.2857142857142857
+ two                                   crash       0.2857142857142857
+ building                              crash       0.2857142857142857
+ windshield                            crash       0.2857142857142857
+ ended                                 crash       0.2857142857142857
+ bumper                                crash       0.2857142857142857
+ steering                              crash       0.2857142857142857
+ had                                   crash       0.2857142857142857
+ ford                                  crash       0.2857142857142857
+ determine                             crash       0.2857142857142857
+ shop                                  crash       0.2857142857142857
+ high                                  crash       0.2857142857142857
+ opened                                crash       0.2857142857142857
+ crash                                 crash       0.2857142857142857
+ inflate                               crash       0.2857142857142857
+ causing                               crash       0.2857142857142857
+ dealer                                crash       0.2857142857142857
+ while                                 crash       0.2857142857142857
+ been                                  crash       0.2857142857142857
+ crashed                               crash       0.2857142857142857
+ NAIVE_BAYES_PRIOR_PROBABILITY         crash                     0.25
+ would                                 no_crash   0.23529411764705882
+ by                                    no_crash   0.23529411764705882
+ at                                    no_crash   0.23529411764705882
+ also                                  no_crash   0.23529411764705882
+ of                                    no_crash   0.23529411764705882
+ work                                  no_crash   0.23529411764705882
+ replaced                              no_crash   0.23529411764705882
+ recall                                no_crash   0.23529411764705882
+ problem                               no_crash   0.23529411764705882
+ been                                  no_crash   0.23529411764705882
+ had                                   no_crash   0.23529411764705882
+ causing                               no_crash   0.23529411764705882
+ will                                  no_crash   0.23529411764705882
+ this                                  no_crash   0.17647058823529413
+ defect                                no_crash   0.17647058823529413
+ out                                   no_crash   0.17647058823529413
+ wheel                                 no_crash   0.17647058823529413
+ left                                  no_crash   0.17647058823529413
+ repaired                              no_crash   0.17647058823529413
+ engine                                no_crash   0.17647058823529413
+ wipers                                no_crash   0.17647058823529413
+ broke                                 no_crash   0.17647058823529413
+ &amp;                                     no_crash   0.17647058823529413
+ times                                 no_crash   0.17647058823529413
+ be                                    no_crash   0.17647058823529413
+ shut                                  no_crash   0.17647058823529413
+ driving                               no_crash   0.17647058823529413
+ off                                   no_crash   0.17647058823529413
+ under                                 no_crash   0.17647058823529413
+ have                                  no_crash   0.17647058823529413
+ miles                                 no_crash   0.17647058823529413
+ switch                                no_crash   0.17647058823529413
+ after                                 no_crash   0.17647058823529413
+ from                                  no_crash   0.17647058823529413
+ that                                  no_crash   0.17647058823529413
+ an                                    no_crash   0.17647058823529413
+ determine                             no_crash   0.17647058823529413
+ 3                                     no_crash   0.17647058823529413
+ informed                              no_crash   0.17647058823529413
+ notified                              no_crash   0.17647058823529413
+ control                               no_crash   0.17647058823529413
+ owner                                 no_crash   0.17647058823529413
+ which                                 no_crash   0.17647058823529413
+ ignition                              no_crash   0.17647058823529413
+ windshield                            no_crash   0.17647058823529413
+ down                                  no_crash   0.17647058823529413
+ transmission                          no_crash   0.17647058823529413
+ while                                 no_crash   0.17647058823529413
+ up                                    no_crash   0.17647058823529413
+ front                                 no_crash   0.17647058823529413
+ still                                 no_crash   0.17647058823529413
+ NAIVE_BAYES_MISSING_TOKEN_PROBABILITY crash      0.14285714285714285
+ four                                  no_crash   0.11764705882352941
+ 4                                     no_crash   0.11764705882352941
+ it                                    no_crash   0.11764705882352941
+ cruise                                no_crash   0.11764705882352941
+ brake's                               no_crash   0.11764705882352941
+ increasedit                           no_crash   0.11764705882352941
+ jiggle                                no_crash   0.11764705882352941
+ around                                no_crash   0.11764705882352941
+ 2                                     no_crash   0.11764705882352941
+ own                                   no_crash   0.11764705882352941
+ stuck                                 no_crash   0.11764705882352941
+ recker                                no_crash   0.11764705882352941
+ sunroof                               no_crash   0.11764705882352941
+ rear                                  no_crash   0.11764705882352941
+ turned                                no_crash   0.11764705882352941
+ dealership                            no_crash   0.11764705882352941
+ transfer                              no_crash   0.11764705882352941
+ hitting                               no_crash   0.11764705882352941
+ notfied                               no_crash   0.11764705882352941
+ resulted                              no_crash   0.11764705882352941
+ hill                                  no_crash   0.11764705882352941
+ owners                                no_crash   0.11764705882352941
+ speeds                                no_crash   0.11764705882352941
+ 10mph                                 no_crash   0.11764705882352941
+ incline                               no_crash   0.11764705882352941
+ speed                                 no_crash   0.11764705882352941
+ change                                no_crash   0.11764705882352941
+ speedometer                           no_crash   0.11764705882352941
+ stalled                               no_crash   0.11764705882352941
+ turn                                  no_crash   0.11764705882352941
+ repairs                               no_crash   0.11764705882352941
+ airbag                                no_crash   0.11764705882352941
+ housing                               no_crash   0.11764705882352941
+ provide                               no_crash   0.11764705882352941
+ thousand                              no_crash   0.11764705882352941
+ belts/speed                           no_crash   0.11764705882352941
+ problems                              no_crash   0.11764705882352941
+ referenced                            no_crash   0.11764705882352941
+ coming                                no_crash   0.11764705882352941
+ almost                                no_crash   0.11764705882352941
+ experienced                           no_crash   0.11764705882352941
+ module                                no_crash   0.11764705882352941
+ about                                 no_crash   0.11764705882352941
+ intermittently                        no_crash   0.11764705882352941
+ happened                              no_crash   0.11764705882352941
+ inoperative                           no_crash   0.11764705882352941
+ truck                                 no_crash   0.11764705882352941
+ electrical                            no_crash   0.11764705882352941
+ case                                  no_crash   0.11764705882352941
+ traveling                             no_crash   0.11764705882352941
+ wants                                 no_crash   0.11764705882352941
+ 1998                                  no_crash   0.11764705882352941
+ what                                  no_crash   0.11764705882352941
+ hour                                  no_crash   0.11764705882352941
+ please                                no_crash   0.11764705882352941
+ but                                   no_crash   0.11764705882352941
+ expense                               no_crash   0.11764705882352941
+ occurring                             no_crash   0.11764705882352941
+ slowing                               no_crash   0.11764705882352941
+ total                                 no_crash   0.11764705882352941
+ over                                  no_crash   0.11764705882352941
+ slip                                  no_crash   0.11764705882352941
+ unexpectedly                          no_crash   0.11764705882352941
+ completed                             no_crash   0.11764705882352941
+ saw                                   no_crash   0.11764705882352941
+ does                                  no_crash   0.11764705882352941
+ alternator/                           no_crash   0.11764705882352941
+ storm                                 no_crash   0.11764705882352941
+ made                                  no_crash   0.11764705882352941
+ without                               no_crash   0.11764705882352941
+ rpms                                  no_crash   0.11764705882352941
+ started                               no_crash   0.11764705882352941
+ information                           no_crash   0.11764705882352941
+ side                                  no_crash   0.11764705882352941
+ if                                    no_crash   0.11764705882352941
+ controlcable                          no_crash   0.11764705882352941
+ head                                  no_crash   0.11764705882352941
+ heard                                 no_crash   0.11764705882352941
+ pull                                  no_crash   0.11764705882352941
+ )                                     no_crash   0.11764705882352941
+ 68000                                 no_crash   0.11764705882352941
+ stopped                               no_crash   0.11764705882352941
+ pedal                                 no_crash   0.11764705882352941
+ 99v029000                             no_crash   0.11764705882352941
+ pump                                  no_crash   0.11764705882352941
+ burned                                no_crash   0.11764705882352941
+ joints                                no_crash   0.11764705882352941
+ corrected                             no_crash   0.11764705882352941
+ walnut                                no_crash   0.11764705882352941
+ lower                                 no_crash   0.11764705882352941
+ r&amp;r                                   no_crash   0.11764705882352941
+ accurate                              no_crash   0.11764705882352941
+ ea02-025                              no_crash   0.11764705882352941
+ back                                  no_crash   0.11764705882352941
+ themselves                            no_crash   0.11764705882352941
+ ball                                  no_crash   0.11764705882352941
+ gear                                  no_crash   0.11764705882352941
+ yh                                    no_crash   0.11764705882352941
+ become                                no_crash   0.11764705882352941
+ properly                              no_crash   0.11764705882352941
+ can't                                 no_crash   0.11764705882352941
+ defective                             no_crash   0.11764705882352941
+ do                                    no_crash   0.11764705882352941
+ factory                               no_crash   0.11764705882352941
+ referred                              no_crash   0.11764705882352941
+ then                                  no_crash   0.11764705882352941
+ following                             no_crash   0.11764705882352941
+ parked                                no_crash   0.11764705882352941
+ pressing                              no_crash   0.11764705882352941
+ malfunctioned                         no_crash   0.11764705882352941
+ rain                                  no_crash   0.11764705882352941
+ shortening                            no_crash   0.11764705882352941
+ blew                                  no_crash   0.11764705882352941
+ stall                                 no_crash   0.11764705882352941
+ further                               no_crash   0.11764705882352941
+ took                                  no_crash   0.11764705882352941
+ it's                                  no_crash   0.11764705882352941
+ drive                                 no_crash   0.11764705882352941
+ noise                                 no_crash   0.11764705882352941
+ light                                 no_crash   0.11764705882352941
+ brake                                 no_crash   0.11764705882352941
+ manufactured                          no_crash   0.11764705882352941
+ smoke                                 no_crash   0.11764705882352941
+ battery                               no_crash   0.11764705882352941
+ reimbursement                         no_crash   0.11764705882352941
+ ;                                     no_crash   0.11764705882352941
+ motor                                 no_crash   0.11764705882352941
+ were                                  no_crash   0.11764705882352941
+ performed                             no_crash   0.11764705882352941
+ both                                  no_crash   0.11764705882352941
+ into                                  no_crash   0.11764705882352941
+ keep                                  no_crash   0.11764705882352941
+ sitting                               no_crash   0.11764705882352941
+ move                                  no_crash   0.11764705882352941
+ leaking                               no_crash   0.11764705882352941
+ totally                               no_crash   0.11764705882352941
+ rolled                                no_crash   0.11764705882352941
+ tune                                  no_crash   0.11764705882352941
+ stayed                                no_crash   0.11764705882352941
+ could                                 no_crash   0.11764705882352941
+ leaks                                 no_crash   0.11764705882352941
+ power                                 no_crash   0.11764705882352941
+ coil                                  no_crash   0.11764705882352941
+ bearing                               no_crash   0.11764705882352941
+ 97v017000                             no_crash   0.11764705882352941
+ caused                                no_crash   0.11764705882352941
+ driveshaft                            no_crash   0.11764705882352941
+ itself                                no_crash   0.11764705882352941
+ its                                   no_crash   0.11764705882352941
+ off/on                                no_crash   0.11764705882352941
+ separated                             no_crash   0.11764705882352941
+ for                                   no_crash   0.11764705882352941
+ gasket                                no_crash   0.11764705882352941
+ just                                  no_crash   0.11764705882352941
+ drivers                               no_crash   0.11764705882352941
+ excessively                           no_crash   0.11764705882352941
+ due                                   no_crash   0.11764705882352941
+ cable                                 no_crash   0.11764705882352941
+ owner's                               no_crash   0.11764705882352941
+ first                                 no_crash   0.11764705882352941
+ *ml                                   no_crash   0.11764705882352941
+ mechanic                              no_crash   0.11764705882352941
+ frame                                 no_crash   0.11764705882352941
+ starter                               no_crash   0.11764705882352941
+ start                                 no_crash   0.11764705882352941
+ fire                                  no_crash   0.11764705882352941
+ periodcally                           no_crash   0.11764705882352941
+ reinspected                           no_crash   0.11764705882352941
+ cannot                                no_crash   0.11764705882352941
+ compartment                           no_crash   0.11764705882352941
+ shift                                 no_crash   0.11764705882352941
+ owned                                 no_crash   0.11764705882352941
+ crash                                 no_crash   0.11764705882352941
+ smelled                               no_crash   0.11764705882352941
+ wear                                  no_crash   0.11764705882352941
+ checked                               no_crash   0.11764705882352941
+ foot                                  no_crash   0.11764705882352941
+ son                                   no_crash   0.11764705882352941
+ fail                                  no_crash   0.11764705882352941
+ aware                                 no_crash   0.11764705882352941
+ loss                                  no_crash   0.11764705882352941
+ 1                                     no_crash   0.11764705882352941
+ steering                              no_crash   0.11764705882352941
+ 66900                                 no_crash   0.11764705882352941
+ NAIVE_BAYES_MISSING_TOKEN_PROBABILITY no_crash  0.058823529411764705</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

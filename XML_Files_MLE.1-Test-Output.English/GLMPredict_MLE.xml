@@ -1,0 +1,1455 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="xaz1507155725845"> </a>
+	  <h1>GLMPredict_MLE</h1>
+
+	  <p style="line-height: 1em;">The GLMPredict_MLE function uses the model output by the function GLM to perform generalized linear model prediction on new input data.</p>
+
+   <a name="cjs1507156720290"> </a>
+   <h2>GLMPredict_MLE Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.11</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GLMPredict_MLE (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY ANY
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS Model DIMENSION [ ORDER BY attribute, predictor ]
+  [ USING
+    <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+    [ Family ('<i>family</i>') ]
+    [ LinkFunction ('<i>link</i>') ]
+  ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="izf1507157274125"> </a>
+	  <h2>GLMPredict_MLE Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of input table columns to copy to the output table.</dd>
+      <dt>Family</dt>
+      <dd>[Optional] Specify the distribution exponential family.<p>
+            <b>Note:</b>  If you specify this syntax element, you must give it the same value that you used for the Family syntax element of the function GLM when you created the Model table.</p>
+      </dd>
+      <dd>Default: Read from the Model table</dd>
+      <dt>LinkFunction</dt>
+      <dd>[Optional] Specify the link function. For the canonical link functions (default link functions) and the link functions allowed for each exponential family, see Supported Family/Link Function Combinations.<p>
+            <b>Note:</b>  If you specify this syntax element, you must give it the same value that you used for the LinkFunction syntax element of the function GLM when you created the Model table.</p>
+      </dd>
+      <dd>Default: 'CANONICAL'</dd>
+   </div>
+
+
+	
+   <a name="gsf1507157312535"> </a>
+   <h2>GLMPredict_MLE Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_cqq_dqv_xcb"> </a>
+   <table class="introtable">
+      <a name="table_cqq_dqv_xcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Input</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains new data.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Model</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">GLM Output Table<p>
+                  <b>Note:</b>  If the GLM call that created the Model table specified the Step syntax element, the ORDER BY clause in the GLMPredict_MLE call is required.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_s4l_brv_xcb"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_N10021_N10019_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10021_N10019_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>dependent_variable_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Dependent/response variables. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>predictor_variable_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears one or more times.] Independent/predictor variable. Cannot be NULL.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="qmo1507157345859"> </a>
+   <h2>GLMPredict_MLE Output</h2>
+   <a name="section_mnp_djv_xcb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">fitted_value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Score of the input data, given by equation g<sup>-1</sup>(Xβ), where g<sup>-1</sup> is the inverse link function, X the predictors, and β is the vector of coefficients estimated by the GLM function.<p style="line-height: 1em; margin: 0px;">
+                  <br/>For BINOMIAL classification, a predicted value close to 1 indicates a high probability of class 1. A predicted value close to 0 indicates a high probability of class 0. For other values of Family, the scores are the expected values of dependent/response variable, conditional on the predictors.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="xym1510786724805"> </a>
+   <h2>GLMPredict_MLE Examples</h2>
+   <a name="zdo1531854877073"> </a>
+	  <h3>GLMPredict_MLE Example: Logistic Distribution Prediction</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input: admissions_test, which has admissions information for 20 students</li>
+      <li>Model: glm_admissions_model, output by GLM Example: Logistic Regression Analysis with Intercept</li>
+   </ul>
+   <a name="table_qjf_wkz_m2b"> </a>
+   <table class="introtable">
+      <a name="table_qjf_wkz_m2b"> </a>
+      <h4 style="text-align: center;">admissions_test</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">masters</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">gpa</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">stats</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">programming</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">admitted</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.95</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">51</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.76</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">52</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">53</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">54</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">55</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">56</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.82</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">57</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.71</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">58</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">59</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.65</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">60</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">61</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">62</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">63</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.83</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">64</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.81</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">65</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">66</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.87</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">67</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.46</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">68</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.87</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">69</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.96</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+   </table>
+
+
+		
+   <a name="section_qhy_1kz_m2b"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GLMPredict_MLE (
+  ON admissions_test PARTITION BY ANY
+  ON glm_admissions_model AS Model DIMENSION
+  USING
+  Accumulate ('id', 'masters', 'gpa', 'stats', 'programming', 'admitted')
+  Family ('LOGISTIC')
+  LinkFunction ('LOGIT')
+) AS dt;</tt>
+   </pre>
+   <a name="section_spg_ckz_m2b"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id masters gpa  stats    programming admitted fitted_value       
+ -- ------- ---- -------- ----------- -------- ------------------ 
+ 50 yes     3.95 beginner beginner           0 0.3507656829365149
+ 51 yes     3.76 beginner beginner           0 0.3557112671780229
+ 52 no       3.7 novice   beginner           1 0.7583079903427496
+ 53 yes      3.5 beginner novice             1 0.5560152436940663
+ 54 yes      3.5 beginner advanced           1 0.7694761266019933
+ 55 no       3.6 beginner advanced           1 0.9680314543695169
+ 56 no      3.82 advanced advanced           1 0.9457732442937538
+ 57 no      3.71 advanced advanced           1 0.9464124273756033
+ 58 no      3.13 advanced advanced           1  0.949666669516694
+ 59 no      3.65 novice   novice             1 0.8741907950304955
+ 60 no       4.0 advanced novice             1 0.8650601698708184
+ 61 yes      4.0 advanced advanced           1 0.6506209990774642
+ 62 no       3.7 advanced advanced           1 0.9464701812067841
+ 63 no      3.83 advanced advanced           1 0.9457147816580886
+ 64 yes     3.81 advanced advanced           1 0.6555256147282206
+ 65 yes      3.9 advanced advanced           1 0.6532064285302687
+ 66 no      3.87 novice   beginner           1 0.7547403697792542
+ 67 yes     3.46 novice   beginner           0 0.2600362186838019
+ 68 no      1.87 advanced novice             1 0.8909664987530864
+ 69 no      3.96 advanced advanced           1 0.9449493421287761</tt>
+   </pre>
+   <a name="section_gxv_dkz_m2b"> </a>
+   <h4>Prediction Accuracy</h4>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT (SELECT COUNT(id) FROM glmpredict_admissions
+  WHERE admitted = fitted_category)/(SELECT count(id)
+    FROM glmpredict_admissions) AS prediction_accuracy;</tt>
+   </pre>
+   <a name="table_y13_4mz_m2b"> </a>
+   <table class="introtable">
+      <a name="table_y13_4mz_m2b"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">prediction_accuracy</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1.00000000000000000000</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="zto1524170536880"> </a>
+	  <h3>GLMPredict_MLE Example: Gaussian Distribution Prediction</h3>
+
+	  <a name="section_ucx_frc_4db"> </a>
+   <p style="line-height: 1em;">The example uses the Gaussian model to evaluate the prediction for new houses, comparing the prediction with the original price information with root mean square error evaluation (RMSE).</p>
+
+
+		<a name="section_N10018_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: housing_test, which contains test data for 54 houses</li>
+      <li>Model: glm_housing_model from the output section of GLM Example: Gaussian Distribution Analysis</li>
+   </ul>
+   <a name="table_t3r_krc_4db"> </a>
+   <table class="introtable">
+      <a name="table_t3r_krc_4db"> </a>
+      <h4 style="text-align: center;">housing_test</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">sn</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">price</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">lotsize</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">bedrooms</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">bathrms</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">stories</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">driveway</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">recroom</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">fullbase</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">gashw</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">airco</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">garagepl</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">prefarea</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">homestyle</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">27000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1700</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">37900</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3185</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">42000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4960</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">38</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">67000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5170</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Eclectic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">53</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">68000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9166</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Eclectic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">104</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">132000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3500</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">bungalow</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">111</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">43000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5076</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">117</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">93000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3760</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Eclectic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">132</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">44500</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3850</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">140</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">43000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3750</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">142</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">40000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2650</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">157</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2953</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Eclectic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">161</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">63900</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3162</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Eclectic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+		
+   <a name="section_ljr_jqc_4db"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">The canonical link specifies the default family link, which is "identity" for the Gaussian distribution.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GLMPredict_MLE (
+  ON housing_test PARTITION BY ANY
+  ON glm_housing_model AS Model DIMENSION
+  USING
+  Accumulate ('sn', 'price')
+  Family ('GAUSSIAN')
+  LinkFunction ('CANONICAL')
+) AS dt ORDER BY sn;</tt>
+   </pre>
+   <a name="section_i4h_kqc_4db"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The fitted_value column gives the predicted home price.</p>
+   <pre>
+      <tt>
+ sn  price    fitted_value       
+ --- -------- ------------------ 
+  13  27000.0  37345.84477329254
+  16  37900.0  43687.13245987892
+  25  42000.0  40902.02870941162
+  38  67000.0  72487.67201280594
+  53  68000.0  79238.69493055344
+ 104 132000.0 111528.00744915009
+ 111  43000.0 39102.882046699524
+ 117  93000.0  66936.95215988159
+ 132  44500.0  41819.88732004166
+ 140  43000.0  41611.79231786728
+ 142  40000.0  44394.14731836319
+ 157  60000.0  66571.26562905312
+ 161  63900.0  64900.98411035538
+ 162 130000.0  107759.1224937439
+ 176  57500.0  73438.73871564865
+ 177  70000.0  62378.35326194763
+ 195  33000.0   37197.9376707077
+ 198  40500.0  47308.08242368698
+ 224  78500.0  67232.86958527565
+ 234  32500.0  35237.16528749466
+ 237  43000.0  46593.47125959396
+ 239  26000.0  43377.86666679382
+ 249  44500.0  37863.84167766571
+ 251  48500.0  45096.38719415665
+ 254  60000.0  74665.70030021667
+ 255  61000.0  60214.16523933411
+ 260  41000.0  43066.21673202515
+ 274  64900.0  67232.45221805573
+ 294  47000.0  38987.55468940735
+ 301  55000.0   55621.6930809021
+ 306  64000.0  67339.69788479805
+ 317  80000.0    65655.120470047
+ 329 115442.0 123612.01978111267
+ 339 141000.0 126282.07774448395
+ 340  62500.0 58474.835211753845
+ 353  78500.0  67485.69113445282
+ 355  86900.0  68425.80433177948
+ 364  72000.0  77422.12543773651
+ 367 114000.0 128556.01284217834
+ 377 140000.0 127201.90244436264
+ 401  92500.0  84040.80987596512
+ 403  77500.0  79857.25416207314
+ 408  87500.0  76218.38956928253
+ 411  90000.0   78179.1003665924
+ 440  69000.0  80549.23930311203
+ 441  51900.0 64670.294174194336
+ 443  65000.0  61704.09422302246
+ 459  44555.0 42818.367908000946
+ 463  49000.0  49293.44947862625
+ 469  55000.0  61779.35452270508
+ 472  60500.0   63767.0579059124
+ 527 105000.0 119762.26224088669
+ 530 108000.0 116119.24969100952
+ 540  85000.0  73146.08736228943</tt>
+   </pre>
+
+	
+</t:intro>

@@ -1,0 +1,554 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="fqy1507664712684"> </a>
+	  <h1>Canopy</h1>
+
+	  <p style="line-height: 1em;">Canopy clustering is a simple, fast, accurate method for grouping objects into preliminary clusters.  It is often performed in preparation for more rigorous clustering techniques, such as <i>k</i>-means clustering.</p>
+   <p style="line-height: 1em;">The canopy clustering algorithm uses a fast approximate distance metric and two distance thresholds, T<sub>1</sub> (loose distance) and T<sub>2</sub> (tight distance), with T<sub>1</sub> greater than T<sub>2</sub>. A point is assigned to a canopy if the distance from the point to the canopy center is less than T<sub>2</sub>, and can be assigned to a canopy if the distance from the point to the canopy center is less than T<sub>1</sub>. A point can be assigned to more than one canopy.</p>
+   <p>
+      <b>Note:</b>  
+      <ul>
+         <li>For distance measurement, the Canopy function uses Euclidean distance.</li>
+         <li>If there are more than 10,000 canopy centers, the function fails. Run the function again, increasing the value of T<sub>2</sub> (specified by the TightDistance syntax element).</li>
+         <li>The canopy clustering algorithm is nondeterministic, and the randomness of the canopy assignments cannot be controlled by a seed syntax element (for more information, see Nondeterministic Results and UniqueID Syntax Element).</li>
+      </ul>
+   </p>
+	
+   <a name="vtv1507664783941"> </a>
+   <h2>Canopy Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 2.2</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Canopy (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  USING
+  LooseDistance (<i>maximum</i>)
+  TightDistance (<i>minimum</i>)
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="xro1507664904827"> </a>
+	  <h2>Canopy Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>LooseDistance</dt>
+      <dd>Specify the maximum distance that any point can be from a canopy center to be considered part of that canopy (T<sub>1</sub>).</dd>
+      <dt>TightDistance</dt>
+      <dd>Specify the minimum distance that separates two canopy centers (T<sub>2</sub>).</dd>
+   </div>
+
+
+	
+   <a name="ciy1507664952328"> </a>
+   <h2>Canopy Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>InputTable Schema</h3>
+   <p style="line-height: 1em;">The table can have only the columns described in the following table.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>id</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Leftmost column. Row identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>dimension_i</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each dimension.] Data in dimension <i>i</i>.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="nyk1507665004944"> </a>
+   <h2>Canopy Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">canopyid</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Canopy identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>dimension_i</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each dimension.] Canopy center for dimension <i>i</i>.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="pyq1510703406272"> </a>
+   <h2>Canopy Example</h2>
+   <a name="section_rlc_j5k_rdb"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">The input table has more than 6000 rows of computer specifications.</p>
+   <a name="table_nvz_v5k_rdb"> </a>
+   <table class="introtable">
+      <a name="table_nvz_v5k_rdb"> </a>
+      <h4 style="text-align: center;">InputTable: computers_train1</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">price</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">speed</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">hd</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">ram</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">screen</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1499</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">80</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1795</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">85</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1595</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">170</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1849</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">170</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3295</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">340</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3695</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">340</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1720</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">170</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1995</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">85</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2225</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">210</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2605</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">210</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2045</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">130</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2295</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">245</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2225</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">130</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">17</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1595</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">85</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">18</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2325</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">210</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">19</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2095</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">250</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">20</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4395</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">452</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_w5m_j5k_rdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Canopy(
+  ON computers_train1 AS InputTable
+  USING
+  LooseDistance(1000)
+  TightDistance(500)
+) AS dt;</tt>
+   </pre>
+   <a name="section_bhz_j5k_rdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ canopyid price            speed            hd               ram              screen           
+ -------- ---------------- ---------------- ---------------- ---------------- ---------------- 
+        1 3669.84615384615 57.2307692307692 363.153846153846 8.61538461538461 14.5384615384615
+        2 1893.51282051282 34.6153846153846  156.25641025641 4.46153846153846 14.0769230769231
+        3 2585.75471698113 45.4528301886792 227.320754716981 6.86792452830189 14.4339622641509</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

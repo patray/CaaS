@@ -1,0 +1,535 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="copyright" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.rights.owner" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="Histogram" />
+<meta name="abstract" content="This ML Engine function calculates frequency distribution of data set using techniques that can automatically calculate bin width and number of bins." />
+<meta name="description" content="This ML Engine function calculates frequency distribution of data set using techniques that can automatically calculate bin width and number of bins." />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="mcm1507661970733" />
+<meta name="DC.Language" content="en-us" />
+
+<link rel="stylesheet" type="text/css" href="css/normal_styles.css" />
+<title>Histogram</title>
+</head>
+<body>
+<div class="nested0" aria-labelledby="ariaid-title1" topicindex="1" topicid="mcm1507661970733" id="mcm1507661970733">
+	<h1 class="title topictitle1" id="ariaid-title1">Histogram</h1>
+
+	<div class="body conbody"><p class="p">Histograms are useful for assessing the shape of a data distribution. The Histogram function calculates the frequency distribution of a data set using either the Sturges or Scott algorithm to compute binning (bin width and number of bins). The <dfn class="term">bin width</dfn> is the range for each group of values. Binning algorithms make strong assumptions about the shape of the distribution. Appropriate bin width depends on the actual data distribution and analysis goals. The function maps each input row to one bin and returns the row count (frequency) and percentage of rows (proportion) of each bin.</p>
+<p class="p"><span class="keyword">ML Engine</span> histogram implementation includes these capabilities:</p>
+<ul class="ul" id="mcm1507661970733__ul_tyj_r4r_p1b"><li class="li">User-selected or automatic bin determination</li>
+<li class="li">User-selected left-inclusive or right-inclusive binning</li>
+<li class="li">Multiple histograms for distinct groups</li>
+</ul>
+</div>
+
+<div class="topic reference nested1" aria-labelledby="ariaid-title2" topicindex="2" topicid="lwc1507662302928" xml:lang="en-us" lang="en-us" id="lwc1507662302928"><h2 class="title topictitle2" id="ariaid-title2">Histogram Syntax</h2>
+<div class="body refbody"><div class="section" id="lwc1507662302928__section_N1000E_N1000C_N10001"><h3 class="title sectiontitle">Version 1.5</h3><pre class="pre codeblock"><code>SELECT * FROM Histogram (
+  <span class="ph">ON { <var class="keyword varname">table</var> | <var class="keyword varname">view</var> | (<var class="keyword varname">query</var>) }</span> AS InputTable
+  [ <span class="ph">ON { <var class="keyword varname">table</var> | <var class="keyword varname">view</var> | (<var class="keyword varname">query</var>) }</span> AS CustomBinTable ]
+  OUT TABLE OutputTable (<var class="keyword varname">output_table</var>)
+  USING
+  { AutoBin ({ 'Sturges' | 'Scott' | <var class="keyword varname">number_of_bins</var> }) |
+    CustomBinColumn ('<var class="keyword varname">breaks_col</var>') |
+    StartValue (<var class="keyword varname">bin_start</var>)
+    BinSize (<var class="keyword varname">bin_size</var>)
+    EndValue (<var class="keyword varname">bin_end</var>)
+  }
+  TargetColumn ('<var class="keyword varname">target_column</var>')
+  [ Inclusion ({ 'left' | 'right' }) ]
+  [ GroupbyColumns ({ '<var class="keyword varname">group_column</var>' | <var class="keyword varname">group_column_range</var> }[,...]) ]
+) AS <var class="keyword varname">alias</var>;</code></pre></div>
+<div class="section" id="lwc1507662302928__section_irp_4kj_rbb"><h3 class="title sectiontitle">Bin Definition Options</h3><ul class="ul" id="lwc1507662302928__ul_ftc_pkj_rbb"><li class="li">The function determines the bin boundaries automatically, using one of two algorithms.</li>
+<li class="li">You specify the bin boundaries.</li>
+<li class="li">You provide the minimum and maximum values for the histogram and an optional bin size. If you specify a bin size, all bins have that size; if not, bins might not be the same size.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title3" topicindex="3" topicid="ino1507662339929" xml:lang="en-us" lang="en-us" id="ino1507662339929">
+	<h2 class="title topictitle2" id="ariaid-title3">Histogram Syntax Elements</h2>
+
+	<div class="body refbody">
+		<div class="section" id="ino1507662339929__section_N10011_N1000E_N10001"><dl class="dl parml"><dt class="dt pt dlterm">OutputTable</dt>
+<dd class="dd pd">Specify the name for the table that the function creates for the output.</dd>
+<dt class="dt pt dlterm">AutoBin</dt>
+<dd class="dd pd">[Optional] If you specify this syntax element, you must not specify CustomBinTable, CustomBinColumn, StartValue, BinSize, or EndValue.<p class="p">Specify either the algorithm for selecting bin boundaries or the approximate number of bins to find. The <var class="keyword varname">number_of_bins</var> must be a positive integer.</p>
+<p class="p">Sturges algorithm for calculating bin width can be written as:</p>
+<p class="p"><code class="ph codeph"><var class="keyword varname">w</var> = <var class="keyword varname">r</var>/(1 + log<span class="ph sub">2</span><var class="keyword varname">n</var>)</code></p>
+<p class="p">where <var class="keyword varname">w</var> is the bin width, <var class="keyword varname">r</var> is the range of the data values and <var class="keyword varname">n</var> is the number of elements in the data set. Sturges algorithm performs best if the data is normally distributed and <var class="keyword varname">n</var> is at least 30.</p>
+<p class="p">The Scott algorithm for calculating bin width can be written as:</p>
+<p class="p"><code class="ph codeph"><var class="keyword varname">w</var> = 3.49<var class="keyword varname">s</var>/(<var class="keyword varname">n</var><span class="ph sup">1/3</span>)</code></p>
+<p class="p">where <var class="keyword varname">w</var> is the bin width, <var class="keyword varname">s</var> is the standard deviation of the data values and <var class="keyword varname">n</var> is the number of elements in the data set. The number of bins is <var class="keyword varname">r</var>/<var class="keyword varname">w</var>, where <var class="keyword varname">r</var> is the range of the data values. The Scott algorithm performs best on normally distributed data.</p>
+</dd>
+<dt class="dt pt dlterm">CustomBinColumn</dt>
+<dd class="dd pd">[Required if you specify CustomBinTable, disallowed otherwise.] If you specify this syntax element, you must not specify AutoBin, StartValue, BinSize, or EndValue.<p class="p">Specify the name of the CustomBinTable column that contains the boundary values. This column must have a numeric SQL data type.</p>
+</dd>
+<dt class="dt pt dlterm">StartValue</dt>
+<dd class="dd pd">[Optional] If you specify this syntax element, you must also specify BinSize and EndValue, and you must not specify AutoBin, CustomBinTable, or CustomBinColumn.<p class="p">Specify the smallest value to use in binning.</p>
+</dd>
+<dt class="dt pt dlterm">EndValue</dt>
+<dd class="dd pd">[Optional] If you specify this syntax element, you must also specify StartValue and BinSize, and you must not specify AutoBin, CustomBinTable, or CustomBinColumn.<p class="p">Specify the largest value to use in binning.</p>
+</dd>
+<dt class="dt pt dlterm">BinSize</dt>
+<dd class="dd pd">[Optional] If you specify this syntax element, you must also specify StartValue and EndValue, and you must not specify AutoBin, CustomBinTable, or CustomBinColumn.<p class="p">Specify this syntax element only for equally sized bins. The <var class="keyword varname">bin_size</var> is the width of each bin, a positive DOUBLE PRECISION value.</p>
+</dd>
+<dt class="dt pt dlterm">GroupByColumns</dt>
+<dd class="dd pd">[Optional] Specify the names of the InputTable columns that contain the group values for binning. These columns cannot contain DOUBLE PRECISION values.</dd>
+<dt class="dt pt dlterm">Inclusion</dt>
+<dd class="dd pd">[Optional] Specify whether to include points on bin boundaries in the bin on the left or the bin on the right.</dd>
+<dd class="dd pd ddexpand">Default: 'left'</dd>
+<dt class="dt pt dlterm">TargetColumn</dt>
+<dd class="dd pd">Specify the name of the InputTable column for which to compute statistics. This column must have a numeric SQL data type.</dd>
+</dl>
+</div>
+
+	</div>
+
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title4" topicindex="4" topicid="rjt1507665360558" xml:lang="en-us" lang="en-us" id="rjt1507665360558"><h2 class="title topictitle2" id="ariaid-title4">Histogram Input</h2>
+<div class="body refbody"><div class="section" id="rjt1507665360558__section_N1000E_N1000C_N10001"><h3 class="title sectiontitle">InputTable Schema</h3><p class="p"><span class="ph">The table can have additional columns, but the function ignores them.</span></p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="rjt1507665360558__table_N10014_N1000E_N1000C_N10001" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:25%" /><col style="width:25%" /><col style="width:50%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry nocellnorowborder" style="vertical-align:top;" id="d7432e303">Column</th>
+<th class="entry nocellnorowborder" style="vertical-align:top;" id="d7432e305">Data Type</th>
+<th class="entry cell-norowborder" style="vertical-align:top;" id="d7432e307">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d7432e303 "><var class="keyword varname">target_column</var></td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d7432e305 ">NUMERIC</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d7432e307 ">Values to sort.</td>
+</tr>
+<tr class="row"><td class="entry row-nocellborder" style="vertical-align:top;" headers="d7432e303 "><var class="keyword varname">group_column</var></td>
+<td class="entry row-nocellborder" style="vertical-align:top;" headers="d7432e305 ">INTEGER or VARCHAR</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e307 ">[Column appears once for each specified <var class="keyword varname">group_column</var>.] Column by which to group input data. Function produces separate histogram for each group.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="rjt1507665360558__section_knv_g1j_h2b"><h3 class="title sectiontitle">CustomBinTable Schema</h3><p class="p">This table is optional.</p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="rjt1507665360558__table_zjt_j1j_h2b" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d7432e341">Column</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d7432e343">Data Type</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d7432e345">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e341 ">break</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e343 ">DOUBLE PRECISION</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e345 ">Bin boundary.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title5" topicindex="5" topicid="bvr1507662948840" xml:lang="en-us" lang="en-us" id="bvr1507662948840"><h2 class="title topictitle2" id="ariaid-title5">Histogram Output</h2>
+<div class="body refbody"><div class="section" id="bvr1507662948840__section_N1000E_N1000C_N10001"><h3 class="title sectiontitle">Output Message Schema</h3>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="bvr1507662948840__table_hhs_1ks_rcb" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d7432e374">Column</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d7432e376">Data Type</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d7432e378">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e374 ">output_table</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e376 ">VARCHAR</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e378 ">States that output table is specified in OutputTable syntax element.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e374 ">output_columns</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e376 ">VARCHAR</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e378 ">Names of histogram output table columns.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="bvr1507662948840__section_ynv_gfw_xcb"><h3 class="title sectiontitle">OutputTable Schema</h3>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="bvr1507662948840__table_N10014_N1000E_N1000C_N10001" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:25%" /><col style="width:25%" /><col style="width:50%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry nocellnorowborder" style="vertical-align:top;" id="d7432e405">Column</th>
+<th class="entry nocellnorowborder" style="vertical-align:top;" id="d7432e407">Data Type</th>
+<th class="entry cell-norowborder" style="vertical-align:top;" id="d7432e409">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d7432e405 "><var class="keyword varname">group_column</var></td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d7432e407 ">Any</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d7432e409 ">[Column appears once for each specified <var class="keyword varname">group_column</var>.] Column by which InputTable data is grouped.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d7432e405 ">bin</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d7432e407 ">INTEGER</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d7432e409 ">Bin identifier. Starts at 0.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d7432e405 ">bin_start</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d7432e407 ">DOUBLE PRECISION</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d7432e409 ">Lower boundary of bin.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d7432e405 ">bin_end</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d7432e407 ">DOUBLE PRECISION</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d7432e409 ">Upper boundary of bin.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d7432e405 ">bin_count</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d7432e407 ">INTEGER</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d7432e409 ">Number of input rows in bin.</td>
+</tr>
+<tr class="row"><td class="entry row-nocellborder" style="vertical-align:top;" headers="d7432e405 ">bin_percent</td>
+<td class="entry row-nocellborder" style="vertical-align:top;" headers="d7432e407 ">DOUBLE PRECISION</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e409 ">Percent of input rows in bin.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="topic concept nested1" aria-labelledby="ariaid-title6" topicindex="6" topicid="yzi1510786982190" xml:lang="en-us" lang="en-us" id="yzi1510786982190"><h2 class="title topictitle2" id="ariaid-title6">Histogram Examples</h2>
+<div class="topic reference nested2" aria-labelledby="ariaid-title7" topicindex="7" topicid="auh1524242329681" xml:lang="en-us" lang="en-us" id="auh1524242329681">
+	<h3 class="title topictitle3" id="ariaid-title7">Histogram Example: AutoBin ('Sturges')</h3>
+
+	<div class="body refbody"><div class="section" id="auh1524242329681__section_g5j_klt_r2b"><h4 class="title sectiontitle">Input</h4><p class="p">The InputTable, cars_hist, has the cylinder (cyl) and horsepower (hp) data for different car models. The examples compute the histograms on the hp column.</p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="auh1524242329681__table_gr5_mlt_r2b" class="table" frame="border" border="1" rules="all"><div class="caption"><span class="tablecap">InputTable: cars_hist</span></div><colgroup><col style="width:25%" /><col style="width:25%" /><col style="width:25%" /><col style="width:25%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d7432e503">id</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d7432e505">name</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d7432e507">cyl</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d7432e509">hp</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Mazda RX4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">6</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">110</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Mazda RX4 Wag</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">6</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">110</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Datsun 710</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">93</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Hornet 4 Drive</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">6</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">110</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Hornet Sportabout</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">175</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">6</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Valiant</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">6</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">105</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">7</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Duster 360</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">245</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Merc 240D</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">62</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">9</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Merc 230</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">95</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">10</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Merc 280</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">6</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">123</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">11</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Merc 280C</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">6</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">123</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">12</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Merc 450SE</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">180</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">13</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Merc 450SL</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">180</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">14</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Merc 450SLC</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">180</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">15</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Cadillac Fleetwood</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">205</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">16</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Lincoln Continental</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">215</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">17</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Chrysler Imperial</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">230</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">18</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Fiat 128</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">66</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">19</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Honda Civic</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">52</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">20</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Toyota Corolla</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">65</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">21</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Toyota Corona</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">97</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">22</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Dodge Challenger</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">150</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">23</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">AM CJavelin</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">150</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">24</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Camaro Z28</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">245</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">25</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Pontiac Firebird</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">175</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">26</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Fiat X1-9</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">66</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">27</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Porsche 914-2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">91</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">28</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Lotus Europa</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">113</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">29</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Ford Pantera L</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">264</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">30</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Ferrari Dino</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">6</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">175</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">31</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Maserati Bora</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">335</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e503 ">32</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e505 ">Volvo 142E</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e507 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e509 ">109</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="auh1524242329681__section_gyv_mr3_4db"><h4 class="title sectiontitle">SQL Call</h4><pre class="pre codeblock"><code>DROP TABLE cars_sturges_out;
+
+ SELECT * FROM Histogram(
+  ON cars_hist AS InputTable
+  OUT TABLE OutputTable (cars_sturges_out)
+  USING
+  AutoBin ('Sturges')
+  TargetColumn ('hp')
+) AS dt ORDER BY 1;</code></pre></div>
+<div class="section" id="auh1524242329681__section_jn2_nr3_4db"><h4 class="title sectiontitle">Output</h4><pre class="pre screen"> output_table                      output_columns                              
+ --------------------------------- ------------------------------------------- 
+ specified in OutputTable argument bin bin_start bin_end bin_count bin_percent</pre>
+<pre class="pre codeblock"><code>SELECT * FROM cars_sturges_out ORDER BY 1;</code></pre><pre class="pre screen"> bin bin_start bin_end bin_count bin_percent 
+ --- --------- ------- --------- ----------- 
+   0      50.0   100.0         9       28.13
+   1     100.0   150.0         8          25
+   2     150.0   200.0         8          25
+   3     200.0   250.0         5       15.63
+   4     250.0   300.0         1        3.13
+   5     300.0   350.0         1        3.13</pre>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="auh1524242329681__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+
+	</div>
+
+</div>
+<div class="topic reference nested2" aria-labelledby="ariaid-title8" topicindex="8" topicid="yjx1524242402489" xml:lang="en-us" lang="en-us" id="yjx1524242402489">
+	<h3 class="title topictitle3" id="ariaid-title8">Histogram Example: AutoBin ('Scott')</h3>
+
+	<div class="body refbody"><div class="section" id="yjx1524242402489__section_wnz_fmt_r2b"><h4 class="title sectiontitle">Input</h4><ul class="ul" id="yjx1524242402489__ul_sqd_qbj_h2b"><li class="li">InputTable: cars_hist, as in <a class="xref" href="yag1556809656020.html#auh1524242329681" title="See example of Machine Learning Engine function Histogram that uses the Sturges algorithm to calculate the bin width.">Histogram Example: AutoBin ('Sturges')</a></li>
+</ul>
+</div>
+<div class="section" id="yjx1524242402489__section_gyv_mr3_4db"><h4 class="title sectiontitle">SQL Call</h4><pre class="pre codeblock"><code>DROP TABLE cars_scott_out;</code></pre><pre class="pre codeblock"><code>SELECT * FROM Histogram(
+  ON cars_hist AS InputTable
+  OUT TABLE OutputTable(cars_scott_out)
+  USING
+  AutoBin('Scott')
+  TargetColumn('hp')
+) AS dt ORDER BY 1;</code></pre></div>
+<div class="section" id="yjx1524242402489__section_jn2_nr3_4db"><h4 class="title sectiontitle">Output</h4><pre class="pre screen"> output_table                      output_columns                              
+ --------------------------------- ------------------------------------------- 
+ specified in OutputTable argument bin bin_start bin_end bin_count bin_percent</pre>
+<pre class="pre codeblock"><code>SELECT * FROM cars_scott_out ORDER BY 1;</code></pre><pre class="pre screen"> bin bin_start bin_end bin_count bin_percent 
+ --- --------- ------- --------- ----------- 
+   0       0.0   100.0         9       28.13
+   1     100.0   200.0        16          50
+   2     200.0   300.0         6       18.75
+   3     300.0   400.0         1        3.13</pre>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="yjx1524242402489__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+</div>
+
+</div>
+<div class="topic reference nested2" aria-labelledby="ariaid-title9" topicindex="9" topicid="opk1507664990250" xml:lang="en-us" lang="en-us" id="opk1507664990250"><h3 class="title topictitle3" id="ariaid-title9">Histogram Example: BinSize, StartValue, EndValue</h3>
+<div class="body refbody"><div class="section" id="opk1507664990250__section_N10011_N1000E_N10001"><p class="p">You specify one bin size and start and end values, and the output is grouped for each values of grouping variable (cyl).</p>
+</div>
+<div class="section" id="opk1507664990250__section_wnz_fmt_r2b"><h4 class="title sectiontitle">Input</h4><ul class="ul" id="opk1507664990250__ul_sqd_qbj_h2b"><li class="li">InputTable: cars_hist, as in <a class="xref" href="yag1556809656020.html#auh1524242329681" title="See example of Machine Learning Engine function Histogram that uses the Sturges algorithm to calculate the bin width.">Histogram Example: AutoBin ('Sturges')</a></li>
+</ul>
+</div>
+<div class="section" id="opk1507664990250__section_gyv_mr3_4db"><h4 class="title sectiontitle">SQL Call</h4><pre class="pre codeblock"><code>DROP TABLE cars_hist_out;</code></pre><pre class="pre codeblock"><code>SELECT * FROM Histogram(
+  ON cars_hist AS InputTable
+  OUT TABLE OutputTable(cars_hist_out)
+  USING
+  StartValue(20)
+  BinSize(50)
+  EndValue(400)
+  Inclusion('right')
+  TargetColumn('hp')
+  GroupbyColumns('cyl')
+) AS dt;</code></pre></div>
+<div class="section" id="opk1507664990250__section_jn2_nr3_4db"><h4 class="title sectiontitle">Output</h4><pre class="pre screen"> output_table                      output_columns                                    
+ --------------------------------- ------------------------------------------------- 
+ specified in OutputTable argument "cyl" bin bin_start bin_end bin_count bin_percent</pre>
+<pre class="pre codeblock"><code>SELECT *  FROM cars_hist_out order by 1,2;</code></pre><pre class="pre screen"> cyl bin bin_start bin_end bin_count bin_percent 
+ --- --- --------- ------- --------- ----------- 
+   4   0      20.0    70.0         5       45.45
+   4   1      70.0   120.0         6       54.55
+   4   2     120.0   170.0         0           0
+   4   3     170.0   220.0         0           0
+   4   4     220.0   270.0         0           0
+   4   5     270.0   320.0         0           0
+   4   6     320.0   370.0         0           0
+   4   7     370.0   400.0         0           0
+   6   0      20.0    70.0         0           0
+   6   1      70.0   120.0         4       57.14
+   6   2     120.0   170.0         2       28.57
+   6   3     170.0   220.0         1       14.29
+   6   4     220.0   270.0         0           0
+   6   5     270.0   320.0         0           0
+   6   6     320.0   370.0         0           0
+   6   7     370.0   400.0         0           0
+   8   0      20.0    70.0         0           0
+   8   1      70.0   120.0         0           0
+   8   2     120.0   170.0         2       14.29
+   8   3     170.0   220.0         7          50
+   8   4     220.0   270.0         4       28.57
+   8   5     270.0   320.0         0           0
+   8   6     320.0   370.0         1        7.14
+   8   7     370.0   400.0         0           0
+</pre>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="opk1507664990250__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+</div>
+</div>
+<div class="topic reference nested2" aria-labelledby="ariaid-title10" topicindex="10" topicid="xnr1530116264130" xml:lang="en-us" lang="en-us" id="xnr1530116264130">
+	<h3 class="title topictitle3" id="ariaid-title10">Histogram Example: CustomBinTable</h3>
+
+	<div class="body refbody"><div class="section" id="xnr1530116264130__section_ihn_4bj_h2b"><h4 class="title sectiontitle">Input</h4><ul class="ul" id="xnr1530116264130__ul_sqd_qbj_h2b"><li class="li">InputTable: cars_hist, as in <a class="xref" href="yag1556809656020.html#auh1524242329681" title="See example of Machine Learning Engine function Histogram that uses the Sturges algorithm to calculate the bin width.">Histogram Example: AutoBin ('Sturges')</a></li>
+<li class="li">CustomBinTable: bin_breaks</li>
+</ul>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="xnr1530116264130__table_gsc_ybj_h2b" class="table" frame="border" border="1" rules="all"><div class="caption"><span class="tablecap">bin_breaks</span></div><colgroup><col style="width:100%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d7432e983">break</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e983 ">50.0</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e983 ">100.0</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e983 ">150.0</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e983 ">200.0</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e983 ">250.0</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e983 ">300.0</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d7432e983 ">350.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="xnr1530116264130__section_ety_jbj_h2b"><h4 class="title sectiontitle">SQL Call</h4><pre class="pre codeblock"><code>SELECT * FROM Histogram(
+  ON cars_hist AS InputTable
+  ON bin_breaks AS CustomBinTable
+  OUT TABLE OutputTable(cars_hist_out2)
+  USING
+  CustomBinColumn('break')
+  ValueColumn('hp')
+  GroupbyColumns('cyl')
+) AS dt;</code></pre></div>
+<div class="section" id="xnr1530116264130__section_wl5_kbj_h2b"><h4 class="title sectiontitle">Output</h4><pre class="pre screen"> output_table                      output_columns                                    
+ --------------------------------- ------------------------------------------------- 
+ specified in OutputTable argument "cyl" bin bin_start bin_end bin_count bin_percent</pre>
+<pre class="pre codeblock"><code>SELECT * FROM cars_hist_out2;</code></pre><pre class="pre screen"> cyl bin bin_start bin_end bin_count bin_percent 
+ --- --- --------- ------- --------- ----------- 
+   4   1     100.0   150.0         2       18.18
+   4   3     200.0   250.0         0           0
+   4   5     300.0   350.0         0           0
+   8   1     100.0   150.0         0           0
+   8   3     200.0   250.0         5       35.71
+   8   5     300.0   350.0         1        7.14
+   6   1     100.0   150.0         6       85.71
+   6   3     200.0   250.0         0           0
+   6   5     300.0   350.0         0           0
+   4   0      50.0   100.0         9       81.82
+   4   2     150.0   200.0         0           0
+   4   4     250.0   300.0         0           0
+   8   0      50.0   100.0         0           0
+   8   2     150.0   200.0         7          50
+   8   4     250.0   300.0         1        7.14
+   6   0      50.0   100.0         0           0
+   6   2     150.0   200.0         1       14.29
+   6   4     250.0   300.0         0           0</pre>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="xnr1530116264130__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+
+	</div>
+
+</div>
+</div>
+</div>
+</body>
+</html>

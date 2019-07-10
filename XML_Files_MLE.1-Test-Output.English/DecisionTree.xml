@@ -1,0 +1,3429 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="sfg1507661639626"> </a>
+	  <h1>DecisionTree</h1>
+
+	  <a name="section_p1r_r55_zdb"> </a>
+   <p style="line-height: 1em;">The DecisionTree function takes an entire data set as training input and builds a single decision tree from it. The function creates a single decision tree in a distributed fashion, either weighted or unweighted. The model table that this function outputs can be input to the function DecisionTreePredict_MLE.</p>
+   <p style="line-height: 1em;">DecisionTree requires vworkers to communicate during the tree-building process. This communication can be very expensive, depending on the number of variables and the number of possible splits; therefore, the algorithm uses a sampling approach to reduce the number of splits.</p>
+   <p style="line-height: 1em;">The DecisionTree function uses the functions Approximate Percentile and Percentiles to sample the split values. The split table has all the splits for all the numerical attributes that were considered in building the tree.</p>
+
+
+   <a name="mbk1507661926705"> </a>
+   <h2>DecisionTree Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.24</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM DecisionTree (
+  { ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable |
+    ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS AttributeTable
+    ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS ResponseTable
+  }
+  [ ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS CategoricalAttributeTable ] 
+  [ ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS SplitsTable ]
+  OUT TABLE OutputTable (<i>output_table</i>)
+  [ OUT TABLE FinalResponseTable (<i>final_response_table</i>) ]
+  [ OUT TABLE IntermediateSplitsTable (<i>intermediate_splits_table</i>) ]
+  USING
+  AttributeNameColumns ('<i>attribute_name_column</i>' [,...])
+  AttributeValueColumn ('<i>attribute_value_column</i>')
+  ResponseColumn ('<i>response_column</i>')
+  IDColumns ('<i>id_column</i>' [,...])
+  [ CategoricalEncoding ({ 'GrayCode' | 'Hashing' }) ]
+  [ SplitsValueColumn ('<i>splits_valcol</i>') ]
+  [ ApproxSplits ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ NumSplits (<i>num_splits_to_consider</i>) ]
+  [ MinNodeSize (<i>minimum_split_size</i>) ]
+  [ MaxDepth (<i>max_depth</i>) ]
+  [ Weighted ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ WeightColumn ('<i>weight_column</i>') ]
+  [ SplitMeasure ( { 'gini' | 'entropy' | 'chisquare' } ) ]
+  [ OutputProb {'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'} ]
+  [ ResponseProbDistType ({ 'laplace' | 'frequency' | 'rawcount' }) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="nqb1507661985806"> </a>
+	  <h2>DecisionTree Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputTable</dt>
+      <dd>Specify the name for the output table that is to contain the final decision tree (the model table). The <i>output_table</i> must not exceed 64 characters.</dd>
+      <dt>FinalResponseTable</dt>
+      <dd>[Optional] Specify the name for the output table that is to contain the final PID and response pair from the response table and the node_id from the final single drive tree.</dd>
+      <dd>Default behavior: The function does not output this table.</dd>
+      <dt>IntermediateSplitsTable</dt>
+      <dd>[Disallowed with SplitsTable, optional otherwise.] Specify the name for the intermediate splits table, if it is to be saved.</dd>
+      <dd>Default behavior: The function does not save the intermediate splits table.</dd>
+      <dt>AttributeNameColumns</dt>
+      <dd>Specify the names of the InputTable or AttributeTable columns that have the attribute names.</dd>
+      <dt>AttributeValueColumn</dt>
+      <dd>Specify the name of the InputTable or AttributeTable columns that have the attribute values.</dd>
+      <dt>ResponseColumn</dt>
+      <dd>Specify the name of the ResponseTable column that contains the response variable.</dd>
+      <dt>IDColumns</dt>
+      <dd>Specify the names of the ResponseTable and AttributeTable columns that specify the ID of the instance.</dd>
+      <dt>CategoricalEncoding</dt>
+      <dd>[Optional with CategoricalAttributeTable, disallowed otherwise.] Specify algorithm for encoding categorical columns:<a name="table_n14_5pp_sgb"> </a>
+         <table class="introtable">
+            <a name="table_n14_5pp_sgb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">GrayCode</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Recommended when accuracy is critical. Depending on available memory, out-of-memory errors can occur if a categorical column has more than about 20 unique levels, even with a small data set.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">Hashing</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Optimizes calculation speed and minimizes memory use, possibly decreasing accuracy.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dd>Default: 'GrayCode'</dd>
+      <dt>SplitsValueColumn</dt>
+      <dd>[Optional] If you specify SplitsTable, this syntax element specifies the name of the column that contains the split value.</dd>
+      <dd>Default: <i>splits_valcol</i> if UseApproximateSplits is 'true', <i>attribute_value_column</i> (the AttributeValueColumn syntax element value) otherwise</dd>
+      <dt>ApproxSplits</dt>
+      <dd>[Optional] Specify whether to use approximate percentiles (true) or exact percentiles (false). Internally, the function uses percentile values as split values.</dd>
+      <dd>Default: 'true'</dd>
+      <dt>NumSplits</dt>
+      <dd>[Optional] Specify the number of splits to consider for each variable. The <i>num_splits_to_consider</i> must be an INTEGER. If  ApproxSplits is true, <i>num_splits_to_consider</i> must be greater than 1; otherwise, it must be greater than 0. The function does not consider all possible splits for all attributes.</dd>
+      <dd>Default: 10</dd>
+      <dt>MinNodeSize</dt>
+      <dd>[Optional] Specify the decision tree stopping criterion and the minimum size of any particular node within each decision tree.</dd>
+      <dd>Default: 100</dd>
+      <dt>MaxDepth</dt>
+      <dd>Specify a decision tree stopping criterion. If the tree reaches a depth past this value, the algorithm stops looking for splits. Decision trees can grow up to (2<sup>(<i>max_depth</i>+1)</sup> - 1) nodes. This stopping criteria has the greatest effect on function performance.</dd>
+      <dd>Default: 5</dd>
+      <dd>Maximum: 60</dd>
+      <dt>Weighted</dt>
+      <dd>[Optional] Specify whether to build a weighted decision tree. If you specify 'true', you must also specify the WeightColumn syntax element.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>WeightColumn</dt>
+      <dd>[Required with Weighted, otherwise optional.] Specify the name of the response table column that contains the weights of the attribute values.</dd>
+      <dt>SplitMeasure</dt>
+      <dd>[Optional] Specify the impurity measurement to use while constructing the decision tree. If the tree is weighted, this value cannot be 'chisquare'.</dd>
+      <dd>Default: 'gini'</dd>
+      <dt>OutputProb</dt>
+      <dd>[Optional] Specify whether to output the probability distributions for each node.<p>
+            <b>Note:</b>  Specify 'true' to use the OutputProb syntax element of the DecisionTreePredict_MLE function.</p>
+      </dd>
+      <dd>Default: 'false'</dd>
+      <dt>ResponseProbDistType</dt>
+      <dd>[Optional] Specifies the probability distribution type.</dd>
+      <dd>Default: 'laplace'</dd>
+   </div>
+
+
+	
+   <a name="wqm1507662061218"> </a>
+   <h2>DecisionTree Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">Single decision trees support millions of attributes. Because the database cannot have millions of columns, you must spread the attributes across rows in the form of <i>key-value</i> pairs, where <i>key</i> is the name of the attribute and <i>value</i> is the value of the attribute. The Unpivoting function is useful for this purpose (see Unpivoting Example: Specified Target Columns, Default Optional Values).</p>
+   <a name="table_f1g_3f2_ycb"> </a>
+   <table class="introtable">
+      <a name="table_f1g_3f2_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Required if you omit AttributeTable and ResponseTable, disallowed otherwise.] Contains attribute names and values and response values.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">AttributeTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Required if you omit InputTable, disallowed otherwise.] Contains attribute names and values.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ResponseTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Required if you omit InputTable, disallowed otherwise.] Contains response values.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">SplitsTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Contains user-specified splits.<p style="line-height: 1em; margin: 0px;">
+                  <br/>Every attribute in AttributeTable must appear in this table.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CategoricalAttributeTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Contains categorical attribute names.<p style="line-height: 1em; margin: 0px;">
+                  <br/>Every categorical attribute in AttributeTable must appear in this table.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+   <p>
+      <b>Note:</b>  The function ignores input rows with NULL values.</p>
+   <a name="section_gzd_g22_ycb"> </a>
+   <h3>InputTable Schema</h3>
+   <a name="table_N10026_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10026_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Data point identifier. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>attribute_name_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Attribute name. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>attribute_value_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>Numeric attribute:</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>NUMERIC, INTEGER, BIGINT, or DOUBLE PRECISION</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>Categorical attribute:</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>Any</p>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Attribute value. If NULL, function estimates value by arithmetic means on an attribute basis. If estimate is out of range, function cannot use it to partition training data, so it is useless.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>response_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NUMERIC, INTEGER, BIGINT, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Response value for data point. Can be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>weight_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with Weighted ('true').] Weight of data point. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>actual_label</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Actual label of data point.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_dqz_g22_ycb"> </a>
+   <h3>AttributeTable Schema</h3>
+   <a name="table_N100A9_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100A9_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Data point identifier. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>attribute_name_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Attribute name. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>attribute_value_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>Numeric attribute:</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>NUMERIC, INTEGER, BIGINT, or DOUBLE PRECISION</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>Categorical attribute:</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>Any</p>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Attribute value. If NULL, function estimates value by arithmetic means on an attribute basis. If estimate is out of range, function cannot use it to partition training data, so it is useless.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>actual_label</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Actual label of data point.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_vj1_422_ycb"> </a>
+   <h3>ResponseTable Schema</h3>
+   <a name="table_N1010C_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1010C_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Data point identifier. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>response_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NUMERIC, INTEGER, BIGINT, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Response value for data point. Can be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>weight_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with Weighted ('true').] Weight of data point. Cannot be NULL.</div>
+         </td>
+      </tr>
+   </table>
+
+   <p>
+      <b>Note:</b>  The response table must not have a column named node_id.</p>
+   <a name="section_qp1_322_ycb"> </a>
+   <h3>SplitsTable Schema</h3>
+   <a name="table_xqg_yvc_pw"> </a>
+   <table class="introtable">
+      <a name="table_xqg_yvc_pw"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>attribute_name_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Attribute name. Cannot be NULL.<p style="line-height: 1em; margin: 0px;">
+                  <br/>Every attribute in AttributeTable must appear in this table.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>split_id</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Split identifier. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>splits_valcol</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NUMERIC, INTEGER, BIGINT, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Split value. Cannot be NULL.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_omf_j22_ycb"> </a>
+   <h3>CategoricalAttributeTable Schema</h3>
+   <a name="table_yqg_yvc_pw"> </a>
+   <table class="introtable">
+      <a name="table_yqg_yvc_pw"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>categorical_attribute_name_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Categorical attribute name.<p style="line-height: 1em; margin: 0px;">
+                  <br/>Every categorical attribute in AttributeTable must appear in this table.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="tsm1507662178542"> </a>
+   <h2>DecisionTree Output</h2>
+   <a name="section_u1z_mvs_r2b"> </a>
+   <a name="table_cyy_nvs_r2b"> </a>
+   <table class="introtable">
+      <a name="table_cyy_nvs_r2b"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">OutputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains final decision tree (model table).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">FinalResponseTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Contains final PID and response pair from ResponseTable and node_id from final decision tree.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">IntermediateSplitsTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Disallowed with SplitsTable, optional otherwise] Contains intermediate splits.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Message Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">message</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Reports either that model table was stored in table specified by OutputTable syntax element and depth of tree or "The splitting conditions are not satisfied and no tree is built".<p style="line-height: 1em; margin: 0px;">
+                  <br/>If no tree was built, confirm following:<ul>
+                     <li>Every column in SplitsTable and CategoricalAttributesTable is also in InputTable.</li>
+                     <li>Values of numeric columns in SplitsTable are not outside range of InputTable values.</li>
+                     <li>Values of categorical columns in SplitsTable appear in InputTable.</li>
+                  </ul>
+               </p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>"The splitting conditions are not satisfied and no tree is built" also appears if function cannot find split that improves impurity measurement of full input data set.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_hqg_132_ycb"> </a>
+   <h3>OutputTable Schema</h3>
+   <p style="line-height: 1em;">This model table has a row for each node in the model.</p>
+   <a name="table_N1004C_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1004C_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">node_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Node identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">node_size</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of objects in node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">node_gini[_p]</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">GINI impurity value for information in node. For ImpurityMeasurement ('gini'), column name is node_gini_p; otherwise, it is node_gini.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">node_entropy[_p]</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Entropy impurity value for the information in the node. For ImpurityMeasurement ('entropy'), column name is node_entropy_p; otherwise, it is node_entropy.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">node_chisq_pv[_p]</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Chi-square impurity value for the information in the node. For ImpurityMeasurement ('chisquare'), column name is node_chisq_pv_p; otherwise, it is node_chisq_pv.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">node_label</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Output category for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">node_majorvotes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of objects that belong to category identified by node_label.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">split_value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Numeric split value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">split_gini[_p]</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">GINI impurity measurement for information in node after splitting. For ImpurityMeasurement ('gini'), column name is split_gini_p; otherwise, it is split_gini.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">split_entropy[_p]</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Entropy impurity measurement for the information in node after splitting. For ImpurityMeasurement ('entropy'), column name is split_entropy_p; otherwise, it is split_entropy.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">split_chisq_pv[_p]</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Chi-square impurity measurement for information in node after splitting. For ImpurityMeasurement ('chisquare'), column name is split_chisq_pv_p; otherwise, it is split_chisq_pv.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">left_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Identifier of left child of node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">left_size</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of objects in left child of node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">left_label</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Output category for left child of node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">left_majorvotes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of objects that belong to category identified by left_label.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">right_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Identifier of right child of node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">right_size</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of objects in right child of node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">right_label</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Output category for right child of node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">right_majorvotes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of objects that belong to category identified by right_label.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">left_bucket</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">When split value is categorical attribute, value in left child of node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">right_bucket</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">When split value is categorical attribute, value in right child of node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">attribute</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Split attribute.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">node_majorfreq</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with Weighted ('true').] Weighted objects that belong to category identified by node_label.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">left_majorfreq</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with Weighted ('true').] Weighted objects that belong to category identified by left_label.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">right_majorfreq</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with Weighted ('true').] Weighted objects that belong to category identified by right_label.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">left_label_probdist</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with OutputProb ('true').] Probability of each label for left child of node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">right_label_probdist</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with OutputProb ('true').] Probability of each label for right child of node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">prob_label_order</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with OutputProb ('true').] Order of probability of labels for left and right children of node.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ylx_c32_ycb"> </a>
+   <h3>IntermediateSplitsTable Schema</h3>
+   <a name="table_N101D4_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N101D4_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">attribute</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Attribute name (from the attribute table in DecisionTree Input). For each attribute, the table has the number of rows specified by the MaxDepth syntax element.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">percentile</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Percentage of values in the split. For example, if attribute A has 100 different values, then percentile =10 and value =1 means that 100*10%=10 (the 10th value) of attribute A is 1, and 1 is the split value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NUMERIC, INTEGER, BIGINT, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Split value (from the attribute table, DecisionTree Input).</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_mdb_f32_ycb"> </a>
+   <h3>SaveFinalResponseTable Schema</h3>
+   <a name="table_N10234_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10234_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">node_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Node identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">pid</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Data point identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">response</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NUMERIC, INTEGER, BIGINT, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Response value for the data point.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ahj1510350905353"> </a>
+   <h2>DecisionTree Examples</h2>
+   <a name="oas1510351677286"> </a>
+   <h3>DecisionTree Example: Create Model</h3>
+   <a name="section_xdt_zln_n2b"> </a>
+   <p style="line-height: 1em;">The function DecisionTree acts on the training set to create the model. The DecisionTreePredict_MLE function uses that model and a test set to predict the output. The prediction accuracy is determined based on the original and prediction results.</p>
+
+   <a name="section_pdn_xln_n2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">This example uses the iris data set (iris_input). The data has values for four attributes (sepal_length, sepal_width, petal_length and petal_width), which are grouped into three categories (setosa (1), versicolor (2), virginica (3)). From the raw data, the example creates training and test data sets.</p>
+   <a name="table_ew5_gmn_n2b"> </a>
+   <table class="introtable">
+      <a name="table_ew5_gmn_n2b"> </a>
+      <h4 style="text-align: center;">Raw Data: iris_input</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">species</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">This code divides the 150 data rows into a training data set (80%) and a test data set (20%):</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE iris_train;
+DROP TABLE iris_test;
+
+CREATE MULTISET TABLE iris_train AS (
+  SELECT * FROM iris_input WHERE id MOD 5 &lt;&gt; 0
+) WITH DATA;
+
+CREATE MULTISET TABLE iris_test AS (
+  SELECT * FROM iris_input WHERE id MOD 5 = 0
+) WITH DATA;
+</tt>
+   </pre>
+   <p>
+      <b>Note:</b>  Alternatively, you can do the preceding task with the Sampling or RandomSample function.</p>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM iris_train ORDER BY id;</tt>
+   </pre>
+   <a name="table_q52_dnn_n2b"> </a>
+   <table class="introtable">
+      <a name="table_q52_dnn_n2b"> </a>
+      <h4 style="text-align: center;">Training Data Set: iris_train</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">species</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM iris_test ORDER BY id;</tt>
+   </pre>
+   <a name="table_fkb_qnn_n2b"> </a>
+   <table class="introtable">
+      <a name="table_fkb_qnn_n2b"> </a>
+      <h4 style="text-align: center;">Test Data Set: iris_test</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">species</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">20</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">35</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">40</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">45</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">55</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">60</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">65</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">70</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">75</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">80</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">85</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">90</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">95</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">100</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">105</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">110</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">115</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">120</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">125</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">130</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">135</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">140</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">145</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">150</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">The attribute tables, iris_attribute_train and iris_attribute_test, are created from the raw train and test data, iris_train and iris_test. The recommended way to create the attribute tables is to use the Unpivoting function:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE singletree1 AS ( 
+  SELECT * FROM <b>Unpivoting</b> (
+    ON <b>iris_train</b>
+    USING
+    <b>TargetColumns</b> ('sepal_length', 'sepal_width', 'petal_length', 'petal_width')
+    AttributeColumn ('attribute')
+    ValueColumn ('value_col')
+    InputTypes ('false')
+    Accumulate ('id')
+  ) AS dt
+) WITH DATA;
+
+CREATE MULTISET TABLE <b>iris_attribute_train</b> AS (
+  SELECT id AS pid, attribute, value_col AS attrvalue FROM singletree1
+) WITH DATA;</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE singletree2 AS (
+  SELECT * FROM <b>Unpivoting</b> (
+    ON <b>iris_test</b>
+    USING
+    <b>TargetColumns</b> ('sepal_length', 'sepal_width', 'petal_length', 'petal_width')
+    AttributeColumn ('attribute')
+    ValueColumn ('value_col')
+    InputTypes ('false')
+    Accumulate ('id')
+  ) AS dt
+) WITH DATA;
+
+CREATE MULTISET TABLE <b>iris_attribute_test</b> AS (
+  SELECT id AS pid, attribute, value_col AS attrvalue FROM singletree2
+) WITH DATA;</tt>
+   </pre>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM iris_attribute_train ORDER BY pid, attribute;</tt>
+   </pre>
+   <a name="table_pzz_dqn_n2b"> </a>
+   <table class="introtable">
+      <a name="table_pzz_dqn_n2b"> </a>
+      <h4 style="text-align: center;">Attribute Table: iris_attribute_train</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">pid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">attribute</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">attrvalue</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.7</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM iris_attribute_test ORDER BY pid, attribute;</tt>
+   </pre>
+   <a name="table_rf2_kqn_n2b"> </a>
+   <table class="introtable">
+      <a name="table_rf2_kqn_n2b"> </a>
+      <h4 style="text-align: center;">Attribute Table: iris_attribute_test</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">pid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">attribute</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">attrvalue</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">Response tables, created from the raw train and test data, are used as inputs.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE iris_response_train;
+CREATE MULTISET TABLE iris_response_train (pid INTEGER, response VARCHAR);
+INSERT INTO iris_response_train SELECT id, species FROM iris_train;</tt>
+   </pre>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM iris_response_train ORDER BY pid;</tt>
+   </pre>
+   <a name="table_lqb_tqn_n2b"> </a>
+   <table class="introtable">
+      <a name="table_lqb_tqn_n2b"> </a>
+      <h4 style="text-align: center;">Response Table: iris_response_train</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">pid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">response</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE iris_response_test;
+CREATE MULTISET TABLE iris_response_test (pid INTEGER, response VARCHAR);
+INSERT INTO iris_response_test SELECT id, species FROM iris_test;</tt>
+   </pre>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM iris_response_test ORDER BY pid;</tt>
+   </pre>
+   <a name="table_ixv_2rn_n2b"> </a>
+   <table class="introtable">
+      <a name="table_ixv_2rn_n2b"> </a>
+      <h4 style="text-align: center;">Response Table: iris_response_test</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">pid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">response</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">20</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">35</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">40</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">45</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">55</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">60</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">65</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">70</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">75</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">80</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">85</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">90</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">95</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">100</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">105</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">110</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">115</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">120</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">125</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">130</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">135</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">140</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">145</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">150</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_vbg_yln_n2b"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE iris_attribute_output;
+DROP TABLE splits_small;
+
+SELECT * FROM DecisionTree (
+  ON iris_attribute_train AS AttributeTable
+  ON iris_response_train AS ResponseTable
+  OUT TABLE OutputTable (iris_attribute_output)
+  OUT TABLE IntermediateSplitsTable (splits_small)
+  USING
+  NumSplits (3)
+  SplitMeasure ('gini')
+  MaxDepth (10)
+  IDColumns ('pid')
+  AttributeNameColumns ('attribute')
+  AttributeValueColumn ('attrvalue')
+  ResponseColumn ('response')
+  MinNodeSize (10)
+  ApproxSplits ('false')
+) AS dt;</tt>
+   </pre>
+   <a name="section_rzx_yln_n2b"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ message                                                                                   
+ ----------------------------------------------------------------------------------------- 
+ Output model table is successfully stored in the table specified in OutputTable argument.
+ Depth of the tree is:5</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM iris_attribute_output;</tt>
+   </pre>
+   <pre>
+      <tt>
+ node_id node_size node_gini_p         node_entropy        node_chisq_pv node_label  node_majorvotes split_value        split_gini_p        split_entropy       split_chisq_pv         left_id left_size left_label  left_majorvotes right_id right_size right_label right_majorvotes left_bucket right_bucket attribute      
+ ------- --------- ------------------- ------------------- ------------- ----------- --------------- ------------------ ------------------- ------------------- ---------------------- ------- --------- ----------- --------------- -------- ---------- ----------- ---------------- ----------- ------------ -------------- 
+       2        90  0.5977777777777777  1.4900684346901674           1.0           2              40 1.7999999523162842  0.2459045406780598  0.6980234505326226 1.1102230246251565E-16       5        41           2              39        6         49           3               38                          petal_width   
+       6        49  0.3740108288213244  1.0467992835555564           1.0           3              38  6.300000190734863  0.2924397031539888  0.7112635941634022  1.4851330869192214E-4      13        16           3               8       14         33           3               30                          sepal_length  
+      11        38 0.05124653739612184 0.17556502585750336           1.0           2              37                5.5 0.04210526315789473 0.09499053880096872   0.009226867937210503      23         5           2               4       24         33           2               33                          sepal_length  
+      30        24             0.21875  0.5435644431995974           1.0           3              21  3.200000047683716 0.19999999999999996  0.4512050593046013    0.15149399240422035      61        15           3              12       62          9           3                9                          sepal_width   
+       0       130  0.7125443786982248  1.9220774796203766           1.0           1              40                1.0  0.4138461538461538   1.031585839400885                    0.0       1        40           1              40        2         90           2               40                          petal_width   
+       5        41 0.09280190362879237  0.2811937964320433           1.0           2              39                5.0 0.08001711596063324 0.22991118255484383    0.01747194813144859      11        38           2              37       12          3           2                2                          petal_length  
+      13        16           0.5546875  1.2717822215997983           1.0           3               8  3.200000047683716 0.20833333333333331  0.5548650349110991  0.0019848295804182348      27         7           3               7       28          9           5                7                          sepal_width   
+      14        33  0.1652892561983471  0.4394969869215134           1.0           3              30 2.9000000953674316  0.1590909090909091  0.3953195950542527     0.2659534093128423      29         9           3               9       30         24           3               21                          sepal_width</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM splits_small;</tt>
+   </pre>
+   <pre>
+      <tt>
+ attribute      percentile         attrvalue          
+ -------------- ------------------ ------------------ 
+ sepal_length    66.66666666666667  6.300000190734863
+ petal_length    66.66666666666667                5.0
+ petal_width    33.333333333333336                1.0
+ sepal_width    33.333333333333336 2.9000000953674316
+ petal_width                 100.0                2.5
+ sepal_width                 100.0  4.400000095367432
+ sepal_length   33.333333333333336                5.5
+ petal_length   33.333333333333336                3.5
+ sepal_length                100.0  7.900000095367432
+ petal_length                100.0  6.900000095367432
+ petal_width     66.66666666666667 1.7999999523162842
+ sepal_width     66.66666666666667  3.200000047683716</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="dyn1510351756676"> </a>
+   <h3>DecisionTree Example: Alternate Input Format</h3>
+   <a name="section_krz_spj_tdb"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The InputTable is a combination of the attribute table and response table of DecisionTree Example: Create Model.</p>
+   <a name="table_zyf_mqj_tdb"> </a>
+   <table class="introtable">
+      <a name="table_zyf_mqj_tdb"> </a>
+      <h4 style="text-align: center;">InputTable: iris_altinput</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">pid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">attribute</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">attrvalue</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">response</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_fhl_tpj_tdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE iris_attribute_output_2;
+DROP TABLE splits_small_2;
+
+SELECT * FROM DecisionTree (
+  ON iris_altinput AS InputTable
+  OUT TABLE OutputTable (iris_attribute_output_2)
+  OUT TABLE IntermediateSplitsTable (splits_small_2)
+  USING
+  NumSplits (3)
+  SplitMeasure ('gini')
+  MaxDepth (10)
+  IDColumns ('pid')
+  AttributeNameColumns ('attribute')
+  AttributeValueColumn ('attrvalue')
+  ResponseColumn ('response')
+  MinNodeSize (10)
+  ApproxSplits ('false')
+) AS dt;</tt>
+   </pre>
+   <a name="section_hbx_tpj_tdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ message                                                                                   
+ ----------------------------------------------------------------------------------------- 
+ Output model table is successfully stored in the table specified in OutputTable argument.
+ Depth of the tree is:5</tt>
+   </pre>
+   <p style="line-height: 1em;">These queries return the attribute and the splits table (which are the same as in DecisionTree Example: Create Model):</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM iris_attribute_output_2 ORDER BY 1;
+SELECT * FROM splits_small_2 ORDER BY 1;</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="mgt1532704427717"> </a>
+	  <h3>DecisionTree Example: OutputProb</h3>
+
+	  <a name="section_c1s_cxs_p2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>AttributeTable: iris_attribute_train</li>
+      <li>ResponseTable: iris_response_train</li>
+   </ul>
+   <p style="line-height: 1em;">The preceding tables are created in DecisionTree Example: Create Model.</p>
+
+   <a name="section_mvp_bxs_p2b"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE iris_attribute_output ;
+DROP TABLE splits_small ;
+
+SELECT * FROM DecisionTree (
+  ON iris_attribute_train AS AttributeTable
+  ON iris_response_train AS ResponseTable
+  OUT TABLE OutputTable (iris_attribute_output)
+  OUT TABLE IntermediateSplitsTable (splits_small)
+  USING
+  NumSplits (3)
+  SplitMeasure ('gini')
+  MaxDepth (10)
+  IDColumns ('pid')
+  AttributeNameColumns ('attribute')
+  AttributeValueColumn ('attrvalue')
+  ResponseColumn ('response')
+  MinNodeSize (10)
+  ApproxSplits ('false')
+  OutputProb ('true')
+) AS dt;
+</tt>
+   </pre>
+   <a name="section_ftf_cxs_p2b"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ message                                                                                   
+ ----------------------------------------------------------------------------------------- 
+ Output model table is successfully stored in the table specified in OutputTable argument.
+ Depth of the tree is:5</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM iris_attribute_output;</tt>
+   </pre>The table looks like iris_attribute_output in DecisionTree Example: Create Model, except that it has additional columns left_label_probdist, right_label_probdist, and prob_label_order.<pre>
+      <tt>
+ node_id node_size node_gini_p         node_entropy        node_chisq_pv node_label  node_majorvotes split_value        split_gini_p        split_entropy       split_chisq_pv         left_id left_size left_label  left_majorvotes right_id right_size right_label right_majorvotes left_bucket right_bucket left_label_probdist                     right_label_probdist                    prob_label_order                                            attribute      
+ ------- --------- ------------------- ------------------- ------------- ----------- --------------- ------------------ ------------------- ------------------- ---------------------- ------- --------- ----------- --------------- -------- ---------- ----------- ---------------- ----------- ------------ --------------------------------------- --------------------------------------- ----------------------------------------------------------- -------------- 
+       2        90  0.5977777777777777  1.4900684346901674           1.0           2              40 1.7999999523162842  0.2459045406780598  0.6980234505326226 1.1102230246251565E-16       5        41           2              39        6         49           3               38                          0.06522,0.02174,0.02174,0.02174,0.86957 0.72222,0.14815,0.01852,0.07407,0.03704           3,          5,          1,          4,          2 petal_width   
+       5        41 0.09280190362879237  0.2811937964320433           1.0           2              39                5.0 0.08001711596063324 0.22991118255484383    0.01747194813144859      11        38           2              37       12          3           2                2                          0.33333,0.16667,0.16667,0.16667,0.16667 0.33333,0.16667,0.16667,0.16667,0.16667           3,          5,          1,          4,          2 petal_length  
+      11        38 0.05124653739612184 0.17556502585750336           1.0           2              37                5.5 0.04210526315789473 0.09499053880096872   0.009226867937210503      23         5           2               4       24         33           2               33                          0.33333,0.16667,0.16667,0.16667,0.16667 0.20000,0.20000,0.20000,0.20000,0.20000           3,          5,          1,          4,          2 sepal_length  
+      30        24             0.21875  0.5435644431995974           1.0           3              21  3.200000047683716 0.19999999999999996  0.4512050593046013    0.15149399240422035      61        15           3              12       62          9           3                9                          0.65000,0.05000,0.05000,0.20000,0.05000 0.71429,0.07143,0.07143,0.07143,0.07143           3,          5,          1,          4,          2 sepal_width   
+       0       130  0.7125443786982248  1.9220774796203766           1.0           1              40                1.0  0.4138461538461538   1.031585839400885                    0.0       1        40           1              40        2         90           2               40                          0.02222,0.02222,0.91111,0.02222,0.02222 0.43158,0.08421,0.01053,0.04211,0.43158           3,          5,          1,          4,          2 petal_width   
+       6        49  0.3740108288213244  1.0467992835555564           1.0           3              38  6.300000190734863  0.2924397031539888  0.7112635941634022  1.4851330869192214E-4      13        16           3               8       14         33           3               30                          0.45000,0.40000,0.05000,0.05000,0.05000 0.81579,0.02632,0.02632,0.10526,0.02632           3,          5,          1,          4,          2 sepal_length  
+      14        33  0.1652892561983471  0.4394969869215134           1.0           3              30 2.9000000953674316  0.1590909090909091  0.3953195950542527     0.2659534093128423      29         9           3               9       30         24           3               21                          0.71429,0.07143,0.07143,0.07143,0.07143 0.75862,0.03448,0.03448,0.13793,0.03448           3,          5,          1,          4,          2 sepal_width   
+      13        16           0.5546875  1.2717822215997983           1.0           3               8  3.200000047683716 0.20833333333333331  0.5548650349110991  0.0019848295804182348      27         7           3               7       28          9           5                7                          0.66667,0.08333,0.08333,0.08333,0.08333 0.15385,0.61538,0.07692,0.07692,0.07692           3,          5,          1,          4,          2 sepal_width</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

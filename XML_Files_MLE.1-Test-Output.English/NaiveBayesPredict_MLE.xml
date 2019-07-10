@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="flg1506116560459"> </a>
+	  <h1>NaiveBayesPredict_MLE</h1>
+
+	
+		<p style="line-height: 1em;">The NaiveBayesPredict_MLE function uses the model output by the Naive Bayes Classifier function to predict the outcomes for a test set of data.</p>
+
+	
+   <a name="djr1506116663965"> </a>
+   <h2>NaiveBayesPredict_MLE Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.12</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NaiveBayesPredict_MLE (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable PARTITION BY ANY
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS Model DIMENSION
+  USING
+  IDColumn ('<i>test_point_id_col</i>')
+  [ NumericInputs ({ '<i>numeric_input_column</i>' | <i>numeric_input_column_range</i> }[,...] ) ]
+  [ CategoricalInputs ({ '<i>categorical_input_column</i>' | <i>categorical_input_column_range</i> }[,...] ) ]
+  Responses ('<i>response</i>' [,...])
+  [ OutputProb ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="ruv1506116762514"> </a>
+	  <h2>NaiveBayesPredict_MLE Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>IDColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the ID that uniquely identifies the test input data.</dd>
+      <dt>NumericInputs</dt>
+      <dd>[Required if you omit CategoricalInputs.] Specify the same <i>numeric_input_columns</i> that you specified when you used the NaiveBayesMap and NaiveBayesReduce functions to create the model table from the training data.</dd>
+      <dt>CategoricalInputs</dt>
+      <dd>[Required if you omit NumericInputs.] Specify the same <i>categorical_input_columns</i> that you specified when you used the NaiveBayesMap and NaiveBayesReduce functions to create the model table from the training data.<p>
+            <b>Note:</b>  For information about columns that you must identify as categorical, see Identification of Categorical Columns.</p>
+      </dd>
+      <dt>Responses</dt>
+      <dd>Specify the responses to output.</dd>
+      <dt>OutputProb</dt>
+      <dd>Specify whether to output the calculated probability for each selected response.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the InputTable columns to copy to the output table.</dd>
+   </div>
+
+
+	
+   <a name="fsu1506116895907"> </a>
+   <h2>NaiveBayesPredict_MLE Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_lqp_yc2_ycb"> </a>
+   <table class="introtable">
+      <a name="table_lqp_yc2_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains test data. Has same schema as Naive Bayes Classifier Input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Model</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Naive Bayes Classifier Output output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="gks1506116993188"> </a>
+   <h2>NaiveBayesPredict_MLE Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Table Schema</h3>
+   <p style="line-height: 1em;">Each row of the table represents one observation.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Row (observation) identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">prediction</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Prediction for observation.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">loglik_<i>response</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>response</i>.] Loglikelihood (natural logarithm of probability) that observation has <i>response</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">prob_<i>response</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>response</i>.] Probability that observation has <i>response</i>.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="fpf1526675821937"> </a>
+	  <h2>NaiveBayesPredict_MLE Example</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Input</h3>
+   <ul>
+      <li>InputTable: nb_iris_input_test, from Naive Bayes Classifier Example</li>
+      <li>Model: nb_iris_model output by Naive Bayes Classifier Example</li>
+   </ul>
+
+		
+   <a name="section_ujq_tmf_wdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE TABLE nb_iris_predict AS (
+  SELECT * FROM NaiveBayesPredict_MLE (
+    ON nb_iris_input_test <b>PARTITION BY ANY</b>
+         <b>ON nb_iris_model AS model DIMENSION</b>
+    USING
+    IDColumn ('id')
+    NumericInputs ('[1:4]')
+    <b>Responses ('virginica', 'setosa', 'versicolor')</b>
+    OutputProb('t')
+    ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_n5j_5mf_wdb"> </a>
+   <h3>Output</h3>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM nb_iris_predict ORDER BY id;</tt>
+   </pre>
+   <p style="line-height: 1em;">The output provides a prediction for each row in the test data set and shows the log likelihood and corresponding probability values that were used to make the predictions for each category.</p>
+   <pre>
+      <tt>
+ id  prediction loglik_virginica    loglik_setosa        loglik_versicolor   prob_virginica         prob_setosa            prob_versicolor        
+ --- ---------- ------------------- -------------------- ------------------- ---------------------- ---------------------- ---------------------- 
+   5 setosa     -60.990734253263504   0.9404245089472999  -38.23198294967012 1.2695198379533435E-27                    1.0   9.71940317924901E-18
+  10 setosa      -61.58619821439369 -0.17304369612032777  -37.66608359194052  2.131110046508006E-27                    1.0  5.211703059012073E-17
+  15 setosa      -64.71695683575356    -3.55476298603102 -42.613273091194195  2.739029501478155E-27                    1.0 1.0891923690024204E-17
+  20 setosa      -57.79928557069812   0.5317966964588929 -35.761305765776314 4.6465738923573095E-26     0.9999999999999998 1.7302380940689745E-16
+  25 setosa      -55.09391552619634  -3.2370318008146173 -32.117985910900344 3.0119069413102237E-23     0.9999999999997136 2.8652399499869745E-13
+  30 setosa     -58.067307546812884  0.10961171820769827  -34.92859901787489   5.42106967410162E-26     0.9999999999999993  6.068738461889238E-16
+  35 setosa     -58.198028158940886   0.6602027864226648 -34.933599515507424  2.742805968486149E-26     0.9999999999999997   3.48183406795067E-16
+  40 setosa      -58.35388608250933   0.9768407808212478 -35.442558011140925 1.7099866346922702E-26     0.9999999999999999 1.5249516367387455E-16
+  45 setosa      -50.38476101165091   -4.369215787004387  -29.05374789421166 1.0368182360203043E-20      0.999999999980961  1.903899051337528E-11
+  50 setosa     -59.474535549159874   1.0025797130664609 -36.502602214464886   5.43403661228925E-27                    1.0  5.148805022922067E-17
+  55 versicolor  -5.221080105821829   -270.4654904532394 -1.7396368596493992    0.02984486347374556                    0.0     0.9701551365262544
+  60 versicolor -11.335646463678362  -174.56549409208046  -2.319252419114942  1.2138837517511092E-4 1.5644258784333062E-75     0.9998786116248249
+  65 versicolor -12.649647748539188  -138.43575851289683  -2.189800136664341  2.8663779342411874E-5  6.747138838325088E-60     0.9999713362206575
+  70 versicolor -15.236844832532645  -152.47257400437167 -2.3538461309784644   2.540877047013271E-6  6.371823697392144E-66     0.9999974591229529
+  75 versicolor  -8.346325661919643  -214.38367320704464 -1.1472748376909605   7.467367534737606E-4  2.467654883660264E-93     0.9992532632465262
+  80 versicolor -18.455946846109452  -109.90097602090296  -3.727429862843837   4.013157212723945E-7  7.752015013752797E-47     0.9999995986842788
+  85 versicolor  -7.002831886241749  -249.65653395348528 -2.0045561157689042   0.006704323455297395                    0.0     0.9932956765447026
+  90 versicolor -12.027992226495456  -177.47037184770375 -1.7453975071096566   3.422244158442146E-5  4.826123690600991E-77     0.9999657775584156
+  95 versicolor -10.180243946029357  -198.03717180240537 -1.1056729705329262  1.1452865426266493E-4  2.976370575042397E-86     0.9998854713457372
+ 100 versicolor -10.131539436020182  -187.29500562368133 -1.0288528197041062   1.113538068919299E-4 1.2752323133135041E-81     0.9998886461931081
+ 105 virginica  -1.5832164154434905   -540.5635710813433  -14.85964106733729     0.9999982855639519                    0.0   1.714436048134742E-6
+ 110 virginica   -6.113020624561468   -654.8021108771111  -28.83851492549933      0.999999999864966                    0.0  1.350340292044474E-10
+ 115 virginica  -3.6463518709972518  -456.64764580224687 -15.329878398979325     0.9999915684923585                    0.0   8.431507641564082E-6
+ 120 versicolor  -7.736150994583292  -322.90906957999925   -3.53629441822891   0.014776119478681243                    0.0     0.9852238805213187
+ 125 virginica  -1.8762709809140221   -509.8171593744312 -13.751542793349264     0.9999930396359074                    0.0   6.960364092651829E-6
+ 130 virginica   -3.369081146829314   -469.8029906143188  -9.138327814224688      0.996887608609285                    0.0   0.003112391390714933
+ 135 versicolor  -5.814829599870933  -403.67826879918823  -4.516448942741908    0.21443767585554682                    0.0     0.7855623241444533
+ 140 virginica  -1.4843093764923676  -463.61106264747457 -12.023861145012699     0.9999735321094436                    0.0  2.6467890556455832E-5
+ 145 virginica   -3.822666544684785   -576.3955856381103  -22.69421795258488     0.9999999936292677                    0.0   6.370732293282236E-9
+ 150 virginica  -2.5700464022369367  -366.50619806275694  -4.848872882106539      0.907108209897753                    0.0    0.09289179010224705</tt>
+   </pre>
+   <a name="section_qfn_wmf_wdb"> </a>
+   <h3>Prediction Accuracy</h3>
+   <p style="line-height: 1em;">The following SQL code calculates and displays the prediction accuracy.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE nb_predict_accuracy;</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE nb_predict_accuracy AS (
+  SELECT nb_iris_input_test.id, species, prediction
+  FROM nb_iris_predict, nb_iris_input_test
+  WHERE nb_iris_input_test.id = nb_iris_predict.id
+) WITH DATA;</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT (
+ SELECT count(id) FROM nb_predict_accuracy
+  WHERE prediction = species) / (1.00 * ( 
+        SELECT count(id) FROM nb_predict_accuracy) )
+ AS prediction_accuracy ;</tt>
+   </pre>
+   <pre>
+      <tt>
+ prediction_accuracy 
+ ------------------- 
+                0.93</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

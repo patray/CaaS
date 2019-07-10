@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="copyright" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.rights.owner" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="TextClassifier" />
+<meta name="abstract" content="This Machine Learning Engine function classifies input text, using a model output by TextClassifierTrainer." />
+<meta name="description" content="This Machine Learning Engine function classifies input text, using a model output by TextClassifierTrainer." />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="mdp1507235149305" />
+<meta name="DC.Language" content="en-us" />
+
+<link rel="stylesheet" type="text/css" href="css/normal_styles.css" />
+<title>TextClassifier</title>
+</head>
+<body>
+<div class="nested0" aria-labelledby="ariaid-title1" topicindex="1" topicid="mdp1507235149305" id="mdp1507235149305">
+	<h1 class="title topictitle1" id="ariaid-title1">TextClassifier</h1>
+
+	<div class="body conbody">
+		<p class="p">The TextClassifier function classifies input text, using a model output by the function <a class="xref" href="qqb1558542100825.html#rop1507219165371" title="This Machine Learning Engine function trains a machine-learning model for text classification, to input to TextClassifier.">TextClassifierTrainer</a>.</p>
+<div class="note note" id="mdp1507235149305__note_N10049_N10010_N10001"><span class="notetitle">Note</span><div class="notebody">TextClassifier uses files that are preinstalled on <span class="keyword">ML Engine</span>. For details, see <a class="xref" href="tzu1557778477026.html" title="See a table of preinstalled files that Machine Learning Engine analytic functions use.">Preinstalled Files That Functions Use</a>.</div></div>
+
+	</div>
+
+<div class="topic reference nested1" aria-labelledby="ariaid-title2" topicindex="2" topicid="srb1507235254090" xml:lang="en-us" lang="en-us" id="srb1507235254090"><h2 class="title topictitle2" id="ariaid-title2">TextClassifier Syntax</h2>
+<div class="body refbody"><div class="section" id="srb1507235254090__section_N1000E_N1000C_N10001"><h3 class="title sectiontitle">Version 1.4</h3><pre class="pre codeblock"><code>SELECT * FROM TextClassifier (
+  <span class="ph">ON { <var class="keyword varname">table</var> | <var class="keyword varname">view</var> | (<var class="keyword varname">query</var>) }</span>
+  USING
+  TextColumn ('<var class="keyword varname">text_column</var>')
+  InputModelFile ('<var class="keyword varname">input_model_file</var>')
+  <code class="ph codeph">[ Accumulate ({ '<var class="keyword varname">accumulate_column</var>' | <var class="keyword varname">accumulate_column_range</var> }[,...]) ]</code>
+) AS <var class="keyword varname">alias</var>;</code></pre></div>
+</div>
+<div class="related-links">
+<div class="linklistheader">Related Information</div>
+<ul class="linklist linklist relinfo">
+<div class="linklistmember"><a class="link" href="ndv1557782188375.html" title="See the syntax details for Machine Learning Engine analytic functions with syntax elements that specify ( {'column' | column_range }[,...] ).">Column Specification Syntax Elements</a></div></ul>
+</div></div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title3" topicindex="3" topicid="tfh1507235310475" xml:lang="en-us" lang="en-us" id="tfh1507235310475">
+	<h2 class="title topictitle2" id="ariaid-title3">TextClassifier Syntax Elements</h2>
+
+	<div class="body refbody">
+		<div class="section" id="tfh1507235310475__section_N10011_N1000E_N10001"><dl class="dl parml"><dt class="dt pt dlterm">TextColumn</dt>
+<dd class="dd pd">Specify the column of the input table that contains the text to use for predicting classification.</dd>
+<dt class="dt pt dlterm">InputModelFile</dt>
+<dd class="dd pd">Specify the model created by TextClassifierTrainer, which is installed on <span class="keyword">ML Engine</span> when it is created.</dd>
+<dt class="dt pt dlterm">Accumulate</dt>
+<dd class="dd pd">[Optional] Specify the names of the input columns to copy to the output table.</dd>
+</dl>
+</div>
+
+	</div>
+
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title4" topicindex="4" topicid="apg1507235387800" xml:lang="en-us" lang="en-us" id="apg1507235387800"><h2 class="title topictitle2" id="ariaid-title4">TextClassifier Input</h2>
+<div class="body refbody"><div class="section" id="apg1507235387800__section_jpz_3zc_ycb"><h3 class="title sectiontitle">Input Table Schema</h3>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="apg1507235387800__table_N1000E_N1000C_N10001" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:28.57142857142857%" /><col style="width:14.285714285714285%" /><col style="width:57.14285714285714%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry nocellnorowborder" style="vertical-align:top;" id="d409750e187">Column</th>
+<th class="entry nocellnorowborder" style="vertical-align:top;" id="d409750e189">Data Type</th>
+<th class="entry cell-norowborder" style="vertical-align:top;" id="d409750e191">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d409750e187 "><var class="keyword varname">text_column</var></td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d409750e189 ">VARCHAR</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d409750e191 ">Text to classify.</td>
+</tr>
+<tr class="row"><td class="entry row-nocellborder" style="vertical-align:top;" headers="d409750e187 "><var class="keyword varname">accumulate_column</var></td>
+<td class="entry row-nocellborder" style="vertical-align:top;" headers="d409750e189 ">Any</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d409750e191 ">[Column appears once for each specified <var class="keyword varname">accumulate_column</var>.] <span class="ph">Column to copy to output table.</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title5" topicindex="5" topicid="bld1507235501974" xml:lang="en-us" lang="en-us" id="bld1507235501974"><h2 class="title topictitle2" id="ariaid-title5">TextClassifier Output</h2>
+<div class="body refbody"><div class="section" id="bld1507235501974__section_m2b_hzc_ycb"><h3 class="title sectiontitle">Output Table Schema</h3>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="bld1507235501974__table_N1000E_N1000C_N10001" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:20%" /><col style="width:13.333333333333334%" /><col style="width:66.66666666666666%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry nocellnorowborder" style="vertical-align:top;" id="d409750e234">Column</th>
+<th class="entry nocellnorowborder" style="vertical-align:top;" id="d409750e236">Data Type</th>
+<th class="entry cell-norowborder" style="vertical-align:top;" id="d409750e238">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d409750e234 ">out_category</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d409750e236 ">VARCHAR</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d409750e238 ">Predicted category of text. If text is empty or contains no model features, this value is NULL.</td>
+</tr>
+<tr class="row"><td class="entry row-nocellborder" style="vertical-align:top;" headers="d409750e234 "><var class="keyword varname">accumulate_column</var></td>
+<td class="entry row-nocellborder" style="vertical-align:top;" headers="d409750e236 "><span class="ph">Same as in Input table</span></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d409750e238 ">[Column appears once for each specified <var class="keyword varname">accumulate_column</var>.] <span class="ph">Column copied from input table.</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title6" topicindex="6" topicid="nid1510348931679" xml:lang="en-us" lang="en-us" id="nid1510348931679"><h2 class="title topictitle2" id="ariaid-title6">TextClassifier Example</h2>
+<div class="body refbody"><div class="section" id="nid1510348931679__section_ahj_xsl_pdb"><h3 class="title sectiontitle">Input</h3><ul class="ul" id="nid1510348931679__ul_dtd_ctl_pdb"><li class="li">Input table: textclassifier_input</li>
+<li class="li">InputModelFile: knn.bin, output by <a class="xref" href="qqb1558542100825.html#bvk1507219920237" title="">TextClassifierTrainer Example</a></li>
+</ul>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="nid1510348931679__table_qkd_2tl_pdb" class="table" frame="border" border="1" rules="all"><div class="caption"><span class="tablecap">textclassifier_input</span></div><colgroup><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d409750e297">id</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d409750e299">content</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d409750e301">category</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d409750e297 ">16</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d409750e299 ">At the beginning of 2004, Federer had a world ranking of No. 2, and that same year, he won the Australian Open, the U.S. Open, the ATP Masters and retained the Wimbledon singles title.</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d409750e301 ">sports</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d409750e297 ">17</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d409750e299 ">Federer held on to his No. 1 ranking from 2004 into 2008. In 2006 and 2007, he won the singles championships at the Australian Open, Wimbledon and the U.S. Open.</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d409750e301 ">sports</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d409750e297 ">18</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d409750e299 ">A paragon of graceful athleticism, Federer was named the Laureus World Sportsman of the Year from 2005-08.</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d409750e301 ">sports</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d409750e297 ">19</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d409750e299 ">Cyclone, tropical cyclone, hurricane, and typhoon are different names for the same phenomenon, which is a cyclonic storm system that forms over the oceans.</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d409750e301 ">natural disaster</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d409750e297 ">20</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d409750e299 ">Drought is the unusual dryness of soil, resulting in crop failure and shortage of water and for other uses which is caused by significant low rainfall than average over a prolonged period.</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d409750e301 ">natural disaster</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d409750e297 ">21</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d409750e299 ">A tornado is a violent, dangerous, rotating column of air that is in contact with both the surface of the earth and a cumulonimbus cloud or, in rare cases, the base of a cumulus cloud.</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d409750e301 ">natural disaster</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="nid1510348931679__section_vrv_xsl_pdb"><h3 class="title sectiontitle">SQL Call</h3><pre class="pre codeblock"><code>SELECT * FROM TextClassifier (
+  ON textclassifier_input
+  USING
+  TextColumn ('content')
+  InputModelFile ('knn.bin')
+  Accumulate ('id', 'category')
+) AS dt ORDER BY id;</code></pre></div>
+<div class="section" id="nid1510348931679__section_qlf_ysl_pdb"><h3 class="title sectiontitle">Output</h3><pre class="pre screen"> id category         out_category     
+ -- ---------------- ---------------- 
+ 16 sports           sports          
+ 17 sports           sports          
+ 18 sports           natural disaster
+ 19 natural disaster natural disaster
+ 20 natural disaster natural disaster
+ 21 natural disaster natural disaster</pre>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="nid1510348931679__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

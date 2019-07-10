@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="xcy1506632882935"> </a>
+	  <h1>IDWT</h1>
+
+	  <p style="line-height: 1em;">The IDWT function is the inverse of DWT; that is, IDWT applies inverse wavelet transforms on multiple sequences simultaneously. IDWT takes as input the output table and meta table output by DWT and outputs the sequences in time domain. (Because the IDWT output is comparable to the DWT input, the inverse transformation is also called the reconstruction.)</p>
+   <a name="fig_xjp_j3b_mw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAfkAAACfCAIAAAB1DjdAAAAACXBIWXMAAAsSAAALEgHS3X78AAARc0lEQVR42u3df1hU1b7H8W9qWZBWjwrXIBUcQOeCJqRXRTQwYYTByTwg+HjNn5wIj0qYaWr+CKJUFMc83Az15q00O0dFRhr8gfmrvBRHES4KIVxMNEY8JjqSWXb/WD0TVxEpRXF8v575Y2bvvfZaLLaf+c7aoz7ww+Ufq8+eF9xVLh3bMwkAmk6rq1ev1v5wmYkAADvWgikAALIeAEDWAwDIegAAWQ8AIOsBAGQ9AICsBwCQ9QBA1gMAyHoAAFkPACDrAQBkPQCArAcAkPUAALIeAMh6AABZDwAg6wEA91PWe7i72h5husErjMusVutNm5gyMxpz8uSkhXXPb3sUFRXWe7wpM8PD3fVWegSAe0urO9bTlGkJ3j49RMR68WLaSmPxsaPvLF7m6Oh462c2DH+hb39/ESksOGJMTVm1+gO1vXNnN37BACB3cg3Hzc09MHBwYOBgfbjhr++lZ5uzTKataldRUeHrM6d7uLtOfjlGVdaq7o6fGrdmzfv1HlCXVuutzuzm5i4i6nlg4GBHR0er1brCuCxMN9jD3TU5aaHFUlW3ug/TDQ7TDa63li8qKpz8coxqddOPIABA1tejc2e3iMio/EN5ImKxVBn0Oo2nV4bJrBsaFj817qvcgxkms4jMmjNPrx9W7wGN7MiYmnL6VOXipcszTOYLF2oWzp9r2/XFgX2Lly6PjZsSPzVu9+5d1wS9Qa8LGBSoWiW9OY8LBQBZ/0doPL0+3bhBRKqrz0yZljB+/CSt1lsfbhCRqqoqrdZbRJw6ODk5Odd7QCN7ebRNm9Fjxmq13lqtd89eftnmLNuuP8fGqROOnxCzI/uzuq127dwRERk1cmS0Vus9eszYTzduqKgo51oBcO9qdddHoNV6V1VVrTAuO32qMv/woXoPEJEGDmjA+AkxJtPWjM2bKitP1g16qbOa79OjZ/zUuLfeXmLbZc4y6UL1dW/tlpWVNd3q/8mTJwrzv7azC+vYseKZM2fwBwy437O+tKQ4IjJKRNasef/vGzeMiIzq7x8wesxYg153zZEVFeUGvS7ixgc0YM3qVeYs04jIqL79/X2f6Z2cuEBt9/T0sh1jvXSp7ksRKSkpLikpNqam/HbMxYtNNxWurp2eDehnZxfWli18owm477O+oqL8040bli1fKSLJiQsSkxePHBktIvXeBS04ckREVN39e2+TGlNTbCe3WCx109xiqXJychaRstJvBgQMqtsqRBfq+0zv8eMnqZemzAyfHj24VgCQ9TdXXl6mboGq71yG6EIDg55TwZp/KM/Hx8d68eLmTX8TEcsZi8r08vIyi6XK2dlZBa6zs/POHdttBzTm+5q2k5cdP75ubbp6m1G7UpcuHj1mbNnx42tWr1K3gm10Q8PSVhrd3NydnZ137dxhzjKtXfcx1wqAe9eduzdrTE2JmfBizIQX01YaR0RG2b5c/+prs0TEoNdt3vS3ISFDZ82Zl5y4oLrakpi82Jiasnt3Tu8+fWfNmZe20jj/jdk+PXraDmhMp7aTFxzJn78wydPTa2vGFvUeoPH0Muh15s+2rVr9gbolYKMPN8TGTfn7p58Y9LrTpyr/+l66+gQAAPeoBy7V/lB5upqJuLs0bi529hNt2ZLx/PMGfrPAfVfXAwDIegAAWQ8AIOsBAGQ9AJD1AACyHgBA1gMAyHoAAFkPACDrAQBkPQCArAcAsh64bY4dK96//4CIVFdX879TAc1EK6YAt1enTk8tN64QkS0ZW583DGNCAOp62CEHBwc/3161tbUiMmCAPxMCkPWwT+p/KRng3799+/bMBkDWwz61b9++m5fXgAEDmAqgmWC9Ho3ys+V/frlc0/jjw599WuP4z5++/ZKpa8JKre1TLR5zbc4jPFf7M78msh73kks5C3769mDjj39S5AKz1sQe7h//iH98cx7h16cu82tqLpUBUwAA9l/Xt37oQZeO3EADALvO+hYtWjzycGsmAgDsGGs4AEDWAwDIegAAWQ8AIOsBAGQ9AICsBwCQ9QAAsh4AyHoAAFkPACDrAQBkPQCArAcAkPUAALIeAEDWAwBZDwDNU8Ee03uvTwrWOAZrHN97fVLBHlPDx+duWx+scfwDHdXb8MO3p6uur3lUHs27/gzBGsfcbetv13j+sFZcNADuLZvfXZCWumjMxNjE5ekiUlKQlzBhZOy0GcMnz7szAwg0RPfs96yIlBbkpaUuSln9idreobMndT3QtKLNXaLNXSqvdLhme+WVDmrXrZwEzaqiT0tdlLg8ffTMJX3CovuERY+euSRxeXpa6iJV3deto1X5nLtt/ZypE9WumjOVwRrHPRtXqY8FH749veZM5fUFeL0NbWNw6e7nM0jvM0jv4uYpIuq5zyD9mYoSddolcRF1a/nK8pLru/tt79E8W6ubfkAh64Ebys7Z10QH487L//Lz4JDQPmHRdTf2CYsODgnN//Lzept06zMwYfabIrI2c2/bDi4ikvR6fC//oLWZe60151fNn3ajvq5v2ICaM5Xjwgd28ei+NnPvwNAX5kydWPr1r+NJS110o+7OnigeFz7Q6UnXtZl7ew8akjBhZL0LQWQ9UL/3T/RSRfo/ajqqLXmXPKLNXWZ87SMiu89ro81dXtrnJSLFlzup7dHmLirop+9yLL7ciTn8A4zGd7dv33Hp0qWm62JdelrX7t7Xb+/a3Xtdelq9Tdp2cHnCqaOqx9WW2Gkz+oRFu3T3+9NL07dnZ9lC+aYNG3Ch+rvYaTNCxr3i0t1PvRX9s+r0Tbvbu3XDiMhRwyfPc+nuNygyZkTkqNxdTVLak/Www/p9/XdPv/bu1uycfY85tn7xnW1qo8fDp7Jz9n3+j5Kaq47f1T6UnbNvY+bOmquOJRcfz87Z5+HUKkj7xK9FouaJjg+eZT7/gODgIR+v3/By3F/S01cfO1bcbMep1l5EpF0nr7qhfEvn7O6n8fHb/O6C916fNDnUt5Hd7crKcHrStfJonno4Pem6KyujKX5k7s3CDm09/L2I7Jgf5OdQPLJHyIikbBFp28IaGf7cxsydp6/4l56VkKCA7Jx9p6+0Kz3XUkR821/0c/gmJyggO2dfZOeTbVtYm/+Pua3op1ZnMprVkK5cuaKe7D/whYh0Doy+7V2MmRh7/Gjh9duPHy0cMzH2bpYaa5dmfvpheMToXv5B+n9/aVz4wMa0KikpLilZlJa6qKmHR9bD3lRe6ZCds0+j0fg5fCMifm0qbLv8OjtsFDn1w6NF334fpH0iO0dKLj5efPqSqvrvuZ80TNvqEX9DsxrSxx+vb9euXUjwkAED/B0cHHYcv/2LOT37PbsufeTAbevrLtnnblu/PTvL9n2YWuuFXy+G8pJ6T3LO8mtlrRbHXdw9G9mwASlJc2e/tWxQZIyI/HjpQsPdVZb9ev7gkFCfZ/qFjHvFdoBtF1kPNKRNyxvmi2/7iyJy+Ezr7Jzs6QODQoICSs+13Ji5c2JkaNsWBUzdrfP19R01KrpJu/AZpI+dNmPO1IljCvLUFx/zv/x8XXpa7LQZPoP0IjIictRXe3ZofPwqy0quqZcrj+aplfeUpLlPOHV0cfc0/dd/jIgcpTY2pmEDgkNCjx3+SuPjV2u9sGvTRyriVehf350t0AeGvrBu5WK1t7KsZN3KxeERo5ti3livh71RazWlpaV5lzxEJO9CZ9suVbyvzykSkX958HvtU4/nlp4TkV6uLZm326JbN6870MvwyfNSVn9irTmfMGFkwoSR1przKas/sX25Pjp+fpvHHh8XPvDQgZzZby1TG7v6+AaHhCYnTFLhO2Zi7N6sTePCBzq2fWzcnKWNb9iAca8lisi48IG7Nn3UP8SQMPvNlKS5F6pPiUjC7Dev707pExY9Ju5VtXdv1qaIsS/Zavzb64FffvmFCxQ3dWFD5E/fHmzOI1TfoilI8nV58Ezm2R4vvrNNo9H4du+yMXOniIQEBazX/a+IzPjaJ31jlkajyY25vP67p+OWZorIl2/6e7U+ISJ9VrUuLS2dGzNsgntJ81+yf7h//CP+8c15hE2xhnPrgjWOicvTr/nWpt1jDQf2IyQoQMQqIuHtjrwzeVhO0bnz1ssrXwlXt2qVXq4tQ4ICtE89LnLYs601JChARDo+eEbtjR/Wfevhjrml50Kfate2tZUphd2groed1PX3Iep66nrqegCo3/bS+/ETG/dmAYCsBwCQ9QAAsh4AQNYDAMh6AABZDwAg6wEAZD0AkPUAALIeAEDWAwDIegAAWQ8AIOsBAGQ9AICsB4D7Q6vLP16pPnueibi7XDq2ZxIANGHWX716tfaHy0wEANhz1jMFaAyHoHm/XK5p/PEbdh4ZNrCHw0PMXBNq0fYpJgFkPW6nlk7/+ruOP/DVR04u7sHBQ5i6+9mQrg5MQnOpDJgC3Hb79x+ora3N3r6DqQDIethz1ovI2bNnjx0rZjaA5oA1HNxm1dXVFSdO+PbqJSL79+/v1s2LOQHIetihlCWLtm/f8fzzhhMnTjAbAFkPO9S+/W9/V6BTp05MCNAcsF4PAGQ9AICsBwCQ9QAAsh4AQNYDAMh6AABZDwAg6wGArAcAkPWNYMrM8HB3TU5aWHdjRUW5h7urh7trAw093F1NmRmN6SI5aaE62zWPoqLC33VyNVSuCQD25w79ezhrVq+aMi3B0dFRvTx48OBtPLlh+At9+/uLSGHBEWNqyqrVH6jtnTu78QsGALljazienl65ub/l+749uz09f/unbouKCl+fOd3D3XXyyzG7d+9SdbeIxE+NW7Pm/WsOuL4e12q9AwMHBwYOdnNzFxH1PDBwsKOjo9VqXWFcFqYbrD5bWCxVtlbl5WXqnNdsv9GQAICsvwldqP7gFwfU84qK8mxzli5Ub3tp0Os6PumSYTIHDAqMmfBiUVFhhsksIrPmzNPrh1ksVQa9TuPplWEy64aGxU+N+yq3sR8LjKkpp09VLl66PMNkvnChZuH8uXV39fcPuH77jYbEtQLg3nWH1nD69u03KupPahnn4MGDEZFRqgYXka0ZWyIio/4yJV5V6PmH8nbt3KFeOnVwcnJyLioqnDItYfz4SeqA+KlxVVVVjez30TZtDMNf0Gq9RaRnL785s1617ZoyLUEfbhCRP8fGPRcYUPf9o94hqZMAAFl/Q7379FXLOIGBg/ft2a0bGmbbZc4y6UL1tsK545Mu5iyTyllFhewK47LTpyrzDx/6Xf2OnxBjMm3N2LypsvJktjmr7i7bm41a1q/7/nHTIQEAWV8/tYzj7Oycbc56Y/6buf/9ax1dUlJcUlJsTE25UUO1ohIRGdXfP2D0mLEGva7xna5ZvcqcZRoRGdW3v7/vM72TExc0ptVNhwQAZH391DLOo23aRERGOTk527aH6EJ9n+mtlmhEpKiosOz48boNC44cEZG33l4iIlar9Xd1akxNSUxePHJktIhYLJa6uyxnLLYeRcS9a1dbvzcd0u118uSJwvyvuRYB2EPWq2UcY2rKsuUr/1+9PzQsbaXRqYOTStu0lcYRkVFqV3l5mcVS5ezsLCKmzAxnZ+edO7armLZarbZvcDYgRBeafyjPx8en7PjxdWvT1acEtWiTnLhAdfrhuv+MiIzSar1tgd7AkJqCq2unZwP6cS0CaDp39O/NqsTs8299627Uhxti46aYP9tm0OvMn20bM26iKqgTkxcbU1N2787p3afvrDnz0lYa578x26dHz1lz5iUnLqiutjSmx1dfmyUiBr2u4Ej+/IVJnp5eWzO2qF2z5sxTnbZp03b23AWNGRIA3KMeuFT7Q+Xpaibi7tK4uTAJAOykrgcAkPUAALIeAEDWAwDIegAg6wEAZD0AgKwHAJD1AACyHgBA1gMAyHoAAFkPAGQ9AICsBwCQ9QAAsh4AQNYDAMh6AABZDwAg6wGArAcAkPUAALIeANCMPfDzzz9f/vEKE3F3PfJwayYBQNP5P3rn/ZiOGSnNAAAAAElFTkSuQmCC"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <p style="line-height: 1em;">This is a typical IDWT use case:</p>
+   <ol>
+      <li>Apply DWT to sequences to create their coefficients and corresponding metadata.</li>
+      <li>Filter the coefficients by methods appropriate for the objects (for example, minimum threshold or top <i>n</i> coefficients).</li>
+      <li>Apply IDWT to the filtered coefficients to reconstruct the sequences.</li>
+      <li>Compare the reconstructed sequences to their original counterparts.</li>
+   </ol>
+
+   <a name="cxy1506632938883"> </a>
+   <h2>IDWT Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.6</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM IDWT (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS MetaTable
+  OUT TABLE OutputTable (<i>output_table</i>)
+  USING
+  TargetColumns ('<i>target_column</i>' [,...])
+  SortColumn ('<i>sort_column</i>')
+  [ PartitionColumns ('<i>partition_column</i>' [,...]) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="ouc1506633010323"> </a>
+	  <h2>IDWT Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputTable</dt>
+      <dd>Specify the name for the table that the function creates to store the reconstructed result. This table must not exist.</dd>
+      <dt>TargetColumns</dt>
+      <dd>Specify the names of the InputTable columns that contain the data to transform. These columns must contain numeric values between -1e308 and 1e308. The function treats NULL as 0.</dd>
+      <dt>SortColumn</dt>
+      <dd>Specify the name of the InputTable column that represents the order of coefficients in each sequence (the waveletid column in the DWT output table). The column must contain a sequence of integer values that start from 1 for each sequence. If a value is missing from the sequence, the function treats the corresponding data column as 0.</dd>
+      <dt>PartitionColumns</dt>
+      <dd>[Optional] Specify the names of the InputTable partition columns, which identify the sequences. Rows with the same partition column values belong to the same sequence. If you specify multiple partition columns, the function treats the first one as the distribute key of the OutputTable and MetaTable.<p>
+            <b>Note:</b>  The IDWT input tables are the DWT output tables. If you specify this syntax element for DWT, you must also specify it for IDWT; otherwise, the results might not make sense.</p>
+      </dd>
+      <dd>Default behavior: All rows belong to one sequence, and the function creates a distribute key column named dwt_id_<i>random_name</i> in both the OutputTable and MetaTable. In both tables, every cell of dwt_id_<i>random_name</i> has the value 1.</dd>
+   </div>
+
+
+	
+   <a name="znn1506633082308"> </a>
+   <h2>IDWT Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_gn5_dht_wcb"> </a>
+   <table class="introtable">
+      <a name="table_gn5_dht_wcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Has same schema as DWT Output OutputTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">MetaTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Has same schema as DWT Output MetaInformationTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="vih1506633152472"> </a>
+   <h2>IDWT Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Message Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">messages</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Reports whether function succeeded.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_enb_yht_wcb"> </a>
+   <h3>OutputTable Schema</h3>
+   <p style="line-height: 1em;">The table has reconstructed sequences.</p>
+   <a name="table_N10049_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10049_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>partition_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>partition_column</i>.] Identifier of sequence to which data belongs. Rows with same partition column values belong to same sequence.<p style="line-height: 1em; margin: 0px;">
+                  <br/>If InputTable has multiple partition columns, first one is distribution key in both InputTable and OutputTable.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>If InputTable has only one partition column, OutputTable has as its distribution key a function-created column named dwt_id_<i>random_name</i>. Every cell of dwt_id_<i>random_name</i> has the value 1.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">indexid</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Index of each reconstructed sequence (starting from 1 for each sequence).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, SMALLINT, BIGINT, DOUBLE PRECISION, or NUMERIC</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each <i>target_column</i>.] Reconstructed sequence.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="mmq1506633228426"> </a>
+   <h2>IDWT Example</h2>
+   <a name="section_N10019_N10016_N10001"> </a>
+   <p style="line-height: 1em;">This example reconstructs the DWT Example input.</p>
+
+   <a name="section_yjl_h5y_m2b"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">Input tables are DWT Example output:</p>
+   <ul>
+      <li>InputTable: dwt_coef_table</li>
+      <li>MetaTable: dwt_meta_table</li>
+   </ul>
+
+   <a name="section_rft_h5y_m2b"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE climate_reconstruct;
+
+SELECT * FROM IDWT (
+  ON dwt_coef_table AS InputTable
+  ON dwt_meta_table AS MetaTable
+  OUT TABLE OutputTable (climate_reconstruct)
+  USING
+  TargetColumns ('temp_f', 'pressure_mbar', 'dewpoint_f')
+  SortColumn ('waveletid')
+  PartitionColumns ('city')
+) AS dt;</tt>
+   </pre>
+   <a name="section_drf_35y_m2b"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ messages                    
+ --------------------------- 
+ IDwt finished successfully!</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM climate_reconstruct ORDER BY city, indexid;</tt>
+   </pre>
+   <p style="line-height: 1em;">Except for its name, climate_reconstruct, the output table is the same as the DWT Example input table, ville_climatedata. The original values for the temperature, pressure, and the dew point are reconstructed.</p>
+   <pre>
+      <tt>
+ city        indexid temp_f             pressure_mbar      dewpoint_f         
+ ----------- ------- ------------------ ------------------ ------------------ 
+ asheville         1  34.90000000000003 1020.5000000000007 28.900000000000016
+ asheville         2  34.40000000000003  1020.200000000001 28.700000000000006
+ asheville         3  33.90000000000002 1020.0000000000008 28.400000000000013
+ asheville         4  33.40000000000002  1020.200000000001  28.30000000000001
+ asheville         5  33.10000000000004 1020.2000000000007 28.000000000000018
+ asheville         6  32.70000000000004 1020.0000000000006  27.90000000000002
+ asheville         7 32.500000000000014 1020.3000000000004 27.700000000000017
+ asheville         8 32.300000000000004 1020.8000000000003  27.60000000000001
+ asheville         9 32.100000000000016 1021.3000000000006 27.400000000000016
+ asheville        10 33.800000000000004 1021.7000000000008 28.200000000000024
+ asheville        11  36.40000000000003 1022.1000000000008  28.90000000000002
+ asheville        12 39.400000000000034 1022.0000000000007 29.300000000000026
+ asheville        13  42.10000000000004 1021.1000000000006 29.200000000000017
+ asheville        14 44.200000000000045 1020.0000000000005 29.100000000000023
+ asheville        15  45.60000000000004 1019.3000000000005 28.900000000000013
+ asheville        16  46.20000000000004 1019.0000000000006  28.50000000000001
+ asheville        17  45.80000000000002 1019.2000000000007 28.500000000000014
+ asheville        18 44.100000000000016 1019.6000000000008 28.600000000000023
+ asheville        19 41.200000000000024 1020.1000000000007 28.500000000000025
+ asheville        20  39.60000000000003 1020.6000000000006 28.800000000000026
+ asheville        21  38.20000000000004 1020.9000000000003  29.00000000000002
+ asheville        22  37.20000000000003 1021.1000000000004  29.00000000000002
+ asheville        23 36.300000000000026 1021.0000000000007 29.000000000000018
+ asheville        24 35.500000000000014 1020.9000000000008  29.00000000000002
+ brownsville       1  35.10000000000003 1020.5000000000005  28.90000000000002
+ brownsville       2  34.60000000000004 1020.2000000000005  28.80000000000002
+ brownsville       3  34.10000000000002 1020.0000000000007 28.500000000000018
+ brownsville       4 33.700000000000024 1020.1000000000005 28.400000000000013
+ brownsville       5  33.30000000000002 1020.2000000000007 28.200000000000017
+ brownsville       6  32.90000000000003 1020.0000000000007  28.10000000000002
+ brownsville       7  32.70000000000003 1020.3000000000006  27.90000000000002
+ brownsville       8  32.50000000000002 1020.8000000000005 27.800000000000022
+ brownsville       9  32.30000000000001 1021.2000000000007 27.700000000000017
+ brownsville      10 34.000000000000014 1021.6000000000007 28.500000000000014
+ brownsville      11  36.70000000000002 1022.0000000000008 29.200000000000017
+ brownsville      12  39.70000000000003 1021.9000000000008 29.600000000000016
+ brownsville      13  42.50000000000003 1021.0000000000007  29.70000000000001
+ brownsville      14 44.500000000000036 1019.9000000000007 29.500000000000007
+ brownsville      15  45.90000000000004 1019.2000000000007 29.200000000000017
+ brownsville      16  46.50000000000004 1019.0000000000002 28.900000000000013
+ brownsville      17  46.00000000000004 1019.2000000000008 28.900000000000013
+ brownsville      18  44.30000000000003 1019.6000000000006 28.900000000000006
+ brownsville      19 41.500000000000036 1020.0000000000007 28.800000000000015
+ brownsville      20  39.80000000000003 1020.5000000000003  29.20000000000001
+ brownsville      21  38.50000000000004 1020.8000000000004  29.30000000000002
+ brownsville      22 37.400000000000034 1020.9000000000005  29.30000000000002
+ brownsville      23  36.50000000000003 1020.9000000000004 29.300000000000022
+ brownsville      24  35.70000000000003 1020.8000000000004 29.200000000000006
+ greenville        1  34.90000000000002 1020.6000000000006  28.80000000000002
+ greenville        2  34.40000000000002 1020.2000000000008  28.70000000000001
+ greenville        3  33.90000000000001 1020.1000000000005 28.400000000000013
+ greenville        4  33.50000000000002 1020.2000000000003  28.30000000000001
+ greenville        5  33.10000000000002 1020.2000000000003 28.000000000000018
+ greenville        6 32.700000000000024 1020.0000000000002  27.90000000000002
+ greenville        7 32.500000000000014 1020.4000000000004 27.700000000000017
+ greenville        8  32.30000000000001 1020.8000000000006 27.600000000000016
+ greenville        9 32.100000000000016 1021.3000000000004 27.500000000000018
+ greenville       10 33.800000000000026 1021.7000000000004 28.300000000000015
+ greenville       11  36.60000000000003 1022.0000000000006 29.100000000000016
+ greenville       12  39.60000000000003 1021.9000000000008 29.500000000000014
+ greenville       13  42.40000000000003 1021.1000000000006  29.50000000000002
+ greenville       14  44.50000000000003 1020.0000000000007  29.40000000000002
+ greenville       15  46.00000000000003 1019.3000000000006 29.100000000000023
+ greenville       16  46.50000000000002 1019.0000000000006  28.80000000000002
+ greenville       17  46.10000000000002 1019.2000000000007  28.80000000000002
+ greenville       18  44.40000000000002 1019.6000000000008 28.700000000000017
+ greenville       19  41.50000000000002 1020.1000000000007 28.700000000000017
+ greenville       20  39.80000000000003 1020.6000000000004 29.100000000000023
+ greenville       21  38.50000000000003 1020.9000000000007 29.200000000000017
+ greenville       22  37.40000000000002 1021.0000000000008 29.200000000000017
+ greenville       23  36.50000000000002 1020.9000000000007  29.20000000000001
+ greenville       24  35.80000000000001 1020.9000000000004  29.10000000000001
+ knoxville         1  34.80000000000002 1020.4000000000004 28.700000000000017
+ knoxville         2  34.20000000000003 1020.0000000000007  28.40000000000002
+ knoxville         3  33.70000000000003 1019.9000000000005  28.10000000000002
+ knoxville         4  33.20000000000003 1020.0000000000008 27.900000000000016
+ knoxville         5  32.80000000000001 1020.0000000000005  27.70000000000002
+ knoxville         6  32.40000000000001 1019.9000000000003  27.50000000000002
+ knoxville         7 32.200000000000024 1020.2000000000005 27.400000000000013
+ knoxville         8  32.00000000000003 1020.6000000000005  27.30000000000001
+ knoxville         9  31.80000000000002 1021.1000000000004 27.200000000000024
+ knoxville        10  33.50000000000002 1021.5000000000003 28.000000000000032
+ knoxville        11 36.300000000000026 1021.9000000000005 28.700000000000017
+ knoxville        12 39.300000000000026 1021.8000000000005 29.000000000000007
+ knoxville        13  42.10000000000002 1021.0000000000005  29.10000000000002
+ knoxville        14  44.10000000000002 1019.9000000000002  28.90000000000002
+ knoxville        15  45.50000000000002 1019.2000000000006 28.600000000000023
+ knoxville        16  46.00000000000003 1018.9000000000005 28.300000000000022
+ knoxville        17  45.60000000000002  1019.200000000001 28.300000000000026
+ knoxville        18  43.90000000000002 1019.6000000000008 28.400000000000023
+ knoxville        19 41.100000000000016 1020.0000000000009 28.300000000000022
+ knoxville        20  39.40000000000002 1020.5000000000006 28.700000000000024
+ knoxville        21  38.20000000000003 1020.8000000000004  28.80000000000002
+ knoxville        22  37.10000000000004 1020.9000000000005 28.800000000000015
+ knoxville        23  36.30000000000002 1020.9000000000003  28.80000000000002
+ knoxville        24  35.50000000000002 1020.8000000000004  28.70000000000001
+ nasheville        1  35.00000000000002 1020.4000000000007  29.00000000000002
+ nasheville        2 34.500000000000014 1020.1000000000007 28.700000000000017
+ nasheville        3 34.000000000000014 1019.9000000000008 28.500000000000018
+ nasheville        4 33.600000000000016 1020.0000000000007  28.30000000000001
+ nasheville        5  33.10000000000001 1020.1000000000003 28.100000000000016
+ nasheville        6               32.8 1019.9000000000001  28.00000000000002
+ nasheville        7 32.500000000000014 1020.2000000000005 27.800000000000022
+ nasheville        8  32.40000000000001 1020.6000000000006 27.700000000000028
+ nasheville        9  32.20000000000002 1021.1000000000004 27.600000000000023
+ nasheville       10  33.80000000000002 1021.5000000000006  28.40000000000002
+ nasheville       11  36.60000000000003 1021.9000000000005 29.000000000000014
+ nasheville       12  39.60000000000004 1021.8000000000005 29.400000000000002
+ nasheville       13 42.300000000000026 1021.0000000000008 29.400000000000016
+ nasheville       14  44.30000000000003 1019.8000000000006  29.20000000000002
+ nasheville       15  45.60000000000003 1019.2000000000005  28.90000000000002
+ nasheville       16  46.20000000000003 1018.9000000000003  28.70000000000002
+ nasheville       17  45.70000000000004 1019.1000000000004 28.600000000000016
+ nasheville       18  44.10000000000003 1019.5000000000007 28.700000000000017
+ nasheville       19  41.30000000000002 1019.9000000000005  28.60000000000002
+ nasheville       20  39.50000000000002 1020.4000000000007 28.900000000000016
+ nasheville       21  38.30000000000002  1020.700000000001 29.000000000000014
+ nasheville       22  37.20000000000003 1020.9000000000011 29.000000000000014
+ nasheville       23  36.40000000000002 1020.8000000000006 29.000000000000014
+ nasheville       24  35.60000000000002 1020.7000000000006  28.90000000000002</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

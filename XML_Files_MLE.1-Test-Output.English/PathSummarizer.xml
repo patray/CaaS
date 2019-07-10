@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="odv1507653146030"> </a>
+	  <h1>PathSummarizer</h1>
+
+	  <p style="line-height: 1em;">The PathSummarizer function takes output of the function PathGenerator and returns, for each prefix in the input table, the parent and children and number of times each of its subsequences was traveled. This output can be input to the function PathStart.</p>
+   <p>
+      <b>Note:</b>  For the definitions of the terms that this section uses, see Path Analysis Functions.</p>
+   <a name="nht1507653179942"> </a>
+   <h2>PathSummarizer Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.11</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM PathSummarizer (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY <i>partition_column</i> [,...]
+  USING
+  [ CountColumn ('<i>count_column</i>') ]
+  Delimiter ('<i>delimiter</i>')
+  SeqColumn ('<i>sequence_column</i>')
+  PartitionNames ('<i>partition_column</i>' [,...])
+  [ HashCode ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  PrefixColumn ('<i>prefix_column</i>')
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="gik1507653227655"> </a>
+	  <h2>PathSummarizer Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>CountColumn</dt>
+      <dd>[Optional] Specify the name of the input table column that contains the number of times a path was traveled.</dd>
+      <dd>Default: 1</dd>
+      <dt>Delimiter</dt>
+      <dd>[Optional] Specify the single-character delimiter that separates symbols in the path string. <p>
+            <b>Note:</b>  
+            <p style="line-height: 1em;">Do not use any of the following characters as <i>delimiter</i> (they cause the function to fail):<ul>
+                  <li>Asterisk (<tt style="font-family: monospace;">*</tt>)</li>
+                  <li>Plus (<tt style="font-family: monospace;">+</tt>)</li>
+                  <li>Left parenthesis (<tt style="font-family: monospace;">(</tt>)</li>
+                  <li>Right parenthesis (<tt style="font-family: monospace;">)</tt>)</li>
+                  <li>Single quotation mark (<tt style="font-family: monospace;">'</tt>)</li>
+                  <li>Escaped single quotation mark (<tt style="font-family: monospace;">\'</tt>)</li>
+                  <li>Backslash (<tt style="font-family: monospace;">\</tt>)</li>
+               </ul>
+            </p>
+         </p>
+      </dd>
+      <dd>Default: ',' (comma)</dd>
+      <dt>SeqColumn</dt>
+      <dd>Specify the name of the input table column that contains the paths.</dd>
+      <dt>PartitionNames</dt>
+      <dd>Specify the names of the columns that the PARTITION BY clause specifies. The function uses these names for output table columns. This syntax element and the PARTITION BY clause must specify the same names in the same order.</dd>
+      <dt>HashCode</dt>
+      <dd>[Optional] Specify whether to include the hash code of the node in the output table.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>PrefixColumn</dt>
+      <dd>Specify the name of the input column that contains the node prefixes.</dd>
+   </div>
+
+
+	
+   <a name="txx1507653270048"> </a>
+   <h2>PathSummarizer Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The input table has the same schema as the PathGenerator Output table.</p>
+
+   <a name="rfc1507653319461"> </a>
+   <h2>PathSummarizer Output</h2>
+   <a name="section_whk_jds_wcb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">node</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CLOB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Path to node, including node itself.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">parent</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CLOB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Parent of node (path traveled to node).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">children</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CLOB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Children of node (paths traveled from node), a list of subsequences with this syntax:<pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+                     <b>[</b>(<i>subsequence</i>)[,...]<b>]</b>
+                  </tt>
+               </pre>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>Outer brackets appear in table.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cnt</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER or BIGINT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count (sum) of values in input table column <i>count_column</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">depth</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER or BIGINT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of steps on path to node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">prefix</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CLOB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Subsequence of node, copied from input table column <i>prefix_column</i>.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="vav1510766820211"> </a>
+   <h2>PathSummarizer Example</h2>
+   <a name="section_s11_xgd_mdb"> </a>
+   <h3>Input</h3>
+   <ul>
+      <li>Output table of PathGenerator Example</li>
+   </ul>
+
+   <a name="section_p4b_ygd_mdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM PathSummarizer (
+  ON PathGenerator (
+    ON clickstream1
+    USING
+    SeqColumn ('path')
+    Delimiter (',')
+  ) PARTITION BY prefix
+  USING
+  SeqColumn ('sequence')
+  PrefixColumn ('prefix')
+  PartitionNames ('prefix')
+  Delimiter(',')
+  CountColumn ('cnt')
+  HashCode ('false')
+) AS dt ORDER BY node, cnt ASC;</tt>
+   </pre>
+   <a name="section_f4m_ygd_mdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ node                parent            children                  cnt depth prefix            
+ ------------------- ----------------- ------------------------- --- ----- ----------------- 
+ ^,a                 ^                 [(^,a,h),(^,a,p)]          11     1 ^,a              
+ ^,a,h               ^,a               [(^,a,h,c),(^,a,h,p)]       5     2 ^,a,h            
+ ^,a,h,c             ^,a,h             [(^,a,h,c,$)]               3     3 ^,a,h,c          
+ ^,a,h,c,$           ^,a,h,c                                       3     4 ^,a,h,c          
+ ^,a,h,p             ^,a,h             [(^,a,h,p,$)]               2     3 ^,a,h,p          
+ ^,a,h,p,$           ^,a,h,p                                       2     4 ^,a,h,p          
+ ^,a,p               ^,a               [(^,a,p,s)]                 6     2 ^,a,p            
+ ^,a,p,s             ^,a,p             [(^,a,p,s,o)]               6     3 ^,a,p,s          
+ ^,a,p,s,o           ^,a,p,s           [(^,a,p,s,o,)]              6     4 ^,a,p,s,o        
+ ^,c                 ^                 [(^,c,s)]                   1     1 ^,c              
+ ^,c,s               ^,c               [(^,c,s,o)]                 1     2 ^,c,s            
+ ^,c,s,o             ^,c,s             [(^,c,s,o,e)]               1     3 ^,c,s,o          
+ ^,c,s,o,e           ^,c,s,o           [(^,c,s,o,e,$)]             1     4 ^,c,s,o,e        
+ ^,c,s,o,e,$         ^,c,s,o,e                                     1     5 ^,c,s,o,e        
+ ^,h                 ^                 [(^,h,a),(^,h,c),(^,h,e)]  20     1 ^,h              
+ ^,h,a               ^,h               [(^,h,a,c),(^,h,a,p)]       6     2 ^,h,a            
+ ^,h,a,c             ^,h,a             [(^,h,a,c,p)]               4     3 ^,h,a,c          
+ ^,h,a,c,p           ^,h,a,c           [(^,h,a,c,p,i)]             4     4 ^,h,a,c,p        
+ ^,h,a,c,p,i         ^,h,a,c,p         [(^,h,a,c,p,i,s)]           4     5 ^,h,a,c,p,i      
+ ^,h,a,c,p,i,s       ^,h,a,c,p,i       [(^,h,a,c,p,i,s,o)]         4     6 ^,h,a,c,p,i,s    
+ ^,h,a,c,p,i,s,o     ^,h,a,c,p,i,s     [(^,h,a,c,p,i,s,o,e)]       4     7 ^,h,a,c,p,i,s,o  
+ ^,h,a,c,p,i,s,o,e   ^,h,a,c,p,i,s,o   [(^,h,a,c,p,i,s,o,e,$)]     4     8 ^,h,a,c,p,i,s,o,e
+ ^,h,a,c,p,i,s,o,e,$ ^,h,a,c,p,i,s,o,e                             4     9 ^,h,a,c,p,i,s,o,e
+ ^,h,a,p             ^,h,a             [(^,h,a,p,i)]               2     3 ^,h,a,p          
+ ^,h,a,p,i           ^,h,a,p           [(^,h,a,p,i,s)]             2     4 ^,h,a,p,i        
+ ^,h,a,p,i,s         ^,h,a,p,i         [(^,h,a,p,i,s,o)]           2     5 ^,h,a,p,i,s      
+ ^,h,a,p,i,s,o       ^,h,a,p,i,s       [(^,h,a,p,i,s,o,$)]         2     6 ^,h,a,p,i,s,o    
+ ^,h,a,p,i,s,o,$     ^,h,a,p,i,s,o                                 2     7 ^,h,a,p,i,s,o    
+ ^,h,c               ^,h               [(^,h,c,h),(^,h,c,p)]      12     2 ^,h,c            
+ ^,h,c,h             ^,h,c             [(^,h,c,h,p)]               7     3 ^,h,c,h          
+ ^,h,c,h,p           ^,h,c,h           [(^,h,c,h,p,$)]             7     4 ^,h,c,h,p        
+ ^,h,c,h,p,$         ^,h,c,h,p                                     7     5 ^,h,c,h,p        
+ ^,h,c,p             ^,h,c             [(^,h,c,p,e)]               5     3 ^,h,c,p          
+ ^,h,c,p,e           ^,h,c,p           [(^,h,c,p,e,$)]             5     4 ^,h,c,p,e        
+ ^,h,c,p,e,$         ^,h,c,p,e                                     5     5 ^,h,c,p,e        
+ ^,h,e               ^,h               [(^,h,e,$)]                 2     2 ^,h,e            
+ ^,h,e,$             ^,h,e                                         2     3 ^,h,e            
+ ^,p                 ^                 [(^,p,c)]                   2     1 ^,p              
+ ^,p,c               ^,p               [(^,p,c,p)]                 2     2 ^,p,c            
+ ^,p,c,p             ^,p,c             [(^,p,c,p,s)]               2     3 ^,p,c,p          
+ ^,p,c,p,s           ^,p,c,p           [(^,p,c,p,s,o)]             2     4 ^,p,c,p,s        
+ ^,p,c,p,s,o         ^,p,c,p,s         [(^,p,c,p,s,o,e)]           2     5 ^,p,c,p,s,o      
+ ^,p,c,p,s,o,e       ^,p,c,p,s,o       [(^,p,c,p,s,o,e,$)]         2     6 ^,p,c,p,s,o,e    
+ ^,p,c,p,s,o,e,$     ^,p,c,p,s,o,e                                 2     7 ^,p,c,p,s,o,e</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="copyright" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.rights.owner" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="AMLGenerator" />
+<meta name="abstract" content="This Teradata Scoring SDK function translates an ML Engine model into an XML-based format accepted by the Teradata Scoring SDK functionality." />
+<meta name="description" content="This Teradata Scoring SDK function translates an ML Engine model into an XML-based format accepted by the Teradata Scoring SDK functionality." />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="xbd1507818506662" />
+<meta name="DC.Language" content="en-us" />
+
+<link rel="stylesheet" type="text/css" href="css/normal_styles.css" />
+<title>AMLGenerator</title>
+</head>
+<body>
+<div class="nested0" aria-labelledby="ariaid-title1" topicindex="1" topicid="xbd1507818506662" id="xbd1507818506662">
+	<h1 class="title topictitle1" id="ariaid-title1">AMLGenerator</h1>
+
+	<div class="body conbody">
+		<p class="p">The AMLGenerator function translates an <span class="keyword">ML Engine</span> model into an XML-based format, which is accepted by the <span class="keyword">Teradata Scoring SDK</span> functionality.</p>
+
+	</div>
+
+<div class="topic reference nested1" aria-labelledby="ariaid-title2" topicindex="2" topicid="ral1507818531172" xml:lang="en-us" lang="en-us" id="ral1507818531172"><h2 class="title topictitle2" id="ariaid-title2">AMLGenerator Syntax</h2>
+<div class="body refbody"><div class="section" id="ral1507818531172__section_N1000E_N1000C_N10001"><h3 class="title sectiontitle">Version 1.8</h3><pre class="pre codeblock"><code>SELECT * from AMLGenerator (
+  [ ON (SELECT 1) AS InputTable PARTITION BY 1 ]
+  <span class="ph">ON { <var class="keyword varname">table</var> | <var class="keyword varname">view</var> | (<var class="keyword varname">query</var>) }</span> AS ModelTable
+  [ <span class="ph">ON { <var class="keyword varname">table</var> | <var class="keyword varname">view</var> | (<var class="keyword varname">query</var>) }</span> AS ModelTable2 ]
+  USING
+  ModelType ('<var class="keyword varname">function_name</var>')
+  [ ModelTableTag ('<var class="keyword varname">model_table_tag</var>') ]
+  [ ModelTable2Tag ('<var class="keyword varname">model_table_2_tag</var>') ]
+  [ InstalledFile ('<var class="keyword varname">installed_file</var>') ]
+  [ InstalledFile2 ('<var class="keyword varname">installed_file_2</var>') ]
+  [ InstalledFileTag ('<var class="keyword varname">installed_file_tag</var>') ]
+  [ InstalledFile2Tag ('<var class="keyword varname">installed_file_2_tag</var>') ]
+  RequestColNames ('<var class="keyword varname">column_name</var>' [,...]) ]
+  RequestColTypes ('<var class="keyword varname">column_type</var>' [,...])
+  [ AMLPrefix ('<var class="keyword varname">aml_model_file</var>') ]
+  [ OverwriteOutput (<span class="keyword">{'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}</span>)]
+  [ RequestArgName1 ('<var class="keyword varname">arg_name</var>') ]
+  [ RequestArgVal1 ('<var class="keyword varname">arg_value</var>') ]
+  ...
+  [ RequestArgName<var class="keyword varname">n</var> ('<var class="keyword varname">arg_name</var>') ]
+  [ RequestArgVal<var class="keyword varname">n</var> ('<var class="keyword varname">arg_value</var>') ]
+) AS <var class="keyword varname">alias</var>;</code></pre><div class="note note" id="ral1507818531172__note_N10082_N10011_N1000E_N10001"><span class="notetitle">Note</span><div class="notebody">If you omit <code class="ph codeph"><span class="ph">ON { <var class="keyword varname">table</var> | <var class="keyword varname">view</var> | (<var class="keyword varname">query</var>) }</span> AS ModelTable</code>, you must include <code class="ph codeph">ON (SELECT 1) AS InputTable PARTITION BY 1</code>.</div></div>
+</div>
+</div>
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title3" topicindex="3" topicid="asu1507818535138" xml:lang="en-us" lang="en-us" id="asu1507818535138">
+	<h2 class="title topictitle2" id="ariaid-title3">AMLGenerator Syntax Elements</h2>
+
+	<div class="body refbody">
+		<div class="section" id="asu1507818535138__section_N10011_N1000E_N10001"><dl class="dl parml"><dt class="dt pt dlterm">ModelType</dt>
+<dd class="dd pd">Specify the function name for which this .aml file is to be used. For predictors, this represents the type of the model trained. For information about model types, see <a class="xref" href="zwf1562075126453.html" title="">Teradata Scoring SDK Functions</a>.</dd>
+<dt class="dt pt dlterm">ModelTable</dt>
+<dd class="dd pd">[Optional] Specify the name of the database table to use to create the .aml file for the input table.</dd>
+<dt class="dt pt dlterm">ModelTable2</dt>
+<dd class="dd pd">[Optional] Use only if the function can use two input tables. The functions that can use two input tables are TextTokenizer, TextTagger, TextParser, and SentimentExtractor. Specify the name of the database table to use to create the .aml file for the second input table.</dd>
+<dt class="dt pt dlterm">ModelTableTag</dt>
+<dd class="dd pd">[Optional] Specify the tag for <var class="keyword varname">model_table</var>, which identifies the role of the table in the <span class="keyword">Teradata Scoring SDK</span> context.</dd>
+<dt class="dt pt dlterm">ModelTable2Tag</dt>
+<dd class="dd pd">[Optional] Use only with ModelTable2. Specify the tag for <var class="keyword varname">model_table_2</var>, which identifies the role of the table in the <span class="keyword">Teradata Scoring SDK</span> context.</dd>
+<dt class="dt pt dlterm">InstalledFile</dt>
+<dd class="dd pd">[Optional] Specify the name of the file, installed on <span class="keyword">ML Engine</span>, to use to create the .aml file.</dd>
+<dt class="dt pt dlterm">InstalledFile2</dt>
+<dd class="dd pd">[Optional] Use only if the function can use two input files. The functions that can use two input files are TextTokenizer, TextTagger, TextParser, and SentimentExtractor. Specify the name of the database file to use to create the .aml file.</dd>
+<dt class="dt pt dlterm">InstalledFileTag</dt>
+<dd class="dd pd">[Optional] Specify the tag for <var class="keyword varname">installed_file</var>, which identifies the role of the file in the <span class="keyword">Teradata Scoring SDK</span> context.</dd>
+<dt class="dt pt dlterm">InstalledFile2Tag</dt>
+<dd class="dd pd">[Optional] Use only with InstalledFile2. Specify the tag for <var class="keyword varname">installed_file_2</var>, which identifies the role of the file in the <span class="keyword">Teradata Scoring SDK</span> context.</dd>
+<dt class="dt pt dlterm">RequestColNames</dt>
+<dd class="dd pd">Specify the column names of the request to be scored. For a predictor, these column names typically match the column names of the training data used to train the model.</dd>
+<dt class="dt pt dlterm">RequestColTypes</dt>
+<dd class="dd pd">Specify the column types of the request to be scored. For a predictor, these column types typically match the columns types of the training data used to train the model. Specify one <var class="keyword varname">column_type</var> for each <var class="keyword varname">column_name</var>.</dd>
+<dt class="dt pt dlterm">AMLPrefix</dt>
+<dd class="dd pd">[Optional] Specify the name for the AML model file that the function outputs. The file suffix is ".aml". For example, if <var class="keyword varname">aml_model_file</var> is 'model', the output file is <span class="ph filepath">model.aml</span>.</dd>
+<dd class="dd pd ddexpand">Default: 'model'</dd>
+<dt class="dt pt dlterm">OverwriteOutput</dt>
+<dd class="dd pd">[Optional] Specifies whether to overwrite the output AML model file if it exists.</dd>
+<dd class="dd pd ddexpand">Default: 'false'</dd>
+<dt class="dt pt dlterm">RequestArgName<var class="keyword varname">n</var></dt>
+<dd class="dd pd">[Optional] Specify a syntax element for <var class="keyword varname">function_name</var>. Typically, this syntax element is the same as it is in the corresponding SQL function. For supported clauses for each function, see <a class="xref" href="zwf1562075126453.html" title="">Teradata Scoring SDK Functions</a>. For syntax element descriptions, see the documentation for the corresponding SQL function.<p class="p">The values of <var class="keyword varname">n</var> must proceed sequentially from 1. For example: RequestArgName1, RequestArgName2, RequestArgName3. The maximum value of <var class="keyword varname">n</var> is 30.</p>
+</dd>
+<dt class="dt pt dlterm">RequestArgVal<var class="keyword varname">n</var></dt>
+<dd class="dd pd">[Optional] Specify the value or values for the syntax element that RequestArgName<var class="keyword varname">n</var> specifies. The valid values are the same as they are for the corresponding syntax element of the SQL function.</dd>
+</dl>
+</div>
+
+	</div>
+
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title4" topicindex="4" topicid="khv1507818543569" xml:lang="en-us" lang="en-us" id="khv1507818543569"><h2 class="title topictitle2" id="ariaid-title4">AMLGenerator Output</h2>
+<div class="body refbody"><div class="section" id="khv1507818543569__section_N10011_N1000E_N10001"><p class="p">The function creates an AML file, installed on <span class="keyword">ML Engine</span>, which conforms to a specific XSD (XML schema definition) format, and displays the statistics of created AML file on the screen.</p>
+<p class="p">To download the AML file from Teradata, use the command <code class="ph codeph">call pm.download_afile (</code><var class="keyword varname">aml_model_file</var><code class="ph codeph">)</code>, where <var class="keyword varname">aml_model_file</var> is specified in the AMLPrefix clause.</p>
+</div>
+<div class="section" id="khv1507818543569__section_rsb_jff_bcb"><h3 class="title sectiontitle">Header</h3><p class="p">The header consists of ModelType, AMLGenerator build version, and Teradata Copyright information.</p>
+</div>
+<div class="section" id="khv1507818543569__section_drm_jff_bcb"><h3 class="title sectiontitle">Request Columns</h3><p class="p">Request columns specify the names and data types of columns expected in the scoring request and are appended in the block columns with <code class="ph codeph">entity = "request"</code>. These are extracted from syntax elements RequestColNames and RequestColTypes. The data type is converted from <span class="keyword">NewSQL Engine</span> SQL type to Scoring data type.</p>
+</div>
+<div class="section" id="khv1507818543569__section_djn_jff_bcb"><h3 class="title sectiontitle">Request Parameters</h3><p class="p">The parameters specified by the user in the clauses RequestArgName and RequestArgVal are appended in the block params. These parameters are not validated by AMLGenerator (parameter parsing takes place inside Scorer) and are appended as specified by the user.</p>
+</div>
+<div class="section" id="khv1507818543569__section_obp_jff_bcb"><h3 class="title sectiontitle">Model Columns</h3><p class="p">Model columns are appended in the block columns with <code class="ph codeph">entity = "model"</code>. They specify the names and data types of columns in Model data. Each block contains ModelTag information, if provided. Each block also contains InstalledFile information, if provided.</p>
+<div class="p">The behavior of Model Columns depends on whether the model is database table or installed file:
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="khv1507818543569__table_csb_cx2_gdb" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:20%" /><col style="width:40%" /><col style="width:40%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d78761e397">Model</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d78761e399">Model Columns and Types</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d78761e401">AML File Model Column Header</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e397 ">Database table</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e399 ">Retrieved from <span class="keyword">NewSQL Engine</span> and converted to Scoring data types.</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e401 ">Database table name is appended in the AML file model column header.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e397 ">Installed file</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e399 ">Model columns are empty.</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e401 ">Installed file name is appended in the AML file model column header.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="section" id="khv1507818543569__section_otp_jff_bcb"><h3 class="title sectiontitle">Model Data</h3><p class="p">Model data contains the data for the model that the ModelTable syntax element specifies and the checksum of the stored data, for data integrity.</p>
+<div class="p">How data is stored depends on whether the data is in a database table or an installed file:
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="khv1507818543569__table_pzc_sx2_gdb" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:20%" /><col style="width:80%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d78761e434">Model</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d78761e436">How Data Is Stored</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e434 ">Database table</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e436 "><ul class="ul" id="khv1507818543569__ul_v3g_dy2_gdb"><li class="li">Time and timestamp SQLdata types are converted to acceptable scoring format.</li>
+<li class="li">Binary data is stored using Base64 encoding.</li>
+<li class="li">Special characters are transformed as follows:
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="khv1507818543569__table_w3g_dy2_gdb" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:50%" /><col style="width:50%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d78761e456">Character</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d78761e458">Transformation</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e456 ">Backslash (\)</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e458 ">\\</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e456 ">Comma (,)</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e458 ">\,</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e456 ">Ampersand (&amp;)</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e458 ">"&amp;"</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e456 ">Less than (&lt;)</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e458 ">"&amp;lt;"</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e456 ">Greater than (&gt;)</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e458 ">"&amp;gt;"</td>
+</tr>
+</tbody>
+</table>
+</div>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e434 ">Installed file</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e436 ">Data is captured in binary format (bytes) and stored using Base64 encoding in AML file. Because of binary encoded format, special character handling is unnecessary.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="note note" id="khv1507818543569__note_N1003E_N1000E_N1000C_N10001"><span class="notetitle">Note</span><div class="notebody">Scorer expects only AML files output by the AMLGenerator function. Third-party generation or manipulation of an AML file can cause scorer failure or incorrect scoring results.</div></div>
+</div>
+</div>
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title5" topicindex="5" topicid="seo1510714607004" xml:lang="en-us" lang="en-us" id="seo1510714607004"><h2 class="title topictitle2" id="ariaid-title5">AMLGenerator Example</h2>
+<div class="body refbody"><div class="section" id="seo1510714607004__section_w3h_zfp_xdb"><h3 class="title sectiontitle">Input</h3>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="seo1510714607004__table_tr4_mgp_xdb" class="table" frame="border" border="1" rules="all"><div class="caption"><span class="tablecap">ModelTable: glass_attribute_table_output</span></div><colgroup><col style="width:12.5%" /><col style="width:12.5%" /><col style="width:12.5%" /><col style="width:12.5%" /><col style="width:12.5%" /><col style="width:12.5%" /><col style="width:12.5%" /><col style="width:12.5%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d78761e529">node_id</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d78761e531">node_size</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d78761e533">node_label</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d78761e535">left_id</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d78761e537">left_size</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d78761e539">right_id</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d78761e541">right_size</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d78761e543">attribute</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e529 ">0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e531 ">100</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e533 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e535 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e537 ">32</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e539 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e541 ">68</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e543 ">Mg</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e529 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e531 ">32</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e533 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e535 ">3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e537 ">11</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e539 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e541 ">21</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e543 ">Na</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e529 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e531 ">68</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e533 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e535 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e537 ">28</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e539 ">6</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e541 ">40</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e543 ">Ca</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e529 ">3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e531 ">11</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e533 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e535 ">7</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e537 ">10</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e539 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e541 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e543 ">Fe</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e529 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e531 ">21</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e533 ">7</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e535 ">9</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e537 ">14</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e539 ">10</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e541 ">7</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e543 ">K</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e529 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e531 ">28</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e533 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e535 ">11</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e537 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e539 ">12</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e541 ">24</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e543 ">Al</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e529 ">6</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e531 ">40</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e533 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e535 ">13</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e537 ">29</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e539 ">14</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e541 ">11</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d78761e543 ">Na</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="seo1510714607004__section_bcr_zfp_xdb"><h3 class="title sectiontitle">SQL Call</h3><p class="p">RequestColNames specifies all the attributes on which the single decision tree function was trained.</p>
+<pre class="pre codeblock"><code>SELECT * FROM AMLGenerator (
+  ON glass_attribute_table_output AS ModelTable
+  USING
+  ModelType ('SDT')
+  RequestColNames ('pid','RI','Na','Mg','Al','Si','K','Ca','Ba','Fe')
+  RequestColTypes ('int','double','double','double','double',
+                   'double','double','double','double','double')
+  AMLPrefix ('glass_model')
+  RequestArgName1 ('ATTRTABLE_AttributeColumns')
+  RequestArgVal1 ('RI','Na','Mg','Al','Si','K','Ca','Ba','Fe')
+  RequestArgName2 ('ATTRTABLE_pidColumns')
+  RequestArgVal2 ('pid')
+  OverwriteOutput ('true')
+) AS dt;</code></pre></div>
+<div class="section" id="seo1510714607004__section_cjb_1gp_xdb"><h3 class="title sectiontitle">Output</h3><p class="p">The AML file glass_model.aml (shown below) is created and installed on <span class="keyword">ML Engine</span>. To download the file, use the command <code class="ph codeph">call pm.download_afile ('glass_model.aml')</code>.</p>
+<pre class="pre codeblock"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;model xmlns:aml="Aster Model Language"&gt;
+  &lt;name&gt;SDT&lt;/name&gt;
+  &lt;version&gt;6.21_rel_1.0_r55243&lt;/version&gt;
+  &lt;copyright&gt;Copyright (c) 2015-2016 by Teradata Corporation. All rights              reserved.&lt;/copyright&gt;
+  &lt;columns entity="model" name="glass_attribute_table_output"&gt;
+    &lt;c type="long"&gt;node_id&lt;/c&gt;
+    &lt;c type="long"&gt;node_size&lt;/c&gt;
+    &lt;c type="string"&gt;node_label&lt;/c&gt;
+    &lt;c type="long"&gt;left_id&lt;/c&gt;
+    &lt;c type="long"&gt;left_size&lt;/c&gt;
+    &lt;c type="long"&gt;right_id&lt;/c&gt;
+    &lt;c type="long"&gt;right_size&lt;/c&gt;
+    &lt;c type="string"&gt;attribute&lt;/c&gt;
+  &lt;/columns&gt;
+  &lt;columns entity="request"&gt;
+    &lt;c type="int"&gt;pid&lt;/c&gt;
+    &lt;c type="double"&gt;RI&lt;/c&gt;
+    &lt;c type="double"&gt;Na&lt;/c&gt;
+    &lt;c type="double"&gt;Mg&lt;/c&gt;
+    &lt;c type="double"&gt;Al&lt;/c&gt;
+    &lt;c type="double"&gt;Si&lt;/c&gt;
+    &lt;c type="double"&gt;K&lt;/c&gt;
+    &lt;c type="double"&gt;Ca&lt;/c&gt;
+    &lt;c type="double"&gt;Ba&lt;/c&gt;
+    &lt;c type="double"&gt;Fe&lt;/c&gt;
+  &lt;/columns&gt;
+  &lt;data entity="model" name="glass_attribute_table_output"&gt;
+    &lt;d&gt;0,100,2,1,32,2,68,Mg&lt;/d&gt;
+    &lt;d&gt;1,32,2,3,11,4,21,Na&lt;/d&gt;
+    &lt;d&gt;2,68,1,5,28,6,40,Ca&lt;/d&gt;
+    &lt;d&gt;3,11,2,7,10,8,1,Fe&lt;/d&gt;
+    &lt;d&gt;4,21,7,9,14,10,7,K&lt;/d&gt;
+    &lt;d&gt;5,28,2,11,4,12,24,Al&lt;/d&gt;
+    &lt;d&gt;6,40,1,13,29,14,11,Na&lt;/d&gt;
+    &lt;checksum&gt;d49eed5708d45967b88444a88e99bdb0bc11e11d&lt;/checksum&gt;
+  &lt;/data&gt;
+  &lt;params&gt;
+      &lt;p name="AttrTableAttributeColumns"&gt;RI,Na,Mg,Al,Si,K,Ca,Ba,Fe&lt;/p&gt;
+      &lt;p name="AttrTablePidColumns"&gt;pid&lt;/p&gt;
+  &lt;/params&gt;
+&lt;/model&gt;</code></pre></div>
+</div>
+</div>
+</div>
+</body>
+</html>

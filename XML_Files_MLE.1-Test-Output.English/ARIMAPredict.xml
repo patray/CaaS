@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="cvb1506028734992"> </a>
+	  <h1>ARIMAPredict</h1>
+
+	  <p style="line-height: 1em;">The ARIMAPredict function takes as input the ARIMA model produced by the function ARIMA and predicts a specified number of future values (time point forecasts) for the modeled sequence.</p>
+
+   <a name="sws1506028935032"> </a>
+   <h2>ARIMAPredict Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.4</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ARIMAPredict (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS Model PARTITION BY <i>partition_column</i> [,...]
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS ResidualTable PARTITION BY <i>partition_column</i> [,...]
+    ORDER BY '<i>time_column</i>' [,...]
+  USING
+  StepAhead (<i>steps</i>)
+  [ PartitionColumns ('<i>partition_column</i>' [,...]) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="fss1506029000715"> </a>
+	  <h2>ARIMAPredict Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>StepAhead</dt>
+      <dd>Specify the number of steps to forecast after the end of the time series. This value must be a positive integer.</dd>
+      <dt>PartitionColumns</dt>
+      <dd>[Optional] Specify the columns by which the Model and ResidualTable are partitioned.</dd>
+   </div>
+
+
+	
+   <a name="xzu1506029062332"> </a>
+   <h2>ARIMAPredict Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The ARIMAPredict function requires the ARIMA Output tables, ModelTable and ResidualTable.</p>
+
+   <a name="efi1506029135190"> </a>
+   <h2>ARIMAPredict Output</h2>
+   <a name="section_ig2_tkm_wcb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>partition_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each <i>partition_column</i> specified in PartitionColumns.] Column by which input data is partitioned.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">stepahead</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Step number (future time point in series) that was forecast after end of input time series.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">predict</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Prediction value.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ebe1510717637703"> </a>
+   <h2>ARIMAPredict Example</h2>
+   <a name="section_z5d_lrx_hdb"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">Input tables are ARIMA Example: OrdersTable, PartitionColumns, No Seasonality output:</p>
+   <ul>
+      <li>Model: arimaex1_model</li>
+      <li>ResidualTable: arimaex1_residual</li>
+   </ul>
+
+   <a name="section_ph4_lrx_hdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ARIMAPredict (
+  ON arimaex1_model AS Model PARTITION BY id_partition
+  ON arimaex1_resid AS ResidualTable PARTITION BY id_partition ORDER BY period
+  USING
+  StepAhead (10)
+  PartitionColumns ('id_partition')
+ ) AS dt ORDER BY id_partition, stepahead;</tt>
+   </pre>
+   <a name="section_pk5_lrx_hdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ id_partition stepahead predict           
+ ------------ --------- ----------------- 
+            1         1 632.6295188421049
+            1         2 635.7652663835223
+            1         3 636.8423124813031
+            1         4 637.2122492448414
+            1         5 637.3393127097191
+            1         6  637.382955639263
+            1         7 637.3979458278352
+            1         8 637.4030945599616
+            1         9 637.4048630128653
+            1        10 637.4054704295256
+            2         1  814.345648052931
+            2         2 819.4931716185765
+            2         3 819.4931716185765
+            2         4 819.4931716185765
+            2         5 819.4931716185765
+            2         6 819.4931716185765
+            2         7 819.4931716185765
+            2         8 819.4931716185765
+            2         9 819.4931716185765
+            2        10 819.4931716185765</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

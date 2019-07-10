@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="zfa1507236147591"> </a>
+	  <h1>TextClassifierEvaluator</h1>
+
+	
+		<p style="line-height: 1em;">The TextClassifierEvaluator function evaluates the precision, recall, and F-measure of the trained model output by the function TextClassifier.</p>
+
+	
+   <a name="ofo1507236256881"> </a>
+   <h2>TextClassifierEvaluator Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.3</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TextClassifierEvaluator (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY 1
+  USING
+  ObservationColumn ('<i>observation_column</i>')
+  PredictColumn ('<i>predicted_column</i>')
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="pfb1507236373839"> </a>
+	  <h2>TextClassifierEvaluator Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>ObservationColumn</dt>
+      <dd>Specify the name of the input column that contains the expected (correct) category.</dd>
+      <dt>PredictColumn</dt>
+      <dd>Specify the name of the input column that contains the predicted category (assigned by the function TextClassifier).</dd>
+   </div>
+
+
+	
+   <a name="yze1507236471519"> </a>
+   <h2>TextClassifierEvaluator Input</h2>
+   <a name="section_o3c_r1d_ycb"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>observation_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Expected (correct) category.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>predicted_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Predicted category (assigned by TextClassifier function).</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="bnu1507237286962"> </a>
+   <h2>TextClassifierEvaluator Output</h2>
+   <a name="section_atb_p1d_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">precision_val</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Precision of model.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">recall</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Recall of model.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">f_measure</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">F-measure of model.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="elv1510349038455"> </a>
+   <h2>TextClassifierEvaluator Example</h2>
+   <a name="section_f25_ljt_pdb"> </a>
+   <h3>Input</h3>
+   <ul>
+      <li>Input table: TextClassifier Example output table</li>
+      <li>Model file: knn.bin, output by TextClassifierTrainer Example</li>
+   </ul>
+
+   <a name="section_hth_mjt_pdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TextClassifierEvaluator (
+  ON TextClassifier (
+    ON (SELECT * FROM textclassifier_input)
+    USING
+    TextColumn ('content')
+    Accumulate ('category')
+    Model ('knn.bin')
+  ) AS dt1 PARTITION BY 1
+  USING
+  ObservationColumn ('category')
+  PredictColumn ('out_category')
+) AS dt2;</tt>
+   </pre>
+   <a name="section_fr1_njt_pdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ precision_val      recall             f_measure          
+ ------------------ ------------------ ------------------ 
+ 0.8333333333333334 0.8333333333333334 0.8333333333333334</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

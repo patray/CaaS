@@ -1,0 +1,1345 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="vqm1507162150338"> </a>
+	  <h1>KMeans</h1>
+
+	
+		<p style="line-height: 1em;">The KMeans function takes a data set and outputs the centroids of its clusters and, optionally, the clusters themselves. The <i>k</i>-means algorithm groups a set of observations into <i>k</i> clusters with each observation assigned to the cluster with the nearest centroid, or mean. The algorithm minimizes an objective function; in the KMeans function, the objective function is the total Euclidean distance of all data points from the center of the cluster to which they are assigned.</p>
+   <p style="line-height: 1em;">This is the algorithm:<ol>
+         <li>Specify or randomly select <i>k</i> initial cluster centroids.</li>
+         <li>Assign each data point to the cluster that has the closest centroid.</li>
+         <li>Recalculate the positions of the <i>k</i> centroids.</li>
+         <li>Repeat steps 2 and 3 until the centroids no longer move.</li>
+      </ol>
+   </p>
+   <p style="line-height: 1em;">Although the procedure always terminates, the <i>k</i>-means algorithm does not necessarily find the optimal configuration, corresponding to the global objective function minimum. The algorithm is significantly sensitive to the initial randomly selected cluster centers. To reduce the effect of these limitations, the <i>k</i>-means algorithm can be run multiple times.</p>
+
+	
+   <a name="alz1507162260661"> </a>
+   <h2>KMeans Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.14</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM KMeans (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  [ ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS CentroidsTable ]
+  OUT TABLE OutputTable (<i>output_table</i>)
+  [ OUT TABLE ClusterAssignmentTable (<i>cluster_assignement_table</i>) ]
+  USING
+  [ UnpackColumns ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ InitialSeeds ('<i>starting_cluster</i>' [,...]) ]
+  [ NumClusters (<i>number_of_means</i>) [ Seed (<i>seed</i>) ] ]
+  [ StopThreshold (<i>threshold</i>) ]
+  [ MaxIterNum (<i>max_iterations</i>) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <p>
+      <b>Note:</b>  You must specify only one of NumClusters, InitialSeeds, or CentroidsTable. If you specify more than one, the function gives top priority to InitialSeeds, then to NumClusters, and then to CentroidsTable.</p>
+   <a name="dyb1507162368051"> </a>
+	  <h2>KMeans Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputTable</dt>
+      <dd>Specify the name of the table of cluster centroids.</dd>
+      <dt>ClusterAssignmentTable</dt>
+      <dd>Specify the name of the table of the clusters.</dd>
+      <dt>UnpackColumns</dt>
+      <dd>[Optional] Specify whether the means for each centroid appear unpacked (that is, in separate columns) in the OutputTable.</dd>
+      <dd>Default: 'false' (The function concatenates the means for the centroids and outputs the result in a single VARCHAR column.)</dd>
+      <dt>InitialSeeds</dt>
+      <dd>[Optional] Specify the initial seed means as strings of underscore-delimited DOUBLE PRECISION values. For example, this clause initializes eight clusters in eight-dimensional space:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+InitialSeeds ('50_50_50_50_50_50_50_50',
+'150_150_150_150_150_150_150_150',
+'250_250_250_250_250_250_250_250',
+'350_350_350_350_350_350_350_350',
+'450_450_450_450_450_450_450_450',
+'550_550_550_550_550_550_550_550',
+'650_650_650_650_650_650_650_650',
+'750_750_750_750_750_750_750_750')</tt>
+         </pre>
+      </dd>
+      <dd>The dimensionality of the means must match the dimensionality of the data (that is, each mean must have <i>n</i> numbers in it, where <i>n</i> is the number of input columns minus one).</dd>
+      <dd>Default behavior: The algorithm chooses the initial seed means randomly.</dd>
+      <dd>
+         <p>
+            <b>Note:</b>  With InitialSeeds, the function uses a deterministic algorithm and the function supports up to 1596 dimensions.</p>
+      </dd>
+      <dt>NumClusters</dt>
+      <dd>[Optional] Specify the number of clusters to create from the data.<p>
+            <b>Note:</b>  With NumClusters, the function uses a nondeterministic algorithm and the function supports up to 1543 dimensions (for more information, see Nondeterministic Results and UniqueID Syntax Element).</p>
+      </dd>
+      <dt>Seed</dt>
+      <dd>[Optional] Specify the random seed the algorithm uses for repeatable results. The algorithm uses the seed to randomly sample the input table rows as initial clusters. The <i>seed</i> must be a nonnegative LONG value.</dd>
+      <dt>StopThreshold</dt>
+      <dd>[Optional] Specify the convergence threshold. When the centroids move by less than this amount, the algorithm has converged.</dd>
+      <dd>Default: 0.0395</dd>
+      <dt>MaxIterNum</dt>
+      <dd>[Optional] Specify the maximum number of iterations that the algorithm runs before quitting if the convergence threshold has not been met.</dd>
+      <dd>Default: 10</dd>
+   </div>
+
+
+	
+   <a name="xqc1507162418233"> </a>
+   <h2>KMeans Input</h2>
+   <a name="section_uqz_gpd_ycb"> </a>
+   <a name="table_pyr_hpd_ycb"> </a>
+   <table class="introtable">
+      <a name="table_pyr_hpd_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains features by which to cluster the data.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CentroidsTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Contains initial seed means for clusters. Has same schema as KMeans Output OutputTable, which depends on UnpackColumns syntax element.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>InputTable Schema</h3>
+   <a name="table_N10017_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10017_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>id</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Identifier of user or item.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>dimension_i</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each dimension.] Data in dimension <i>i</i>. Each dimension is a feature by which to cluster data. The number of dimensions is implicitly derived from the data.<p style="line-height: 1em; margin: 0px;">
+                  <br/>For example, if the application clusters points on the surface of the earth by latitude and longitude, the input table has three columns: point identifier, latitude, and longitude. The function clusters the data in the latitude and longitude columns; that is, the data has two dimensions.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="hkw1507162473507"> </a>
+   <h2>KMeans Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_hhn_trd_ycb"> </a>
+   <table class="introtable">
+      <a name="table_hhn_trd_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Output</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Results message</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains information about each cluster.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">OutputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains cluster centroids. Schema depends on UnpackColumns syntax element.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ClusterAssignmentTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Contains clusters themselves.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_jzd_zpd_ycb"> </a>
+   <h3>Results Message Schema</h3>
+   <a name="table_N10017_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10017_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">clusterid</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Cluster identifier of centroid.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">mean</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Concatenation of means in centroid. For example, means 3, 5, and 6 are represented as '3 5 6'.<p>
+                  <b>Note:</b>  The UnpackColumns syntax element does not affect this column.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">size</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of points in cluster.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">withinss</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Within-cluster-sum-of-squares—sum of squared differences of each point from its cluster centroid.</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">After the information described by the preceding schema, the results message has the following information:</p>
+   <a name="table_N1007F_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1007F_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Label</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Value</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Converged :</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">'True' if algorithm converged, 'False' otherwise.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Number of iterations :</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of iterations algorithm performed.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Number of clusters :</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of clusters.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Successfully created Output table</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Successfully created Clustered Output table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with ClusterAssignmentTable.]</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Total_WithinSS :</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sum of withinss values in preceding table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Between_SS :</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Between sum of squares—sum of squared distances of centroids to global mean, where squared distance of each mean to global mean is multiplied by number of data points it represents.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_nsg_cqd_ycb"> </a>
+   <h3>OutputTable Schema, UnpackColumns ('false') (Default)</h3>
+   <a name="table_N100DD_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100DD_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">clusterid</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Cluster identifier of centroid.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">mean</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Concatenation of means in centroid. For example, means 3, 5, and 6 are represented as '3 5 6'.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">size</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of points in cluster.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">withinss</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Within-cluster-sum-of-squares—sum of squared differences of each point from its cluster centroid.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_kgw_cqd_ycb"> </a>
+   <h3>OutputTable Schema, UnpackColumns ('true')</h3>
+   <a name="table_N10141_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10141_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">clusterid</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Cluster identifier of centroid.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>feature_i</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each feature.] Mean for feature <i>i</i> (name of InputTable column).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">size</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of points in cluster.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">withinss</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Within-cluster-sum-of-squares—sum of squared differences of each point from its cluster centroid.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_f24_dqd_ycb"> </a>
+   <h3>ClusterAssignmentTable Table Schema</h3>
+   <a name="table_N101A9_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N101A9_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">pointid</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Identifier of user or item (<i>id</i> from InputTable).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">centroidid</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Identifier of centroid for <i>pointid</i>.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="nyu1507162537637"> </a>
+   <h2>KMeans Examples</h2>
+   <a name="mxc1525724133141"> </a>
+	  <h3>KMeans Example: NumClusters, UnpackColumns ('false')</h3>
+
+	  <a name="section_vgj_n1r_t2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The InputTable has five attributes of personal computers (price, speed, hard disk size, RAM, and screen size). The table has over 6000 rows. These examples use different syntax elements to find eight clusters based on the five attributes.</p>
+   <a name="table_sbl_t1r_t2b"> </a>
+   <table class="introtable">
+      <a name="table_sbl_t1r_t2b"> </a>
+      <h4 style="text-align: center;">InputTable: computers_train1</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">price</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">speed</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">hd</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">ram</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">screen</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1499</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">80</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1795</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">85</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1595</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">170</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1849</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">170</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3295</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">340</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3695</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">340</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1720</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">170</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1995</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">85</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2225</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">210</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2605</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">210</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2045</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">130</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2295</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">245</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2225</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">130</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">17</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1595</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">85</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">18</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2325</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">210</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">19</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2095</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">250</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">20</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4395</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">452</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">This call tries to group the 5-dimensional data points into 8 clusters. UnpackColumns is 'false' by default.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM KMeans (
+  ON computers_train1 AS InputTable
+  OUT TABLE OutputTable (kmeanssample_centroid)
+  USING
+  NumClusters (8)
+  StopThreshold (0.05)
+  MaxIterNum (10)
+) AS dt;</tt>
+   </pre>
+   <a name="section_cxx_ckd_tdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ clusterid mean                                                                                 size withinss         
+ --------- ------------------------------------------------------------------------------------ ---- ---------------- 
+ 0         3072.21428571429 52.6428571428571 271.071428571429 8.57142857142857 14.7142857142857 14   586706.785714269
+ 1         1740.88888888889 30.3333333333333 141.666666666667 4.66666666666667 14.1111111111111 9    51205.7777777761
+ 2         1481.14285714286 27.2857142857143 112.857142857143 3.14285714285714 14.1428571428571 7    81104.8571428545
+ 3         1991.0 38.8461538461538 160.384615384615 4.46153846153846 14.0                       13   51006.0000000149
+ 4         2615.75 41.3333333333333 220.166666666667 7.33333333333333 14.75                     12   140175.50000003 
+ 5         2371.75 48.75 204.625 6.0 14.25                                                      8    36636.375       
+ 6         2192.8 38.1 194.4 5.2 14.1                                                           10   41549.3999999911
+ 7         4026.42857142857 59.0 432.285714285714 9.14285714285714 14.2857142857143             7    324109.428571463
+ --------- ------------------------------------------------------------------------------------ ---- ----------------
+           Converged : False                                                                                         
+           Number of Iterations : 10                                                                                 
+           Number of clusters : 8                                                                                    
+           Successfully created Output table                                                                         
+           Total_WithinSS : 1312494.1242063986                                                                       
+           Between_SS : 3.8234387625793636E7</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM kmeanssample_centroid;
+</tt>
+   </pre>
+   <pre>
+      <tt>
+ clusterid mean                                                                                 size withinss         
+ --------- ------------------------------------------------------------------------------------ ---- ---------------- 
+         1 1740.88888888889 30.3333333333333 141.666666666667 4.66666666666667 14.1111111111111    9 51205.7777777761
+         3 1991.0 38.8461538461538 160.384615384615 4.46153846153846 14.0                         13 51006.0000000149
+         5 2371.75 48.75 204.625 6.0 14.25                                                         8        36636.375
+         7 4026.42857142857 59.0 432.285714285714 9.14285714285714 14.2857142857143                7 324109.428571463
+         0 3072.21428571429 52.6428571428571 271.071428571429 8.57142857142857 14.7142857142857   14 586706.785714269
+         2 1481.14285714286 27.2857142857143 112.857142857143 3.14285714285714 14.1428571428571    7 81104.8571428545
+         4 2615.75 41.3333333333333 220.166666666667 7.33333333333333 14.75                       12  140175.50000003
+         6 2192.8 38.1 194.4 5.2 14.1                                                             10 41549.3999999911
+</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="gel1525724214208"> </a>
+	  <h3>KMeans Example: NumClusters, UnpackColumns ('true')</h3>
+
+	  <a name="section_zff_dbr_t2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: computers_train1, as in KMeans Example: NumClusters, UnpackColumns ('false')</li>
+   </ul>
+
+   <a name="section_jww_hkd_tdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM KMeans (
+  ON computers_train1 AS InputTable
+  OUT TABLE OutputTable (kmeanssample_centroid)
+  USING
+  UnpackColumns('true')
+  NumClusters(8)
+  StopThreshold(0.05)
+  MaxIterNum(10)
+) AS dt ;</tt>
+   </pre>
+   <a name="section_cxx_ckd_tdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ clusterid mean                                                                                 size withinss         
+ --------- ------------------------------------------------------------------------------------ ---- ---------------- 
+ 0         1435.6 26.6 107.0 3.2 14.0                                                           5    40551.1999999993
+ 1         2477.82352941176 44.3529411764706 217.0 7.05882352941176 14.4117647058824            17   266923.411764711
+ 2         2985.0625 51.1875 253.4375 8.0 14.875                                                16   628673.0625     
+ 3         3959.375 57.875 419.5 9.0 14.25                                                      8    585122.25       
+ 4         1660.57142857143 29.5714285714286 139.285714285714 4.28571428571429 14.1428571428571 7    27135.1428571418
+ 5         1808.5 31.0 138.75 4.5 14.25                                                         4    7173.5          
+ 6         1984.0 39.3333333333333 156.25 4.16666666666667 14.0                                 12   40644.5833333135
+ 7         2182.09090909091 37.6363636363636 195.818181818182 5.45454545454545 14.0909090909091 11   54416.7272727191
+ --------- ------------------------------------------------------------------------------------ ---- ----------------
+           Converged : False                                                                                         
+           Number of Iterations : 10                                                                                 
+           Number of clusters : 8                                                                                    
+           Successfully created Output table                                                                         
+           Total_WithinSS : 1650639.8777278848                                                                       
+           Between_SS : 3.789624187227207E7</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM kmeanssample_centroid;</tt>
+   </pre>
+   <pre>
+      <tt>
+ clusterid price            speed            hd               ram              screen           size withinss         
+ --------- ---------------- ---------------- ---------------- ---------------- ---------------- ---- ---------------- 
+         1 2477.82352941176 44.3529411764706            217.0 7.05882352941176 14.4117647058824   17 266923.411764711
+         3         3959.375           57.875            419.5              9.0            14.25    8        585122.25
+         5           1808.5             31.0           138.75              4.5            14.25    4           7173.5
+         7 2182.09090909091 37.6363636363636 195.818181818182 5.45454545454545 14.0909090909091   11 54416.7272727191
+         0           1435.6             26.6            107.0              3.2             14.0    5 40551.1999999993
+         2        2985.0625          51.1875         253.4375              8.0           14.875   16      628673.0625
+         4 1660.57142857143 29.5714285714286 139.285714285714 4.28571428571429 14.1428571428571    7 27135.1428571418
+         6           1984.0 39.3333333333333           156.25 4.16666666666667             14.0   12 40644.5833333135</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="dkj1525724289654"> </a>
+	  <h3>KMeans Example: InitialSeeds, ClusterAssignmentTable</h3>
+
+	  <a name="section_zff_dbr_t2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: computers_train1, as in KMeans Example: NumClusters, UnpackColumns ('false')</li>
+   </ul>
+
+   <a name="section_c1v_lkd_tdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM KMeans (
+  ON computers_train1 AS InputTable
+  OUT TABLE OutputTable (kmeanssample_output)
+  OUT TABLE ClusterAssignmentTable (kmeanssample_clusteredoutput)
+  USING
+   
+  InitialSeeds('2249_51_408_8_14', '2165_51_398_7_14.6', 
+    '2182_51_404_7_14.6', '2204_55_372_7.19_14.6',
+    '2419_44_222_6.6_14.3', '2394_44.3_277_7.3_14.5',
+    ' 2326_43.6_301_7.11_14.3', '2288_44_325_7_14.4')
+) AS dt;</tt>
+   </pre>
+   <a name="section_cxx_ckd_tdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ clusterid mean                                                                                 size withinss         
+ --------- ------------------------------------------------------------------------------------ ---- ---------------- 
+ 0         2249.0 51.0 408.0 8.0 14.0                                                           0    0.0             
+ 1         1566.83333333333 28.3333333333333 125.833333333333 3.83333333333333 14.0833333333333 12   218374.583333351
+ 2         2182.0 51.0 404.0 7.0 14.6                                                           0    0.0             
+ 3         1940.125 37.25 151.875 4.25 14.0625                                                  16   141346.4375     
+ 4         4026.42857142857 59.0 432.285714285714 9.14285714285714 14.2857142857143             7    324109.428571463
+ 5         3072.21428571429 52.6428571428571 271.071428571429 8.57142857142857 14.7142857142857 14   586706.785714269
+ 6         2568.3125 43.5 217.75 7.0 14.625                                                     16   252294.1875     
+ 7         2218.2 40.2666666666667 196.6 5.6 14.1333333333333                                   15   117724.266666621
+ --------- ------------------------------------------------------------------------------------ ---- ----------------
+           Converged : True                                                                                          
+           Number of Iterations : 8                                                                                  
+           Number of clusters : 8                                                                                    
+           Successfully created Output table                                                                         
+           Successfully created Clustered Output table                                                               
+           Total_WithinSS : 1640555.689285704                                                                        
+           Between_SS : 3.790632606071441E7</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM kmeanssample_output;</tt>
+   </pre>
+   <pre>
+      <tt>
+ clusterid mean                                                                                 size withinss         
+ --------- ------------------------------------------------------------------------------------ ---- ---------------- 
+         1 1566.83333333333 28.3333333333333 125.833333333333 3.83333333333333 14.0833333333333   12 218374.583333351
+         3 1940.125 37.25 151.875 4.25 14.0625                                                    16      141346.4375
+         5 3072.21428571429 52.6428571428571 271.071428571429 8.57142857142857 14.7142857142857   14 586706.785714269
+         7 2218.2 40.2666666666667 196.6 5.6 14.1333333333333                                     15 117724.266666621
+         0 2249.0 51.0 408.0 8.0 14.0                                                              0              0.0
+         2 2182.0 51.0 404.0 7.0 14.6                                                              0              0.0
+         4 4026.42857142857 59.0 432.285714285714 9.14285714285714 14.2857142857143                7 324109.428571463
+         6 2568.3125 43.5 217.75 7.0 14.625                                                       16      252294.1875</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM kmeanssample_clusteredoutput;</tt>
+   </pre>
+   <pre>
+      <tt>
+ id  clusterid 
+ --- --------- 
+  28         4
+  53         5
+  42         4
+  23         5
+  20         4
+  17         1
+  99         6
+  68         1
+  85         6
+  81         5
+  34         6
+  95         5
+  33         6
+  78         5
+  40         6
+  26         1
+  22         6
+  24         5
+  12         6
+   1         1
+  43         6
+  58         5
+   6         4
+  75         5
+  71         4
+  90         5
+  61         4
+  97         3
+  25         4
+  14         7
+  36         6
+  69         7
+  84         6
+  32         3
+  49         6
+  87         7
+  63         6
+  16         7
+  72         6
+  57         3
+  39         6
+  62         3
+  82         6
+  77         3
+  79         6
+  54         7
+  27         3
+   4         3
+  60         3
+  98         3
+   8         3
+  74         5
+ 100         1
+  21         1
+  89         1
+  83         5
+  80         1
+   7         1
+  76         5
+   5         5
+   3         1
+  41         5
+  96         1
+  73         1
+  19         7
+  47         7
+  31         3
+  13         3
+   9         7
+  64         7
+  88         3
+  55         7
+  37         7
+  35         3
+  50         3
+  67         7
+  44         7
+  18         7
+  56         7
+   2         3</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="vpt1507163049784"> </a>
+   <h3>KMeans Example: CentroidsTable, ClusterAssignmentTable</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <ul>
+      <li>InputTable: computers_train1, as in KMeans Example: NumClusters, UnpackColumns ('false')</li>
+      <li>CentroidsTable: kmeanssample_centroid, output by KMeans Example: NumClusters, UnpackColumns ('true')</li>
+   </ul>
+
+   <a name="section_vw4_g3d_tdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM KMeans (
+  ON computers_train1 AS InputTable
+  ON kmeanssample_centroid AS CentroidsTable
+  OUT TABLE OutputTable (kmeanssample_output)
+  OUT TABLE ClusterAssignmentTable (kmeanssample_clusteredoutput)
+) AS dt ;</tt>
+   </pre>
+   <a name="section_fxz_g3d_tdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ clusterid mean                                                                                 size withinss         
+ --------- ------------------------------------------------------------------------------------ ---- ---------------- 
+ 0         1435.6 26.6 107.0 3.2 14.0                                                           5    40551.1999999993
+ 1         2604.92307692308 42.0 219.384615384615 7.07692307692308 14.7692307692308             13   158637.230769217
+ 2         3072.21428571429 52.6428571428571 271.071428571429 8.57142857142857 14.7142857142857 14   586706.785714269
+ 3         4026.42857142857 59.0 432.285714285714 9.14285714285714 14.2857142857143             7    324109.428571463
+ 4         1660.57142857143 29.5714285714286 139.285714285714 4.28571428571429 14.1428571428571 7    27135.1428571418
+ 5         1808.5 31.0 138.75 4.5 14.25                                                         4    7173.5          
+ 6         2006.86666666667 39.2 164.333333333333 4.4 14.0666666666667                          15   84880.0         
+ 7         2280.46666666667 42.5333333333333 199.4 5.86666666666667 14.0666666666667            15   118565.733333319
+ --------- ------------------------------------------------------------------------------------ ---- ----------------
+           Converged : True                                                                                          
+           Number of Iterations : 5                                                                                  
+           Number of clusters : 8                                                                                    
+           Successfully created Output table                                                                         
+           Successfully created Clustered Output table                                                               
+           Total_WithinSS : 1347759.0212454093                                                                       
+           Between_SS : 3.8199122728754565E7</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM kmeanssample_output;</tt>
+   </pre>
+   <pre>
+      <tt>
+ clusterid mean                                                                                 size withinss         
+ --------- ------------------------------------------------------------------------------------ ---- ---------------- 
+         1 2604.92307692308 42.0 219.384615384615 7.07692307692308 14.7692307692308               13 158637.230769217
+         3 4026.42857142857 59.0 432.285714285714 9.14285714285714 14.2857142857143                7 324109.428571463
+         5 1808.5 31.0 138.75 4.5 14.25                                                            4           7173.5
+         7 2280.46666666667 42.5333333333333 199.4 5.86666666666667 14.0666666666667              15 118565.733333319
+         0 1435.6 26.6 107.0 3.2 14.0                                                              5 40551.1999999993
+         2 3072.21428571429 52.6428571428571 271.071428571429 8.57142857142857 14.7142857142857   14 586706.785714269
+         4 1660.57142857143 29.5714285714286 139.285714285714 4.28571428571429 14.1428571428571    7 27135.1428571418
+         6 2006.86666666667 39.2 164.333333333333 4.4 14.0666666666667                            15          84880.0</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM kmeanssample_clusteredoutput;</tt>
+   </pre>
+   <pre>
+      <tt>
+ id  clusterid 
+ --- --------- 
+   7         4
+  22         1
+   3         4
+  12         1
+  96         0
+  82         1
+ 100         4
+  79         1
+  17         4
+  99         1
+  68         0
+  85         1
+  55         7
+  34         1
+  37         7
+  88         5
+  67         7
+  57         6
+  42         3
+  77         6
+  20         3
+  50         6
+  25         3
+  78         2
+  14         7
+   5         2
+   6         3
+  41         2
+  49         7
+  58         2
+  64         7
+  56         6
+  71         3
+  90         2
+  80         4
+  19         6
+  26         0
+  74         2
+   1         0
+  31         6
+  73         4
+  13         6
+  21         4
+  87         6
+  89         0
+  81         2
+  40         7
+  72         1
+  39         7
+  62         5
+  54         7
+   4         5
+  44         7
+  43         1
+  61         3
+   2         5
+  18         7
+  36         1
+  47         7
+  84         1
+  69         7
+  33         1
+   9         7
+  63         1
+  28         3
+  95         2
+  16         7
+  35         6
+  27         6
+  76         2
+  24         2
+  60         6
+  98         6
+  75         2
+   8         6
+  97         6
+  53         2
+  23         2
+  32         6
+  83         2</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

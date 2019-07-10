@@ -1,0 +1,1090 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="vya1507673875298"> </a>
+	  <h1>Hypothesis-Test Mode</h1>
+
+	  <p style="line-height: 1em;">In hypothesis-test mode, the function tests the hypothesis that the sample data
+			comes from the specified reference distribution. The function simultaneously performs
+			the specified tests and reports a p-value for each test. The null hypothesis is that the
+			data are consistent with the specified distribution. Therefore, a low p-value suggests
+			that the distribution is a poor fit for the data.</p>
+
+   <a name="lrg1507674748665"> </a>
+   <h2>Hypothesis-Test Mode Syntax</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">Recommended syntax depends on whether the reference distribution is continuous or
+                discrete and on the sample data set. For both continuous and discrete distributions,
+                there are two syntax options. Teradata recommends option 1 for large data sets
+                stored across multiple nodes and option 2 for small data sets stored on a single
+                node. However, performance ultimately depends on the data itself.</p>
+
+   <a name="fcs1466004794018"> </a>
+   <h3>Hypothesis-Test Mode Syntax (Continuous Distributions)</h3>
+   <a name="msp1507675625733"> </a>
+   <h4>Multiple-Node Data Sets</h4>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h4>DistributionMatchReduce version 1.6, DistributionMatchMultiInput version 1.4</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM DistributionMatchReduce (
+  ON DistributionMatchMultiInput (
+    ON (SELECT RANK() OVER (PARTITION BY <i>col</i> [,...] 
+      ORDER BY <i>column</i>) AS rank, *
+      FROM <i>input_table</i> 
+      WHERE <i>column</i> IS NOT NULL
+    ) AS InputTable PARTITION BY ANY
+    ON (SELECT <i>col</i> [,...], COUNT(*) AS group_size
+      FROM <i>input_table</i> 
+      WHERE <i>column</i> IS NOT NULL
+      GROUP BY <i>col</i> [,...] 
+    ) AS GroupStatistics DIMENSION
+    USING
+    TargetColumn ('<i>target_column</i>')
+    [ Tests ('<i>test</i>' [,...]) ]
+    Distributions ('<i>distribution</i>:<i>parameter</i>' [,...])
+  [ GroupByColumns
+    ({ '<i>group_column</i>' | <i>group_column_range</i> }[,...]) ]
+    [ MinGroupSize (<i>minGroupSize</i>) ]
+    [ NumCell (<i>cell_size</i>) ]
+  ) AS <i>alias_1</i> PARTITION BY <i>col</i> [,...] 
+) AS <i>alias_2</i>;</tt>
+   </pre>
+   <p style="line-height: 1em;">If your input table already includes a rank column, replace this clause:</p>
+   <p style="line-height: 1em;">
+      <tt style="font-family: monospace;">ON (SELECT RANK()...</tt>
+   </p>
+   <p style="line-height: 1em;">with this clause:</p>
+   <p style="line-height: 1em;">
+      <tt style="font-family: monospace;">ON SELECT * FROM <i>input_table</i>
+      </tt>.</p>
+
+   <a name="hwf1507676337439"> </a>
+   <h4>Single-Node Data Sets</h4>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h4>DistributionMatchReduce version 1.6, DistributionMatchMultiInput version 1.4</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM DistributionMatchReduce (
+  ON DistributionMatchMultiInput (
+    ON (SELECT RANK() OVER (PARTITION BY <i>column</i> [,...] 
+      ORDER BY <i>column</i>) AS rank, *
+      FROM <i>input_table</i> 
+      WHERE <i>column</i> IS NOT NULL
+    ) AS InputTable PARTITION BY <i>column</i> [,...] 
+    ON (SELECT <i>col</i> [,...], COUNT(*) AS group_size
+      FROM <i>input_table</i> 
+      WHERE <i>column</i> IS NOT NULL <i>c</i> 
+      GROUP BY <i>column</i> [,...] 
+    ) AS GroupStatistics PARTITION BY <i>column</i> [,...]
+  USING
+  TargetColumn ('<i>target_column</i>')
+  [ Tests ('<i>test</i>' [,...]) ]
+  Distributions ('<i>distribution</i>:<i>parameters</i>' [,...])
+  [ GroupByColumns
+    ({ '<i>group_column</i>' | <i>group_column_range</i> }[,...]) ]
+  [ MinGroupSize (<i>min_group_size</i>) ]
+  [ NumCell (<i>cell_size</i>) ]
+  ) AS <i>alias_1</i> PARTITION BY <i>column</i> [,...] 
+) AS <i>alias_2</i>;</tt>
+   </pre>
+   <p style="line-height: 1em;">If your input table already includes a rank column, replace this clause:</p>
+   <p style="line-height: 1em;">
+      <tt style="font-family: monospace;">ON (SELECT RANK()...</tt>
+   </p>
+   <p style="line-height: 1em;">with this clause:</p>
+   <p style="line-height: 1em;">
+      <tt style="font-family: monospace;">ON SELECT * FROM <i>input_table</i>
+      </tt>.</p>
+
+   <a name="myj1466004794224"> </a>
+   <h3>Hypothesis-Test Mode Syntax (Discrete Distributions)</h3>
+   <a name="eob1507677052717"> </a>
+   <h4>Multiple-Node Data Sets</h4>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h4>DistributionMatchReduce version 1.6, DistributionMatchMultiInput version 1.4</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM DistributionMatchReduce (
+  ON DistributionMatchMultiInput (
+    ON (SELECT COUNT(1) AS counts,
+      SUM(COUNT(1)) OVER (PARTITION BY <i>column</i> [,...] 
+        ORDER BY <i>column</i>) AS rank, <i>column</i> [,...] 
+        FROM <i>input_table</i> 
+        WHERE <i>column</i> IS NOT NULL
+        GROUP BY <i>column</i> [,...] 
+    ) AS InputTable PARTITION BY ANY
+    ON (SELECT <i>column</i> [,...], COUNT(*) AS group_size
+      FROM <i>input_table</i> 
+      WHERE <i>column</i> IS NOT NULL
+      GROUP BY <i>column</i> [,...] 
+    ) AS GroupStatistics DIMENSION
+    USING
+    TargetColumn ('<i>target_column</i>')
+    [ Tests ('<i>test</i>' [,...]) ]
+    Distributions ('<i>distribution</i>:<i>parameters</i>' [,...])
+    [ GroupByColumns ({ '<i>group_column</i>' | <i>group_column_range</i> }[,...]) ]
+    [ MinGroupSize (<i>min_group_size</i>) ]
+    [ NumCell (<i>cell_size</i>) ]
+  ) AS <i>alias_1</i> PARTITION BY <i>column</i> [,...] 
+) AS <i>alias_2</i>;</tt>
+   </pre>
+   <a name="gnd1507677698297"> </a>
+   <h4>Single-Node Data Sets and Any CvM Test</h4>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h4>DistributionMatchReduce version 1.6, DistributionMatchMultiInput version 1.4</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM DistributionMatchReduce (
+  ON DistributionMatchMultiInput (
+    ON (SELECT COUNT(1) AS counts,
+      SUM(COUNT(1)) OVER (PARTITION BY <i>column</i> [,...] 
+        ORDER BY <i>column</i>) AS rank, <i>column</i> [,...] 
+      FROM <i>input_table</i> 
+      WHERE <i>column</i> IS NOT NULL
+      GROUP BY <i>column</i> [,...] 
+    ) AS InputTable PARTITION BY <i>column</i> [,...] ORDER BY <i>column</i> 
+    ON (SELECT <i>column</i> [,...], COUNT(*) AS group_size
+      FROM <i>input_table</i> 
+      WHERE <i>column</i> IS NOT NULL
+      GROUP BY <i>column</i> [,...] 
+    ) AS GroupStatistics PARTITION BY <i>column</i> [,...]
+    USING
+    TargetColumn ('<i>target_column</i>')
+    [ Tests ('<i>test</i>' [,...]) ]
+    Distributions ('<i>distribution</i>:<i>parameters</i>' [,...])
+    [ GroupByColumns ({ '<i>group_column</i>' | '<i>group_column_range</i>' [,...]) ]
+    [ MinGroupSize (<i>min_group_size</i>) ]
+    [ NumCell (<i>cell_size</i>) ]
+  ) AS <i>alias_1</i> PARTITION BY <i>column</i> [,...] 
+) AS <i>alias_2</i>;</tt>
+   </pre>
+   <a name="wwg1507678428399"> </a>
+	  <h2>Hypothesis-Test Mode Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the values of the sample data set.</dd>
+      <dt>Tests</dt>
+      <dd>[Optional] Specify one to four tests to perform:<a name="table_f4y_p4y_fdb"> </a>
+         <table class="introtable">
+            <a name="table_f4y_p4y_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">
+                     <i>test</i>
+                  </div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'KS'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Kolmogorov-Smirnov test.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'CvM'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Cramér-von Mises criterion.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'AD'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Anderson-Darling test.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'CHISQ'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Pearson's Chi-squared test.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dd>Default: All tests</dd>
+      <dt>Distributions</dt>
+      <dd>Specify the reference distributions and their parameters. Either all distributions must be continuous or all must be discrete.</dd>
+      <dd>
+         <a name="table_N100BE_N1000C_N10001"> </a>
+         <table class="introtable">
+            <a name="table_N100BE_N1000C_N10001"> </a>
+            <h4 style="text-align: center;">Continuous Distributions and Parameters</h4>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">
+                     <i>distribution</i>:<i>parameters</i>
+                  </div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">parameter Descriptions</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">BETA:α,β</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">α &gt; 0 is the first shape parameter.<p style="line-height: 1em; margin: 0px;">
+                        <br/>β &gt; 0 is the second shape parameter.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">CAUCHY:x,θ</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">x, a DOUBLE PRECISION value, is the median parameter.<p style="line-height: 1em; margin: 0px;">
+                        <br/>θ &gt; 0 is the scale parameter.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">CHISQ:k</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">k, a positive INTEGER, is the degree of freedom.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">EXPONENTIAL:θ</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">θ &gt; 0 is the mean parameter, which is the inverse rate.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">F:d<sub>1</sub>,d<sub>2</sub>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">d<sub>1</sub> &gt; 0 and d<sub>2</sub> &gt; 0 are degrees of freedom.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">GAMMA:k,θ</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">k &gt; 0 is the shape parameter.<p style="line-height: 1em; margin: 0px;">
+                        <br/>θ &gt; 0 is the scale parameter.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">LOGNORMAL:μ,σ</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">μ, a DOUBLE PRECISION value, is the mean.<p style="line-height: 1em; margin: 0px;">
+                        <br/>σ &gt; 0 is the standard deviation.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">NORMAL:μ,σ</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">μ, a DOUBLE PRECISION value, is the mean.<p style="line-height: 1em; margin: 0px;">
+                        <br/>σ &gt; 0 is the standard deviation.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">T:k</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">k, a positive INTEGER, is the degree of freedom.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">TRIANGULAR:a,c,b</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">a &lt;= c &lt;= b &amp;&amp; a &lt; b, where a is the lower limit of this distribution (inclusive), b is the upper limit of this distribution (inclusive), and c is the mode of this distribution.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">UNIFORMCONTINUOUS:a,b</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">a &lt; b, where a is the lower bound of this distribution (inclusive) and b is the upper bound of this distribution (exclusive).</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">WEIBULL:α,β</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">α &gt; 0 is the shape parameter.<p style="line-height: 1em; margin: 0px;">
+                        <br/>β &gt; 0 is the scale parameter.</p>
+                     <p style="line-height: 1em; margin: 0px;">
+                        <br/>The function uses the two-parameter form of the distribution defined by the Weibull Distribution, http://mathworld.wolfram.com/WeibullDistribution.html, equations (1) and (2).</p>
+                  </div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dd>
+         <a name="table_N10182_N1000C_N10001"> </a>
+         <table class="introtable">
+            <a name="table_N10182_N1000C_N10001"> </a>
+            <h4 style="text-align: center;">Discrete Distributions and Parameters</h4>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">
+                     <i>distribution</i>:<i>parameters</i>
+                  </div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">parameter Descriptions</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">BINOMIAL:n,p</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">n, a positive INTEGER, is the number of trials.<p style="line-height: 1em; margin: 0px;">
+                        <br/>p, in [0,1], is the success probability in each trial.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">GEOMETRIC:p</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">p, in [0,1], is the success probability in each trial.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">NEGATIVEBINOMIAL:r,p</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">r, a positive INTEGER, is the number of successes until the function stops the tests.<p style="line-height: 1em; margin: 0px;">
+                        <br/>p, in [0,1], is the success probability in each trial.</p>
+                     <p style="line-height: 1em; margin: 0px;">
+                        <br/>The function represents the distribution of the number of failures before r successes occur.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">POISSON:λ</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">λ &gt; 0 is the rate parameter.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">UNIFORMDISCRETE:a,b</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">a &lt; b, where a is the lower bound of this distribution (inclusive) and b is the upper bound of this distribution (exclusive). Both a and b are INTEGER values.</div>
+               </td>
+            </tr>
+         </table>
+
+         <p style="line-height: 1em;">For discrete distributions:<ul>
+               <li>BINOMIAL, GEOMETRIC, NEGATIVEBINOMIAL, and POISSON distributions are on N={0,1,2,...}.</li>
+               <li>UNIFORMDISCRETE distribution is on events, which are represented by integers.</li>
+            </ul>
+         </p>
+      </dd>
+      <dt>GroupByColumns</dt>
+      <dd>[Optional] Specify the names of the InputTable columns that contain the group identifications over which to run the test. The function can run multiple tests for different partitions of the data in parallel. If you omit this syntax element, specify PARTITION BY 1 and omit the GROUP BY clause in the second ON clause.</dd>
+      <dt>MinGroupSize</dt>
+      <dd>[Optional] Specify the minimum group size. The function ignores groups smaller than the minimum size when calculating statistics.</dd>
+      <dd>Default: 50</dd>
+      <dt>NumCell</dt>
+      <dd>[Optional] Specify the number of cells to make discrete in a continuous distribution. The cell_size must be greater than 3 if <i>distribution</i> is NORMAL; otherwise, it must be greater than 1. The quotient <i>min_group_size</i>/<i>cell_size</i> cannot be less than 5.<p>
+            <b>Note:</b>  If you specify NumCell, you must specify <tt style="font-family: monospace;">'CHISQ'</tt> in the Tests syntax element.</p>
+      </dd>
+      <dd>Default: 10</dd>
+   </div>
+
+
+	
+   <a name="cld1507679115767"> </a>
+   <h2>Hypothesis-Test Mode Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The <i>input_table</i> has an arbitrary number of grouping columns and a single value column that contains the data set to match to the specified distributions. The syntax includes clauses that create two tables from the <i>input_table</i>, InputTable and GroupStatistics. One table ranks the data and the other table counts the number of points in each group.</p>
+
+   <a name="section_a4s_2dv_xcb"> </a>
+   <h3>
+      <i>input_table</i> Schema</h3>
+   <a name="table_N1002B_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1002B_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column can appear several times.] Partitions or identifies values.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, BIGINT, NUMERIC, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sample data set value.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="gmy1507679767827"> </a>
+   <h2>Hypothesis-Test Mode Output</h2>
+   <a name="section_bz4_ldv_xcb"> </a>
+   <h3>Output Table Schema</h3>
+   <p style="line-height: 1em;">The table has the following columns for each group defined by the PARTITION BY clause.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>group_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>group_column</i>.]</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">group_size</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of rows in group.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>group</i>_ks_statistics</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with Tests ('KS') or if you omit Tests syntax element.] Kolmogorov-Smirnov statistic.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>group</i>_ks_p_value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with Tests ('KS') or if you omit Tests syntax element.] Kolmogorov-Smirnov p-value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>group</i>_cvm_statistic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with Tests ('CvM') or if you omit Tests syntax element.] Cramér-von Mises criterion statistic.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>group</i>_cvm_p_value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with Tests ('CvM') or if you omit Tests syntax element.] Cramér-von Mises p-value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>group</i>_ad_statistic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with Tests ('AD') or if you omit Tests syntax element.] Anderson-Darling statistic.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>group</i>_ad_p_value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with Tests ('AD') or if you omit Tests syntax element.] Anderson-Darling p-value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>group</i>_chisq_statistic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with Tests ('CHISQ') or if you omit Tests syntax element.] Pearson's Chi-squared statistic.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>group</i>_chisq_p_value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with Tests ('CHISQ') or if you omit Tests syntax element.] Pearson's Chi-squared p-value.</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">For details about columns that depend on the Tests syntax element, see Results (statistics and p-values).</p>
+
+   <a name="jea1507680380894"> </a>
+   <h3>Results (statistics and p-values)</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The results use these R packages:<ul>
+         <li>nortest (R Package_nortest)</li>
+         <li>ADGofTest (R Package_ADGofTest)</li>
+         <li>dgof (R Package_dgof)</li>
+      </ul>
+   </p>
+   <a name="table_h1p_c2v_xcb"> </a>
+   <table class="introtable">
+      <a name="table_h1p_c2v_xcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Distribution</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Continuous Distributions</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Discrete Distributions</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Normal</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Function computes p-values from the modified statistics, as implemented in the R package nortest.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Not applicable</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">KS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Function computes p-values using approximation to the Kolmogorov-Smirnov distribution (assuming large sample size). Results are comparable to the ks.test() from the stats package in R.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Results are comparable to the ks.test() from the R package dgof, when reference distribution is a 'stepfun' object.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CvM</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Function computes results as in the R package nortest.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Statistics are comparable to the cvm.test() from the R package dgof, when reference distribution is a 'stepfun' object. P-values are not calculated.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">AD</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Function computes results comparable to those of ad.test() from the R package ADGofTest.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Results are comparable to the ad.test() from the R package ADGofTest.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CHISQ</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Function computes statistics comparable to those of pearson.test() from the R package nortest, with a minor modification when data falls beyond the upper limit of distribution support. The function computes p-values using DOF = <i>cell_size</i> - 1.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Statistics are comparable to pearson.test() from the R package nortest, with a minor modification when data falls beyond the upper limit of distribution support. The function computes p-values using DOF = <i>cell_size</i> - 1.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="obt1507680966426"> </a>
+   <h2>Hypothesis-Test Mode Examples</h2>
+   <a name="ckx1507681523494"> </a>
+   <h3>Hypothesis-Test Mode Example: Omit GroupByColumns</h3>
+   <a name="section_ngp_frb_4db"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The example creates input tables t1 and t2 from a table of raw input, raw_normal_50_2, which contains data drawn from a normal distribution with a mean of 50 and a standard deviation of 2. Here are the first 10 rows:</p>
+   <a name="table_f25_ctb_4db"> </a>
+   <table class="introtable">
+      <a name="table_f25_ctb_4db"> </a>
+      <h4 style="text-align: center;">raw_normal_50_2</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">price</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">48.0701</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">52.6426</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">48.6372</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">50.9832</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">50.523</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">52.1773</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">50.3103</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">48.4424</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">50.1352</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">50.1382</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">The following statements create tables t1 and t2:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE t1 AS (
+  SELECT COUNT(*) AS group_size
+  FROM raw_normal_50_2
+  WHERE price IS NOT NULL
+) WITH data;</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE t2 AS (
+  SELECT RANK() OVER (ORDER BY price) AS "rank", price 
+  FROM raw_normal_50_2 
+  WHERE price IS NOT NULL
+) WITH data;</tt>
+   </pre>
+   <a name="section_p5y_frb_4db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM DistributionMatchReduce (
+  ON DistributionMatchMultiInput (
+		ON t2 AS InputTable PARTITION BY ANY
+		ON t1 AS GroupStatistics DIMENSION
+		USING
+		TargetColumn('price')
+		TESTS('KS', 'CvM', 'AD', 'CHISQ')
+		DISTRIBUTIONS('NORMAL:49.97225,2.009698')
+		MINGROUPSIZE(50)
+		NumCell(10)
+  ) PARTITION BY 1
+) as dt;</tt>
+   </pre>
+   <a name="section_wwk_grb_4db"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The reported p-value for each of the four tests is around 0.4, which does not rule out the null hypothesis that the data are consistent with a normal distribution with the specified mean and standard deviation.</p>
+   <p>
+      <b>Note:</b>  In the output table column names, when 'a' and 'b' appear between digits, interpret them as comma (,) and period (.), respectively.</p>
+   <pre>
+      <tt>
+ group_size normal$49b97225a2b009698_ks_statistic normal$49b97225a2b009698_ks_p_value normal$49b97225a2b009698_cvm_statistic normal$49b97225a2b009698_cvm_p_value normal$49b97225a2b009698_ad_statistic normal$49b97225a2b009698_ad_p_value normal$49b97225a2b009698_chisq_statistic normal$49b97225a2b009698_chisq_p_value 
+ ---------- ------------------------------------- ----------------------------------- -------------------------------------- ------------------------------------ ------------------------------------- ----------------------------------- ---------------------------------------- -------------------------------------- 
+        400                   0.03195042908191681                 0.41180261969566345                     0.0556536540389061                   0.4307910203933716                    0.3761519193649292                  0.4102906286716461                        7.800000190734863                      0.350559800863266</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="cxu1507684072009"> </a>
+   <h3>Hypothesis-Test Mode Example: Include GroupByColumns</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">This example shows the use of grouping columns, and also illustrates the syntax for testing against multiple distributions in a single SQL command.</p>
+
+   <a name="section_dx2_3kb_4db"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, factory_7, represents hypothetical mean-time-to-failure data for two products. This is a subset of the rows:</p>
+   <a name="table_jsc_yxb_4db"> </a>
+   <table class="introtable">
+      <a name="table_jsc_yxb_4db"> </a>
+      <h4 style="text-align: center;">factory_7</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">product</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">mttf</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">A</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10039.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">A</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9926.6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">A</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9971.34</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">A</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9868.7</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">A</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9940.17</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">A</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10266.7</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">A</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9768.64</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">A</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10043.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">A</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10133.7</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">A</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9731.33</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">D</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9721.21</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">D</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10068.6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">D</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9952</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">D</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9851.94</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">D</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10378.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">D</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9908.9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">D</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9749.43</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">D</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10448</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">D</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9681.25</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">D</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10147.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_awl_jkb_4db"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">The function call evaluates two possible distributions (normal and uniform) and applies the Kolmogorov-Smirnov (KS) and Anderson-Darling (AD) fit tests.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM DistributionMatchReduce (
+	ON DistributionMatchMultiInput (
+		ON (SELECT RANK() OVER (PARTITION BY  product
+				ORDER BY mttf) AS "rank", product, mttf
+			FROM factory_7 
+			WHERE mttf IS NOT NULL) AS InputTable PARTITION BY ANY
+		ON (SELECT product, COUNT(*) AS group_size 
+			FROM factory_7 
+			WHERE mttf IS NOT NULL 
+			GROUP BY product) AS GroupStatistics DIMENSION
+		USING
+		TargetColumn('mttf')
+		TESTS('KS', 'AD')
+		DISTRIBUTIONS('NORMAL:10000,150','UNIFORMCONTINUOUS:9500,10500')
+		GroupByColumns('product')
+		MINGROUPSIZE(50)
+	) PARTITION BY product
+)as dt ;</tt>
+   </pre>
+   <a name="section_lbb_kkb_4db"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The reported p-values support these conclusions:<ul>
+         <li>For product A:<ul>
+               <li>Both tests fail to reject the null hypothesis that the data fit a normal distribution with the specified parameters.</li>
+               <li>Both tests reject the null hypothesis that the data fit the specified uniform distribution.</li>
+            </ul>
+         </li>
+         <li>For product D:<ul>
+               <li>Both tests fail to reject the null hypothesis that the data fit a uniform distribution with the specified parameters.</li>
+               <li>Both tests reject the null hypothesis that the data fit the specified normal distribution.</li>
+            </ul>
+         </li>
+      </ul>
+   </p>
+   <p>
+      <b>Note:</b>  In the output table column names, when 'a' and 'b' appear between digits, interpret them as comma (,) and period (.), respectively.</p>
+   <pre>
+      <tt>
+ product group_size normal$10000a150_ks_statistic normal$10000a150_ks_p_value normal$10000a150_ad_statistic normal$10000a150_ad_p_value uniformcontinuous$9500a10500_ks_statistic uniformcontinuous$9500a10500_ks_p_value uniformcontinuous$9500a10500_ad_statistic uniformcontinuous$9500a10500_ad_p_value 
+ ------- ---------- ----------------------------- --------------------------- ----------------------------- --------------------------- ----------------------------------------- --------------------------------------- ----------------------------------------- --------------------------------------- 
+ A             2999           0.01148039847612381         0.44052770733833313            0.5279074311256409         0.17789512872695923                        0.2148340940475464                                     0.0                         365.3498229980469                   2.0006669387839793E-7
+ D             3000            0.2077179253101349                         0.0             886.3829956054688                         0.0                      0.007739999797195196                      0.9938256740570068                         0.442442923784256                      0.8058283925056458
+</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

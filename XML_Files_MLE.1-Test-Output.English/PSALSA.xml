@@ -1,0 +1,1253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="caa1507826678390"> </a>
+	  <h1>PSALSA</h1>
+
+	
+		<p style="line-height: 1em;">The PSALSA (Personalized SALSA) function is a SQL-GR function that evaluates the similarity of nodes in a bipartite graph according to their proximity. The typical application of PSALSA is for recommendation.</p>
+
+		<p style="line-height: 1em;">The PSALSA function assigns numerical scores (between 0 and 1) to the vertices on both sides of the bipartite graph for each seed (hub) vertex. Also, for each seed vertex, the function outputs <i>K</i> hub/authority vertices with highest score.</p>
+
+		<p style="line-height: 1em;">The score assigned by PSALSA to a node defines the probability of visiting the node by a random walk with a restart from a seed node.</p>
+
+	
+   <a name="xao1516745434472"> </a>
+   <h2>PSALSA Background</h2>
+   <a name="wzg1507826789115"> </a>
+   <h3>SALSA</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">Stochastic Approach for Link-Structure Analysis (SALSA) is a link analysis algorithm originally developed for evaluating the importance of web pages (similar to the PageRank algorithm).</p>
+   <p style="line-height: 1em;">In SALSA, a collection of web pages is transformed into a bipartite graph:</p>
+   <p style="line-height: 1em;">`<i>G</i>=(<i>V</i>,<i>X</i>,<i>E</i>)</p>
+   <p style="line-height: 1em;">where</p>
+   <p style="line-height: 1em;">{<i>ν</i> ∈<i>V</i>} are hub vertices located on the left side of the graph.</p>
+   <p style="line-height: 1em;">{<i>x</i> ∈ <i>X</i>} are authority vertices located on the right side of the graph.</p>
+   <p style="line-height: 1em;">{(<i>ν</i>,<i>x</i>) Î <i>E</i>} are edges linking the hub vertices and authority vertices.</p>
+   <p style="line-height: 1em;">The following figure shows an example on a bipartite graph, which shows the transforming (a) of the collection into (b) bipartite `<i>G</i>.</p>
+
+            <a name="fig_ihp_klf_lw"> </a>
+                <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+            <p style="line-height: 1em;">For each hub vertex in the graph, SALSA computes a hub score (<i>h</i>
+      <sub>
+         <i>ν</i>
+      </sub>), and for each authority vertex, an authority score (<i>h</i>
+      <i>x</i>) is associated with. The hub/authority score is defined by analyzing a random walk on the bipartite graph, wherein the steps from hub vertex to authority vertex (from the left side of the bipartite graph to the right side) are called forward steps, and the steps from the authority vertex to the hub vertex are called backward steps.</p>
+   <p style="line-height: 1em;">The hub score (<i>h</i>
+      <sub>
+         <i>ν</i>
+      </sub>) is defined as the probability of visiting the hub vertex <i>ν</i> and the authority score (<i>a</i>
+      <sub>
+         <i>x</i>
+      </sub>) is the probability of visiting the authority vertex <i>x</i> in a random walk on the bipartite graph.</p>
+   <p style="line-height: 1em;">The hub score (<i>h</i>
+      <sub>
+         <i>ν</i>
+      </sub>) and authority score (<i>a</i>
+      <sub>
+         <i>x</i>
+      </sub>) can be computed using this update rule until convergence:</p>
+
+            <a name="fig_cxs_nlf_lw"> </a>
+                <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+            <p style="line-height: 1em;">For more information about SALSA, see this paper:</p>
+   <p style="line-height: 1em;">Lempel, R.; Moran S. (April 2001). "SALSA: The Stochastic Approach for Link-Structure Analysis" (PDF). <i>ACM Transaction on Information Systems</i> 19 (2): 131–160. doi:10.1145/382979.383041</p>
+
+   <a name="tgt1507827505625"> </a>
+   <h3>PSALSA</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">You can use the personalized version of the SALSA algorithm, PSALSA, to evaluate the similarity between vertices on each side. While the SALSA algorithm creates a global score for each vertex, the PSALSA algorithm creates, for each hub vertex <i>v</i>
+      <sub>
+         <i>i</i>
+      </sub>, a set of hub scores, <i>h</i>
+      <sub>
+         <i>v</i>
+         <sub>
+            <i>j</i>
+         </sub>
+      </sub> (<i>i</i>), and a set of authority scores, <i>a</i>
+      <sub>
+         <i>x</i>
+         <sub>
+            <i>k</i>
+         </sub>
+      </sub> (<i>i</i>).</p>
+   <p style="line-height: 1em;">A higher hub score indicates that vertex <i>v</i>
+      <sub>
+         <i>j</i>
+      </sub> shares more connections with (or is closer to) <i>v</i>
+      <sub>
+         <i>i</i>
+      </sub>. A higher authority score indicates that vertex <i>a</i>
+      <sub>
+         <i>k</i>
+      </sub> is more important in building the closeness relationship with <i>v</i>
+      <sub>
+         <i>i</i>
+      </sub>.</p>
+   <p style="line-height: 1em;">The updating rule for hub/authority score personalizing on <i>v</i>
+      <sub>
+         <i>j</i>
+      </sub> is as follows:</p>
+   <a name="fig_blz_fsk_pw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <p style="line-height: 1em;">This allows random jumps, with a probability of ε, to the seed vertex at forward steps.</p>
+   <p style="line-height: 1em;">Personalized SALSA can be used in recommendation application where the users are the hub vertices and the products that must be recommended are the authority nodes, and there is an edge between the user and product nodes if there is a purchase record.</p>
+   <p style="line-height: 1em;">Using the power iteration method to get the scores personalizing each of the hub vertices is harder with PSALSA than with SALSA, because the power iteration must run once for each hub vertex.</p>
+   <p style="line-height: 1em;">The PSALSA function implements the personalized SALSA algorithm described in this paper:</p>
+   <p style="line-height: 1em;">Bahmani Bahman, Abdur Chowdhury, and Ashish Goel. "Fast incremental and personalized PageRank." <i>Proceedings of the VLDB Endowment</i> 4.3 (2010): 173-184.</p>
+   <p style="line-height: 1em;">This paper solves the problem through Monte Carlo simulation: From each hub vertex <i>h</i>
+      <sub>
+         <i>i</i>,</sub> the algorithm starts a random walk of <i>L</i> steps (<i>L</i> is a input parameter) and tracks the path of the random walk. After the walk stops, the algorithm computes the score of a hub vertex <i>h</i>
+      <sub>
+         <i>j</i>
+      </sub> to <i>h</i>
+      <sub>
+         <i>i</i>,</sub>, and an authority vertex <i>a</i>
+      <sub>
+         <i>k</i>
+      </sub> to <i>h</i>
+      <sub>
+         <i>i</i>
+      </sub> as follows:</p>
+   <p style="line-height: 1em;">
+      <i>score_h</i>
+      <sub>
+         <i>ij</i>
+      </sub> = (2<i>vh</i>
+      <sub>
+         <i>ij</i>
+      </sub>) / <i>L</i>
+   </p>
+   <p style="line-height: 1em;">
+      <i>score_a</i>
+      <sub>
+         <i>ik</i>
+      </sub> = (2<i>va</i>
+      <sub>
+         <i>ik</i>
+      </sub>) / <i>L</i>
+   </p>
+   <p style="line-height: 1em;">where <i>vh</i>
+      <sub>
+         <i>ij</i>
+      </sub> and <i>va</i>
+      <sub>
+         <i>ik</i>
+      </sub> are the visit time of vertex <i>h</i>
+      <sub>
+         <i>j</i>
+      </sub> as a hub vertex and <i>a</i>
+      <sub>
+         <i>k</i>
+      </sub> as an authority vertex in the random walk path starting from the seed vertex <i>h</i>
+      <sub>
+         <i>i</i>
+      </sub>.</p>
+
+   <a name="sfd1507827782598"> </a>
+   <h2>PSALSA Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.2</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM PSALSA (
+  ON <i>vertices_table</i> AS Vertices PARTITION BY <i>vertex_key_column</i> [,...] 
+  ON <i>edges_table</i> AS Edges PARTITION BY <i>source_vertex_key_column</i> [,...] 
+  [ ON <i>sources_table</i> AS Sources PARTITION BY <i>source_vertex_key_column</i> [,...] ]
+  [ ON <i>targets_table</i> AS Targets PARTITION BY <i>target_vertex_key_column</i> [,...] ]
+  USING
+  SourceKey ({ '<i>source_vertex_column</i>' | <i>source_vertex_column_range</i> }[,...])
+  TargetKey ({ '<i>target_vertex_column</i>' | <i>target_vertex_column_range</i> }[,...])
+  [ EdgeWeight (<i>weight_column</i>) ]
+  MaxHubNum (<i>max_hubs</i>)
+  MaxAuthorityNum (<i>max_authority</i>)
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+  [ TeleportProb (<i>eta</i>) ]
+  [ RandomWalkLength (<i>L</i>) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="obm1507827859880"> </a>
+	  <h2>PSALSA Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>SourceKey</dt>
+      <dd>Specify the source key (the names of the Edges table columns that identify the target vertex). If you specify <i>sources_table</i>, the function uses only the vertices in <i>sources_table</i> as sources (which must be a subset of those that this syntax element specifies).<p style="line-height: 1em;">The function uses these names to construct the column names for recommended hub nodes in the output table.</p>
+      </dd>
+      <dt>TargetKey</dt>
+      <dd>Specify the target key (the names of the Edges table columns that identify the target vertex). If you specify <i>targets_table</i>, the function uses only the vertices in targets_table as targets (which must be a subset of those that this syntax element specifies).</dd>
+      <dt>EdgeWeight</dt>
+      <dd>[Optional] Specify the name of the Edges table column that contains edge weights. Each <i>edge_weight</i> is a positive value.</dd>
+      <dd>Default behavior: Each <i>edge_weight</i> is 1; that is, the graph is unweighted.</dd>
+      <dt>MaxHubNum</dt>
+      <dd>Specify the maximum number of hub vertices with the highest score output for each hub vertex. The <i>max_hubs</i> must be an INTEGER.</dd>
+      <dt>MaxAuthorityNum</dt>
+      <dd>Specify the maximum number of authority vertices with the highest score output for each hub vertex. The <i>max_authority</i> must be an INTEGER.</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the name of the Vertices table columns to copy to the output table.</dd>
+      <dt>TeleportProb</dt>
+      <dd>[Optional] Specify the probability ε, a DOUBLE PRECISION value between 0 and 1 that represents the jump to the seed vertex during random walk.</dd>
+      <dd>Default: 0.15</dd>
+      <dt>RandomWalkLength</dt>
+      <dd>[Optional] Specify the random walk length <i>L</i> for each hub vertex. <i>L</i> must be an INTEGER. The final hub/authority score is computed as <tt style="font-family: monospace;">ε*<i>K</i>
+            <i>v</i>/<i>L</i>
+         </tt>, where <i>K</i>
+         <i>v</i> is the number of times that the random walk visits vertex <i>v</i>.</dd>
+      <dd>Default: 5000</dd>
+   </div>
+
+
+	
+   <a name="unr1507827956095"> </a>
+   <h2>PSALSA Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_jm5_zgr_ycb"> </a>
+   <table class="introtable">
+      <a name="table_jm5_zgr_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Vertices</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Each row represents a vertex of the graph.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Edges</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Each row represents an edge of the graph.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Sources</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Required for directed graph, optional for undirected graph.] Vertices to use as sources.<p style="line-height: 1em; margin: 0px;">
+                  <br/>By default, all vertices are both sources and targets (that is, the graph is undirected).</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Targets</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Required for directed graph, optional for undirected graph.] Vertices to use as targets.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_yfz_tgr_ycb"> </a>
+   <h3>Vertices Schema</h3>
+   <a name="table_N10017_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10017_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>vertex_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any allowed in PARTITION BY clause</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>vertex_key_column</i>.] All or part of unique vertex key. Cannot be NULL.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_epd_vgr_ycb"> </a>
+   <h3>Edges Schema</h3>
+   <a name="table_N1004C_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1004C_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>source_vertex_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any allowed in PARTITION BY clause</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column appears once for each specified <i>source_vertex_key_column</i>.] All or part of key that identifies source vertex of edge. Must be a <i>vertex_key_column</i> in Vertices table. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_vertex_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as <i>source_vertex_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column appears once for each specified <i>target_vertex_key_column</i>.] All or part of key that identifies target vertex of edge. Must be a <i>vertex_key_column</i> in Vertices table. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>edge_weight</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SMALLINT, INTEGER, or NUMERIC</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Required only for weighted graph.] Edge weight, a positive value. Can be NULL.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_zjd_wgr_ycb"> </a>
+   <h3>Sources Schema</h3>
+   <a name="table_N1009D_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1009D_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>source_vertex_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as corresponding <i>vertex_key_column</i> in Vertices table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column appears once for each specified <i>source_vertex_key_column</i>.] All or part of key that identifies source vertex of edge. Must be a <i>vertex_key_column</i> in Vertices table. Cannot be NULL.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ryg_xgr_ycb"> </a>
+   <h3>Targets Schema</h3>
+   <a name="table_N100D2_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100D2_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_vertex_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as corresponding <i>vertex_key_column</i> in Vertices table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column appears once for each specified <i>target_vertex_key_column</i>.] All or part of key that identifies target vertex of edge. Must be a <i>vertex_key_column</i> in Vertices table. Cannot be NULL.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="dch1507828018756"> </a>
+   <h2>PSALSA Output</h2>
+   <a name="section_ch2_rgr_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>source_vertex_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Edges table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column appears once for each specified <i>source_vertex_key_column</i>.] All or part of key that identifies source vertex of edge. Must be a <i>vertex_key_column</i> in Vertices table. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Vertices table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column appears once for each specified <i>accumulate_column</i>.] Column copied from Vertices table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">hub_<i>source_vertex_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Edges table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column appears once for each specified <i>source_vertex_key_column</i>.] Hub node with top hub score, personalized on source node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">hub_score</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Hub score for top hub node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">authority_<i>target_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Edges table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column appears once for each specified <i>target_key_column</i>.] Authority node with highest authority score, personalized on source node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">authority_score</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Authority score for node with highest authority score.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="evk1510708854066"> </a>
+   <h2>PSALSA Examples</h2>
+   <a name="dpa1526071664537"> </a>
+	  <h3>PSALSA Example: Similar Users, No Edge Weight</h3>
+
+	  <a name="section_vc4_rrg_5db"> </a>
+   <p style="line-height: 1em;">This example uses the syntax elements MaxHubNum and MaxAuthorityNum to output a maximum of two hub and two authority users.</p>
+
+   <a name="section_yhx_1rg_5db"> </a>
+   <h4>Input</h4>
+   <a name="table_yvc_wrg_5db"> </a>
+   <table class="introtable">
+      <a name="table_yvc_wrg_5db"> </a>
+      <h4 style="text-align: center;">Vertices: users_vertex</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">userid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">username</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">John</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Carla</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Simon</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Celine</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Winston</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Diana</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_eky_xrg_5db"> </a>
+   <table class="introtable">
+      <a name="table_eky_xrg_5db"> </a>
+      <h4 style="text-align: center;">Edges: users_edges</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">followers</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">leaders</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">likes</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Carla</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Celine</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Carla</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Diana</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Celine</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Diana</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">John</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Carla</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">John</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Celine</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">John</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Diana</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">John</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Simon</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Simon</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Diana</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Winston</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Diana</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">The likes column is not used as edgeweight in this example.</p>
+
+   <a name="section_msw_xqg_5db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM PSALSA (
+  ON users_vertex AS Vertices PARTITION BY username
+  ON users_edges AS Edges PARTITION BY followers
+  USING
+  SourceKey ('followers ')
+  TargetKey ('leaders ')
+  MaxHubNum (2)
+  MaxAuthorityNum (2)
+  TeleportProb (0.15)
+  RandomWalkLength (1000)
+) AS dt ORDER BY followers;</tt>
+   </pre>
+   <a name="section_tmn_yqg_5db"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The output shows that the users John and Simon are similar to Carla. John is more similar, as he has a higher hub_score. The output varies with every run.</p>
+   <pre>
+      <tt>
+ followers hub_followers hub_score           authority_leaders authority_score     
+ --------- ------------- ------------------- ----------------- ------------------- 
+ carla     NULL                         NULL carla             0.12326043737574553
+ carla     NULL                         NULL simon             0.09145129224652088
+ carla     simon         0.08366533864541832 NULL                             NULL
+ carla     john          0.41832669322709165 NULL                             NULL
+ celine    NULL                         NULL celine             0.1854043392504931
+ celine    NULL                         NULL carla             0.09072978303747535
+ celine    carla          0.2075098814229249 NULL                             NULL
+ celine    john          0.31225296442687744 NULL                             NULL
+ john      celine        0.07240704500978473 NULL                             NULL
+ john      carla         0.19373776908023482 NULL                             NULL
+ simon     NULL                         NULL celine                          0.166
+ simon     NULL                         NULL carla                           0.092
+ simon     carla                       0.186 NULL                             NULL
+ simon     john                        0.318 NULL                             NULL
+ winston   NULL                         NULL celine                          0.184
+ winston   NULL                         NULL carla                           0.096
+ winston   carla                       0.186 NULL                             NULL
+ winston   john                        0.308 NULL                             NULL</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="eso1526071725336"> </a>
+	  <h3>PSALSA Example: Similar Users, Edge Weight</h3>
+
+	  <a name="section_il1_ctg_5db"> </a>
+   <p style="line-height: 1em;">This example uses the syntax elements MaxHubNum and MaxAuthorityNum to output a maximum of two hub and two authority users.</p>
+
+   <a name="section_avk_1rg_5db"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">As in PSALSA Example: Similar Users, No Edge Weight:<ul>
+         <li>Vertices: users_vertex</li>
+         <li>Edges: users_edges</li>
+      </ul>
+   </p>
+
+   <a name="section_msw_xqg_5db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM PSALSA (
+  ON users_vertex AS Vertices PARTITION BY username
+  ON users_edges AS Edges PARTITION BY followers
+  USING
+  SourceKey ('followers ')
+  TargetKey ('leaders ')
+  EdgeWeight ('likes')
+  MaxHubNum (2)
+  MaxAuthorityNum (2)
+  TeleportProb (0.15)
+  RandomWalkLength (1000)
+) AS dt ORDER BY 1, 3 DESC, 5 DESC;</tt>
+   </pre>
+   <a name="section_tmn_yqg_5db"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The output shows that John and Winston are similar to Carla. John is more similar, as he has a higher hub_score. The output varies with every run.</p>
+   <pre>
+      <tt>
+ followers hub_followers hub_score           authority_leaders authority_score     
+ --------- ------------- ------------------- ----------------- ------------------- 
+ carla     john          0.29504950495049503 NULL                             NULL
+ carla     winston       0.16237623762376238 NULL                             NULL
+ carla     NULL                         NULL carla              0.1067193675889328
+ carla     NULL                         NULL simon             0.03557312252964427
+ celine    carla           0.300990099009901 NULL                             NULL
+ celine    john          0.27524752475247527 NULL                             NULL
+ celine    NULL                         NULL celine            0.17786561264822134
+ celine    NULL                         NULL carla             0.10869565217391304
+ john      carla                       0.278 NULL                             NULL
+ john      winston                     0.138 NULL                             NULL
+ simon     carla                        0.32 NULL                             NULL
+ simon     john                         0.27 NULL                             NULL
+ simon     NULL                         NULL celine                           0.18
+ simon     NULL                         NULL carla                           0.102
+ winston   carla                       0.324 NULL                             NULL
+ winston   john                        0.264 NULL                             NULL
+ winston   NULL                         NULL celine                          0.178
+ winston   NULL                         NULL carla                           0.104</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="xpa1526071760766"> </a>
+	  <h3>PSALSA Example: Product Recommendation for Similar Users</h3>
+
+	  <a name="section_jhp_rtg_5db"> </a>
+   <p style="line-height: 1em;">This example finds similar customers and recommended products for them.</p>
+   <p style="line-height: 1em;">Teradata recommends PSALSA for recommending products to similar users when the product line has limited pairwise history or changes frequently. An example of a product line that changes frequently is apparel, which is subject to seasons and trends.</p>
+
+   <a name="section_dzx_zqg_5db"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Vertices: user_product_nodes, which has customer names</li>
+      <li>Edges: women_apparel_log, which reflects customer shopping patterns</li>
+   </ul>
+   <a name="table_knn_j5g_5db"> </a>
+   <table class="introtable">
+      <a name="table_knn_j5g_5db"> </a>
+      <h4 style="text-align: center;">Vertices:user_product_nodes</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">nodeid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">nodename</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sandra</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Susan</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Stacie</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Stephanie</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sally</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">coats</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sweaters</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">jackets</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">blazers</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">pants</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">pajamas</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_pzv_45g_5db"> </a>
+   <table class="introtable">
+      <a name="table_pzv_45g_5db"> </a>
+      <h4 style="text-align: center;">Edges: women_apparel_log</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">username</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">product</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">frequency</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Sally</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">blazers</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Sally</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">coats</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Sally</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">jackets</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Sally</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sweaters</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Sandra</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">coats</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Sandra</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">jackets</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Sandra</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sweaters</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Stacie</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">pajamas</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Stacie</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">pants</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Stephanie</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">blazers</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Stephanie</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">jackets</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Stephanie</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">pajamas</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Stephanie</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">pants</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Susan</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">blazers</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Susan</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">jackets</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Susan</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">pajamas</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Susan</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">pants</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Susan</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sweaters</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_msw_xqg_5db"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">This call outputs a maximum of two similar users (hub) and recommends two products (authority) for each user, using frequency of purchase as a weight factor.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM PSALSA (
+  ON user_product_nodes AS Vertices PARTITION BY nodename
+  ON women_apparel_log AS Edges PARTITION BY username
+  USING
+  SourceKey ('username')
+  TargetKey ('product')
+  EdgeWeight ('frequency')
+  MaxHubNum (2)
+  MaxAuthorityNum (2)
+  TeleportProb (0.15)
+  RandomWalkLength (500)
+) AS dt ORDER BY username, hub_score DESC, authority_score DESC;</tt>
+   </pre>
+   <a name="section_tmn_yqg_5db"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The output shows possible recommendations, based on hub_score and authority_score. For example, the seller can recommend pajamas to Sandra and Susan because they and Sally have similar scores. The hub_score and authority_score values vary with every run.</p>
+   <pre>
+      <tt>
+ username  hub_username hub_score           authority_product authority_score     
+ --------- ------------ ------------------- ----------------- ------------------- 
+ sally     sandra       0.23255813953488372 NULL                             NULL
+ sally     stephanie    0.13565891472868216 NULL                             NULL
+ sally     NULL                        NULL pajamas           0.13127413127413126
+ sally     NULL                        NULL pants             0.12355212355212356
+ sandra    sally                      0.212 NULL                             NULL
+ sandra    stephanie                  0.152 NULL                             NULL
+ sandra    NULL                        NULL pajamas                         0.144
+ sandra    NULL                        NULL pants                           0.136
+ stacie    stephanie     0.1984732824427481 NULL                             NULL
+ stacie    sally        0.17557251908396945 NULL                             NULL
+ stacie    NULL                        NULL jackets            0.1482889733840304
+ stacie    NULL                        NULL sweaters          0.13307984790874525
+ stephanie sally        0.18253968253968253 NULL                             NULL
+ stephanie susan         0.1746031746031746 NULL                             NULL
+ stephanie NULL                        NULL coats             0.13043478260869565
+ stephanie NULL                        NULL sweaters          0.12648221343873517
+ susan     stephanie    0.17120622568093385 NULL                             NULL
+ susan     stacie       0.16731517509727625 NULL                             NULL
+ susan     NULL                        NULL coats             0.09689922480620156</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="npa1526071799230"> </a>
+	  <h3>PSALSA Example: Sources and Targets Tables as Inputs</h3>
+
+	  <a name="section_osk_jvg_5db"> </a>
+   <p style="line-height: 1em;">This example shows how to limit the vertices and edges used. Teradata recommends this technique if the original Vertices and Edges tables are large, but only a subset of the information is relevant. The function calculates the hubs and authorities for the nodes specified in the Sources and Targets tables (user_source_nodes and product_target_nodes).</p>
+
+
+		<a name="section_N10018_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">As in PSALSA Example: Product Recommendation for Similar Users:<ul>
+         <li>Vertices: user_product_nodes, which has customer names</li>
+         <li>Edges: women_apparel_log, which reflects customer shopping patterns</li>
+      </ul>
+   </p>
+
+		
+   <a name="section_msw_xqg_5db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM PSALSA (
+  ON user_product_nodes AS Vertices PARTITION BY nodename
+  ON women_apparel_log AS Edges PARTITION BY username
+  ON user_source_nodes AS Sources PARTITION BY username
+  ON product_target_nodes AS Targets PARTITION BY product
+  USING
+  SourceKey ('username')
+  TargetKey ('product')
+  EdgeWeight ('frequency')
+  MaxHubNum (2)
+  MaxAuthorityNum (2)
+  TeleportProb (0.15)
+  RandomWalkLength (500)
+) AS dt ORDER BY username, hub_score DESC, authority_score DESC;</tt>
+   </pre>
+   <a name="section_tmn_yqg_5db"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">Based on the output, the retailer recommends pajamas to Sandra, who has no purchase history for them, but recommends nothing to Susan, who has bought all the items (see the PSALSA Example: Product Recommendation for Similar Users input). The *_score results vary with every run.</p>
+   <pre>
+      <tt>
+ username hub_username hub_score authority_product authority_score     
+ -------- ------------ --------- ----------------- ------------------- 
+ sandra   sally            0.364 NULL                             NULL
+ sandra   stephanie        0.088 NULL                             NULL
+ sandra   NULL              NULL pajamas           0.21348314606741572
+ susan    sally            0.228 NULL                             NULL
+ susan    sandra           0.168 NULL                             NULL</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

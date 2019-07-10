@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="dme1507831816786"> </a>
+	  <h1>Pack_MLE</h1>
+
+	
+		<p style="line-height: 1em;">The Pack_MLE function packs data from multiple input columns into a single column. The packed column has a virtual column for each input column. By default, virtual columns are separated by commas and each virtual column value is labeled with its column name.</p>
+
+		<p style="line-height: 1em;">Pack_MLE complements the function Unpack_MLE, but you can use it on any columns that meet the input requirements.</p>
+   <p>
+      <b>Note:</b>  To use Pack_MLE and Unpack_MLE together, you must run both on ML Engine platform. Pack_MLE and Unpack_MLE are incompatible with NewSQL Engine Pack and Unpack functions.</p>
+		<p style="line-height: 1em;">Before packing columns, note their data types—you need them if you want to
+			unpack the packed column.</p>
+
+	
+   <a name="bam1507831851546"> </a>
+   <h2>Pack_MLE Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.5</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Pack_MLE (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+  USING
+  [ TargetColumns ({ '<i>target_column</i>' | <i>target_column_range</i> }[,... ]) ]
+  [ Delimiter ('<i>delimiter</i>') ]
+  [ IncludeColumnName ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  OutputColumn ('<i>output_column</i>')
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="fgr1507831865377"> </a>
+	  <h2>Pack_MLE Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumns</dt>
+      <dd>[Optional] Specify the names of the input columns to pack into a single output column. These names become the column names of the virtual columns. If you specify this syntax element, but do not specify all input table columns, the function copies the unspecified input table columns to the output table.</dd>
+      <dd>Default behavior: All input table columns are packed into a single output column.</dd>
+      <dt>Delimiter</dt>
+      <dd>[Optional] Specify the delimiter (a string) that separates the virtual columns in the packed data.</dd>
+      <dd>Default: ',' (comma)</dd>
+      <dt>IncludeColumnName</dt>
+      <dd>[Optional] Specify whether to label each virtual column value with its column name (making the virtual column <i>target_column</i>:<i>value</i>).</dd>
+      <dd>Default: 'true'</dd>
+      <dt>OutputColumn</dt>
+      <dd>Specify the name to give to the packed output column.</dd>
+   </div>
+
+
+	
+   <a name="vbb1507831873294"> </a>
+   <h2>Pack_MLE Input</h2>
+   <a name="section_y2j_hls_ycb"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>target_column</i>.] Column to pack, with other target columns, into single output column.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>other_input_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears zero or more times.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="skb1507831878027"> </a>
+   <h2>Pack_MLE Output</h2>
+   <a name="section_zvf_fls_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>row_id</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BIGINT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column created by function. Value may vary from run to run on same data set.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>output_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CLOB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Packed column.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>other_input_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>other_input_column</i>.]Column copied from input table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ufl1526332054342"> </a>
+	  <h2>Pack_MLE Examples</h2>
+
+   <a name="obh1507831896200"> </a>
+   <h3>Pack_MLE Example: Default Values</h3>
+   <a name="section_htv_f5r_t2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, ville_temperature, contains temperature readings for the cities Nashville and Knoxville, in the state of Tennessee.</p>
+   <a name="table_ngw_35r_t2b"> </a>
+   <table class="introtable">
+      <a name="table_ngw_35r_t2b"> </a>
+      <h4 style="text-align: center;">ville_temperature</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">sn</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">city</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">state</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">period</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">temp_f</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Tennessee</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">35.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Tennessee</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 01:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">36.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Tennessee</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 02:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">34.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Tennessee</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 03:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33.6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Tennessee</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 04:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Knoxville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Tennessee</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 03:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Knoxville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Tennessee</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 04:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32.8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Knoxville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Tennessee</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 05:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Knoxville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Tennessee</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 06:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Knoxville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Tennessee</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 07:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32.4</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_yss_rs3_xdb"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">Delimiter and IncludeColumnName have their default values.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT row_id, cast(packed_data as varchar(100)), sn 
+  FROM Pack_MLE (
+  ON ville_temperature
+  USING
+  Delimiter('<b>,</b>')
+  OutputColumn('packed_data')
+  IncludeColumnName('<b>true</b>')
+  TargetColumns('city', 'state', 'period', 'temp_F')
+) AS dt ORDER BY sn;</tt>
+   </pre>
+   <a name="section_okf_ss3_xdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The columns specified by TargetColumns are packed in the column packed_data. Virtual columns are separated by commas, and each virtual column value is labeled with its column name. The input column sn, which was not specified by TargetColumns, is unchanged in the output table.</p>
+   <pre>
+      <tt>
+ row_id packed_data                                                           sn 
+ ------ --------------------------------------------------------------------- -- 
+      3 city:nashville,state:tennessee,period:2010-01-01 00:00:00,temp_f:35.1  1
+      5 city:nashville,state:tennessee,period:2010-01-01 01:00:00,temp_f:36.2  2
+      2 city:nashville,state:tennessee,period:2010-01-01 02:00:00,temp_f:34.5  3
+      2 city:nashville,state:tennessee,period:2010-01-01 03:00:00,temp_f:33.6  4
+      1 city:nashville,state:tennessee,period:2010-01-01 04:00:00,temp_f:33.1  5
+      3 city:knoxville,state:tennessee,period:2010-01-01 03:00:00,temp_f:33.2  6
+      1 city:knoxville,state:tennessee,period:2010-01-01 04:00:00,temp_f:32.8  7
+      4 city:knoxville,state:tennessee,period:2010-01-01 05:00:00,temp_f:32.4  8
+      6 city:knoxville,state:tennessee,period:2010-01-01 06:00:00,temp_f:32.2  9
+      7 city:knoxville,state:tennessee,period:2010-01-01 07:00:00,temp_f:32.4 10</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="vee1507831918060"> </a>
+   <h3>Pack_MLE Example: Nondefault Values</h3>
+   <a name="section_htv_f5r_t2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: ville_temperature, as in Pack_MLE Example: Default Values</li>
+   </ul>
+
+   <a name="section_yss_rs3_xdb"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">Delimiter and IncludeColumnName have nondefault values.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT row_id, cast(packed_data as varchar(100)), sn 
+FROM Pack_MLE(
+ON ville_temperature
+USING
+Delimiter('<b>|</b>')
+OutputColumn('packed_data')
+IncludeColumnName('<b>false</b>')
+TargetColumns('city', 'state', 'period', 'temp_F')
+) as dt ORDER BY sn;</tt>
+   </pre>
+   <a name="section_okf_ss3_xdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">Virtual columns are separated by pipe characters and not labeled with their column names.</p>
+   <pre>
+      <tt>
+ row_id packed_data                                  sn 
+ ------ -------------------------------------------- -- 
+      5 nashville|tennessee|2010-01-01 00:00:00|35.1  1
+      7 nashville|tennessee|2010-01-01 01:00:00|36.2  2
+      4 nashville|tennessee|2010-01-01 02:00:00|34.5  3
+      2 nashville|tennessee|2010-01-01 03:00:00|33.6  4
+      3 nashville|tennessee|2010-01-01 04:00:00|33.1  5
+      3 knoxville|tennessee|2010-01-01 03:00:00|33.2  6
+      1 knoxville|tennessee|2010-01-01 04:00:00|32.8  7
+      6 knoxville|tennessee|2010-01-01 05:00:00|32.4  8
+      1 knoxville|tennessee|2010-01-01 06:00:00|32.2  9
+      2 knoxville|tennessee|2010-01-01 07:00:00|32.4 10</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

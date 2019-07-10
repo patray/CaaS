@@ -1,0 +1,976 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="swn1507915086903"> </a>
+	  <h1>SVMSparse</h1>
+
+	  <p style="line-height: 1em;">The SVMSparse function takes training data (in sparse format) and outputs a predictive model in binary format, which is input to the functions SVMSparsePredict_MLE and SVMSparseSummary.</p>
+
+   <a name="qza1507915147600"> </a>
+   <h2>SVMSparse Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.4</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SVMSparse (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  OUT TABLE ModelTable (<i>model_table</i>)
+  USING
+  IDColumn ('<i>id_column</i>')
+  AttributeNameColumn ('<i>attribute_name_column</i>')
+  [ AttributeValueColumn ('<i>attribute_value_column</i>') ]
+  ResponseColumn ('<i>response_column</i>')
+  [ Cost (<i>cost</i>) ]
+  [ Bias (<i>bias</i>) ]
+  [ HashProjection ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ HashBuckets (<i>buckets_number</i>) ]
+  [ ClassWeights ('<i>class</i>:<i>weight</i>' [,...]) ]
+  [ MaxStep (<i>max_step</i>) ]
+  [ Epsilon (<i>epsilon</i>) ]
+  [ Seed (<i>seed</i>) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="azb1507915217843"> </a>
+	  <h2>SVMSparse Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>ModelTable</dt>
+      <dd>Specify the name of the model table (which must not exist).</dd>
+      <dt>IDColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the identifiers of the training samples.</dd>
+      <dt>AttributeNameColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the attributes of the samples.</dd>
+      <dt>AttributeValueColumn</dt>
+      <dd>[Optional] Specify the name of the InputTable column that contains the attribute values.</dd>
+      <dd>Default behavior: Each attribute has the value 1.</dd>
+      <dt>ResponseColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the classes of the samples.</dd>
+      <dt>Cost</dt>
+      <dd>[Optional] Specify the regularization parameter λ in the SVM soft-margin loss function:<a name="fig_fwh_fxb_tw"> </a>
+         <div style="text-align: center;">
+            <div style="margin: auto; display: inline-block">
+               <img src="data:image/png;base64,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"
+                    width=""
+                    height=""/>
+            </div>
+         </div>
+         <p style="line-height: 1em;">The <i>cost</i> must be greater than 0.0.</p>
+         <p style="line-height: 1em;">Default: 1.0</p>
+      </dd>
+      <dt>Bias</dt>
+      <dd>[Optional] Specify whether to add another dimension containing the bias value <i>b</i>. The <i>bias</i> must be nonnegative. If <i>bias</i> is greater than 0, the function converts each sample <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAATCAYAAABLN4eXAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAAkdEVYdENvbW1lbnQATEVBRCBUZWNobm9sb2dpZXMgSW5jLiBWMS4wMX7Qgw0AAAJ6SURBVDhPjVPLThRBFD3d0zMDAi70RzQRnyBxoR9hDD4hEqISV/6A0ZiwQIIb/QETH0EMRIwLE+PKhRISYxTQje4MDDA9XV3Vx3NrdG/N3Hrc9z33dkIt/Odi5VEyQ4oQX/Co4LCFXWMUuyiMjTeYSK7gbQjwcu1ToFFJ4lmSlcIFka6Fa7GTe/GcHmS+cZuHkyOc+Rqf4pdUOCnoT77iTXNe/0cJ9/Q22TQeUtEhzv3oMC92CFIeFYHVdoymXacxAjtVi/z8iAdwjA/W866adGBRKtGmRfMFW6VTtjts7zo6v8wpjHMxKplJGQ0TcxqyIBByNNGPMgLgkVUJGmmFNhLxswhEJeoVVElblr2GVV4DsgyotyTtg0tqQqpEqNVRFR6oZSq1izSUtSDa5PbCJHvSfsovD86uKh0T2FrmRJKymYHnXusZnBLRuXb/FLOLzwTJBqdHEiIbE5ZanfloENHMbvADW/ytqpD7Du1HZ64d12aGlfkJzn0jn46C9cF7XIkNcvzJLoKw3S6Wji9V4ZdpHlXmQ4PDrJ+5y4+FoLfGWz9KkUEeDbglI/XLhOUCL8koG5rlShwJ671kle46DP00E3K5HwBCHZ3Uwa//wmqiGag1sBcN+HpH8+AQkoaQFXqaP8RarBybiI0ZHu8f5tVrp1X8CO98kqDcjmKvTUHjsnEXU0l+f8iTGODYY+WwcJ419PH6E1OJMCn1rW7tWnBLo/pCVEMC1sbfRVQ85zlpvIklqZR8P5bx7KKuMSMZvZiCGrqfPZdfctsKdZtWK59fsOm2ad/HWzLwfxG0ajRPbY1nlxHMk0HoTCOw0tsmxtjBqTaxAwv+AS/fmrxz6CVCAAAAAElFTkSuQmCC"
+              width=""
+              height=""/> in the training set to (<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAATCAYAAABLN4eXAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAAkdEVYdENvbW1lbnQATEVBRCBUZWNobm9sb2dpZXMgSW5jLiBWMS4wMX7Qgw0AAAJ6SURBVDhPjVPLThRBFD3d0zMDAi70RzQRnyBxoR9hDD4hEqISV/6A0ZiwQIIb/QETH0EMRIwLE+PKhRISYxTQje4MDDA9XV3Vx3NrdG/N3Hrc9z33dkIt/Odi5VEyQ4oQX/Co4LCFXWMUuyiMjTeYSK7gbQjwcu1ToFFJ4lmSlcIFka6Fa7GTe/GcHmS+cZuHkyOc+Rqf4pdUOCnoT77iTXNe/0cJ9/Q22TQeUtEhzv3oMC92CFIeFYHVdoymXacxAjtVi/z8iAdwjA/W866adGBRKtGmRfMFW6VTtjts7zo6v8wpjHMxKplJGQ0TcxqyIBByNNGPMgLgkVUJGmmFNhLxswhEJeoVVElblr2GVV4DsgyotyTtg0tqQqpEqNVRFR6oZSq1izSUtSDa5PbCJHvSfsovD86uKh0T2FrmRJKymYHnXusZnBLRuXb/FLOLzwTJBqdHEiIbE5ZanfloENHMbvADW/ytqpD7Du1HZ64d12aGlfkJzn0jn46C9cF7XIkNcvzJLoKw3S6Wji9V4ZdpHlXmQ4PDrJ+5y4+FoLfGWz9KkUEeDbglI/XLhOUCL8koG5rlShwJ671kle46DP00E3K5HwBCHZ3Uwa//wmqiGag1sBcN+HpH8+AQkoaQFXqaP8RarBybiI0ZHu8f5tVrp1X8CO98kqDcjmKvTUHjsnEXU0l+f8iTGODYY+WwcJ419PH6E1OJMCn1rW7tWnBLo/pCVEMC1sbfRVQ85zlpvIklqZR8P5bx7KKuMSMZvZiCGrqfPZdfctsKdZtWK59fsOm2ad/HWzLwfxG0ajRPbY1nlxHMk0HoTCOw0tsmxtjBqTaxAwv+AS/fmrxz6CVCAAAAAElFTkSuQmCC"
+              width=""
+              height=""/> , b). Use this syntax element when not all samples center at 0.</dd>
+      <dd>Default: 0.0</dd>
+      <dt>HashProjection</dt>
+      <dd>[Optional] Specify whether to use hash projection on attributes. Hash projection can accelerate processing speed but can slightly decrease accuracy.</dd>
+      <dd>
+         <p>
+            <b>Note:</b>  You must use hash projection if the data set has more features than fit into memory.</p>
+      </dd>
+      <dd>Default: 'false'</dd>
+      <dt>HashBuckets</dt>
+      <dd>[Optional] [Valid only with HashProjection ('true').] Specify the number of buckets for hash projection. Usually, the function can determine the appropriate number of buckets from the scale of the input data set. However, if the data set has many features, you might have to specify <i>buckets_number</i> to accelerate the function.</dd>
+      <dd>Default behavior: The function determines the appropriate number of buckets from the scale of the input data set.</dd>
+      <dt>ClassWeights</dt>
+      <dd>[Optional] Specify the weights for different classes. If you specify a <i>weight</i> for a <i>class</i>, the cost parameter for that class is <i>weight</i> * <i>cost</i>. A <i>weight</i> larger than 1 often increases the accuracy of <i>class</i>; however, it may decrease global accuracy.</dd>
+      <dd>Default behavior: The function assigns weight 1.0 to any class not assigned a weight in this syntax element.</dd>
+      <dt>MaxStep</dt>
+      <dd>[Optional] Specify the maximum number of steps of the training process. One step means that the trainer sees each sample once. The <i>max_step</i> must be in the range (0, 10000].</dd>
+      <dd>Default: 100</dd>
+      <dt>Epsilon</dt>
+      <dd>[Optional] Specify the termination criterion: When the difference between the values of the loss function in two sequential iterations is less than this <i>epsilon</i>, the function stops. The <i>epsilon</i> must be greater than 0.0.</dd>
+      <dd>Default: 0.01</dd>
+      <dt>Seed</dt>
+      <dd>[Optional] Specify the random seed the algorithm uses for repeatable results (for more information, see Nondeterministic Results and UniqueID Syntax Element). The algorithm uses the seed to order the training set randomly and consistently. The <i>seed</i> must be a nonnegative LONG value.</dd>
+      <dd>Default: 0</dd>
+   </div>
+
+
+	
+   <a name="suj1507915383408"> </a>
+   <h2>SVMSparse Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>InputTable Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, SMALLINT, BIGINT, NUMERIC, VARCHAR, VARBYTE(<i>n</i>), or BLOB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Training sample identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>attribute_name_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, SMALLINT, BIGINT, or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Training sample attribute.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>attribute_value_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, SMALLINT, BIGINT, or NUMERIC</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Attribute value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>response_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, SMALLINT, BIGINT, VARCHAR, or VARCHAR(<i>n</i>)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Training sample class.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="lhs1507915494399"> </a>
+   <h2>SVMSparse Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Message Schema</h3>
+   <a name="table_u21_cxw_xcb"> </a>
+   <table class="introtable">
+      <a name="table_u21_cxw_xcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">message</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Describes model created.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_z3v_yww_xcb"> </a>
+   <h3>ModelTable</h3>
+   <p style="line-height: 1em;">The model table, which is input to the function SVMSparsePredict_MLE, is in binary format. To display its readable content, use the function SVMSparseSummary.</p>
+   <p>
+      <b>Note:</b>  The model may be different even if the function is run with the same syntax elements, unless you run the function on the same database and specify the Seed syntax element.</p>
+   <a name="vhr1510769089605"> </a>
+   <h2>SVMSparse Example</h2>
+   <a name="section_bzt_y4x_42b"> </a>
+   <h3>Input</h3>
+   <ul>
+      <li>InputTable: svm_iris_input_train<p style="line-height: 1em;">The example creates svm_iris_input_train in two steps:<ol>
+               <li>Create table svm_iris_input in sparse format by inputting table svm_iris to the Unpivoting function:<pre style="margin-left: 2em; font-family: monospace;">
+                     <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE svm_iris_input AS (
+  SELECT id, species, attribute, value_col
+  FROM Unpivoting (
+    ON svm_iris
+    USING
+    TargetColumns ('Sepal_Length', 'Sepal_Width', 'Petal_Length', 'Petal_Width')
+    Accumulate ('ID', 'Species')
+  ) AS dt
+) WITH DATA;</tt>
+                  </pre>
+               </li>
+               <li>From svm_iris_input, create training table svm_iris_input_train (with 80% of the rows) and testing table svm_iris_input_test (with 20% of the rows):<pre style="margin-left: 2em; font-family: monospace;">
+                     <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE svm_iris_input_train AS (
+  SELECT * FROM svm_iris_input WHERE id MOD 5 &lt;&gt; 0
+) WITH DATA;
+
+CREATE MULTISET TABLE svm_iris_input_test AS (
+  SELECT * FROM svm_iris_input WHERE id MOD 5 = 0
+) WITH DATA;</tt>
+                  </pre>
+                  <p style="line-height: 1em;">The testing table is input to the SVMSparsePredict_MLE function.</p>
+               </li>
+            </ol>
+         </p>
+      </li>
+   </ul>
+   <p style="line-height: 1em;">The table svm_iris has four iris attributes (sepal length, sepal width, petal length, and petal width), grouped into three categories (setosa, versicolor, and virginica).</p>
+   <a name="table_vbc_spx_42b"> </a>
+   <table class="introtable">
+      <a name="table_vbc_spx_42b"> </a>
+      <h4 style="text-align: center;">svm_iris</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">species</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_ez4_lqx_42b"> </a>
+   <table class="introtable">
+      <a name="table_ez4_lqx_42b"> </a>
+      <h4 style="text-align: center;">svm_iris_input</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">species</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">attribute</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">value_col</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.7</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_xsm_zsx_42b"> </a>
+   <table class="introtable">
+      <a name="table_xsm_zsx_42b"> </a>
+      <h4 style="text-align: center;">InputTable: svm_iris_input_train</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">species</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">attribute</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">value_col</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.7</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_r1f_z4x_42b"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SVMSparse (
+  ON svm_iris_input_train AS InputTable
+  OUT TABLE ModelTable (svm_iris_model_1)
+  USING
+  IDColumn ('id')
+  AttributeNameColumn ('attribute')
+  ResponseColumn ('species')
+  AttributeValueColumn ('value1')
+  MaxStep (150)
+  Seed (0)
+)as dt ;</tt>
+   </pre>
+   <a name="section_rjq_z4x_42b"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ message                                                                                                                                        
+ ---------------------------------------------------------------------------------------------------------------------------------------------- 
+ Model table is created successfully                                                                                                           
+ The model is trained with 120 samples and 4 unique attributes                                                                                 
+ There are 3 different classes in the training set                                                                                             
+ The model is not converged after 150 steps with epsilon 0.01, the average value of the loss function for the training set is 36.44926590032744
+ The corresponding training parameters are cost:1.0 bias:0.0</tt>
+   </pre>
+   <p style="line-height: 1em;">The model table, svm_iris_model, is in binary format.</p>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

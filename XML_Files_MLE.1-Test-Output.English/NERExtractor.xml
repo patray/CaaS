@@ -1,0 +1,698 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="cok1507323704385"> </a>
+	  <h1>NERExtractor</h1>
+
+	
+		<p style="line-height: 1em;">The NERExtractor function takes input documents and extracts specified entities, using one or more CRF models (output by the function NERTrainer) and, if appropriate, rules (regular expressions) or a dictionary.</p>
+
+		<p style="line-height: 1em;">The function uses models to extract the names of persons, locations, and
+			organizations; rules to extract entities that conform to rules (such as phone numbers,
+			times, and dates); and a dictionary to extract known entities.</p>
+   <p>
+      <b>Note:</b>  NERExtractor uses files that are preinstalled on ML Engine. For details, see Preinstalled Files That Functions Use.</p>
+	
+   <a name="tvi1507323900594"> </a>
+   <h2>NERExtractor Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.7</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NERExtractor (
+  ON <i>input_table</i> PARTITION BY { ANY | <i>key</i> }
+  [ ON <i>rules_table</i> AS Rules DIMENSION ]
+  [ ON <i>dictionary_table</i> AS Dict DIMENSION ]
+  USING
+  TextColumn ('<i>text_column</i>')
+  [ InputModelFiles ('<i>input_model_file</i>[:<i>jar_file</i>]' [,...]) ]
+  [ InputLanguage ({ 'en' | 'zh_CN' | 'zh_TW' }) ]
+  [ ShowContext ('<i>n</i>') ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="dhv1507327571656"> </a>
+	  <h2>NERExtractor Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TextColumn</dt>
+      <dd>Specify the name of the input table column that contains the text to analyze.</dd>
+      <dt>InputModelFiles</dt>
+      <dd>[Optional] Specify the CRF models (binary files) to use, output by NERTrainer. If you specified the ExtractorJAR syntax element in the NERTrainer call that created <i>input_model_file</i>, then you must specify the same <i>jar_file</i> in this syntax element. You must install <i>input_model_file</i> and <i>jar_file</i> in ML Engine before calling the NERExtractor function.<p>
+            <b>Note:</b>  The names <i>input_model_file</i> and <i>jar_file</i> are case-sensitive.</p>
+      </dd>
+      <dt>InputLanguage</dt>
+      <dd>[Optional] Specify the language of the input text:<a name="d59e19"> </a>
+         <table class="introtable">
+            <a name="d59e19"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'en'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">English</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'zh_CN'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Simplified Chinese</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'zh_TW'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Traditional Chinese</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>ShowContext</dt>
+      <dd>[Optional] Specify the number of context words to output (a positive integer). The function outputs the <i>n</i> words that precede the entity, the entity, and the <i>n</i> words that follow the entity.</dd>
+      <dd>Default: 0</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the input table columns to copy to the output table.</dd>
+   </div>
+
+
+	
+   <a name="zsi1507327647838"> </a>
+   <h2>NERExtractor Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_z5t_xmc_ycb"> </a>
+   <table class="introtable">
+      <a name="table_z5t_xmc_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Text to analyze.<p>
+                  <b>Tip:</b>  To optimize function performance, remove punctuation marks from text with TextParser function.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Rules</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Rules to use when extracting entities from text.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Dict</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Dictionary to use when extracting entities from text.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_gqj_cnc_ycb"> </a>
+   <h3>Input Table Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N1001B_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1001B_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>text_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Text to analyze.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_vm2_gnc_ycb"> </a>
+   <h3>Rules Schema</h3>
+   <a name="table_N10061_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10061_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Entity type.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">regex</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Regular expression that represents an entity of this type. Expression must conform to Java Regex standard, documented at http://docs.oracle.com/javase/tutorial/essential/regex/quant.html.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_nxd_hnc_ycb"> </a>
+   <h3>Dict Schema</h3>
+   <a name="table_N100AD_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100AD_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Entity type.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">dict</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Dictionary word.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ily1507327714131"> </a>
+   <h2>NERExtractor Output</h2>
+   <a name="section_dsr_vnc_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">sn</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Serial number of extracted entity.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">entity</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Extracted entity.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Type of extracted entity.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">start</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Start position of extracted entity in input text.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">end</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">End position of extracted entity in input text.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">context</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with ShowContent syntax element.] Context of extracted entity.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">approach</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Method used to identify extracted entity—CRF, RULE, or DICT.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="lit1507327795901"> </a>
+   <h2>NERExtractor Example</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Input</h3>
+   <ul>
+      <li>Input table: ner_sports_test2, which contains text to analyze.</li>
+      <li>Rules: rule_table, which is preinstalled on ML Engine.</li>
+      <li>Model: ner_model.bin, output by NERTrainer Example.</li>
+   </ul>
+   <a name="table_N10025_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10025_N1000E_N1000C_N10001"> </a>
+      <h4 style="text-align: center;">Input table: ner_sports_test2</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">content</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">528</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">email sports@espn.com to contact for all sport info</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">email cricket@espn.com to contact for all cricket info</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">530</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">email tennis@espn.com to contact for all tennis info</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">531</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1=  Igor Trandenkov  (Russia) 5.86</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">532</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.  Maksim Tarasov  (Russia) 5.86</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">533</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.  Tim Lobinger  (Germany) 5.80</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">534</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.  Igor Potapovich  (Kazakstan) 5.80</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">535</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.  Jean Galfione  (France) 5.65</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">536</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7.  Pyotr Bochkary  (Russia) 5.65</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">537</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8.  Dmitri Markov  (Belarus) 5.65</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">583</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;"> GENEVA 1996-08-30</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">584</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;"> UEFA came down heavily on Belgian club Standard Liege on Friday for disgraceful behaviour in an Intertoto final match against Karlsruhe of Germany .</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">585</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">The Belgian club were fined 25</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">586</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">He was sent off for insulting the referee and then urged his team mates to protest .</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">587</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;"> Roberto Bisconti will be sidelined for six Euro ties after pushing the referee in the back as he protested about a Karlsruhe goal</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">588</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;"> Karlsruhe won the August 20 match 3-1 thanks to two late goals .</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">589</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">They took the tie 3-2 on aggregate and qualified for the UEFA Cup .</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">591</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ATHLETICS -  HARRISON</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">592</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;"> MONTE CARLO 1996-08-30</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">593</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Olympic champion  Kenny Harrison  and world record holder  Jonathan Edwards  will both take part in a triple jump competition at the Solidarity Meeting for Sarajevo on September 9 .</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">594</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">The  International Amateur Athletic Federation  said on Friday that a schedule reshuffle had allowed organisers to hold a men s triple jump as well as the women s long jump on the  one usable runway at the war-devastated   Kosevo  stadium .</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">595</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Atlanta Games silver medal winner  Edwards  has called on other leading athletes to take part in the  Sarajevo  meeting -- a goodwill gesture towards  Bosnia  as it recovers from the war in the  Balkans  -- two days after the grand prix final in  Milan  .</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">596</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;"> Edwards was quoted as saying : What type of character do we show by going to the IAAF Grand Prix Final in Milan where there is a lot of money to make but refusing to make the trip to Sarajevo as a humanitarian gesture ?</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">598</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SOCCER -  BARATELLI  TO COACH  NICE  .</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">599</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;"> NICE</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">600</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Former international goalkeeper  Dominique Baratelli  is to coach struggling French first division side  Nice</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">601</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;"> Baratelli</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">602</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;"> Nice have been unable to win any of their four league matches played this season and are lying a lowly 18th in the table .</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_N100C6_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100C6_N1000E_N1000C_N10001"> </a>
+      <h4 style="text-align: center;">Rules: rule_table</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">regex</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">email</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[\w\-]([\.\w])+[\w]+@([\w\-]+\.)+[a-zA-Z]{2,4}</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_jpx_p4b_cdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NERExtractor (
+  ON ner_sports_test2 PARTITION BY ANY
+  ON rule_table AS Rules DIMENSION
+  USING
+  TextColumn ('content')
+  InputModelFiles ('ner_model.bin')
+  ShowContext (2)
+  Accumulate ('id')
+) AS dt ORDER BY id, sn;</tt>
+   </pre>
+   <a name="section_np2_cpb_cdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ id  sn entity              type_ner start_ner end_ner context                                            approach 
+ --- -- ------------------- -------- --------- ------- -------------------------------------------------- -------- 
+ 528  1 sports@espn.com     email            2       2 ... email sports@espn.com to contact               RULE    
+ 529  1 cricket@espn.com    email            2       2 ... email cricket@espn.com to contact              RULE    
+ 530  1 tennis@espn.com     email            2       2 ... email tennis@espn.com to contact               RULE    
+ 531  1 Igor Trandenkov     PER              2       3 ... 1= Igor Trandenkov (Russia) 5.86               CRF     
+ 532  1 Maksim Tarasov      PER              2       3 ... 3. Maksim Tarasov (Russia) 5.86                CRF     
+ 533  1 Tim Lobinger        PER              2       3 ... 4. Tim Lobinger (Germany) 5.80                 CRF     
+ 534  1 Igor Potapovich     PER              2       3 ... 5. Igor Potapovich (Kazakstan) 5.80            CRF     
+ 535  1 Jean Galfione       PER              2       3 ... 6. Jean Galfione (France) 5.65                 CRF     
+ 536  1 Pyotr Bochkary      PER              2       3 ... 7. Pyotr Bochkary (Russia) 5.65                CRF     
+ 537  1 Dmitri Markov       PER              2       3 ... 8. Dmitri Markov (Belarus) 5.65                CRF     
+ 583  1 GENEVA              LOC              1       1 ... ... GENEVA 1996-08-30 ...                      CRF     
+ 584  1 Standard Liege      PER              8       9 Belgian club Standard Liege on Friday              CRF     
+ 587  1 Roberto Bisconti    PER              1       2 ... ... Roberto Bisconti will be                   CRF     
+ 591  1 HARRISON            PER              3       3 ATHLETICS - HARRISON ... ...                       CRF     
+ 592  1 MONTE CARLO         PER              1       2 ... ... MONTE CARLO 1996-08-30 ...                 CRF     
+ 593  1 Kenny Harrison      PER              3       4 Olympic champion Kenny Harrison and world          CRF     
+ 593  2 Jonathan Edwards    PER              9      10 record holder Jonathan Edwards will both           CRF     
+ 596  1 What                ORG              7       7 saying : What type of                              CRF     
+ 598  1 BARATELLI TO        PER              3       4 SOCCER - BARATELLI TO COACH NICE                   CRF     
+ 599  1 NICE                PER              1       1 ... ... NICE ... ...                               CRF     
+ 600  1 Dominique Baratelli PER              4       5 international goalkeeper Dominique Baratelli is to CRF     
+ 600  2 Nice                PER             14      14 division side Nice ... ...                         CRF     
+ 601  1 Baratelli           PER              1       1 ... ... Baratelli ... ...                          CRF</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

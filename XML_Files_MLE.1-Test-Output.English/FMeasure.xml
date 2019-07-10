@@ -1,0 +1,640 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="zad1507658869459"> </a>
+	  <h1>FMeasure</h1>
+
+	  <p style="line-height: 1em;">The FMeasure function calculates the accuracy of a test (usually the output of a classifier).</p>
+
+   <a name="uqc1507658915120"> </a>
+   <h2>FMeasure Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.6</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM FMeasure (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY 1
+  USING
+  ObservationColumn ('<i>observed_column</i>')
+  PredictColumn ('<i>predicted_column</i>')
+  [ Classes ('<i>class</i>' [,...]) ]
+  [ Beta (<i>beta_value</i>) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="wwd1507658932203"> </a>
+	  <h2>FMeasure Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>ObservationColumn</dt>
+      <dd>Specify the name of the input table column that contains the observed class.</dd>
+      <dt>PredictColumn</dt>
+      <dd>Specify the name of the input table column that contains the predicted class.</dd>
+      <dt>Classes</dt>
+      <dd>[Optional] Specify the class or classes to output in the result.</dd>
+      <dd>Default: All classes</dd>
+      <dt>Beta</dt>
+      <dd>[Optional] Specify the value of β in the F-measure formula that the function implements. The <i>beta_value</i> must be a positive DOUBLE PRECISION value.</dd>
+      <dd>Default: 1.0</dd>
+   </div>
+
+
+	
+   <a name="vfa1507659349151"> </a>
+   <h2>FMeasure Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Input Table Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>observation_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Expected class.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>result_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Result class.</div>
+         </td>
+      </tr>
+   </table>
+
+   <p>
+      <b>Note:</b>  The function is intended for general, multiple-class input data. To submit a binary classification problem to the function in the expected format, input a query that includes WHERE clauses.</p>
+   <a name="ixa1507659364852"> </a>
+   <h2>FMeasure Output</h2>
+   <a name="section_vbt_gd5_wcb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">class</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with Classes syntax element.] Observed classes and, in last row (labeled <tt style="font-family: monospace;">-AVG-</tt>), average F<sub>1</sub> score for all classes.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">precision</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Precision variable value, <i>p</i>, used to calculate F<sub>1</sub> score.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">recall</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Precision variable value, <i>r</i>, used to calculate F<sub>1</sub> score.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">beta</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beta syntax element value used to calculate F<sub>1</sub> score.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">fmeasure</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">F<sub>1</sub> score.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="acb1510785554295"> </a>
+   <h2>FMeasure Examples</h2>
+   <a name="yik1524168555227"> </a>
+	  <h3>FMeasure Example: Output All Classes</h3>
+
+	  <a name="section_pjj_gjt_r2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, computers_category, has five attributes of personal computers—price, speed, hard disk size, RAM, and screen size. The table has 500 rows, categorized into five price groups—SPECIAL, SUPER, HYPER, MEGA and UBER. The predicted_compcategory values can be output by a classification function, such as KNN.</p>
+   <a name="table_b5k_kjt_r2b"> </a>
+   <table class="introtable">
+      <a name="table_b5k_kjt_r2b"> </a>
+      <h4 style="text-align: center;">computers_category</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">compid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">price</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">speed</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">hd</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">ram</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">screen</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">expected_compcategory</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">predicted_compcategory</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1499</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">80</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SPECIAL</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SPECIAL</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1795</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">85</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SUPER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SUPER</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1595</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">170</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SPECIAL</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SPECIAL</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1849</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">170</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SUPER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">HYPER</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3295</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">340</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">HYPER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SUPER</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3695</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">340</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">UBER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SPECIAL</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1720</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">170</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SPECIAL</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SPECIAL</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1995</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">85</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SUPER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SUPER</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2225</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">210</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SUPER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SUPER</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2605</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">210</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">MEGA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">UBER</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2045</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">130</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SUPER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SUPER</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2295</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">245</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">MEGA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">MEGA</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2225</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">130</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SUPER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SUPER</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ghm_cmc_4db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM FMeasure(
+ON computers_category PARTITION BY 1
+USING
+ObservationColumn ('expected_compcategory')
+PredictColumn ('predicted_compcategory')
+Beta (1.0)
+) AS dt;</tt>
+   </pre>
+   <a name="section_e2y_cmc_4db"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ class   precision          recall             beta fmeasure           
+ ------- ------------------ ------------------ ---- ------------------ 
+ hyper   0.9368421052631579               0.89  1.0 0.9128205128205129
+ mega    0.9230769230769231  0.935064935064935  1.0 0.9290322580645162
+ special            0.84375 0.8852459016393442  1.0              0.864
+ super   0.9358974358974359  0.954248366013072  1.0 0.9449838187702266
+ uber     0.896551724137931             0.8125  1.0 0.8524590163934426
+ -AVG-                0.918              0.918  1.0              0.918</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="xpt1524168584990"> </a>
+	  <h3>FMeasure Example: Output Specified Classes</h3>
+
+	  <a name="section_pjj_gjt_r2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>computers_category, as in FMeasure Example: Output All Classes</li>
+   </ul>
+
+   <a name="section_ghm_cmc_4db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM FMeasure (
+  ON computers_category PARTITION BY 1
+  USING
+  ObservationColumn ('expected_compcategory')
+  PredictColumn ('predicted_compcategory')
+  Classes ('special','hyper')
+  Beta (1.0)
+) AS dt;</tt>
+   </pre>
+   <a name="section_e2y_cmc_4db"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ class   precision          recall             beta fmeasure           
+ ------- ------------------ ------------------ ---- ------------------ 
+ special            0.84375 0.8852459016393442  1.0              0.864
+ hyper   0.9368421052631579               0.89  1.0 0.9128205128205129</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

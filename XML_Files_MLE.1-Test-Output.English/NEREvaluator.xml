@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="ett1507580403278"> </a>
+	  <h1>NEREvaluator</h1>
+
+	
+		<p style="line-height: 1em;">The NEREvaluator function evaluates a CRF model (output by the function NERTrainer).</p>
+   <p>
+      <b>Note:</b>  NEREvaluator uses files that are preinstalled on ML Engine. For details, see Preinstalled Files That Functions Use.</p>
+	
+   <a name="zyc1507581033228"> </a>
+   <h2>NEREvaluator Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.6</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NEREvaluator (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY 1
+  USING
+  TextColumn ('<i>text_column</i>')
+  ModelFile ('<i>model_file</i>[:<i>jar_file</i>]')
+  [ InputLanguage ({ 'en' | 'zh_CN' | 'zh_TW' }) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="xmn1507581159221"> </a>
+	  <h2>NEREvaluator Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TextColumn</dt>
+      <dd>Specify the name of the input table column that contains the text to analyze.</dd>
+      <dt>ModelFile</dt>
+      <dd>Specify the CRF model file to evaluate, created and automatically installed by NERTrainer.</dd>
+      <dd>If you specified the ExtractorJAR syntax element in the NERTrainer call that created <i>model_file</i>, then you must specify the same <i>jar_file</i> in this syntax element. You must install the <i>jar_file</i> on ML Engine before calling the NERExtractor function.<p>
+            <b>Note:</b>  The names <i>model_file</i> and <i>jar_file</i> are case-sensitive.</p>
+      </dd>
+      <dt>InputLanguage</dt>
+      <dd>[Optional] Specify the language of the input text:<a name="d59e19"> </a>
+         <table class="introtable">
+            <a name="d59e19"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'en'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">English</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'zh_CN'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Simplified Chinese</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'zh_TW'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Traditional Chinese</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+   </div>
+
+
+	
+   <a name="ybh1507581278998"> </a>
+   <h2>NEREvaluator Input</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">The input table has the same schema as the NERExtractor Input table.</p>
+
+   <a name="bjq1507581560763"> </a>
+   <h2>NEREvaluator Output</h2>
+   <a name="section_sfj_b4c_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Entity type.<p style="line-height: 1em; margin: 0px;">
+                  <br/>Final row value: -AVG-</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">precision</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Precision value of the entity type.<p style="line-height: 1em; margin: 0px;">
+                  <br/>Final row value: Average precision value for all entity types.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">recall</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Recall value of the entity type.<p style="line-height: 1em; margin: 0px;">
+                  <br/>Final row value: Average recall value for all entity types.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">f1_measure</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">F<sub>1</sub> score (F-measure) of the entity type.<p style="line-height: 1em; margin: 0px;">
+                  <br/>Final row value: Average F<sub>1</sub> score for all entity types.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="hya1507581649995"> </a>
+   <h2>NEREvaluator Example</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This function evaluates the efficacy of the model file ner_model.bin, created by the NERTrainer function in terms of precision, recall, and f1_measure.</p>
+
+   <a name="section_xs4_lyf_pdb"> </a>
+   <h3>Input</h3>
+   <ul>
+      <li>ner_model.bin, output by NERTrainer Example</li>
+   </ul>
+
+   <a name="section_jgz_lyf_pdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NEREvaluator (
+  ON ner_sports_test2 PARTITION BY 1
+  USING
+  TextColumn ('content')
+  ModelFile ('ner_model.bin')
+) AS dt;</tt>
+   </pre>
+   <a name="section_njj_myf_pdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ type_ner precision_ner recall f1_measure 
+ -------- ------------- ------ ---------- 
+ LOC                  1 0.4444     0.6154
+ ORG                  0      0         -1
+ PER             0.7222 0.8125     0.7647
+ -AVG-           0.7778 0.4884        0.6</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

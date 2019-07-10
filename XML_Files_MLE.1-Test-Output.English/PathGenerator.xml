@@ -1,0 +1,538 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="xwn1507648929521"> </a>
+	  <h1>PathGenerator</h1>
+
+	  <p style="line-height: 1em;">The PathGenerator function takes a set of paths and outputs the sequence and all possible subsequences, which can be input to the function PathSummarizer.</p>
+   <p>
+      <b>Note:</b>  For the definitions of the terms that this section uses, see Path Analysis Functions</p>
+   <a name="njq1507648962516"> </a>
+   <h2>PathGenerator Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.7</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM PathGenerator (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+  USING
+  SeqColumn ('<i>sequence_column</i>')
+  [ Delimiter ('<i>delimiter</i>') ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="jzm1507649011485"> </a>
+	  <h2>PathGenerator Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>SeqColumn</dt>
+      <dd>Specify the name of the input table column that contains the paths.</dd>
+      <dt>Delimiter</dt>
+      <dd>[Optional] Specify the single-character delimiter that separates symbols in the path string. <p>
+            <b>Note:</b>  
+            <p style="line-height: 1em;">Do not use any of the following characters as <i>delimiter</i> (they cause the function to fail):<ul>
+                  <li>Asterisk (<tt style="font-family: monospace;">*</tt>)</li>
+                  <li>Plus (<tt style="font-family: monospace;">+</tt>)</li>
+                  <li>Left parenthesis (<tt style="font-family: monospace;">(</tt>)</li>
+                  <li>Right parenthesis (<tt style="font-family: monospace;">)</tt>)</li>
+                  <li>Single quotation mark (<tt style="font-family: monospace;">'</tt>)</li>
+                  <li>Escaped single quotation mark (<tt style="font-family: monospace;">\'</tt>)</li>
+                  <li>Backslash (<tt style="font-family: monospace;">\</tt>)</li>
+               </ul>
+            </p>
+         </p>
+      </dd>
+      <dd>Default: ',' (comma)</dd>
+   </div>
+
+
+	
+   <a name="omd1507649054292"> </a>
+   <h2>PathGenerator Input</h2>
+   <a name="section_dpb_dds_wcb"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>input_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Column other than <i>sequence_column</i> or <i>count_column</i>. Typically, one <i>input_column</i> is a user identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>sequence_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Path to analyze, which has this syntax:<pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+                     <i>symbol</i> [<i>delimiter symbol</i> ...]</tt>
+               </pre>Each <i>symbol</i> is an alphanumeric character, typically a code that represents a unique web page view, as in PathGenerator Example.<p style="line-height: 1em; margin: 0px;">
+                  <br/>If the input table is a query result, the query must specify <i>sequence_column</i> in the GROUP BY clause, so that input table has one row for each unique path.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>count_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of times path was traveled.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="crp1507649099735"> </a>
+   <h2>PathGenerator Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Table Schema</h3>
+   <p style="line-height: 1em;">The table has a row for each subsequence. The prefix column contains the subsequence.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>input_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Value of <i>input_column</i> for path; for example, identifier of user who took path.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>sequence_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column copied from input table. Path.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>count_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column copied from input table. Number of times path was traveled.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">prefix</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CLOB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Subsequences.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">sequence</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CLOB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sequences (paths in format that PathSummarizer function requires).</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="vpu1507649159476"> </a>
+   <h2>PathGenerator Example</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>E-Commerce Website Page Symbols</h3>
+   <p style="line-height: 1em;">This example uses clickstream data from an e-commerce web site. The following table lists and describes the symbols of the web site pages.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Symbol</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Meaning</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">H</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Home</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Home page</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">A</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Account</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">User account pages</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">C</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Category</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Page with list of products</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">P</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Product</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Product information pages</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">I</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Information</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Shipping, order status, etc.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ShoppingCart</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Pre-order pages</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">O</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Order</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Confirmation/purchase page</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">E</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Enter/Exit</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Noncommercial vendor pages</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_mzx_m2d_mdb"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">The input table, clickstream1, identifies each customer by a userid. The path column lists the symbols for the pages that the customer clicked, ordered from first to last. For symbol meanings, see the preceding table.</p>
+   <a name="table_vw3_t2d_mdb"> </a>
+   <table class="introtable">
+      <a name="table_vw3_t2d_mdb"> </a>
+      <h4 style="text-align: center;">clickstream1</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">userid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">usertype</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">path</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">cnt</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">browser</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">H,E</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">browser</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">H,C,P,E</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">browser</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">H,C,H,P</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">browser</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">A,H,C</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">browser</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">A,H,P</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">buyer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">H,A,C,P,I,S,O,E</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">buyer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">A,P,S,O,</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">buyer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">P,C,P,S,O,E</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">buyer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">H,A,P,I,S,O</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">buyer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">C,S,O,E</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_rgq_n2d_mdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM PathGenerator(
+  ON clickstream1
+  USING
+  SeqColumn('path')
+  Delimiter(',')
+) AS dt ORDER BY userid, usertype, cnt ASC;</tt>
+   </pre>
+   <a name="section_rcb_42d_mdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ userid usertype path            cnt prefix            sequence          
+ ------ -------- --------------- --- ----------------- ----------------- 
+      1 browser  h,e               2 ^,h,e             ^,h,e            
+      1 browser  h,e               2 ^,h               ^,h,e            
+      2 browser  h,c,p,e           5 ^,h,c             ^,h,c,p,e        
+      2 browser  h,c,p,e           5 ^,h               ^,h,c,p,e        
+      2 browser  h,c,p,e           5 ^,h,c,p           ^,h,c,p,e        
+      2 browser  h,c,p,e           5 ^,h,c,p,e         ^,h,c,p,e        
+      3 browser  h,c,h,p           7 ^,h,c,h           ^,h,c,h,p        
+      3 browser  h,c,h,p           7 ^,h,c             ^,h,c,h,p        
+      3 browser  h,c,h,p           7 ^,h,c,h,p         ^,h,c,h,p        
+      3 browser  h,c,h,p           7 ^,h               ^,h,c,h,p        
+      4 browser  a,h,c             3 ^,a,h,c           ^,a,h,c          
+      4 browser  a,h,c             3 ^,a,h             ^,a,h,c          
+      4 browser  a,h,c             3 ^,a               ^,a,h,c          
+      5 browser  a,h,p             2 ^,a,h,p           ^,a,h,p          
+      5 browser  a,h,p             2 ^,a,h             ^,a,h,p          
+      5 browser  a,h,p             2 ^,a               ^,a,h,p          
+      6 buyer    h,a,c,p,i,s,o,e   4 ^,h,a,c,p,i,s     ^,h,a,c,p,i,s,o,e
+      6 buyer    h,a,c,p,i,s,o,e   4 ^,h,a,c,p,i       ^,h,a,c,p,i,s,o,e
+      6 buyer    h,a,c,p,i,s,o,e   4 ^,h,a,c           ^,h,a,c,p,i,s,o,e
+      6 buyer    h,a,c,p,i,s,o,e   4 ^,h,a,c,p,i,s,o   ^,h,a,c,p,i,s,o,e
+      6 buyer    h,a,c,p,i,s,o,e   4 ^,h               ^,h,a,c,p,i,s,o,e
+      6 buyer    h,a,c,p,i,s,o,e   4 ^,h,a,c,p         ^,h,a,c,p,i,s,o,e
+      6 buyer    h,a,c,p,i,s,o,e   4 ^,h,a,c,p,i,s,o,e ^,h,a,c,p,i,s,o,e
+      6 buyer    h,a,c,p,i,s,o,e   4 ^,h,a             ^,h,a,c,p,i,s,o,e
+      7 buyer    a,p,s,o,          6 ^,a,p,s           ^,a,p,s,o,       
+      7 buyer    a,p,s,o,          6 ^,a,p             ^,a,p,s,o,       
+      7 buyer    a,p,s,o,          6 ^,a               ^,a,p,s,o,       
+      7 buyer    a,p,s,o,          6 ^,a,p,s,o         ^,a,p,s,o,       
+      8 buyer    p,c,p,s,o,e       2 ^,p,c,p,s,o,e     ^,p,c,p,s,o,e    
+      8 buyer    p,c,p,s,o,e       2 ^,p,c,p,s,o       ^,p,c,p,s,o,e    
+      8 buyer    p,c,p,s,o,e       2 ^,p,c,p,s         ^,p,c,p,s,o,e    
+      8 buyer    p,c,p,s,o,e       2 ^,p,c,p           ^,p,c,p,s,o,e    
+      8 buyer    p,c,p,s,o,e       2 ^,p,c             ^,p,c,p,s,o,e    
+      8 buyer    p,c,p,s,o,e       2 ^,p               ^,p,c,p,s,o,e    
+      9 buyer    h,a,p,i,s,o       2 ^,h,a,p,i,s,o     ^,h,a,p,i,s,o    
+      9 buyer    h,a,p,i,s,o       2 ^,h,a,p,i,s       ^,h,a,p,i,s,o    
+      9 buyer    h,a,p,i,s,o       2 ^,h,a,p,i         ^,h,a,p,i,s,o    
+      9 buyer    h,a,p,i,s,o       2 ^,h,a,p           ^,h,a,p,i,s,o    
+      9 buyer    h,a,p,i,s,o       2 ^,h,a             ^,h,a,p,i,s,o    
+      9 buyer    h,a,p,i,s,o       2 ^,h               ^,h,a,p,i,s,o    
+     10 buyer    c,s,o,e           1 ^,c               ^,c,s,o,e        
+     10 buyer    c,s,o,e           1 ^,c,s,o,e         ^,c,s,o,e        
+     10 buyer    c,s,o,e           1 ^,c,s,o           ^,c,s,o,e        
+     10 buyer    c,s,o,e           1 ^,c,s             ^,c,s,o,e</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

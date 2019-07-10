@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="gzr1507822835835"> </a>
+	  <h1>Unpack_MLE</h1>
+
+	
+		<p style="line-height: 1em;">The Unpack_MLE function unpacks data from a single packed column into multiple columns. The packed column is composed of multiple virtual columns, which become the output columns. To determine the virtual columns, the function must have either the delimiter that separates them in the packed column or their lengths.</p>
+
+		<p style="line-height: 1em;">Unpack_MLE complements the function Pack_MLE, but you can use it on any packed column that meets the input requirements.</p>
+   <p>
+      <b>Note:</b>  To use Pack_MLE and Unpack_MLE together, you must run both on ML Engine platform. Pack_MLE and Unpack_MLE are incompatible with NewSQL Engine Pack and Unpack functions.</p>
+	
+   <a name="apd1507822865955"> </a>
+   <h2>Unpack_MLE Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.6</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Unpack_MLE (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+  USING
+  TargetColumn ('<i>target_column</i>')
+  OutputColumns ('<i>output_column</i>' [,...])
+  OutputDataTypes ('<i>datatype</i>' [,...])
+  [ Delimiter ('<i>delimiter</i>') ]
+  [ ColumnLength (<i>column_length</i> [,...] ) ]
+  [ Regex ('<i>regular_expression</i>') ]
+  [ RegexSet ('<i>group_number</i>') ]
+  [ IgnoreInvalid ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="vsd1507822869904"> </a>
+	  <h2>Unpack_MLE Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumn</dt>
+      <dd>Specify the name of the input column that contains the packed data.</dd>
+      <dt>OutputColumns</dt>
+      <dd>Specify the names to give to the output columns, one for each virtual column in the packed data, in the order in which the virtual columns appear in <i>target_column</i>.</dd>
+      <dt>OutputDataTypes</dt>
+      <dd>Specify the datatypes of the unpacked output columns. Each <i>datatype</i> must be an MLE data type; for information about these, see <i>Teradata Vantage<sup>™</sup> User Guide</i>, B700-4002.<p style="line-height: 1em;">If OutputDataTypes specifies only one value and OutputColumns specifies multiple columns, the specified value applies to every <i>output_column</i>.</p>
+         <p style="line-height: 1em;">If OutputDataTypes specifies multiple values, it must specify a value for each <i>output_column</i>. The <i>n</i>th <i>datatype</i> corresponds to the <i>n</i>th <i>output_column</i>.</p>
+      </dd>
+      <dt>Delimiter</dt>
+      <dd>[Optional] Specify the delimiter (a string) that separates the virtual columns in the packed data. If <i>delimiter</i> contains a character that is a symbol in a regular expression—such as an asterisk (*) or pipe character (<tt style="font-family: monospace;">|</tt>)—precede it with two escape characters. For example, if the delimiter is the pipe character, specify <tt style="font-family: monospace;">'\\|'</tt>. <p>
+            <b>Note:</b>  Do not specify both this syntax element and the ColumnLength syntax element. If the virtual columns are separated by a delimiter, specify the delimiter with this syntax element; otherwise, specify the ColumnLength syntax element.</p>
+      </dd>
+      <dd>Default: ',' (comma)</dd>
+      <dt>ColumnLength</dt>
+      <dd>[Optional] Specify the lengths of the virtual columns; therefore, to use this syntax element, you must know the length of each virtual column.<p style="line-height: 1em;">If ColumnLength specifies only one value and OutputColumns specifies multiple columns, the specified value applies to every <i>output_column</i>.</p>
+         <p style="line-height: 1em;">If ColumnLength specifies multiple values, it must specify a value for each <i>output_column</i>. The <i>n</i>th <i>datatype</i> corresponds to the <i>n</i>th <i>output_column</i>. However, the last <i>output_column</i> can be an asterisk (*), which represents a single virtual column that contains the remaining data. For example, if the first three virtual columns have the lengths 2, 1, and 3, and all remaining data belongs to the fourth virtual column, you can specify ColumnLength (2, 1, 3, *).</p>
+         <p>
+            <b>Note:</b>  Do not specify both this syntax element and the Delimiter syntax element.</p>
+      </dd>
+      <dt>Regex</dt>
+      <dd>[Optional] Specify a regular expression that describes a row of packed data, enabling the function to find the data values.</dd>
+      <dd>A row of packed data contains a data value for each virtual column, but the row might also contain other information (such as the virtual column name). In the <i>regular_expression</i>, each data value is enclosed in parentheses.</dd>
+      <dd>For example, suppose that the packed data has two virtual columns, age and sex, and that one row of packed data is <tt style="font-family: monospace;">age:34,sex:male</tt>. The <i>regular_expression</i> that describes the row is <tt style="font-family: monospace;">'.*:(.*)'</tt>. The <tt style="font-family: monospace;">'.*:'</tt> matches the virtual column names, age and sex, and the <tt style="font-family: monospace;">'(.*)'</tt> matches the values, 34 and male.</dd>
+      <dd>To represent multiple data groups in <i>regular_expression</i>, use multiple pairs of parentheses. Without parentheses, the last data group in <i>regular_expression</i> represents the data value (other data groups are assumed to be virtual column names or unwanted data). If a different data group represents the data value, specify its group number with the RegexSet syntax element.</dd>
+      <dd>Default: <tt style="font-family: monospace;">'(.*)'</tt>, which matches the whole string (between delimiters, if any). When applied to the preceding sample row, the default <i>regular_expression</i> causes the function to return 'age:34' and 'sex:male' as data values.</dd>
+      <dt>RegexSet</dt>
+      <dd>[Optional] Specify the ordinal number of the data group in <i>regular_expression</i> that represents the data value in a virtual column.</dd>
+      <dd>Default behavior: The last data group in <i>regular_expression</i> represents the data value. For example, suppose that <i>regular_expression</i> is <tt style="font-family: monospace;">'([a-zA-Z]*):(.*)'</tt>. If <i>group_number</i> is '1', <tt style="font-family: monospace;">'([a-zA-Z]*)'</tt> represents the data value. If <i>group_number</i> is '2', <tt style="font-family: monospace;">'(.*)'</tt> represents the data value.</dd>
+      <dt>IgnoreInvalid</dt>
+      <dd>[Optional] Specify whether the function ignores rows that contain invalid data.</dd>
+      <dd>Default: 'false' (The function fails if it encounters a row with invalid data.)</dd>
+   </div>
+
+
+	
+   <a name="aab1507822873557"> </a>
+   <h2>Unpack_MLE Input</h2>
+   <a name="section_ngq_hvs_ycb"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Packed data.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ocj1507822877101"> </a>
+   <h2>Unpack_MLE Output</h2>
+   <a name="section_awn_fvs_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>output_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Specified by OutputDataTypes syntax element.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>output_column</i>.] Unpacked column.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>other_input_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each input table column not specified by TargetColumn syntax element.] Column copied from input table.<p style="line-height: 1em; margin: 0px;">
+                  <br/>This column (or these columns) follow output columns.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="sff1525972246261"> </a>
+	  <h2>Unpack_MLE Examples</h2>
+
+   <a name="pgq1527091375557"> </a>
+	  <h3>Unpack_MLE Example: Delimiter for Virtual Columns</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, ville_tempdata, is a collection of temperature readings for two cities, Nashville and Knoxville, in the state of Tennessee. In the column of packed data, the delimiter comma (,) separates the virtual columns. The last row contains invalid data.</p>
+   <a name="table_omr_km4_xdb"> </a>
+   <table class="introtable">
+      <a name="table_omr_km4_xdb"> </a>
+      <h4 style="text-align: center;">ville_tempdata</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">sn</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">packed_temp_data</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville,Tennessee,35.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville,Tennessee,36.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville,Tennessee,34.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville,Tennessee,33.6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville,Tennessee,33.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville,Tennessee,33.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville,Tennessee,32.8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">17</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville,Tennessee,32.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">18</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville,Tennessee,32.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">19</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville,Tennessee,32.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">20</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Thisisbaddata</div>
+         </td>
+      </tr>
+   </table>
+
+
+		
+   <a name="section_y25_1m4_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Unpack_MLE (
+  ON ville_tempdata
+  USING
+  TargetColumn('packed_temp_data')
+  OutputColumns('city','state','temp_F')
+  OutputDataTypes('varchar(9)','varchar(9)','float')
+  Delimiter(',')
+  Regex('(.*)')
+  RegexSet(1)
+  IgnoreInvalid('true')
+) AS dt ORDER BY sn;</tt>
+   </pre>
+   <p>
+      <b>Note:</b>  Because comma is the default delimiter, the Delimiter syntax element in the preceding call is optional.</p>
+   <a name="section_o1h_bm4_xdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">Because of IgnoreInvalid ('true'), the function did not fail when it encountered the row with invalid data, but it did not output that row.</p>
+   <pre>
+      <tt>
+ city      state     temp_f sn 
+ --------- --------- ------ -- 
+ nashville tennessee   35.1 10
+ nashville tennessee   36.2 11
+ nashville tennessee   34.5 12
+ nashville tennessee   33.6 13
+ nashville tennessee   33.1 14
+ knoxville tennessee   33.2 15
+ knoxville tennessee   32.8 16
+ knoxville tennessee   32.4 17
+ knoxville tennessee   32.2 18
+ knoxville tennessee   32.4 19</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="zbs1527091439310"> </a>
+	  <h3>Unpack_MLE Example: No Delimiter for Virtual Columns</h3>
+   <a name="section_n2n_2m4_xdb"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, ville_tempdata1, is like the input table for the previous example, except that no delimiter separates the virtual columns in the packed data. To enable the function to determine the virtual columns, the function call specifies the column lengths.</p>
+   <a name="table_ipl_1n4_xdb"> </a>
+   <table class="introtable">
+      <a name="table_ipl_1n4_xdb"> </a>
+      <h4 style="text-align: center;">ville_tempdata1</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">sn</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">packed_temp_data</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NashvilleTennessee35.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NashvilleTennessee36.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NashvilleTennessee34.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NashvilleTennessee33.6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NashvilleTennessee33.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NashvilleTennessee33.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NashvilleTennessee32.8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">17</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NashvilleTennessee32.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">18</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NashvilleTennessee32.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">19</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NashvilleTennessee32.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">20</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Thisisbaddata</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_y25_1m4_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Unpack_MLE (
+  ON ville_tempdata1
+  USING
+  TargetColumn ('packed_temp_data')
+  OutputColumns ('city','state','temp_F')
+  OutputDataTypes ('varchar(9)','varchar(9)','float')
+  ColumnLength (9,9,4)
+  Regex ('(.*)')
+  RegexSet (1)
+  IgnoreInvalid ('true')
+) AS dt ORDER BY sn;</tt>
+   </pre>
+   <a name="section_o1h_bm4_xdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ city      state     temp_f sn 
+ --------- --------- ------ -- 
+ nashville tennessee   35.1 10
+ nashville tennessee   36.2 11
+ nashville tennessee   34.5 12
+ nashville tennessee   33.6 13
+ nashville tennessee   33.1 14
+ knoxville tennessee   33.2 15
+ knoxville tennessee   32.8 16
+ knoxville tennessee   32.4 17
+ knoxville tennessee   32.2 18
+ knoxville tennessee   32.4 19</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+</t:intro>

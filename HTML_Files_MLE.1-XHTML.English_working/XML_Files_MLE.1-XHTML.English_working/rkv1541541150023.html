@@ -1,0 +1,1402 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="copyright" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.rights.owner" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="NGramSplitter_MLE" />
+<meta name="abstract" content="This Machine Learning Engine function tokenizes input stream and emits n multigrams, based on specified delimiter and reset parameters." />
+<meta name="description" content="This Machine Learning Engine function tokenizes input stream and emits n multigrams, based on specified delimiter and reset parameters." />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="ggy1507559464762" />
+<meta name="DC.Language" content="en-us" />
+
+<link rel="stylesheet" type="text/css" href="css/normal_styles.css" />
+<title>NGramSplitter_MLE</title>
+</head>
+<body>
+<div class="nested0" aria-labelledby="ariaid-title1" topicindex="1" topicid="ggy1507559464762" id="ggy1507559464762">
+	<h1 class="title topictitle1" id="ariaid-title1">NGramSplitter_MLE</h1>
+
+	<div class="body conbody">
+		<p class="p">The NGramSplitter_MLE function <dfn class="term">tokenizes</dfn> (splits) an input stream of text and outputs <var class="keyword varname">n</var> multigrams (called <var class="keyword varname">n</var><dfn class="term">-grams</dfn>) based on the specified delimiter and reset parameters. NGramSplitter_MLE provides more flexibility than standard tokenization when performing text analysis. Many two-word phrases carry important meaning (for example, "machine learning") that unigrams (single-word tokens) do not capture. This, combined with additional analytical techniques, can be useful for performing sentiment analysis, topic identification, and document classification.</p>
+
+		<p class="p">NGramSplitter_MLE considers each input row to be one document, and returns a row for each unique <var class="keyword varname">n</var>-gram in each document. NGramSplitter_MLE also returns, for each document, the counts of each <var class="keyword varname">n</var>-gram and the total number of <var class="keyword varname">n</var>-grams.</p>
+
+	</div>
+
+<div class="topic reference nested1" aria-labelledby="ariaid-title2" topicindex="2" topicid="cxt1507559517301" xml:lang="en-us" lang="en-us" id="cxt1507559517301"><h2 class="title topictitle2" id="ariaid-title2">NGramSplitter_MLE Syntax</h2>
+<div class="body refbody"><div class="section" id="cxt1507559517301__section_N1000E_N1000C_N10001"><h3 class="title sectiontitle">Version 1.9</h3><pre class="pre codeblock"><code>SELECT * FROM NGramSplitter_MLE (
+  <span class="ph">ON { <var class="keyword varname">table</var> | <var class="keyword varname">view</var> | (<var class="keyword varname">query</var>) }</span>
+  USING
+  TextColumn ('<var class="keyword varname">text_column</var>')
+  [ Delimiter ('<var class="keyword varname">delimiter_regular_expression</var>') ]
+  Grams ({ <var class="keyword varname">gram_number</var> |'<var class="keyword varname">value_range</var>' }[,...])
+  [ OverLapping(<span class="keyword">{'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}</span>) ]
+  [ ConvertToLowerCase (<span class="keyword">{'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}</span>) ]
+  [ Reset ('<var class="keyword varname">reset_regular_expression</var>') ]
+  [ Punctuation ('<var class="keyword varname">punctuation_regular_expression</var>') ]
+  [ OutputTotalGramCount (<span class="keyword">{'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}</span>) ]
+  [ TotalCountColName ('<var class="keyword varname">total_count_column</var>') ]
+  <code class="ph codeph">[ Accumulate ({ '<var class="keyword varname">accumulate_column</var>' | <var class="keyword varname">accumulate_column_range</var> }[,...]) ]</code>
+  [ NGramColName ('<var class="keyword varname">ngram_column</var>') ]
+  [ GramLengthColName ('<var class="keyword varname">gram_length_column</var>') ]
+  [ FrequencyColName ('<var class="keyword varname">frequency_column</var>') ]
+) AS <var class="keyword varname">alias</var>;</code></pre></div>
+</div>
+<div class="related-links">
+<div class="linklistheader">Related Information</div>
+<ul class="linklist linklist">
+<div class="linklistmember"><a class="link" href="ndv1557782188375.html" title="See the syntax details for Machine Learning Engine analytic functions with syntax elements that specify ( {'column' | column_range }[,...] ).">Column Specification Syntax Elements</a></div>
+<div class="linklistmember"><a class="link" href="dsd1557781660424.html" title="See where to find the format for regular expressions in Machine Learning Engine analytic function syntax elements.">Regular Expressions in Syntax Elements</a></div></ul>
+</div></div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title3" topicindex="3" topicid="oet1507562180794" xml:lang="en-us" lang="en-us" id="oet1507562180794">
+	<h2 class="title topictitle2" id="ariaid-title3">NGramSplitter_MLE Syntax Elements</h2>
+
+	<div class="body refbody">
+		<div class="section" id="oet1507562180794__section_N10011_N1000E_N10001"><dl class="dl parml"><dt class="dt pt dlterm">TextColumn</dt>
+<dd class="dd pd">Specify the name of the column that contains the input text. This column must have a SQL string data type.</dd>
+<dt class="dt pt dlterm">Delimiter</dt>
+<dd class="dd pd">[Optional] Specify, with a regular expression, the character or string that separates words in the input text.</dd>
+<dd class="dd pd ddexpand">Default: "\\s+" (all whitespace characters—space, tab, newline, carriage return and others)</dd>
+<dt class="dt pt dlterm">Grams</dt>
+<dd class="dd pd">Specify the length, in words, of each <var class="keyword varname">n</var>-gram (that is, the value of <var class="keyword varname">n</var>). A <var class="keyword varname">value_range</var> has the syntax <var class="keyword varname">integer1</var>-<var class="keyword varname">integer2</var>, where <var class="keyword varname">integer1</var> &lt;= <var class="keyword varname">integer2</var>. The values of <var class="keyword varname">n</var>, <var class="keyword varname">integer1</var>, and <var class="keyword varname">integer2</var> must be positive.</dd>
+<dt class="dt pt dlterm">OverLapping</dt>
+<dd class="dd pd">[Optional] Specify whether the function allows overlapping <var class="keyword varname">n</var>-grams.</dd>
+<dd class="dd pd ddexpand">Default: 'true' (Each word in each sentence starts an <var class="keyword varname">n</var>-gram, if enough words follow it in the same sentence to form a whole <var class="keyword varname">n</var>-gram of the specified size. For information on sentences, see the Reset syntax element description.)</dd>
+<dt class="dt pt dlterm">ConvertToLowerCase</dt>
+<dd class="dd pd">[Optional] Specify whether the function converts all letters in the input text to lowercase.</dd>
+<dd class="dd pd ddexpand">Default: 'true'</dd>
+<dt class="dt pt dlterm">Reset</dt>
+<dd class="dd pd">[Optional] Specify, with a regular expression, the character or string that ends a sentence. At the end of a sentence, the function discards any partial <var class="keyword varname">n</var>-grams and searches for the next <var class="keyword varname">n</var>-gram at the beginning of the next sentence. An <var class="keyword varname">n</var>-gram cannot span sentences.<div class="note note" id="oet1507562180794__note_N100B9_N100A6_N1009F_N10018_N10014_N10010_N10001"><span class="notetitle">Note</span><div class="notebody">The function applies the Reset syntax element before the Punctuation syntax element; that is, it splits the input into sentences before removing punctuation characters.</div></div>
+</dd>
+<dd class="dd pd ddexpand">Default: <code class="ph codeph">'[.,?!]'</code></dd>
+<dt class="dt pt dlterm">Punctuation</dt>
+<dd class="dd pd">[Optional] Specify, with a regular expression, the punctuation characters for the function to remove before evaluating the input text.<div class="note note" id="oet1507562180794__note_N100D2_N100CE_N100C7_N10018_N10014_N10010_N10001"><span class="notetitle">Note</span><div class="notebody">The function applies the Reset syntax element before the Punctuation syntax element; that is, it splits the input into sentences before removing punctuation characters.</div></div>
+</dd>
+<dd class="dd pd ddexpand">Default: <code class="ph codeph">'[`~#^&amp;*()-]'</code></dd>
+<dt class="dt pt dlterm">OutputTotalGramCount</dt>
+<dd class="dd pd">[Optional] Specify whether the function returns the total number of <var class="keyword varname">n</var>-grams in the document (that is, in the row) for each length <var class="keyword varname">n</var> specified in the Grams syntax element. If you specify 'true', the TotalCountColName syntax element determines the name of the output table column that contains these totals.<div class="note note" id="oet1507562180794__note_N10105_N100FD_N100F1_N10030_N10011_N1000E_N1000C_N10001"><span class="notetitle">Note</span><div class="notebody">The total number of <var class="keyword varname">n</var>-grams is not necessarily the number of unique <var class="keyword varname">n</var>-grams.</div></div>
+</dd>
+<dd class="dd pd ddexpand">Default: 'false'</dd>
+<dt class="dt pt dlterm">TotalCountColName</dt>
+<dd class="dd pd">[Optional] Specify the name of the output table column that appears if the value of the OutputTotalGramCount syntax element is 'true'.</dd>
+<dd class="dd pd ddexpand">Default: 'totalcnt'</dd>
+<dt class="dt pt dlterm">Accumulate</dt>
+<dd class="dd pd">[Optional] Specify the names of the input table columns to copy to the output table for each <var class="keyword varname">n</var>-gram. These columns cannot have the same names as those specified by the syntax elements NGramColName, GramLengthColName, and TotalCountColName.</dd>
+<dd class="dd pd ddexpand">Default: All input columns for each <var class="keyword varname">n</var>-gram</dd>
+<dt class="dt pt dlterm">NGramColName</dt>
+<dd class="dd pd">[Optional] Specify the name of the output table column that is to contain the created <var class="keyword varname">n</var>-grams.</dd>
+<dd class="dd pd ddexpand">Default: 'ngram'</dd>
+<dt class="dt pt dlterm">GramLengthColName</dt>
+<dd class="dd pd">[Optional] Specify the name of the output table column that is to contain the length of <var class="keyword varname">n</var>-gram (in words).</dd>
+<dd class="dd pd ddexpand">Default: 'n'</dd>
+<dt class="dt pt dlterm">FrequencyColName</dt>
+<dd class="dd pd">[Optional] Specify the name of the output table column that is to contain the count of each unique <var class="keyword varname">n</var>-gram (that is, the number of times that each unique <var class="keyword varname">n</var>-gram appears in the document).</dd>
+<dd class="dd pd ddexpand">Default: 'frequency'</dd>
+</dl>
+</div>
+
+	</div>
+
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title4" topicindex="4" topicid="ybu1507563797561" xml:lang="en-us" lang="en-us" id="ybu1507563797561"><h2 class="title topictitle2" id="ariaid-title4">NGramSplitter_MLE Input</h2>
+<div class="body refbody"><div class="section" id="ybu1507563797561__section_N1000E_N1000C_N10001"><h3 class="title sectiontitle">Input Table Schema</h3><p class="p">Each row of the table has a document to tokenize. <span class="ph">The table can have additional columns, but the function ignores them.</span></p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="ybu1507563797561__table_N10014_N1000E_N1000C_N10001" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:28.57142857142857%" /><col style="width:14.285714285714285%" /><col style="width:57.14285714285714%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry nocellnorowborder" style="vertical-align:top;" id="d393220e397">Column</th>
+<th class="entry nocellnorowborder" style="vertical-align:top;" id="d393220e399">Data Type</th>
+<th class="entry cell-norowborder" style="vertical-align:top;" id="d393220e401">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d393220e397 "><var class="keyword varname">text_column</var></td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d393220e399 ">VARCHAR</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d393220e401 ">Document to tokenize.</td>
+</tr>
+<tr class="row"><td class="entry row-nocellborder" style="vertical-align:top;" headers="d393220e397 "><var class="keyword varname">accumulate_column</var></td>
+<td class="entry row-nocellborder" style="vertical-align:top;" headers="d393220e399 ">VARCHAR</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d393220e401 ">[Column appears once for each specified <var class="keyword varname">accumulate_column</var>.] <span class="ph">Column to copy to output table.</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title5" topicindex="5" topicid="fbd1507563854249" xml:lang="en-us" lang="en-us" id="fbd1507563854249"><h2 class="title topictitle2" id="ariaid-title5">NGramSplitter_MLE Output</h2>
+<div class="body refbody"><div class="section" id="fbd1507563854249__section_N1000E_N1000C_N10001"><h3 class="title sectiontitle">Output Table Schema</h3><p class="p">The table has a row for each unique <var class="keyword varname">n</var>-gram in each input document.</p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="fbd1507563854249__table_N10014_N1000E_N1000C_N10001" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:35.714285714285715%" /><col style="width:14.285714285714285%" /><col style="width:50%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry nocellnorowborder" style="vertical-align:top;" id="d393220e449">Column</th>
+<th class="entry nocellnorowborder" style="vertical-align:top;" id="d393220e451">Data Type</th>
+<th class="entry cell-norowborder" style="vertical-align:top;" id="d393220e453">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d393220e449 "><var class="keyword varname">accumulate_column</var></td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d393220e451 ">VARCHAR</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d393220e453 ">[Column appears once for each specified <var class="keyword varname">accumulate_column</var>.] <span class="ph">Column copied from input table.</span></td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d393220e449 "><var class="keyword varname">ngram_column</var></td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d393220e451 ">VARCHAR</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d393220e453 ">Created <var class="keyword varname">n</var>-gram.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d393220e449 "><var class="keyword varname">gram_length_column</var></td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d393220e451 ">INTEGER</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d393220e453 ">Length of <var class="keyword varname">n</var>-gram in words (value <var class="keyword varname">n</var>).</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d393220e449 "><var class="keyword varname">frequency_column</var></td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d393220e451 ">INTEGER</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d393220e453 ">Count of each unique <var class="keyword varname">n</var>-gram in document.</td>
+</tr>
+<tr class="row"><td class="entry row-nocellborder" style="vertical-align:top;" headers="d393220e449 "><var class="keyword varname">total_count_column</var></td>
+<td class="entry row-nocellborder" style="vertical-align:top;" headers="d393220e451 ">INTEGER</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d393220e453 ">[Column appears only with TotalCountColName ('true').] Total number of <var class="keyword varname">n</var>-grams in document for each length <var class="keyword varname">n</var> specified in Grams syntax element.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="topic concept nested1" aria-labelledby="ariaid-title6" topicindex="6" topicid="bcu1510347611102" xml:lang="en-us" lang="en-us" id="bcu1510347611102"><h2 class="title topictitle2" id="ariaid-title6">NGramSplitter_MLE Examples</h2>
+<div class="topic reference nested2" aria-labelledby="ariaid-title7" topicindex="7" topicid="vek1524580064974" xml:lang="en-us" lang="en-us" id="vek1524580064974">
+	<h3 class="title topictitle3" id="ariaid-title7">NGramSplitter_MLE Example: Overlapping ('true'), OutputTotalGramCount ('true')</h3>
+
+	<div class="body refbody"><div class="section" id="vek1524580064974__section_evh_5cl_pdb"><h4 class="title sectiontitle">Input</h4><ul class="ul" id="vek1524580064974__ul_nxw_2y1_j2b"><li class="li">Input Table: paragraphs_input, which has paragraphs about common analytics topics (regression, decision Trees, and so on)</li>
+</ul>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="vek1524580064974__table_xxx_1dl_pdb" class="table" frame="border" border="1" rules="all"><div class="caption"><span class="tablecap">Input Table: paragraphs_input</span></div><colgroup><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d393220e570">paraid</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d393220e572">paratopic</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d393220e574">paratext</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d393220e570 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d393220e572 ">Decision Trees</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d393220e574 ">Decision tree learning uses a decision tree as a predictive model which maps observations about an item to conclusions about the items target value. It is one of the predictive modeling approaches used in statistics, data mining and machine learning. Tree models where the target variable can take a finite set of values are called classification trees. In these tree structures, leaves represent class labels and branches represent conjunctions of features that lead to those class labels. Decision trees where the target variable can take continuous values (typically real numbers) are called regression trees.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d393220e570 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d393220e572 ">Simple Regression</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d393220e574 ">In statistics, simple linear regression is the least squares estimator of a linear regression model with a single explanatory variable. In other words, simple linear regression fits a straight line through the set of n points in such a way that makes the sum of squared residuals of the model (that is, vertical distances between the points of the data set and the fitted line) as small as possible</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d393220e570 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d393220e572 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d393220e574 ">...</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="vek1524580064974__section_c14_rcl_pdb"><h4 class="title sectiontitle">SQL Call</h4><pre class="pre codeblock"><code>SELECT * FROM NGramSplitter_MLE (
+  ON paragraphs_input
+  USING
+  TextColumn ('paratext')
+  Delimiter (' ')
+  Grams ('4-6')
+  OverLapping ('true')
+  ConvertToLowerCase ('true')
+  Reset ('[.,?!]')
+  Punctuation ('[`~#^&amp;*()-]')
+  OutputTotalGramCount ('true')
+  Accumulate ('paraid', 'paratopic')
+) AS dt ORDER BY paraid, paratopic, ngram;</code></pre></div>
+<div class="section" id="vek1524580064974__section_wzb_scl_pdb"><h4 class="title sectiontitle">Output</h4><pre class="pre screen"> paraid paratopic                 ngram                                                     n frequency totalcnt 
+ ------ ------------------------- --------------------------------------------------------- - --------- -------- 
+      1 decision trees            a decision tree as                                        4         1       73
+      1 decision trees            a decision tree as a                                      5         1       66
+      1 decision trees            a decision tree as a predictive                           6         1       60
+      1 decision trees            a finite set of                                           4         1       73
+      1 decision trees            a finite set of values                                    5         1       66
+      1 decision trees            a finite set of values are                                6         1       60
+      1 decision trees            a predictive model which                                  4         1       73
+      1 decision trees            a predictive model which maps                             5         1       66
+      1 decision trees            a predictive model which maps observations                6         1       60
+      1 decision trees            about an item to                                          4         1       73
+      1 decision trees            about an item to conclusions                              5         1       66
+      1 decision trees            about an item to conclusions about                        6         1       60
+      1 decision trees            about the items target                                    4         1       73
+      1 decision trees            about the items target value                              5         1       66
+      1 decision trees            an item to conclusions                                    4         1       73
+      1 decision trees            an item to conclusions about                              5         1       66
+      1 decision trees            an item to conclusions about the                          6         1       60
+      1 decision trees            and branches represent conjunctions                       4         1       73
+      1 decision trees            and branches represent conjunctions of                    5         1       66
+      1 decision trees            and branches represent conjunctions of features           6         1       60
+      1 decision trees            approaches used in statistics                             4         1       73
+      1 decision trees            are called classification trees                           4         1       73
+      1 decision trees            are called regression trees                               4         1       73
+      1 decision trees            as a predictive model                                     4         1       73
+      1 decision trees            as a predictive model which                               5         1       66
+      1 decision trees            as a predictive model which maps                          6         1       60
+      1 decision trees            branches represent conjunctions of                        4         1       73
+      1 decision trees            branches represent conjunctions of features               5         1       66
+      1 decision trees            branches represent conjunctions of features that          6         1       60
+      1 decision trees            can take a finite                                         4         1       73
+      1 decision trees            can take a finite set                                     5         1       66
+      1 decision trees            can take a finite set of                                  6         1       60
+      1 decision trees            can take continuous values                                4         1       73
+      1 decision trees            can take continuous values typically                      5         1       66
+      1 decision trees            can take continuous values typically real                 6         1       60
+      1 decision trees            class labels and branches                                 4         1       73
+      1 decision trees            class labels and branches represent                       5         1       66
+      1 decision trees            class labels and branches represent conjunctions          6         1       60
+      1 decision trees            conclusions about the items                               4         1       73
+      1 decision trees            conclusions about the items target                        5         1       66
+      1 decision trees            conclusions about the items target value                  6         1       60
+      1 decision trees            conjunctions of features that                             4         1       73
+      1 decision trees            conjunctions of features that lead                        5         1       66
+      1 decision trees            conjunctions of features that lead to                     6         1       60
+      1 decision trees            continuous values typically real                          4         1       73
+      1 decision trees            continuous values typically real numbers                  5         1       66
+      1 decision trees            continuous values typically real numbers are              6         1       60
+      1 decision trees            data mining and machine                                   4         1       73
+      1 decision trees            data mining and machine learning                          5         1       66
+      1 decision trees            decision tree as a                                        4         1       73
+      1 decision trees            decision tree as a predictive                             5         1       66
+      1 decision trees            decision tree as a predictive model                       6         1       60
+      1 decision trees            decision tree learning uses                               4         1       73
+      1 decision trees            decision tree learning uses a                             5         1       66
+      1 decision trees            decision tree learning uses a decision                    6         1       60
+      1 decision trees            decision trees where the                                  4         1       73
+      1 decision trees            decision trees where the target                           5         1       66
+      1 decision trees            decision trees where the target variable                  6         1       60
+      1 decision trees            features that lead to                                     4         1       73
+      1 decision trees            features that lead to those                               5         1       66
+      1 decision trees            features that lead to those class                         6         1       60
+      1 decision trees            finite set of values                                      4         1       73
+      1 decision trees            finite set of values are                                  5         1       66
+      1 decision trees            finite set of values are called                           6         1       60
+      1 decision trees            in these tree structures                                  4         1       73
+      1 decision trees            is one of the                                             4         1       73
+      1 decision trees            is one of the predictive                                  5         1       66
+      1 decision trees            is one of the predictive modelling                        6         1       60
+      1 decision trees            it is one of                                              4         1       73
+      1 decision trees            it is one of the                                          5         1       66
+      1 decision trees            it is one of the predictive                               6         1       60
+      1 decision trees            item to conclusions about                                 4         1       73
+      1 decision trees            item to conclusions about the                             5         1       66
+      1 decision trees            item to conclusions about the items                       6         1       60
+      1 decision trees            labels and branches represent                             4         1       73
+      1 decision trees            labels and branches represent conjunctions                5         1       66
+      1 decision trees            labels and branches represent conjunctions of             6         1       60
+      1 decision trees            lead to those class                                       4         1       73
+      1 decision trees            lead to those class labels                                5         1       66
+      1 decision trees            learning uses a decision                                  4         1       73
+      1 decision trees            learning uses a decision tree                             5         1       66
+      1 decision trees            learning uses a decision tree as                          6         1       60
+      1 decision trees            leaves represent class labels                             4         1       73
+      1 decision trees            leaves represent class labels and                         5         1       66
+      1 decision trees            leaves represent class labels and branches                6         1       60
+      1 decision trees            maps observations about an                                4         1       73
+      1 decision trees            maps observations about an item                           5         1       66
+      1 decision trees            maps observations about an item to                        6         1       60
+      1 decision trees            mining and machine learning                               4         1       73
+      1 decision trees            model which maps observations                             4         1       73
+      1 decision trees            model which maps observations about                       5         1       66
+      1 decision trees            model which maps observations about an                    6         1       60
+      1 decision trees            modelling approaches used in                              4         1       73
+      1 decision trees            modelling approaches used in statistics                   5         1       66
+      1 decision trees            models where the target                                   4         1       73
+      1 decision trees            models where the target variable                          5         1       66
+      1 decision trees            models where the target variable can                      6         1       60
+      1 decision trees            numbers are called regression                             4         1       73
+      1 decision trees            numbers are called regression trees                       5         1       66
+      1 decision trees            observations about an item                                4         1       73
+      1 decision trees            observations about an item to                             5         1       66
+      1 decision trees            observations about an item to conclusions                 6         1       60
+      1 decision trees            of features that lead                                     4         1       73
+      1 decision trees            of features that lead to                                  5         1       66
+      1 decision trees            of features that lead to those                            6         1       60
+      1 decision trees            of the predictive modelling                               4         1       73
+      1 decision trees            of the predictive modelling approaches                    5         1       66
+      1 decision trees            of the predictive modelling approaches used               6         1       60
+      1 decision trees            of values are called                                      4         1       73
+      1 decision trees            of values are called classification                       5         1       66
+      1 decision trees            of values are called classification trees                 6         1       60
+      1 decision trees            one of the predictive                                     4         1       73
+      1 decision trees            one of the predictive modelling                           5         1       66
+      1 decision trees            one of the predictive modelling approaches                6         1       60
+      1 decision trees            predictive model which maps                               4         1       73
+      1 decision trees            predictive model which maps observations                  5         1       66
+      1 decision trees            predictive model which maps observations about            6         1       60
+      1 decision trees            predictive modelling approaches used                      4         1       73
+      1 decision trees            predictive modelling approaches used in                   5         1       66
+      1 decision trees            predictive modelling approaches used in statistics        6         1       60
+      1 decision trees            real numbers are called                                   4         1       73
+      1 decision trees            real numbers are called regression                        5         1       66
+      1 decision trees            real numbers are called regression trees                  6         1       60
+      1 decision trees            represent class labels and                                4         1       73
+      1 decision trees            represent class labels and branches                       5         1       66
+      1 decision trees            represent class labels and branches represent             6         1       60
+      1 decision trees            represent conjunctions of features                        4         1       73
+      1 decision trees            represent conjunctions of features that                   5         1       66
+      1 decision trees            represent conjunctions of features that lead              6         1       60
+      1 decision trees            set of values are                                         4         1       73
+      1 decision trees            set of values are called                                  5         1       66
+      1 decision trees            set of values are called classification                   6         1       60
+      1 decision trees            take a finite set                                         4         1       73
+      1 decision trees            take a finite set of                                      5         1       66
+      1 decision trees            take a finite set of values                               6         1       60
+      1 decision trees            take continuous values typically                          4         1       73
+      1 decision trees            take continuous values typically real                     5         1       66
+      1 decision trees            take continuous values typically real numbers             6         1       60
+      1 decision trees            target variable can take                                  4         2       73
+      1 decision trees            target variable can take a                                5         1       66
+      1 decision trees            target variable can take a finite                         6         1       60
+      1 decision trees            target variable can take continuous                       5         1       66
+      1 decision trees            target variable can take continuous values                6         1       60
+      1 decision trees            that lead to those                                        4         1       73
+      1 decision trees            that lead to those class                                  5         1       66
+      1 decision trees            that lead to those class labels                           6         1       60
+      1 decision trees            the items target value                                    4         1       73
+      1 decision trees            the predictive modelling approaches                       4         1       73
+      1 decision trees            the predictive modelling approaches used                  5         1       66
+      1 decision trees            the predictive modelling approaches used in               6         1       60
+      1 decision trees            the target variable can                                   4         2       73
+      1 decision trees            the target variable can take                              5         2       66
+      1 decision trees            the target variable can take a                            6         1       60
+      1 decision trees            the target variable can take continuous                   6         1       60
+      1 decision trees            to conclusions about the                                  4         1       73
+      1 decision trees            to conclusions about the items                            5         1       66
+      1 decision trees            to conclusions about the items target                     6         1       60
+      1 decision trees            to those class labels                                     4         1       73
+      1 decision trees            tree as a predictive                                      4         1       73
+      1 decision trees            tree as a predictive model                                5         1       66
+      1 decision trees            tree as a predictive model which                          6         1       60
+      1 decision trees            tree learning uses a                                      4         1       73
+      1 decision trees            tree learning uses a decision                             5         1       66
+      1 decision trees            tree learning uses a decision tree                        6         1       60
+      1 decision trees            tree models where the                                     4         1       73
+      1 decision trees            tree models where the target                              5         1       66
+      1 decision trees            tree models where the target variable                     6         1       60
+      1 decision trees            trees where the target                                    4         1       73
+      1 decision trees            trees where the target variable                           5         1       66
+      1 decision trees            trees where the target variable can                       6         1       60
+      1 decision trees            typically real numbers are                                4         1       73
+      1 decision trees            typically real numbers are called                         5         1       66
+      1 decision trees            typically real numbers are called regression              6         1       60
+      1 decision trees            uses a decision tree                                      4         1       73
+      1 decision trees            uses a decision tree as                                   5         1       66
+      1 decision trees            uses a decision tree as a                                 6         1       60
+      1 decision trees            values are called classification                          4         1       73
+      1 decision trees            values are called classification trees                    5         1       66
+      1 decision trees            values typically real numbers                             4         1       73
+      1 decision trees            values typically real numbers are                         5         1       66
+      1 decision trees            values typically real numbers are called                  6         1       60
+      1 decision trees            variable can take a                                       4         1       73
+      1 decision trees            variable can take a finite                                5         1       66
+      1 decision trees            variable can take a finite set                            6         1       60
+      1 decision trees            variable can take continuous                              4         1       73
+      1 decision trees            variable can take continuous values                       5         1       66
+      1 decision trees            variable can take continuous values typically             6         1       60
+      1 decision trees            where the target variable                                 4         2       73
+      1 decision trees            where the target variable can                             5         2       66
+      1 decision trees            where the target variable can take                        6         2       60
+      1 decision trees            which maps observations about                             4         1       73
+      1 decision trees            which maps observations about an                          5         1       66
+      1 decision trees            which maps observations about an item                     6         1       60
+      2 simple regression         a linear regression model                                 4         1       55
+      2 simple regression         a linear regression model with                            5         1       52
+      2 simple regression         a linear regression model with a                          6         1       49
+      2 simple regression         a single explanatory variable                             4         1       55
+      2 simple regression         a straight line through                                   4         1       55
+      2 simple regression         a straight line through the                               5         1       52
+      2 simple regression         a straight line through the set                           6         1       49
+      2 simple regression         a way that makes                                          4         1       55
+      2 simple regression         a way that makes the                                      5         1       52
+      2 simple regression         a way that makes the sum                                  6         1       49
+      2 simple regression         and the fitted line                                       4         1       55
+      2 simple regression         and the fitted line as                                    5         1       52
+      2 simple regression         and the fitted line as small                              6         1       49
+      2 simple regression         as small as possible                                      4         1       55
+      2 simple regression         between the points of                                     4         1       55
+      2 simple regression         between the points of the                                 5         1       52
+      2 simple regression         between the points of the data                            6         1       49
+      2 simple regression         data set and the                                          4         1       55
+      2 simple regression         data set and the fitted                                   5         1       52
+      2 simple regression         data set and the fitted line                              6         1       49
+      2 simple regression         distances between the points                              4         1       55
+      2 simple regression         distances between the points of                           5         1       52
+      2 simple regression         distances between the points of the                       6         1       49
+      2 simple regression         estimator of a linear                                     4         1       55
+      2 simple regression         estimator of a linear regression                          5         1       52
+      2 simple regression         estimator of a linear regression model                    6         1       49
+      2 simple regression         fits a straight line                                      4         1       55
+      2 simple regression         fits a straight line through                              5         1       52
+      2 simple regression         fits a straight line through the                          6         1       49
+      2 simple regression         fitted line as small                                      4         1       55
+      2 simple regression         fitted line as small as                                   5         1       52
+      2 simple regression         fitted line as small as possible                          6         1       49
+      2 simple regression         in such a way                                             4         1       55
+      2 simple regression         in such a way that                                        5         1       52
+      2 simple regression         in such a way that makes                                  6         1       49
+      2 simple regression         is the least squares                                      4         1       55
+      2 simple regression         is the least squares estimator                            5         1       52
+      2 simple regression         is the least squares estimator of                         6         1       49
+      2 simple regression         least squares estimator of                                4         1       55
+      2 simple regression         least squares estimator of a                              5         1       52
+      2 simple regression         least squares estimator of a linear                       6         1       49
+      2 simple regression         line as small as                                          4         1       55
+      2 simple regression         line as small as possible                                 5         1       52
+      2 simple regression         line through the set                                      4         1       55
+      2 simple regression         line through the set of                                   5         1       52
+      2 simple regression         line through the set of n                                 6         1       49
+      2 simple regression         linear regression fits a                                  4         1       55
+      2 simple regression         linear regression fits a straight                         5         1       52
+      2 simple regression         linear regression fits a straight line                    6         1       49
+      2 simple regression         linear regression is the                                  4         1       55
+      2 simple regression         linear regression is the least                            5         1       52
+      2 simple regression         linear regression is the least squares                    6         1       49
+      2 simple regression         linear regression model with                              4         1       55
+      2 simple regression         linear regression model with a                            5         1       52
+      2 simple regression         linear regression model with a single                     6         1       49
+      2 simple regression         makes the sum of                                          4         1       55
+      2 simple regression         makes the sum of squared                                  5         1       52
+      2 simple regression         makes the sum of squared residuals                        6         1       49
+      2 simple regression         model with a single                                       4         1       55
+      2 simple regression         model with a single explanatory                           5         1       52
+      2 simple regression         model with a single explanatory variable                  6         1       49
+      2 simple regression         n points in such                                          4         1       55
+      2 simple regression         n points in such a                                        5         1       52
+      2 simple regression         n points in such a way                                    6         1       49
+      2 simple regression         of a linear regression                                    4         1       55
+      2 simple regression         of a linear regression model                              5         1       52
+      2 simple regression         of a linear regression model with                         6         1       49
+      2 simple regression         of n points in                                            4         1       55
+      2 simple regression         of n points in such                                       5         1       52
+      2 simple regression         of n points in such a                                     6         1       49
+      2 simple regression         of squared residuals of                                   4         1       55
+      2 simple regression         of squared residuals of the                               5         1       52
+      2 simple regression         of squared residuals of the model                         6         1       49
+      2 simple regression         of the data set                                           4         1       55
+      2 simple regression         of the data set and                                       5         1       52
+      2 simple regression         of the data set and the                                   6         1       49
+      2 simple regression         of the model that                                         4         1       55
+      2 simple regression         of the model that is                                      5         1       52
+      2 simple regression         points in such a                                          4         1       55
+      2 simple regression         points in such a way                                      5         1       52
+      2 simple regression         points in such a way that                                 6         1       49
+      2 simple regression         points of the data                                        4         1       55
+      2 simple regression         points of the data set                                    5         1       52
+      2 simple regression         points of the data set and                                6         1       49
+      2 simple regression         regression fits a straight                                4         1       55
+      2 simple regression         regression fits a straight line                           5         1       52
+      2 simple regression         regression fits a straight line through                   6         1       49
+      2 simple regression         regression is the least                                   4         1       55
+      2 simple regression         regression is the least squares                           5         1       52
+      2 simple regression         regression is the least squares estimator                 6         1       49
+      2 simple regression         regression model with a                                   4         1       55
+      2 simple regression         regression model with a single                            5         1       52
+      2 simple regression         regression model with a single explanatory                6         1       49
+      2 simple regression         residuals of the model                                    4         1       55
+      2 simple regression         residuals of the model that                               5         1       52
+      2 simple regression         residuals of the model that is                            6         1       49
+      2 simple regression         set and the fitted                                        4         1       55
+      2 simple regression         set and the fitted line                                   5         1       52
+      2 simple regression         set and the fitted line as                                6         1       49
+      2 simple regression         set of n points                                           4         1       55
+      2 simple regression         set of n points in                                        5         1       52
+      2 simple regression         set of n points in such                                   6         1       49
+      2 simple regression         simple linear regression fits                             4         1       55
+      2 simple regression         simple linear regression fits a                           5         1       52
+      2 simple regression         simple linear regression fits a straight                  6         1       49
+      2 simple regression         simple linear regression is                               4         1       55
+      2 simple regression         simple linear regression is the                           5         1       52
+      2 simple regression         simple linear regression is the least                     6         1       49
+      2 simple regression         squared residuals of the                                  4         1       55
+      2 simple regression         squared residuals of the model                            5         1       52
+      2 simple regression         squared residuals of the model that                       6         1       49
+      2 simple regression         squares estimator of a                                    4         1       55
+      2 simple regression         squares estimator of a linear                             5         1       52
+      2 simple regression         squares estimator of a linear regression                  6         1       49
+      2 simple regression         straight line through the                                 4         1       55
+      2 simple regression         straight line through the set                             5         1       52
+      2 simple regression         straight line through the set of                          6         1       49
+      2 simple regression         such a way that                                           4         1       55
+      2 simple regression         such a way that makes                                     5         1       52
+      2 simple regression         such a way that makes the                                 6         1       49
+      2 simple regression         sum of squared residuals                                  4         1       55
+      2 simple regression         sum of squared residuals of                               5         1       52
+      2 simple regression         sum of squared residuals of the                           6         1       49
+      2 simple regression         that makes the sum                                        4         1       55
+      2 simple regression         that makes the sum of                                     5         1       52
+      2 simple regression         that makes the sum of squared                             6         1       49
+      2 simple regression         the data set and                                          4         1       55
+      2 simple regression         the data set and the                                      5         1       52
+      2 simple regression         the data set and the fitted                               6         1       49
+      2 simple regression         the fitted line as                                        4         1       55
+      2 simple regression         the fitted line as small                                  5         1       52
+      2 simple regression         the fitted line as small as                               6         1       49
+      2 simple regression         the least squares estimator                               4         1       55
+      2 simple regression         the least squares estimator of                            5         1       52
+      2 simple regression         the least squares estimator of a                          6         1       49
+      2 simple regression         the model that is                                         4         1       55
+      2 simple regression         the points of the                                         4         1       55
+      2 simple regression         the points of the data                                    5         1       52
+      2 simple regression         the points of the data set                                6         1       49
+      2 simple regression         the set of n                                              4         1       55
+      2 simple regression         the set of n points                                       5         1       52
+      2 simple regression         the set of n points in                                    6         1       49
+      2 simple regression         the sum of squared                                        4         1       55
+      2 simple regression         the sum of squared residuals                              5         1       52
+      2 simple regression         the sum of squared residuals of                           6         1       49
+      2 simple regression         through the set of                                        4         1       55
+      2 simple regression         through the set of n                                      5         1       52
+      2 simple regression         through the set of n points                               6         1       49
+      2 simple regression         vertical distances between the                            4         1       55
+      2 simple regression         vertical distances between the points                     5         1       52
+      2 simple regression         vertical distances between the points of                  6         1       49
+      2 simple regression         way that makes the                                        4         1       55
+      2 simple regression         way that makes the sum                                    5         1       52
+      2 simple regression         way that makes the sum of                                 6         1       49
+      2 simple regression         with a single explanatory                                 4         1       55
+      2 simple regression         with a single explanatory variable                        5         1       52
+      3 logistic regression       1958[2][3] although much work                             4         1       59
+      3 logistic regression       1958[2][3] although much work was                         5         1       55
+      3 logistic regression       1958[2][3] although much work was done                    6         1       51
+      3 logistic regression       a binary response based                                   4         1       59
+      3 logistic regression       a binary response based on                                5         1       55
+      3 logistic regression       a binary response based on one                            6         1       51
+      3 logistic regression       a qualitative response/discrete choice                    4         1       59
+      3 logistic regression       a qualitative response/discrete choice model              5         1       55
+      3 logistic regression       a qualitative response/discrete choice model in           6         1       51
+      3 logistic regression       almost two decades earlier                                4         1       59
+      3 logistic regression       although much work was                                    4         1       59
+      3 logistic regression       although much work was done                               5         1       55
+      3 logistic regression       although much work was done in                            6         1       51
+      3 logistic regression       as such it is                                             4         1       59
+      3 logistic regression       as such it is not                                         5         1       55
+      3 logistic regression       as such it is not a                                       6         1       51
+      3 logistic regression       based on one or                                           4         1       59
+      3 logistic regression       based on one or more                                      5         1       55
+      3 logistic regression       based on one or more predictor                            6         1       51
+      3 logistic regression       be called a qualitative                                   4         1       59
+      3 logistic regression       be called a qualitative response/discrete                 5         1       55
+      3 logistic regression       be called a qualitative response/discrete choice          6         1       51
+      3 logistic regression       binary logistic model is                                  4         1       59
+      3 logistic regression       binary logistic model is used                             5         1       55
+      3 logistic regression       binary logistic model is used to                          6         1       51
+      3 logistic regression       binary response based on                                  4         1       59
+      3 logistic regression       binary response based on one                              5         1       55
+      3 logistic regression       binary response based on one or                           6         1       51
+      3 logistic regression       by statistician david cox                                 4         1       59
+      3 logistic regression       by statistician david cox in                              5         1       55
+      3 logistic regression       by statistician david cox in 1958[2][3]                   6         1       51
+      3 logistic regression       called a qualitative response/discrete                    4         1       59
+      3 logistic regression       called a qualitative response/discrete choice             5         1       55
+      3 logistic regression       called a qualitative response/discrete choice model       6         1       51
+      3 logistic regression       case almost two decades                                   4         1       59
+      3 logistic regression       case almost two decades earlier                           5         1       55
+      3 logistic regression       choice model in the                                       4         1       59
+      3 logistic regression       choice model in the terminology                           5         1       55
+      3 logistic regression       choice model in the terminology of                        6         1       51
+      3 logistic regression       could be called a                                         4         1       59
+      3 logistic regression       could be called a qualitative                             5         1       55
+      3 logistic regression       could be called a qualitative response/discrete           6         1       51
+      3 logistic regression       cox in 1958[2][3] although                                4         1       59
+      3 logistic regression       cox in 1958[2][3] although much                           5         1       55
+      3 logistic regression       cox in 1958[2][3] although much work                      6         1       51
+      3 logistic regression       david cox in 1958[2][3]                                   4         1       59
+      3 logistic regression       david cox in 1958[2][3] although                          5         1       55
+      3 logistic regression       david cox in 1958[2][3] although much                     6         1       51
+      3 logistic regression       developed by statistician david                           4         1       59
+      3 logistic regression       developed by statistician david cox                       5         1       55
+      3 logistic regression       developed by statistician david cox in                    6         1       51
+      3 logistic regression       done in the single                                        4         1       59
+      3 logistic regression       done in the single independent                            5         1       55
+      3 logistic regression       done in the single independent variable                   6         1       51
+      3 logistic regression       estimate the probability of                               4         1       59
+      3 logistic regression       estimate the probability of a                             5         1       55
+      3 logistic regression       estimate the probability of a binary                      6         1       51
+      3 logistic regression       in 1958[2][3] although much                               4         1       59
+      3 logistic regression       in 1958[2][3] although much work                          5         1       55
+      3 logistic regression       in 1958[2][3] although much work was                      6         1       51
+      3 logistic regression       in the single independent                                 4         1       59
+      3 logistic regression       in the single independent variable                        5         1       55
+      3 logistic regression       in the single independent variable case                   6         1       51
+      3 logistic regression       in the terminology of                                     4         1       59
+      3 logistic regression       in the terminology of economics                           5         1       55
+      3 logistic regression       independent variable case almost                          4         1       59
+      3 logistic regression       independent variable case almost two                      5         1       55
+      3 logistic regression       independent variable case almost two decades              6         1       51
+      3 logistic regression       is not a classification                                   4         1       59
+      3 logistic regression       is not a classification method                            5         1       55
+      3 logistic regression       is used to estimate                                       4         1       59
+      3 logistic regression       is used to estimate the                                   5         1       55
+      3 logistic regression       is used to estimate the probability                       6         1       51
+      3 logistic regression       it could be called                                        4         1       59
+      3 logistic regression       it could be called a                                      5         1       55
+      3 logistic regression       it could be called a qualitative                          6         1       51
+      3 logistic regression       it is not a                                               4         1       59
+      3 logistic regression       it is not a classification                                5         1       55
+      3 logistic regression       it is not a classification method                         6         1       51
+      3 logistic regression       logistic model is used                                    4         1       59
+      3 logistic regression       logistic model is used to                                 5         1       55
+      3 logistic regression       logistic model is used to estimate                        6         1       51
+      3 logistic regression       logistic regression was developed                         4         1       59
+      3 logistic regression       logistic regression was developed by                      5         1       55
+      3 logistic regression       logistic regression was developed by statistician         6         1       51
+      3 logistic regression       model in the terminology                                  4         1       59
+      3 logistic regression       model in the terminology of                               5         1       55
+      3 logistic regression       model in the terminology of economics                     6         1       51
+      3 logistic regression       model is used to                                          4         1       59
+      3 logistic regression       model is used to estimate                                 5         1       55
+      3 logistic regression       model is used to estimate the                             6         1       51
+      3 logistic regression       more predictor or independent                             4         1       59
+      3 logistic regression       more predictor or independent variables                   5         1       55
+      3 logistic regression       more predictor or independent variables features          6         1       51
+      3 logistic regression       much work was done                                        4         1       59
+      3 logistic regression       much work was done in                                     5         1       55
+      3 logistic regression       much work was done in the                                 6         1       51
+      3 logistic regression       not a classification method                               4         1       59
+      3 logistic regression       of a binary response                                      4         1       59
+      3 logistic regression       of a binary response based                                5         1       55
+      3 logistic regression       of a binary response based on                             6         1       51
+      3 logistic regression       on one or more                                            4         1       59
+      3 logistic regression       on one or more predictor                                  5         1       55
+      3 logistic regression       on one or more predictor or                               6         1       51
+      3 logistic regression       one or more predictor                                     4         1       59
+      3 logistic regression       one or more predictor or                                  5         1       55
+      3 logistic regression       one or more predictor or independent                      6         1       51
+      3 logistic regression       or independent variables features                         4         1       59
+      3 logistic regression       or more predictor or                                      4         1       59
+      3 logistic regression       or more predictor or independent                          5         1       55
+      3 logistic regression       or more predictor or independent variables                6         1       51
+      3 logistic regression       predictor or independent variables                        4         1       59
+      3 logistic regression       predictor or independent variables features               5         1       55
+      3 logistic regression       probability of a binary                                   4         1       59
+      3 logistic regression       probability of a binary response                          5         1       55
+      3 logistic regression       probability of a binary response based                    6         1       51
+      3 logistic regression       qualitative response/discrete choice model                4         1       59
+      3 logistic regression       qualitative response/discrete choice model in             5         1       55
+      3 logistic regression       qualitative response/discrete choice model in the         6         1       51
+      3 logistic regression       regression was developed by                               4         1       59
+      3 logistic regression       regression was developed by statistician                  5         1       55
+      3 logistic regression       regression was developed by statistician david            6         1       51
+      3 logistic regression       response based on one                                     4         1       59
+      3 logistic regression       response based on one or                                  5         1       55
+      3 logistic regression       response based on one or more                             6         1       51
+      3 logistic regression       response/discrete choice model in                         4         1       59
+      3 logistic regression       response/discrete choice model in the                     5         1       55
+      3 logistic regression       response/discrete choice model in the terminology         6         1       51
+      3 logistic regression       single independent variable case                          4         1       59
+      3 logistic regression       single independent variable case almost                   5         1       55
+      3 logistic regression       single independent variable case almost two               6         1       51
+      3 logistic regression       statistician david cox in                                 4         1       59
+      3 logistic regression       statistician david cox in 1958[2][3]                      5         1       55
+      3 logistic regression       statistician david cox in 1958[2][3] although             6         1       51
+      3 logistic regression       such it is not                                            4         1       59
+      3 logistic regression       such it is not a                                          5         1       55
+      3 logistic regression       such it is not a classification                           6         1       51
+      3 logistic regression       the binary logistic model                                 4         1       59
+      3 logistic regression       the binary logistic model is                              5         1       55
+      3 logistic regression       the binary logistic model is used                         6         1       51
+      3 logistic regression       the probability of a                                      4         1       59
+      3 logistic regression       the probability of a binary                               5         1       55
+      3 logistic regression       the probability of a binary response                      6         1       51
+      3 logistic regression       the single independent variable                           4         1       59
+      3 logistic regression       the single independent variable case                      5         1       55
+      3 logistic regression       the single independent variable case almost               6         1       51
+      3 logistic regression       the terminology of economics                              4         1       59
+      3 logistic regression       to estimate the probability                               4         1       59
+      3 logistic regression       to estimate the probability of                            5         1       55
+      3 logistic regression       to estimate the probability of a                          6         1       51
+      3 logistic regression       used to estimate the                                      4         1       59
+      3 logistic regression       used to estimate the probability                          5         1       55
+      3 logistic regression       used to estimate the probability of                       6         1       51
+      3 logistic regression       variable case almost two                                  4         1       59
+      3 logistic regression       variable case almost two decades                          5         1       55
+      3 logistic regression       variable case almost two decades earlier                  6         1       51
+      3 logistic regression       was developed by statistician                             4         1       59
+      3 logistic regression       was developed by statistician david                       5         1       55
+      3 logistic regression       was developed by statistician david cox                   6         1       51
+      3 logistic regression       was done in the                                           4         1       59
+      3 logistic regression       was done in the single                                    5         1       55
+      3 logistic regression       was done in the single independent                        6         1       51
+      3 logistic regression       work was done in                                          4         1       59
+      3 logistic regression       work was done in the                                      5         1       55
+      3 logistic regression       work was done in the single                               6         1       51
+      4 cluster analysis          a cluster and how                                         4         1       83
+      4 cluster analysis          a cluster and how to                                      5         1       76
+      4 cluster analysis          a cluster and how to efficiently                          6         1       70
+      4 cluster analysis          a cluster are more                                        4         1       83
+      4 cluster analysis          a cluster are more similar                                5         1       76
+      4 cluster analysis          a cluster are more similar in                             6         1       70
+      4 cluster analysis          a common technique for                                    4         1       83
+      4 cluster analysis          a common technique for statistical                        5         1       76
+      4 cluster analysis          a common technique for statistical data                   6         1       70
+      4 cluster analysis          a main task of                                            4         1       83
+      4 cluster analysis          a main task of exploratory                                5         1       76
+      4 cluster analysis          a main task of exploratory data                           6         1       70
+      4 cluster analysis          a set of objects                                          4         1       83
+      4 cluster analysis          a set of objects in                                       5         1       76
+      4 cluster analysis          a set of objects in such                                  6         1       70
+      4 cluster analysis          a way that objects                                        4         1       83
+      4 cluster analysis          a way that objects in                                     5         1       76
+      4 cluster analysis          a way that objects in the                                 6         1       70
+      4 cluster analysis          achieved by various algorithms                            4         1       83
+      4 cluster analysis          achieved by various algorithms that                       5         1       76
+      4 cluster analysis          achieved by various algorithms that differ                6         1       70
+      4 cluster analysis          algorithms that differ significantly                      4         1       83
+      4 cluster analysis          algorithms that differ significantly in                   5         1       76
+      4 cluster analysis          algorithms that differ significantly in their             6         1       70
+      4 cluster analysis          analysis itself is not                                    4         1       83
+      4 cluster analysis          analysis itself is not one                                5         1       76
+      4 cluster analysis          analysis itself is not one specific                       6         1       70
+      4 cluster analysis          analysis or clustering is                                 4         1       83
+      4 cluster analysis          analysis or clustering is the                             5         1       76
+      4 cluster analysis          analysis or clustering is the task                        6         1       70
+      4 cluster analysis          and a common technique                                    4         1       83
+      4 cluster analysis          and a common technique for                                5         1       76
+      4 cluster analysis          and a common technique for statistical                    6         1       70
+      4 cluster analysis          and how to efficiently                                    4         1       83
+      4 cluster analysis          and how to efficiently find                               5         1       76
+      4 cluster analysis          and how to efficiently find them                          6         1       70
+      4 cluster analysis          another to each other                                     4         1       83
+      4 cluster analysis          another to each other than                                5         1       76
+      4 cluster analysis          another to each other than to                             6         1       70
+      4 cluster analysis          are more similar in                                       4         1       83
+      4 cluster analysis          are more similar in some                                  5         1       76
+      4 cluster analysis          are more similar in some sense                            6         1       70
+      4 cluster analysis          be achieved by various                                    4         1       83
+      4 cluster analysis          be achieved by various algorithms                         5         1       76
+      4 cluster analysis          be achieved by various algorithms that                    6         1       70
+      4 cluster analysis          but the general task                                      4         1       83
+      4 cluster analysis          but the general task to                                   5         1       76
+      4 cluster analysis          but the general task to be                                6         1       70
+      4 cluster analysis          by various algorithms that                                4         1       83
+      4 cluster analysis          by various algorithms that differ                         5         1       76
+      4 cluster analysis          by various algorithms that differ significantly           6         1       70
+      4 cluster analysis          called a cluster are                                      4         1       83
+      4 cluster analysis          called a cluster are more                                 5         1       76
+      4 cluster analysis          called a cluster are more similar                         6         1       70
+      4 cluster analysis          can be achieved by                                        4         1       83
+      4 cluster analysis          can be achieved by various                                5         1       76
+      4 cluster analysis          can be achieved by various algorithms                     6         1       70
+      4 cluster analysis          cluster analysis itself is                                4         1       83
+      4 cluster analysis          cluster analysis itself is not                            5         1       76
+      4 cluster analysis          cluster analysis itself is not one                        6         1       70
+      4 cluster analysis          cluster analysis or clustering                            4         1       83
+      4 cluster analysis          cluster analysis or clustering is                         5         1       76
+      4 cluster analysis          cluster analysis or clustering is the                     6         1       70
+      4 cluster analysis          cluster and how to                                        4         1       83
+      4 cluster analysis          cluster and how to efficiently                            5         1       76
+      4 cluster analysis          cluster and how to efficiently find                       6         1       70
+      4 cluster analysis          cluster are more similar                                  4         1       83
+      4 cluster analysis          cluster are more similar in                               5         1       76
+      4 cluster analysis          cluster are more similar in some                          6         1       70
+      4 cluster analysis          clustering is the task                                    4         1       83
+      4 cluster analysis          clustering is the task of                                 5         1       76
+      4 cluster analysis          clustering is the task of grouping                        6         1       70
+      4 cluster analysis          common technique for statistical                          4         1       83
+      4 cluster analysis          common technique for statistical data                     5         1       76
+      4 cluster analysis          common technique for statistical data analysis            6         1       70
+      4 cluster analysis          constitutes a cluster and                                 4         1       83
+      4 cluster analysis          constitutes a cluster and how                             5         1       76
+      4 cluster analysis          constitutes a cluster and how to                          6         1       70
+      4 cluster analysis          differ significantly in their                             4         1       83
+      4 cluster analysis          differ significantly in their notion                      5         1       76
+      4 cluster analysis          differ significantly in their notion of                   6         1       70
+      4 cluster analysis          each other than to                                        4         1       83
+      4 cluster analysis          each other than to those                                  5         1       76
+      4 cluster analysis          each other than to those in                               6         1       70
+      4 cluster analysis          for statistical data analysis                             4         1       83
+      4 cluster analysis          general task to be                                        4         1       83
+      4 cluster analysis          general task to be solved                                 5         1       76
+      4 cluster analysis          group called a cluster                                    4         1       83
+      4 cluster analysis          group called a cluster are                                5         1       76
+      4 cluster analysis          group called a cluster are more                           6         1       70
+      4 cluster analysis          grouping a set of                                         4         1       83
+      4 cluster analysis          grouping a set of objects                                 5         1       76
+      4 cluster analysis          grouping a set of objects in                              6         1       70
+      4 cluster analysis          how to efficiently find                                   4         1       83
+      4 cluster analysis          how to efficiently find them                              5         1       76
+      4 cluster analysis          in other groups clusters                                  4         1       83
+      4 cluster analysis          in some sense or                                          4         1       83
+      4 cluster analysis          in some sense or another                                  5         1       76
+      4 cluster analysis          in some sense or another to                               6         1       70
+      4 cluster analysis          in such a way                                             4         1       83
+      4 cluster analysis          in such a way that                                        5         1       76
+      4 cluster analysis          in such a way that objects                                6         1       70
+      4 cluster analysis          in the same group                                         4         1       83
+      4 cluster analysis          in the same group called                                  5         1       76
+      4 cluster analysis          in the same group called a                                6         1       70
+      4 cluster analysis          in their notion of                                        4         1       83
+      4 cluster analysis          in their notion of what                                   5         1       76
+      4 cluster analysis          in their notion of what constitutes                       6         1       70
+      4 cluster analysis          is a main task                                            4         1       83
+      4 cluster analysis          is a main task of                                         5         1       76
+      4 cluster analysis          is a main task of exploratory                             6         1       70
+      4 cluster analysis          is not one specific                                       4         1       83
+      4 cluster analysis          is not one specific algorithm                             5         1       76
+      4 cluster analysis          is the task of                                            4         1       83
+      4 cluster analysis          is the task of grouping                                   5         1       76
+      4 cluster analysis          is the task of grouping a                                 6         1       70
+      4 cluster analysis          it can be achieved                                        4         1       83
+      4 cluster analysis          it can be achieved by                                     5         1       76
+      4 cluster analysis          it can be achieved by various                             6         1       70
+      4 cluster analysis          it is a main                                              4         1       83
+      4 cluster analysis          it is a main task                                         5         1       76
+      4 cluster analysis          it is a main task of                                      6         1       70
+      4 cluster analysis          itself is not one                                         4         1       83
+      4 cluster analysis          itself is not one specific                                5         1       76
+      4 cluster analysis          itself is not one specific algorithm                      6         1       70
+      4 cluster analysis          main task of exploratory                                  4         1       83
+      4 cluster analysis          main task of exploratory data                             5         1       76
+      4 cluster analysis          main task of exploratory data mining                      6         1       70
+      4 cluster analysis          more similar in some                                      4         1       83
+      4 cluster analysis          more similar in some sense                                5         1       76
+      4 cluster analysis          more similar in some sense or                             6         1       70
+      4 cluster analysis          not one specific algorithm                                4         1       83
+      4 cluster analysis          notion of what constitutes                                4         1       83
+      4 cluster analysis          notion of what constitutes a                              5         1       76
+      4 cluster analysis          notion of what constitutes a cluster                      6         1       70
+      4 cluster analysis          objects in such a                                         4         1       83
+      4 cluster analysis          objects in such a way                                     5         1       76
+      4 cluster analysis          objects in such a way that                                6         1       70
+      4 cluster analysis          objects in the same                                       4         1       83
+      4 cluster analysis          objects in the same group                                 5         1       76
+      4 cluster analysis          objects in the same group called                          6         1       70
+      4 cluster analysis          of exploratory data mining                                4         1       83
+      4 cluster analysis          of grouping a set                                         4         1       83
+      4 cluster analysis          of grouping a set of                                      5         1       76
+      4 cluster analysis          of grouping a set of objects                              6         1       70
+      4 cluster analysis          of objects in such                                        4         1       83
+      4 cluster analysis          of objects in such a                                      5         1       76
+      4 cluster analysis          of objects in such a way                                  6         1       70
+      4 cluster analysis          of what constitutes a                                     4         1       83
+      4 cluster analysis          of what constitutes a cluster                             5         1       76
+      4 cluster analysis          of what constitutes a cluster and                         6         1       70
+      4 cluster analysis          or another to each                                        4         1       83
+      4 cluster analysis          or another to each other                                  5         1       76
+      4 cluster analysis          or another to each other than                             6         1       70
+      4 cluster analysis          or clustering is the                                      4         1       83
+      4 cluster analysis          or clustering is the task                                 5         1       76
+      4 cluster analysis          or clustering is the task of                              6         1       70
+      4 cluster analysis          other than to those                                       4         1       83
+      4 cluster analysis          other than to those in                                    5         1       76
+      4 cluster analysis          other than to those in other                              6         1       70
+      4 cluster analysis          same group called a                                       4         1       83
+      4 cluster analysis          same group called a cluster                               5         1       76
+      4 cluster analysis          same group called a cluster are                           6         1       70
+      4 cluster analysis          sense or another to                                       4         1       83
+      4 cluster analysis          sense or another to each                                  5         1       76
+      4 cluster analysis          sense or another to each other                            6         1       70
+      4 cluster analysis          set of objects in                                         4         1       83
+      4 cluster analysis          set of objects in such                                    5         1       76
+      4 cluster analysis          set of objects in such a                                  6         1       70
+      4 cluster analysis          significantly in their notion                             4         1       83
+      4 cluster analysis          significantly in their notion of                          5         1       76
+      4 cluster analysis          significantly in their notion of what                     6         1       70
+      4 cluster analysis          similar in some sense                                     4         1       83
+      4 cluster analysis          similar in some sense or                                  5         1       76
+      4 cluster analysis          similar in some sense or another                          6         1       70
+      4 cluster analysis          some sense or another                                     4         1       83
+      4 cluster analysis          some sense or another to                                  5         1       76
+      4 cluster analysis          some sense or another to each                             6         1       70
+      4 cluster analysis          such a way that                                           4         1       83
+      4 cluster analysis          such a way that objects                                   5         1       76
+      4 cluster analysis          such a way that objects in                                6         1       70
+      4 cluster analysis          task of exploratory data                                  4         1       83
+      4 cluster analysis          task of exploratory data mining                           5         1       76
+      4 cluster analysis          task of grouping a                                        4         1       83
+      4 cluster analysis          task of grouping a set                                    5         1       76
+      4 cluster analysis          task of grouping a set of                                 6         1       70
+      4 cluster analysis          task to be solved                                         4         1       83
+      4 cluster analysis          technique for statistical data                            4         1       83
+      4 cluster analysis          technique for statistical data analysis                   5         1       76
+      4 cluster analysis          than to those in                                          4         1       83
+      4 cluster analysis          than to those in other                                    5         1       76
+      4 cluster analysis          than to those in other groups                             6         1       70
+      4 cluster analysis          that differ significantly in                              4         1       83
+      4 cluster analysis          that differ significantly in their                        5         1       76
+      4 cluster analysis          that differ significantly in their notion                 6         1       70
+      4 cluster analysis          that objects in the                                       4         1       83
+      4 cluster analysis          that objects in the same                                  5         1       76
+      4 cluster analysis          that objects in the same group                            6         1       70
+      4 cluster analysis          the general task to                                       4         1       83
+      4 cluster analysis          the general task to be                                    5         1       76
+      4 cluster analysis          the general task to be solved                             6         1       70
+      4 cluster analysis          the same group called                                     4         1       83
+      4 cluster analysis          the same group called a                                   5         1       76
+      4 cluster analysis          the same group called a cluster                           6         1       70
+      4 cluster analysis          the task of grouping                                      4         1       83
+      4 cluster analysis          the task of grouping a                                    5         1       76
+      4 cluster analysis          the task of grouping a set                                6         1       70
+      4 cluster analysis          their notion of what                                      4         1       83
+      4 cluster analysis          their notion of what constitutes                          5         1       76
+      4 cluster analysis          their notion of what constitutes a                        6         1       70
+      4 cluster analysis          those in other groups                                     4         1       83
+      4 cluster analysis          those in other groups clusters                            5         1       76
+      4 cluster analysis          to each other than                                        4         1       83
+      4 cluster analysis          to each other than to                                     5         1       76
+      4 cluster analysis          to each other than to those                               6         1       70
+      4 cluster analysis          to efficiently find them                                  4         1       83
+      4 cluster analysis          to those in other                                         4         1       83
+      4 cluster analysis          to those in other groups                                  5         1       76
+      4 cluster analysis          to those in other groups clusters                         6         1       70
+      4 cluster analysis          used in many fields                                       4         1       83
+      4 cluster analysis          various algorithms that differ                            4         1       83
+      4 cluster analysis          various algorithms that differ significantly              5         1       76
+      4 cluster analysis          various algorithms that differ significantly in           6         1       70
+      4 cluster analysis          way that objects in                                       4         1       83
+      4 cluster analysis          way that objects in the                                   5         1       76
+      4 cluster analysis          way that objects in the same                              6         1       70
+      4 cluster analysis          what constitutes a cluster                                4         1       83
+      4 cluster analysis          what constitutes a cluster and                            5         1       76
+      4 cluster analysis          what constitutes a cluster and how                        6         1       70
+      5 association rule learning a customer buys onions                                    4         1       71
+      5 association rule learning a customer buys onions and                                5         1       64
+      5 association rule learning a customer buys onions and potatoes                       6         1       58
+      5 association rule learning a method for discovering                                  4         1       71
+      5 association rule learning a method for discovering interesting                      5         1       64
+      5 association rule learning a method for discovering interesting relations            6         1       58
+      5 association rule learning a supermarket would indicate                              4         1       71
+      5 association rule learning a supermarket would indicate that                         5         1       64
+      5 association rule learning a supermarket would indicate that if                      6         1       58
+      5 association rule learning also buy hamburger meat                                   4         1       71
+      5 association rule learning are likely to also                                        4         1       71
+      5 association rule learning are likely to also buy                                    5         1       64
+      5 association rule learning are likely to also buy hamburger                          6         1       58
+      5 association rule learning association rule learning is                              4         1       71
+      5 association rule learning association rule learning is a                            5         1       64
+      5 association rule learning association rule learning is a method                     6         1       58
+      5 association rule learning association rules for discovering                         4         1       71
+      5 association rule learning association rules for discovering regularities            5         1       64
+      5 association rule learning association rules for discovering regularities between    6         1       58
+      5 association rule learning based on the concept                                      4         1       71
+      5 association rule learning based on the concept of                                   5         1       64
+      5 association rule learning based on the concept of strong                            6         1       58
+      5 association rule learning between products in large                                 4         1       71
+      5 association rule learning between products in large scale                           5         1       64
+      5 association rule learning between products in large scale transaction               6         1       58
+      5 association rule learning between variables in large                                4         1       71
+      5 association rule learning between variables in large databases                      5         1       64
+      5 association rule learning buys onions and potatoes                                  4         1       71
+      5 association rule learning buys onions and potatoes together                         5         1       64
+      5 association rule learning by point of sale                                          4         1       71
+      5 association rule learning by point of sale pos                                      5         1       64
+      5 association rule learning by point of sale pos systems                              6         1       58
+      5 association rule learning concept of strong rules                                   4         1       71
+      5 association rule learning customer buys onions and                                  4         1       71
+      5 association rule learning customer buys onions and potatoes                         5         1       64
+      5 association rule learning customer buys onions and potatoes together                6         1       58
+      5 association rule learning data of a supermarket                                     4         1       71
+      5 association rule learning data of a supermarket would                               5         1       64
+      5 association rule learning data of a supermarket would indicate                      6         1       58
+      5 association rule learning data recorded by point                                    4         1       71
+      5 association rule learning data recorded by point of                                 5         1       64
+      5 association rule learning data recorded by point of sale                            6         1       58
+      5 association rule learning databases using different measures                        4         1       71
+      5 association rule learning databases using different measures of                     5         1       64
+      5 association rule learning databases using different measures of interestingness     6         1       58
+      5 association rule learning different measures of interestingness                     4         1       71
+      5 association rule learning discovered in databases using                             4         1       71
+      5 association rule learning discovered in databases using different                   5         1       64
+      5 association rule learning discovered in databases using different measures          6         1       58
+      5 association rule learning discovering interesting relations between                 4         1       71
+      5 association rule learning discovering interesting relations between variables       5         1       64
+      5 association rule learning discovering interesting relations between variables in    6         1       58
+      5 association rule learning discovering regularities between products                 4         1       71
+      5 association rule learning discovering regularities between products in              5         1       64
+      5 association rule learning discovering regularities between products in large        6         1       58
+      5 association rule learning for discovering interesting relations                     4         1       71
+      5 association rule learning for discovering interesting relations between             5         1       64
+      5 association rule learning for discovering interesting relations between variables   6         1       58
+      5 association rule learning for discovering regularities between                      4         1       71
+      5 association rule learning for discovering regularities between products             5         1       64
+      5 association rule learning for discovering regularities between products in          6         1       58
+      5 association rule learning found in the sales                                        4         1       71
+      5 association rule learning found in the sales data                                   5         1       64
+      5 association rule learning found in the sales data of                                6         1       58
+      5 association rule learning identify strong rules discovered                          4         1       71
+      5 association rule learning identify strong rules discovered in                       5         1       64
+      5 association rule learning identify strong rules discovered in databases             6         1       58
+      5 association rule learning if a customer buys                                        4         1       71
+      5 association rule learning if a customer buys onions                                 5         1       64
+      5 association rule learning if a customer buys onions and                             6         1       58
+      5 association rule learning in databases using different                              4         1       71
+      5 association rule learning in databases using different measures                     5         1       64
+      5 association rule learning in databases using different measures of                  6         1       58
+      5 association rule learning in large scale transaction                                4         1       71
+      5 association rule learning in large scale transaction data                           5         1       64
+      5 association rule learning in large scale transaction data recorded                  6         1       58
+      5 association rule learning in the sales data                                         4         1       71
+      5 association rule learning in the sales data of                                      5         1       64
+      5 association rule learning in the sales data of a                                    6         1       58
+      5 association rule learning indicate that if a                                        4         1       71
+      5 association rule learning indicate that if a customer                               5         1       64
+      5 association rule learning indicate that if a customer buys                          6         1       58
+      5 association rule learning intended to identify strong                               4         1       71
+      5 association rule learning intended to identify strong rules                         5         1       64
+      5 association rule learning intended to identify strong rules discovered              6         1       58
+      5 association rule learning interesting relations between variables                   4         1       71
+      5 association rule learning interesting relations between variables in                5         1       64
+      5 association rule learning interesting relations between variables in large          6         1       58
+      5 association rule learning introduced association rules for                          4         1       71
+      5 association rule learning introduced association rules for discovering              5         1       64
+      5 association rule learning introduced association rules for discovering regularities 6         1       58
+      5 association rule learning is a method for                                           4         1       71
+      5 association rule learning is a method for discovering                               5         1       64
+      5 association rule learning is a method for discovering interesting                   6         1       58
+      5 association rule learning is intended to identify                                   4         1       71
+      5 association rule learning is intended to identify strong                            5         1       64
+      5 association rule learning is intended to identify strong rules                      6         1       58
+      5 association rule learning it is intended to                                         4         1       71
+      5 association rule learning it is intended to identify                                5         1       64
+      5 association rule learning it is intended to identify strong                         6         1       58
+      5 association rule learning large scale transaction data                              4         1       71
+      5 association rule learning large scale transaction data recorded                     5         1       64
+      5 association rule learning large scale transaction data recorded by                  6         1       58
+      5 association rule learning learning is a method                                      4         1       71
+      5 association rule learning learning is a method for                                  5         1       64
+      5 association rule learning learning is a method for discovering                      6         1       58
+      5 association rule learning likely to also buy                                        4         1       71
+      5 association rule learning likely to also buy hamburger                              5         1       64
+      5 association rule learning likely to also buy hamburger meat                         6         1       58
+      5 association rule learning method for discovering interesting                        4         1       71
+      5 association rule learning method for discovering interesting relations              5         1       64
+      5 association rule learning method for discovering interesting relations between      6         1       58
+      5 association rule learning of a supermarket would                                    4         1       71
+      5 association rule learning of a supermarket would indicate                           5         1       64
+      5 association rule learning of a supermarket would indicate that                      6         1       58
+      5 association rule learning of sale pos systems                                       4         1       71
+      5 association rule learning of sale pos systems in                                    5         1       64
+      5 association rule learning of sale pos systems in supermarkets                       6         1       58
+      5 association rule learning on the concept of                                         4         1       71
+      5 association rule learning on the concept of strong                                  5         1       64
+      5 association rule learning on the concept of strong rules                            6         1       58
+      5 association rule learning onions and potatoes together                              4         1       71
+      5 association rule learning point of sale pos                                         4         1       71
+      5 association rule learning point of sale pos systems                                 5         1       64
+      5 association rule learning point of sale pos systems in                              6         1       58
+      5 association rule learning pos systems in supermarkets                               4         1       71
+      5 association rule learning potatoes}=&gt;{burger} found in the                          4         1       71
+      5 association rule learning potatoes}=&gt;{burger} found in the sales                    5         1       64
+      5 association rule learning potatoes}=&gt;{burger} found in the sales data               6         1       58
+      5 association rule learning products in large scale                                   4         1       71
+      5 association rule learning products in large scale transaction                       5         1       64
+      5 association rule learning products in large scale transaction data                  6         1       58
+      5 association rule learning rakesh agrawal et al                                      4         1       71
+      5 association rule learning recorded by point of                                      4         1       71
+      5 association rule learning recorded by point of sale                                 5         1       64
+      5 association rule learning recorded by point of sale pos                             6         1       58
+      5 association rule learning regularities between products in                          4         1       71
+      5 association rule learning regularities between products in large                    5         1       64
+      5 association rule learning regularities between products in large scale              6         1       58
+      5 association rule learning relations between variables in                            4         1       71
+      5 association rule learning relations between variables in large                      5         1       64
+      5 association rule learning relations between variables in large databases            6         1       58
+      5 association rule learning rule learning is a                                        4         1       71
+      5 association rule learning rule learning is a method                                 5         1       64
+      5 association rule learning rule learning is a method for                             6         1       58
+      5 association rule learning rules discovered in databases                             4         1       71
+      5 association rule learning rules discovered in databases using                       5         1       64
+      5 association rule learning rules discovered in databases using different             6         1       58
+      5 association rule learning rules for discovering regularities                        4         1       71
+      5 association rule learning rules for discovering regularities between                5         1       64
+      5 association rule learning rules for discovering regularities between products       6         1       58
+      5 association rule learning sale pos systems in                                       4         1       71
+      5 association rule learning sale pos systems in supermarkets                          5         1       64
+      5 association rule learning sales data of a                                           4         1       71
+      5 association rule learning sales data of a supermarket                               5         1       64
+      5 association rule learning sales data of a supermarket would                         6         1       58
+      5 association rule learning scale transaction data recorded                           4         1       71
+      5 association rule learning scale transaction data recorded by                        5         1       64
+      5 association rule learning scale transaction data recorded by point                  6         1       58
+      5 association rule learning strong rules discovered in                                4         1       71
+      5 association rule learning strong rules discovered in databases                      5         1       64
+      5 association rule learning strong rules discovered in databases using                6         1       58
+      5 association rule learning supermarket would indicate that                           4         1       71
+      5 association rule learning supermarket would indicate that if                        5         1       64
+      5 association rule learning supermarket would indicate that if a                      6         1       58
+      5 association rule learning that if a customer                                        4         1       71
+      5 association rule learning that if a customer buys                                   5         1       64
+      5 association rule learning that if a customer buys onions                            6         1       58
+      5 association rule learning the concept of strong                                     4         1       71
+      5 association rule learning the concept of strong rules                               5         1       64
+      5 association rule learning the sales data of                                         4         1       71
+      5 association rule learning the sales data of a                                       5         1       64
+      5 association rule learning the sales data of a supermarket                           6         1       58
+      5 association rule learning they are likely to                                        4         1       71
+      5 association rule learning they are likely to also                                   5         1       64
+      5 association rule learning they are likely to also buy                               6         1       58
+      5 association rule learning to also buy hamburger                                     4         1       71
+      5 association rule learning to also buy hamburger meat                                5         1       64
+      5 association rule learning to identify strong rules                                  4         1       71
+      5 association rule learning to identify strong rules discovered                       5         1       64
+      5 association rule learning to identify strong rules discovered in                    6         1       58
+      5 association rule learning transaction data recorded by                              4         1       71
+      5 association rule learning transaction data recorded by point                        5         1       64
+      5 association rule learning transaction data recorded by point of                     6         1       58
+      5 association rule learning using different measures of                               4         1       71
+      5 association rule learning using different measures of interestingness               5         1       64
+      5 association rule learning variables in large databases                              4         1       71
+      5 association rule learning would indicate that if                                    4         1       71
+      5 association rule learning would indicate that if a                                  5         1       64
+      5 association rule learning would indicate that if a customer                         6         1       58
+      5 association rule learning [2] introduced association rules                          4         1       71
+      5 association rule learning [2] introduced association rules for                      5         1       64
+      5 association rule learning [2] introduced association rules for discovering          6         1       58</pre>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="vek1524580064974__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+</div>
+
+</div>
+<div class="topic reference nested2" aria-labelledby="ariaid-title8" topicindex="8" topicid="wzv1524580127574" xml:lang="en-us" lang="en-us" id="wzv1524580127574">
+	<h3 class="title topictitle3" id="ariaid-title8">NGramSplitter_MLE Example: Overlapping ('false'), OutputTotalGramCount ('false')</h3>
+
+	<div class="body refbody">
+		<div class="section" id="wzv1524580127574__section_N10011_N1000E_N10001"><h4 class="title sectiontitle">Input</h4><ul class="ul" id="wzv1524580127574__ul_yqr_ky1_j2b"><li class="li">Input Table: paragraphs_input, as in <a class="xref" href="rkv1541541150023.html#vek1524580064974" title="See example of Machine Learning Engine function NGramSplitter_MLE that allows overlapping n-grams and outputs number of n-grams in each document.">NGramSplitter_MLE Example: Overlapping ('true'), OutputTotalGramCount ('true')</a></li>
+</ul>
+
+		</div>
+<div class="section" id="wzv1524580127574__section_c14_rcl_pdb"><h4 class="title sectiontitle">SQL Call</h4><pre class="pre codeblock"><code>SELECT * FROM NGramSplitter_MLE (
+  ON paragraphs_input
+  USING
+  TextColumn ('paratext')
+  Delimiter (' ')
+  Grams ('4-6')
+  OverLapping ('false')
+  ConvertToLowerCase ('true')
+  OutputTotalGramCount ('false')
+  Accumulate ('paraid', 'paratopic')
+) AS dt ORDER BY paraid, paratopic, ngram;</code></pre></div>
+<div class="section" id="wzv1524580127574__section_wzb_scl_pdb"><h4 class="title sectiontitle">Output</h4><pre class="pre screen"> paraid paratopic                 ngram                                                   n frequency 
+ ------ ------------------------- ------------------------------------------------------- - --------- 
+      1 decision trees            a decision tree as                                      4         1
+      1 decision trees            a finite set of                                         4         1
+      1 decision trees            a predictive model which                                4         1
+      1 decision trees            an item to conclusions about                            5         1
+      1 decision trees            and branches represent conjunctions                     4         1
+      1 decision trees            branches represent conjunctions of features             5         1
+      1 decision trees            can take a finite set of                                6         1
+      1 decision trees            can take continuous values typically real               6         1
+      1 decision trees            conclusions about the items target value                6         1
+      1 decision trees            continuous values typically real                        4         1
+      1 decision trees            data mining and machine                                 4         1
+      1 decision trees            data mining and machine learning                        5         1
+      1 decision trees            decision tree as a predictive                           5         1
+      1 decision trees            decision tree learning uses                             4         1
+      1 decision trees            decision tree learning uses a                           5         1
+      1 decision trees            decision tree learning uses a decision                  6         1
+      1 decision trees            decision trees where the                                4         1
+      1 decision trees            decision trees where the target                         5         1
+      1 decision trees            decision trees where the target variable                6         1
+      1 decision trees            in these tree structures                                4         1
+      1 decision trees            it is one of                                            4         1
+      1 decision trees            it is one of the                                        5         1
+      1 decision trees            it is one of the predictive                             6         1
+      1 decision trees            item to conclusions about                               4         1
+      1 decision trees            leaves represent class labels                           4         1
+      1 decision trees            leaves represent class labels and                       5         1
+      1 decision trees            leaves represent class labels and branches              6         1
+      1 decision trees            maps observations about an                              4         1
+      1 decision trees            maps observations about an item to                      6         1
+      1 decision trees            model which maps observations about                     5         1
+      1 decision trees            numbers are called regression                           4         1
+      1 decision trees            of features that lead                                   4         1
+      1 decision trees            predictive modelling approaches used in                 5         1
+      1 decision trees            represent conjunctions of features that lead            6         1
+      1 decision trees            set of values are called                                5         1
+      1 decision trees            target variable can take                                4         2
+      1 decision trees            that lead to those class                                5         1
+      1 decision trees            the items target value                                  4         1
+      1 decision trees            the predictive modelling approaches                     4         1
+      1 decision trees            to those class labels                                   4         1
+      1 decision trees            tree as a predictive model which                        6         1
+      1 decision trees            tree models where the                                   4         1
+      1 decision trees            tree models where the target                            5         1
+      1 decision trees            tree models where the target variable                   6         1
+      1 decision trees            typically real numbers are called                       5         1
+      1 decision trees            values are called classification                        4         1
+      1 decision trees            variable can take a finite                              5         1
+      1 decision trees            variable can take continuous values                     5         1
+      2 simple regression         a straight line through                                 4         1
+      2 simple regression         a way that makes the                                    5         1
+      2 simple regression         least squares estimator of a                            5         1
+      2 simple regression         line as small as                                        4         1
+      2 simple regression         line through the set of n                               6         1
+      2 simple regression         linear regression model with a                          5         1
+      2 simple regression         makes the sum of squared residuals                      6         1
+      2 simple regression         model with a single                                     4         1
+      2 simple regression         model with a single explanatory variable                6         1
+      2 simple regression         of a linear regression                                  4         1
+      2 simple regression         of n points in such                                     5         1
+      2 simple regression         of the data set and                                     5         1
+      2 simple regression         of the model that                                       4         1
+      2 simple regression         points in such a                                        4         1
+      2 simple regression         points in such a way that                               6         1
+      2 simple regression         points of the data                                      4         1
+      2 simple regression         set and the fitted                                      4         1
+      2 simple regression         simple linear regression fits                           4         1
+      2 simple regression         simple linear regression fits a                         5         1
+      2 simple regression         simple linear regression fits a straight                6         1
+      2 simple regression         simple linear regression is                             4         1
+      2 simple regression         simple linear regression is the                         5         1
+      2 simple regression         simple linear regression is the least                   6         1
+      2 simple regression         squares estimator of a linear regression                6         1
+      2 simple regression         straight line through the set                           5         1
+      2 simple regression         sum of squared residuals                                4         1
+      2 simple regression         sum of squared residuals of                             5         1
+      2 simple regression         the data set and the fitted                             6         1
+      2 simple regression         the fitted line as small                                5         1
+      2 simple regression         the least squares estimator                             4         1
+      2 simple regression         the set of n                                            4         1
+      2 simple regression         vertical distances between the                          4         1
+      2 simple regression         vertical distances between the points                   5         1
+      2 simple regression         vertical distances between the points of                6         1
+      2 simple regression         way that makes the                                      4         1
+      3 logistic regression       a qualitative response/discrete choice                  4         1
+      3 logistic regression       although much work was done                             5         1
+      3 logistic regression       as such it is                                           4         1
+      3 logistic regression       as such it is not                                       5         1
+      3 logistic regression       as such it is not a                                     6         1
+      3 logistic regression       binary response based on                                4         1
+      3 logistic regression       binary response based on one or                         6         1
+      3 logistic regression       by statistician david cox                               4         1
+      3 logistic regression       case almost two decades                                 4         1
+      3 logistic regression       case almost two decades earlier                         5         1
+      3 logistic regression       david cox in 1958[2][3] although much                   6         1
+      3 logistic regression       in 1958[2][3] although much                             4         1
+      3 logistic regression       in the single independent variable                      5         1
+      3 logistic regression       independent variable case almost two decades            6         1
+      3 logistic regression       is used to estimate                                     4         1
+      3 logistic regression       it could be called                                      4         1
+      3 logistic regression       it could be called a                                    5         1
+      3 logistic regression       it could be called a qualitative                        6         1
+      3 logistic regression       logistic regression was developed                       4         1
+      3 logistic regression       logistic regression was developed by                    5         1
+      3 logistic regression       logistic regression was developed by statistician       6         1
+      3 logistic regression       model in the terminology                                4         1
+      3 logistic regression       more predictor or independent variables features        6         1
+      3 logistic regression       not a classification method                             4         1
+      3 logistic regression       of a binary response based                              5         1
+      3 logistic regression       on one or more predictor                                5         1
+      3 logistic regression       one or more predictor                                   4         1
+      3 logistic regression       or independent variables features                       4         1
+      3 logistic regression       qualitative response/discrete choice model in           5         1
+      3 logistic regression       response/discrete choice model in the terminology       6         1
+      3 logistic regression       statistician david cox in 1958[2][3]                    5         1
+      3 logistic regression       the binary logistic model                               4         1
+      3 logistic regression       the binary logistic model is                            5         1
+      3 logistic regression       the binary logistic model is used                       6         1
+      3 logistic regression       the probability of a                                    4         1
+      3 logistic regression       the single independent variable                         4         1
+      3 logistic regression       to estimate the probability of a                        6         1
+      3 logistic regression       used to estimate the probability                        5         1
+      3 logistic regression       work was done in                                        4         1
+      3 logistic regression       work was done in the single                             6         1
+      4 cluster analysis          a cluster and how                                       4         1
+      4 cluster analysis          a cluster are more                                      4         1
+      4 cluster analysis          a cluster are more similar in                           6         1
+      4 cluster analysis          a way that objects in                                   5         1
+      4 cluster analysis          algorithms that differ significantly in their           6         1
+      4 cluster analysis          and a common technique                                  4         1
+      4 cluster analysis          and a common technique for                              5         1
+      4 cluster analysis          and a common technique for statistical                  6         1
+      4 cluster analysis          and how to efficiently find them                        6         1
+      4 cluster analysis          but the general task                                    4         1
+      4 cluster analysis          but the general task to                                 5         1
+      4 cluster analysis          but the general task to be                              6         1
+      4 cluster analysis          by various algorithms that                              4         1
+      4 cluster analysis          cluster analysis itself is                              4         1
+      4 cluster analysis          cluster analysis itself is not                          5         1
+      4 cluster analysis          cluster analysis itself is not one                      6         1
+      4 cluster analysis          cluster analysis or clustering                          4         1
+      4 cluster analysis          cluster analysis or clustering is                       5         1
+      4 cluster analysis          cluster analysis or clustering is the                   6         1
+      4 cluster analysis          cluster are more similar in                             5         1
+      4 cluster analysis          constitutes a cluster and how                           5         1
+      4 cluster analysis          differ significantly in their                           4         1
+      4 cluster analysis          each other than to those                                5         1
+      4 cluster analysis          for statistical data analysis                           4         1
+      4 cluster analysis          grouping a set of                                       4         1
+      4 cluster analysis          in other groups clusters                                4         1
+      4 cluster analysis          in their notion of what                                 5         1
+      4 cluster analysis          is the task of                                          4         1
+      4 cluster analysis          it can be achieved                                      4         1
+      4 cluster analysis          it can be achieved by                                   5         1
+      4 cluster analysis          it can be achieved by various                           6         1
+      4 cluster analysis          it is a main                                            4         1
+      4 cluster analysis          it is a main task                                       5         1
+      4 cluster analysis          it is a main task of                                    6         1
+      4 cluster analysis          not one specific algorithm                              4         1
+      4 cluster analysis          notion of what constitutes                              4         1
+      4 cluster analysis          notion of what constitutes a cluster                    6         1
+      4 cluster analysis          objects in such a                                       4         1
+      4 cluster analysis          objects in such a way that                              6         1
+      4 cluster analysis          objects in the same group called                        6         1
+      4 cluster analysis          or another to each                                      4         1
+      4 cluster analysis          other than to those                                     4         1
+      4 cluster analysis          other than to those in other                            6         1
+      4 cluster analysis          set of objects in such                                  5         1
+      4 cluster analysis          similar in some sense                                   4         1
+      4 cluster analysis          some sense or another to                                5         1
+      4 cluster analysis          some sense or another to each                           6         1
+      4 cluster analysis          task of exploratory data                                4         1
+      4 cluster analysis          task of grouping a set of                               6         1
+      4 cluster analysis          the same group called                                   4         1
+      4 cluster analysis          the same group called a                                 5         1
+      4 cluster analysis          the task of grouping a                                  5         1
+      4 cluster analysis          to efficiently find them                                4         1
+      4 cluster analysis          used in many fields                                     4         1
+      4 cluster analysis          various algorithms that differ significantly            5         1
+      4 cluster analysis          way that objects in                                     4         1
+      5 association rule learning a method for discovering                                4         1
+      5 association rule learning also buy hamburger meat                                 4         1
+      5 association rule learning association rule learning is                            4         1
+      5 association rule learning association rule learning is a                          5         1
+      5 association rule learning association rule learning is a method                   6         1
+      5 association rule learning based on the concept                                    4         1
+      5 association rule learning based on the concept of                                 5         1
+      5 association rule learning based on the concept of strong                          6         1
+      5 association rule learning between variables in large databases                    5         1
+      5 association rule learning buys onions and potatoes together                       5         1
+      5 association rule learning by point of sale pos                                    5         1
+      5 association rule learning data of a supermarket would                             5         1
+      5 association rule learning discovering regularities between products in            5         1
+      5 association rule learning for discovering interesting relations between variables 6         1
+      5 association rule learning for discovering regularities between                    4         1
+      5 association rule learning identify strong rules discovered                        4         1
+      5 association rule learning if a customer buys                                      4         1
+      5 association rule learning if a customer buys onions and                           6         1
+      5 association rule learning in databases using different                            4         1
+      5 association rule learning indicate that if a customer                             5         1
+      5 association rule learning interesting relations between variables                 4         1
+      5 association rule learning it is intended to                                       4         1
+      5 association rule learning it is intended to identify                              5         1
+      5 association rule learning it is intended to identify strong                       6         1
+      5 association rule learning large scale transaction data recorded                   5         1
+      5 association rule learning method for discovering interesting relations            5         1
+      5 association rule learning of a supermarket would indicate that                    6         1
+      5 association rule learning onions and potatoes together                            4         1
+      5 association rule learning point of sale pos                                       4         1
+      5 association rule learning potatoes}=&gt;{burger} found in the                        4         1
+      5 association rule learning potatoes}=&gt;{burger} found in the sales                  5         1
+      5 association rule learning potatoes}=&gt;{burger} found in the sales data             6         1
+      5 association rule learning products in large scale                                 4         1
+      5 association rule learning rakesh agrawal et al                                    4         1
+      5 association rule learning regularities between products in large scale            6         1
+      5 association rule learning rules discovered in databases using different           6         1
+      5 association rule learning sales data of a                                         4         1
+      5 association rule learning strong rules discovered in databases                    5         1
+      5 association rule learning supermarket would indicate that                         4         1
+      5 association rule learning they are likely to                                      4         1
+      5 association rule learning they are likely to also                                 5         1
+      5 association rule learning they are likely to also buy                             6         1
+      5 association rule learning transaction data recorded by                            4         1
+      5 association rule learning transaction data recorded by point of                   6         1
+      5 association rule learning using different measures of interestingness             5         1
+      5 association rule learning [2] introduced association rules                        4         1
+      5 association rule learning [2] introduced association rules for                    5         1
+      5 association rule learning [2] introduced association rules for discovering        6         1</pre>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="wzv1524580127574__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+
+	</div>
+
+</div>
+</div>
+</div>
+</body>
+</html>

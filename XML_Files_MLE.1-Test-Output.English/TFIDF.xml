@@ -1,0 +1,1259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="kbf1507569393238"> </a>
+	  <h1>TFIDF</h1>
+
+	  <p style="line-height: 1em;">TF-IDF stands for "term frequency-inverse document frequency," a technique for evaluating the importance of a specific term in a specific document in a document set. Term frequency (<i>tf</i>) is the number of times that the term appears in the document and inverse document frequency (<i>idf</i>) is the number of times that the term appears in the document set. The TF-IDF score for a term is <i>tf</i> *<i>idf</i>. A term with a high TF-IDF score is especially relevant to the specific document.</p>
+
+		<p style="line-height: 1em;">The TFIDF function can do either of the following:</p>
+
+		<ul>
+			   <li>Take any document set and output the inverse document frequency (IDF)
+				and term frequency- inverse document frequency (TF-IDF) scores for each term.</li>
+
+			   <li>Use the output of a previous run of the TFIDF function on a training document set to predict TFIDF scores of an input (test) document set.</li>
+
+		</ul>
+
+		<p style="line-height: 1em;">You can use the TF-IDF scores as input for many document clustering and
+			classification algorithms, including:<ul>
+				     <li>Cosine-similarity</li>
+
+				     <li>Latent Dirichlet allocation</li>
+
+				     <li>K-means clustering</li>
+
+				     <li>K-nearest neighbors</li>
+
+			   </ul>
+   </p>
+
+		<p style="line-height: 1em;">You can use the TF-IDF scores derived from a training document set to create a model in a classification function (for example, SVMSparse) and then use the resulting TF-IDF scores in a classification prediction function (for example, SVMSparsePredict_MLE).</p>
+   <p style="line-height: 1em;">The TFIDF function represents each document as an <i>N</i>-dimensional vector, where <i>N</i> is the number of terms in the document set (therefore, the document vector is usually very sparse). Each entry in the document vector is the TF-IDF score of a term.</p>
+
+	
+   <a name="fmu1507569524200"> </a>
+   <h2>TFIDF Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>TFIDF version 2.3, TF version 1.2</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TFIDF (
+  ON TF (
+    ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY <i>docid</i>     
+    [ USING Formula ({ 'normal' | 'bool' | 'log' | 'augment' }) ]
+  ) AS TF PARTITION BY <i>term</i> 
+  [ ON (SELECT COUNT (DISTINCT <i>docid</i>) FROM <i>doccount_table</i>) AS DocCount DIMENSION ]
+  [ ON (SELECT <i>term</i>, COUNT (DISTINCT <i>docid</i>) FROM <i>docperterm_table</i> GROUP BY <i>term</i>)
+      AS DocPerTerm PARTITION BY <i>term</i>
+  ]
+  [ ON (SELECT DISTINCT (<i>term</i>) AS term, idf FROM <i>tf_idf_output_table</i>)
+      AS IDF PARTITION BY <i>term</i>
+  ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="section_sql_hcz_wy"> </a>
+   <h3>Large Document Sets</h3>
+   <p style="line-height: 1em;">For large documents sets, the DocPerTerm table is required.</p>
+   <p style="line-height: 1em;">For training, this is the syntax for large document sets:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TFIDF (
+  ON TF (
+    ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY <i>docid</i>      
+    [ USING Formula ({ 'normal' | 'bool' | 'log' | 'augment' }) ]
+  ) AS TF PARTITION BY <i>term</i> 
+  ON (SELECT COUNT (DISTINCT <i>docid</i>) FROM <i>doccount_table</i>) AS DocCount DIMENSION
+  ON (SELECT <i>term</i>, COUNT (DISTINCT <i>docid</i>) FROM <i>docperterm_table</i> GROUP BY <i>term</i>)
+    AS DocPerTerm PARTITION BY <i>term</i> 
+) AS <i>alias</i> ORDER BY <i>docid</i>;</tt>
+   </pre>
+   <p style="line-height: 1em;">For prediction, this is the syntax for large document sets:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TFIDF (
+  ON TF (
+    ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY <i>docid</i>      
+    [ USING Formula ({ 'normal' | 'bool' | 'log' | 'augment' }) ]
+  ) AS TF PARTITION BY <i>term</i> 
+  [ ON (SELECT <i>term</i>, COUNT (DISTINCT <i>docid</i>) FROM <i>docperterm_table</i> GROUP BY <i>term</i>)
+      AS DocPerTerm PARTITION BY <i>term</i>
+  ]
+  [ ON (SELECT DISTINCT (<i>term</i>) AS <i>term</i>, idf FROM <i>tf_idf_output_table</i>)
+      AS IDF PARTITION BY <i>term</i>
+  ]
+) AS <i>alias</i> ORDER BY <i>docid</i>;</tt>
+   </pre>
+   <a name="section_upw_gcz_wy"> </a>
+   <h3>Small Document Sets</h3>
+   <p style="line-height: 1em;">This syntax is acceptable for small document sets:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TFIDF (
+  ON TF (
+    ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY <i>docid</i> 
+  ) AS TF PARTITION BY <i>term</i> 
+  ON (SELECT COUNT (DISTINCT <i>docid</i>) FROM <i>input_table</i>) AS DocCount DIMENSION
+) AS <i>alias</i> ORDER BY <i>docid</i>;</tt>
+   </pre>
+   <a name="yup1507569536124"> </a>
+	  <h2>TFIDF Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>Formula</dt>
+      <dd>[Optional] Specify the formula for calculating the term frequency (tf) of term <i>t</i> in document <i>d</i>:<a name="table_rns_4lz_fdb"> </a>
+         <table class="introtable">
+            <a name="table_rns_4lz_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'normal'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Normalized frequency:<p style="line-height: 1em; margin: 0px;">
+                        <br/>
+                        <tt style="font-family: monospace;">tf(<i>t</i>,<i>d</i>) = f ((<i>t</i>,<i>d</i>) / sum {<i>w</i>,<i>w</i> ∈<i>d</i>}</tt>
+                     </p>
+                     <p style="line-height: 1em; margin: 0px;">
+                        <br/>This value is <i>rf</i> divided by number of terms in document.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'bool'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Boolean frequency:<p style="line-height: 1em; margin: 0px;">
+                        <br/>
+                        <tt style="font-family: monospace;">tf((<i>t</i>,<i>d</i>) = 1</tt> if <i>t</i> occurs in <i>d</i>; otherwise, <tt style="font-family: monospace;">tf((<i>t</i>,<i>d</i>) = 0</tt>.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'log'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Logarithmically-scaled frequency:<p style="line-height: 1em; margin: 0px;">
+                        <br/>
+                        <tt style="font-family: monospace;">tf((<i>t</i>,<i>d</i>) = log(f((<i>t</i>,<i>d</i>)+1)</tt>
+                     </p>
+                     <p style="line-height: 1em; margin: 0px;">
+                        <br/>where <tt style="font-family: monospace;">f((<i>t</i>,<i>d</i>)</tt> is the number of times <i>t</i> occurs in <i>d</i> (that is, raw frequency, <i>rf</i>).</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'augment'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Augmented frequency, which prevents bias towards longer documents:<p style="line-height: 1em; margin: 0px;">
+                        <br/>
+                        <tt style="font-family: monospace;">tf((<i>t</i>,<i>d</i>) = 0.5 + (0.5 × f ((<i>t</i>,<i>d</i>) / max {f(<i>w</i>,<i>d</i>) : <i>w</i> ∈<i>d</i> })</tt>
+                     </p>
+                     <p style="line-height: 1em; margin: 0px;">
+                        <br/>This value is <i>rf</i> divided by maximum raw frequency of any term in document.</p>
+                  </div>
+               </td>
+            </tr>
+         </table>
+
+         <p>
+            <b>Note:</b>  When using the output of a previous run of the TFIDF function on a training document set to predict TFIDF scores on an input document set, use the same Formula value for the input document set that you used for the training document set.</p>
+      </dd>
+   </div>
+
+
+	
+   <a name="ank1507569551301"> </a>
+   <h2>TFIDF Input</h2>
+   <a name="section_ncm_4gd_ycb"> </a>
+   <p style="line-height: 1em;">The TFIDF function always requires as input the output of the TF function. Whether the other TFIDF input tables are required or optional depend on your reason for running the function.</p>
+
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_twq_t2d_ycb"> </a>
+   <table class="introtable">
+      <a name="table_twq_t2d_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">TF</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">TF function input; document set.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">DocCount</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Required if running function to output IDF and TF-IDF values for each term in document set.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">DocPerTerm</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Optional if running function to output IDF and TF-IDF values for each term in document set.<p style="line-height: 1em; margin: 0px;">
+                  <br/>If you omit this table, the function creates it by processing the entire document set, which can require a large amount of memory. If there is not enough memory to process the entire document set, the DocPerTerm table is required.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">IDF</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Required if running function to predict TF-IDF scores. <p style="line-height: 1em; margin: 0px;">
+                  <br/>This table is the output of an earlier call to TFIDF, using the training document set as input to the TF function, the DocCount table, and optionally, the DocPerTerm table.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_wtq_32d_ycb"> </a>
+   <h3>TF Schema</h3>
+   <a name="table_N10023_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10023_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>docid</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Document identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>term</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Term.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">count</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of times that term appears in document.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_twj_j2d_ycb"> </a>
+   <h3>TF Output and TFIDF Input Table Schema</h3>
+   <a name="table_N10078_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10078_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>docid</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Document identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>term</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Term.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">tf</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Term frequency.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">count</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of times that term appears in document.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_xrz_j2d_ycb"> </a>
+   <h3>DocCount Schema</h3>
+   <a name="table_N100DB_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100DB_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">count</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BIGINT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of documents in document set.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_dh4_k2d_ycb"> </a>
+   <h3>DocPerTerm Schema</h3>
+   <a name="table_N10110_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10110_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>term</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Term.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">count</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BIGINT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of documents that contain term.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ldv1507569576746"> </a>
+   <h2>TFIDF Output</h2>
+   <a name="section_egw_hhd_ycb"> </a>
+   <h3>Output Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>docid</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Document identifier of document <i>d</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>term</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Term <i>t</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">tf</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Term frequency of term <i>t</i> in document <i>d</i>, calculated as specified by Formula syntax element.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">idf</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Inverse document frequency of term <i>t</i> in document <i>d</i>, calculated by this formula:<p style="line-height: 1em; margin: 0px;">
+                  <br/>IDF(<i>t</i>) = log (<i>doccount</i> / <i>doccount</i> (<i>t</i>))</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>where <i>doccount</i> is the number of documents in the document set and <i>doccount</i> (<i>t</i>) is the number of documents that contain the term <i>t</i>.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">tf_idf</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">TFIDF score of term <i>t</i> in document <i>d</i>, calculated by this formula:<p style="line-height: 1em; margin: 0px;">
+                  <br/>TFIDF(<i>t</i>, <i>d</i>) = TF(<i>t</i>, <i>d</i>) * IDF(<i>t</i>)</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="sjx1510350430155"> </a>
+   <h2>TFIDF Examples</h2>
+   <a name="myy1507570146812"> </a>
+   <h3>TFIDF Example: Tokenized Training Document Set</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example uses the NGramSplitter_MLE function to tokenize a training document set, from which it creates the input table for the TFIDF function.</p>
+
+   <a name="section_mlj_nnm_n2b"> </a>
+   <h4>NGramSplitter_MLE Input: tfidf_train</h4>
+   <a name="table_qps_ypm_n2b"> </a>
+   <table class="introtable">
+      <a name="table_qps_ypm_n2b"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">docid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">content</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Chennai floods have battered the capital city of Tamil Nadu and its adjoining areas. Normal life came to a standstill when roads were submerged in water and all modes of transport were severely affected. In the past, Chennai has had tsunamis and earthquakes</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Roger Federer born on 8 August 1981, is a greatest tennis player, who has been continuously ranked inside the top 10 since October 2002 and has won Wimbledon, USOpen, Australian and FrenchOpen titles mutiple times</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">The Federer Nadal rivalry, known by many as Fedal, is between two professional tennis players, Roger Federer of Switzerland and Rafael Nadal of Spain. They are currently engaged in a storied rivalry, which many consider to be the greatest in tennis history. They have played 34 times, most recently in the 2015 Swiss Indoors final, and Nadal leads their eleven-year-old rivalry with an overall record of 23–11</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">The India Pakistan cricket rivalry is one of the most intense sports rivalries in the world. An India-Pakistan cricket match has been estimated to attract up to one billion viewers, according to TV ratings firms and various other reports. The 2011 World Cup semifinal between the two teams attracted around 988 million television viewers</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">An Ashes series is traditionally of five Tests, hosted in turn by England and Australia at least once every four years. As of August 2015, England hold the ashes, having won three of the five Tests in the 2015 Ashes series. Overall, Australia has won 32 series, England 32 and five series have been drawn.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_qpj_2qm_n2b"> </a>
+   <h4>NGramSplitter_MLE SQL Call</h4>
+   <p style="line-height: 1em;">This call creates a table of tokenized input, tfidf_token1, from tfidf_train.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE tfidf_token1 AS (
+  SELECT * FROM NGramSplitter_MLE (
+    ON tfidf_train
+    USING
+    TextColumn ('content')
+    Delimiter (' ')
+    Grams ('1')
+    Overlapping ('false')
+    ConvertToLowerCase ('true')
+    Punctuation ('\[.,?\!\]')
+    Reset ('\[.,?\!\]')
+    OutputTotalGramCount ('false')
+    Accumulate ('docid')
+  ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_rjw_rqm_n2b"> </a>
+   <h4>SQL Call to Create TFIDF Input Table tfidf_input1</h4>
+   <p style="line-height: 1em;">The TFIDF input table must have the tokenized input in the column term.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE tfidf_input1 AS (
+  SELECT docid, ngram AS term, frequency AS "count"
+  FROM tfidf_token1 AS dt
+) WITH DATA;</tt>
+   </pre>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM tfidf_input1 ORDER BY 1, 3, 2;</tt>
+   </pre>
+   <pre>
+      <tt>
+ docid term            count 
+ ----- --------------- ----- 
+     1 a                   1
+     1 adjoining           1
+     1 affected            1
+     1 all                 1
+     1 areas               1
+     1 battered            1
+     1 came                1
+     1 capital             1
+     1 city                1
+     1 earthquakes         1
+     1 floods              1
+     1 had                 1
+     1 has                 1
+     1 have                1
+     1 its                 1
+     1 life                1
+     1 modes               1
+     1 nadu                1
+     1 normal              1
+     1 past                1
+     1 roads               1
+     1 severely            1
+     1 standstill          1
+     1 submerged           1
+     1 tamil               1
+     1 to                  1
+     1 transport           1
+     1 tsunamis            1
+     1 water               1
+     1 when                1
+     1 chennai             2
+     1 in                  2
+     1 of                  2
+     1 the                 2
+     1 were                2
+     1 and                 3
+     2 10                  1
+     2 1981                1
+     2 2002                1
+     2 8                   1
+     2 a                   1
+     2 august              1
+     2 australian          1
+     2 been                1
+     2 born                1
+     2 continuously        1
+     2 federer             1
+     2 frenchopen          1
+     2 greatest            1
+     2 inside              1
+     2 is                  1
+     2 mutiple             1
+     2 october             1
+     2 on                  1
+     2 player              1
+     2 ranked              1
+     2 roger               1
+     2 since               1
+     2 tennis              1
+     2 the                 1
+     2 times               1
+     2 titles              1
+     2 top                 1
+     2 usopen              1
+     2 who                 1
+     2 wimbledon           1
+     2 won                 1
+     2 and                 2
+     2 has                 2
+     3 2015                1
+     3 23â??11             1
+     3 34                  1
+     3 a                   1
+     3 an                  1
+     3 are                 1
+     3 as                  1
+     3 be                  1
+     3 between             1
+     3 by                  1
+     3 consider            1
+     3 currently           1
+     3 eleven-year-old     1
+     3 engaged             1
+     3 fedal               1
+     3 final               1
+     3 greatest            1
+     3 have                1
+     3 history             1
+     3 indoors             1
+     3 is                  1
+     3 known               1
+     3 leads               1
+     3 most                1
+     3 overall             1
+     3 played              1
+     3 players             1
+     3 professional        1
+     3 rafael              1
+     3 recently            1
+     3 record              1
+     3 roger               1
+     3 spain               1
+     3 storied             1
+     3 swiss               1
+     3 switzerland         1
+     3 their               1
+     3 times               1
+     3 to                  1
+     3 two                 1
+     3 which               1
+     3 with                1
+     3 and                 2
+     3 federer             2
+     3 many                2
+     3 tennis              2
+     3 they                2
+     3 in                  3
+     3 nadal               3
+     3 of                  3
+     3 rivalry             3
+     3 the                 3
+     4 2011                1
+     4 988                 1
+     4 according           1
+     4 an                  1
+     4 and                 1
+     4 around              1
+     4 attract             1
+     4 attracted           1
+     4 been                1
+     4 between             1
+     4 billion             1
+     4 cup                 1
+     4 estimated           1
+     4 firms               1
+     4 has                 1
+     4 in                  1
+     4 india               1
+     4 india-pakistan      1
+     4 intense             1
+     4 is                  1
+     4 match               1
+     4 million             1
+     4 most                1
+     4 of                  1
+     4 other               1
+     4 pakistan            1
+     4 ratings             1
+     4 reports             1
+     4 rivalries           1
+     4 rivalry             1
+     4 semifinal           1
+     4 sports              1
+     4 teams               1
+     4 television          1
+     4 tv                  1
+     4 two                 1
+     4 up                  1
+     4 various             1
+     4 cricket             2
+     4 one                 2
+     4 viewers             2
+     4 world               2
+     4 to                  3
+     4 the                 5
+     5 an                  1
+     5 as                  1
+     5 at                  1
+     5 august              1
+     5 been                1
+     5 by                  1
+     5 drawn               1
+     5 every               1
+     5 four                1
+     5 has                 1
+     5 have                1
+     5 having              1
+     5 hold                1
+     5 hosted              1
+     5 is                  1
+     5 least               1
+     5 once                1
+     5 overall             1
+     5 three               1
+     5 traditionally       1
+     5 turn                1
+     5 years               1
+     5 2015                2
+     5 32                  2
+     5 and                 2
+     5 australia           2
+     5 in                  2
+     5 tests               2
+     5 won                 2
+     5 ashes               3
+     5 england             3
+     5 five                3
+     5 of                  3
+     5 the                 3
+     5 series              4</tt>
+   </pre>
+   <a name="section_ysg_1tm_n2b"> </a>
+   <h4>SQL Call to Create TFIDF Input Table tf1</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE tf1 AS (
+  SELECT * FROM tf (
+    ON tfidf_input1 PARTITION BY docid
+  ) AS dt1
+) WITH DATA;
+</tt>
+   </pre>
+   <a name="section_u4s_nnm_n2b"> </a>
+   <h4>TFIDF SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE tfidf_output1 AS (
+  SELECT * FROM TFIDF (
+    ON <b>tf1</b> AS TF PARTITION BY term
+    ON (
+      SELECT CAST(COUNT(DISTINCT(docid)) AS integer) AS "count"
+      FROM <b>tfidf_input1</b>
+    ) AS DocCount DIMENSION
+  ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_qg2_4nm_n2b"> </a>
+   <h4>TFIDF Output</h4>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM tfidf_output1 ORDER BY tfidf DESC;</tt>
+   </pre>
+   <pre>
+      <tt>
+ docid term            tf                   idf                 tf_idf                
+ ----- --------------- -------------------- ------------------- --------------------- 
+     5 series           0.07272727272727272  1.6094379124341003   0.11705002999520729
+     5 ashes            0.05454545454545454  1.6094379124341003   0.08778752249640547
+     5 england          0.05454545454545454  1.6094379124341003   0.08778752249640547
+     5 five             0.05454545454545454  1.6094379124341003   0.08778752249640547
+     1 chennai         0.046511627906976744  1.6094379124341003   0.07485757732251629
+     1 were            0.046511627906976744  1.6094379124341003   0.07485757732251629
+     3 nadal            0.04477611940298507  1.6094379124341003   0.07206438413884031
+     4 one             0.037037037037037035  1.6094379124341003   0.05960881157163334
+     4 cricket         0.037037037037037035  1.6094379124341003   0.05960881157163334
+     4 viewers         0.037037037037037035  1.6094379124341003   0.05960881157163334
+     4 world           0.037037037037037035  1.6094379124341003   0.05960881157163334
+     5 tests            0.03636363636363636  1.6094379124341003  0.058525014997603646
+     5 australia        0.03636363636363636  1.6094379124341003  0.058525014997603646
+     5 32               0.03636363636363636  1.6094379124341003  0.058525014997603646
+     3 many            0.029850746268656716  1.6094379124341003   0.04804292275922687
+     3 they            0.029850746268656716  1.6094379124341003   0.04804292275922687
+     2 mutiple          0.02857142857142857  1.6094379124341003   0.04598394035526001
+     2 10               0.02857142857142857  1.6094379124341003   0.04598394035526001
+     2 inside           0.02857142857142857  1.6094379124341003   0.04598394035526001
+     2 on               0.02857142857142857  1.6094379124341003   0.04598394035526001
+     2 player           0.02857142857142857  1.6094379124341003   0.04598394035526001
+     2 october          0.02857142857142857  1.6094379124341003   0.04598394035526001
+     2 frenchopen       0.02857142857142857  1.6094379124341003   0.04598394035526001
+     2 since            0.02857142857142857  1.6094379124341003   0.04598394035526001
+     2 titles           0.02857142857142857  1.6094379124341003   0.04598394035526001
+     2 2002             0.02857142857142857  1.6094379124341003   0.04598394035526001
+     2 continuously     0.02857142857142857  1.6094379124341003   0.04598394035526001
+     2 australian       0.02857142857142857  1.6094379124341003   0.04598394035526001
+     2 usopen           0.02857142857142857  1.6094379124341003   0.04598394035526001
+     2 wimbledon        0.02857142857142857  1.6094379124341003   0.04598394035526001
+     2 1981             0.02857142857142857  1.6094379124341003   0.04598394035526001
+     2 who              0.02857142857142857  1.6094379124341003   0.04598394035526001
+     2 ranked           0.02857142857142857  1.6094379124341003   0.04598394035526001
+     2 born             0.02857142857142857  1.6094379124341003   0.04598394035526001
+     2 8                0.02857142857142857  1.6094379124341003   0.04598394035526001
+     2 top              0.02857142857142857  1.6094379124341003   0.04598394035526001
+     3 rivalry          0.04477611940298507  0.9162907318741551   0.04102794321824575
+     1 earthquakes     0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 submerged       0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 past            0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 transport       0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 capital         0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 city            0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 battered        0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 roads           0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 areas           0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 tamil           0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 standstill      0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 nadu            0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 life            0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 severely        0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 adjoining       0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 all             0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 had             0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 came            0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 modes           0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 its             0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 affected        0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 tsunamis        0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 when            0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 floods          0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 normal          0.023255813953488372  1.6094379124341003   0.03742878866125814
+     1 water           0.023255813953488372  1.6094379124341003   0.03742878866125814
+     5 2015             0.03636363636363636  0.9162907318741551     0.033319662977242
+     5 won              0.03636363636363636  0.9162907318741551     0.033319662977242
+     4 around          0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 teams           0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 india           0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 television      0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 tv              0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 estimated       0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 other           0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 india-pakistan  0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 various         0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 cup             0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 ratings         0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 988             0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 attracted       0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 up              0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 rivalries       0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 reports         0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 billion         0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 attract         0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 match           0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 million         0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 sports          0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 pakistan        0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 semifinal       0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 intense         0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 firms           0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 2011            0.018518518518518517  1.6094379124341003   0.02980440578581667
+     4 according       0.018518518518518517  1.6094379124341003   0.02980440578581667
+     5 having           0.01818181818181818  1.6094379124341003  0.029262507498801823
+     5 turn             0.01818181818181818  1.6094379124341003  0.029262507498801823
+     5 drawn            0.01818181818181818  1.6094379124341003  0.029262507498801823
+     5 four             0.01818181818181818  1.6094379124341003  0.029262507498801823
+     5 traditionally    0.01818181818181818  1.6094379124341003  0.029262507498801823
+     5 years            0.01818181818181818  1.6094379124341003  0.029262507498801823
+     5 hosted           0.01818181818181818  1.6094379124341003  0.029262507498801823
+     5 at               0.01818181818181818  1.6094379124341003  0.029262507498801823
+     5 hold             0.01818181818181818  1.6094379124341003  0.029262507498801823
+     5 every            0.01818181818181818  1.6094379124341003  0.029262507498801823
+     5 once             0.01818181818181818  1.6094379124341003  0.029262507498801823
+     5 least            0.01818181818181818  1.6094379124341003  0.029262507498801823
+     5 three            0.01818181818181818  1.6094379124341003  0.029262507498801823
+     4 to               0.05555555555555555  0.5108256237659907  0.028379201320332816
+     3 tennis          0.029850746268656716  0.9162907318741551  0.027351962145497167
+     3 federer         0.029850746268656716  0.9162907318741551  0.027351962145497167
+     2 won              0.02857142857142857  0.9162907318741551   0.02617973519640443
+     2 roger            0.02857142857142857  0.9162907318741551   0.02617973519640443
+     2 federer          0.02857142857142857  0.9162907318741551   0.02617973519640443
+     2 greatest         0.02857142857142857  0.9162907318741551   0.02617973519640443
+     2 times            0.02857142857142857  0.9162907318741551   0.02617973519640443
+     2 tennis           0.02857142857142857  0.9162907318741551   0.02617973519640443
+     2 august           0.02857142857142857  0.9162907318741551   0.02617973519640443
+     3 played          0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 spain           0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 swiss           0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 leads           0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 are             0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 with            0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 34              0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 recently        0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 history         0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 indoors         0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 storied         0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 23â??11         0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 engaged         0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 switzerland     0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 consider        0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 currently       0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 record          0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 which           0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 fedal           0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 their           0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 rafael          0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 be              0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 players         0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 known           0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 eleven-year-old 0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 final           0.014925373134328358  1.6094379124341003  0.024021461379613435
+     3 professional    0.014925373134328358  1.6094379124341003  0.024021461379613435
+     4 between         0.018518518518518517  0.9162907318741551  0.016968346886558426
+     4 two             0.018518518518518517  0.9162907318741551  0.016968346886558426
+     4 rivalry         0.018518518518518517  0.9162907318741551  0.016968346886558426
+     4 most            0.018518518518518517  0.9162907318741551  0.016968346886558426
+     5 overall          0.01818181818181818  0.9162907318741551     0.016659831488621
+     5 by               0.01818181818181818  0.9162907318741551     0.016659831488621
+     5 as               0.01818181818181818  0.9162907318741551     0.016659831488621
+     5 august           0.01818181818181818  0.9162907318741551     0.016659831488621
+     2 been             0.02857142857142857  0.5108256237659907  0.014595017821885449
+     2 a                0.02857142857142857  0.5108256237659907  0.014595017821885449
+     3 greatest        0.014925373134328358  0.9162907318741551  0.013675981072748583
+     3 roger           0.014925373134328358  0.9162907318741551  0.013675981072748583
+     3 as              0.014925373134328358  0.9162907318741551  0.013675981072748583
+     3 overall         0.014925373134328358  0.9162907318741551  0.013675981072748583
+     3 most            0.014925373134328358  0.9162907318741551  0.013675981072748583
+     3 2015            0.014925373134328358  0.9162907318741551  0.013675981072748583
+     3 times           0.014925373134328358  0.9162907318741551  0.013675981072748583
+     3 between         0.014925373134328358  0.9162907318741551  0.013675981072748583
+     3 two             0.014925373134328358  0.9162907318741551  0.013675981072748583
+     3 by              0.014925373134328358  0.9162907318741551  0.013675981072748583
+     2 has              0.05714285714285714 0.22314355131420976    0.0127510600750977
+     5 of               0.05454545454545454 0.22314355131420976  0.012171466435320532
+     1 a               0.023255813953488372  0.5108256237659907  0.011879665668976528
+     1 have            0.023255813953488372  0.5108256237659907  0.011879665668976528
+     1 to              0.023255813953488372  0.5108256237659907  0.011879665668976528
+     1 in              0.046511627906976744 0.22314355131420976  0.010378769828567896
+     1 of              0.046511627906976744 0.22314355131420976  0.010378769828567896
+     3 in               0.04477611940298507 0.22314355131420976  0.009991502297651183
+     3 of               0.04477611940298507 0.22314355131420976  0.009991502297651183
+     4 been            0.018518518518518517  0.5108256237659907  0.009459733773444272
+     4 an              0.018518518518518517  0.5108256237659907  0.009459733773444272
+     5 been             0.01818181818181818  0.5108256237659907  0.009287738613927104
+     5 have             0.01818181818181818  0.5108256237659907  0.009287738613927104
+     5 an               0.01818181818181818  0.5108256237659907  0.009287738613927104
+     5 in               0.03636363636363636 0.22314355131420976  0.008114310956880354
+     3 have            0.014925373134328358  0.5108256237659907  0.007624263041283444
+     3 to              0.014925373134328358  0.5108256237659907  0.007624263041283444
+     3 an              0.014925373134328358  0.5108256237659907  0.007624263041283444
+     3 a               0.014925373134328358  0.5108256237659907  0.007624263041283444
+     2 is               0.02857142857142857 0.22314355131420976   0.00637553003754885
+     1 has             0.023255813953488372 0.22314355131420976  0.005189384914283948
+     4 in              0.018518518518518517 0.22314355131420976  0.004132287987300181
+     4 has             0.018518518518518517 0.22314355131420976  0.004132287987300181
+     4 is              0.018518518518518517 0.22314355131420976  0.004132287987300181
+     4 of              0.018518518518518517 0.22314355131420976  0.004132287987300181
+     5 has              0.01818181818181818 0.22314355131420976  0.004057155478440177
+     5 is               0.01818181818181818 0.22314355131420976  0.004057155478440177
+     3 is              0.014925373134328358 0.22314355131420976 0.0033305007658837277
+     4 the              0.09259259259259259                 0.0                   0.0
+     4 and             0.018518518518518517                 0.0                   0.0
+     2 the              0.02857142857142857                 0.0                   0.0
+     2 and              0.05714285714285714                 0.0                   0.0
+     3 and             0.029850746268656716                 0.0                   0.0
+     3 the              0.04477611940298507                 0.0                   0.0
+     5 the              0.05454545454545454                 0.0                   0.0
+     5 and              0.03636363636363636                 0.0                   0.0
+     1 the             0.046511627906976744                 0.0                   0.0
+     1 and              0.06976744186046512                 0.0                   0.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="wcb1507573019641"> </a>
+   <h3>TFIDF Example: Tokenized Test Set</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example uses the IDF values from tfidf_output1, output by TFIDF Example: Tokenized Training Document Set to predict the TFIDF scores of a test document set.</p>
+
+   <a name="section_c4g_j5m_n2b"> </a>
+   <h4>NGramSplitter_MLE Input: tfidf_test</h4>
+   <a name="table_u3q_l5m_n2b"> </a>
+   <table class="introtable">
+      <a name="table_u3q_l5m_n2b"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">docid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">content</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">In Chennai, India, floods have closed roads and factories, turned off power, shut down the airport and forced thousands of people out of their homes.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Spanish tennis star Rafael Nadal said he was happy with the improvement in his game after a below-par year, and looked forward to reigniting his long-time rivalry with Roger Federer in India.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nadal, the world number five, said he has always enjoyed playing against Federer and hoped they would do so for years to come.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_rjd_45m_n2b"> </a>
+   <h4>NGramSplitter_MLE SQL Call</h4>
+   <p style="line-height: 1em;">This call creates a table of tokenized input, tfidf_token1, from tfidf_test.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE tfidf_token1 AS (
+  SELECT * FROM NGramSplitter_MLE (
+    ON tfidf_test
+    USING
+    TextColumn ('content')
+    Delimiter (' ')
+    Grams ('1')
+    Overlapping ('false')
+    ConvertToLowerCase ('true')
+    Punctuation ('\[.,?\!\]')
+    Reset ('\[.,?\!\]')
+    OutputTotalGramCount ('false')
+    Accumulate ('docid')
+  ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_sp3_w5m_n2b"> </a>
+   <h4>SQL Call to Create TFIDF Input Table tfidf_input1</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE tfidf_input1 AS (
+  SELECT docid, ngram AS term, frequency AS "count" FROM tfidf_token1 AS dt
+) WITH DATA;
+</tt>
+   </pre>
+   <a name="section_psm_4xm_n2b"> </a>
+   <h4>SQL Call to Create TFIDF Input Table tf1</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE tf1 AS (
+  SELECT * FROM tf (
+    ON tfidf_input1 PARTITION BY docid
+    USING
+    Formula ('normal')
+  ) AS dt1
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_idg_1vm_n2b"> </a>
+   <h4>TFIDF SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE tfidf_output2 AS (
+  SELECT * FROM TFIDF (
+    ON tf2 AS TF PARTITION BY TERM
+	ON (SELECT CAST(COUNT(DISTINCT(docid)) AS INTEGER) AS "count"
+      FROM tfidf_output1) AS DocCount DIMENSION
+  ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_tgv_dvm_n2b"> </a>
+   <h4>TFIDF Output</h4>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM tfidf_output2 ORDER BY tf_idf DESC;</tt>
+   </pre>
+   <pre>
+      <tt>
+ docid term        tf                   idf                tf_idf               
+ ----- ----------- -------------------- ------------------ -------------------- 
+     6 of                          0.08 1.6094379124341003    0.128755032994728
+     7 his                       0.0625 1.6094379124341003  0.10058986952713127
+     7 with                      0.0625 1.6094379124341003  0.10058986952713127
+     8 so          0.043478260869565216 1.6094379124341003  0.06997556141017827
+     8 world       0.043478260869565216 1.6094379124341003  0.06997556141017827
+     8 always      0.043478260869565216 1.6094379124341003  0.06997556141017827
+     8 enjoyed     0.043478260869565216 1.6094379124341003  0.06997556141017827
+     8 they        0.043478260869565216 1.6094379124341003  0.06997556141017827
+     8 come        0.043478260869565216 1.6094379124341003  0.06997556141017827
+     8 has         0.043478260869565216 1.6094379124341003  0.06997556141017827
+     8 playing     0.043478260869565216 1.6094379124341003  0.06997556141017827
+     8 hoped       0.043478260869565216 1.6094379124341003  0.06997556141017827
+     8 years       0.043478260869565216 1.6094379124341003  0.06997556141017827
+     8 number      0.043478260869565216 1.6094379124341003  0.06997556141017827
+     8 against     0.043478260869565216 1.6094379124341003  0.06997556141017827
+     8 would       0.043478260869565216 1.6094379124341003  0.06997556141017827
+     8 five        0.043478260869565216 1.6094379124341003  0.06997556141017827
+     8 do          0.043478260869565216 1.6094379124341003  0.06997556141017827
+     8 for         0.043478260869565216 1.6094379124341003  0.06997556141017827
+     6 chennai                     0.04 1.6094379124341003    0.064377516497364
+     6 down                        0.04 1.6094379124341003    0.064377516497364
+     6 turned                      0.04 1.6094379124341003    0.064377516497364
+     6 factories                   0.04 1.6094379124341003    0.064377516497364
+     6 their                       0.04 1.6094379124341003    0.064377516497364
+     6 people                      0.04 1.6094379124341003    0.064377516497364
+     6 have                        0.04 1.6094379124341003    0.064377516497364
+     6 off                         0.04 1.6094379124341003    0.064377516497364
+     6 airport                     0.04 1.6094379124341003    0.064377516497364
+     6 thousands                   0.04 1.6094379124341003    0.064377516497364
+     6 forced                      0.04 1.6094379124341003    0.064377516497364
+     6 out                         0.04 1.6094379124341003    0.064377516497364
+     6 roads                       0.04 1.6094379124341003    0.064377516497364
+     6 shut                        0.04 1.6094379124341003    0.064377516497364
+     6 power                       0.04 1.6094379124341003    0.064377516497364
+     6 closed                      0.04 1.6094379124341003    0.064377516497364
+     6 floods                      0.04 1.6094379124341003    0.064377516497364
+     6 homes                       0.04 1.6094379124341003    0.064377516497364
+     7 in                        0.0625 0.9162907318741551 0.057268170742134694
+     7 star                     0.03125 1.6094379124341003 0.050294934763565634
+     7 after                    0.03125 1.6094379124341003 0.050294934763565634
+     7 long-time                0.03125 1.6094379124341003 0.050294934763565634
+     7 improvement              0.03125 1.6094379124341003 0.050294934763565634
+     7 was                      0.03125 1.6094379124341003 0.050294934763565634
+     7 looked                   0.03125 1.6094379124341003 0.050294934763565634
+     7 reigniting               0.03125 1.6094379124341003 0.050294934763565634
+     7 rafael                   0.03125 1.6094379124341003 0.050294934763565634
+     7 spanish                  0.03125 1.6094379124341003 0.050294934763565634
+     7 forward                  0.03125 1.6094379124341003 0.050294934763565634
+     7 year                     0.03125 1.6094379124341003 0.050294934763565634
+     7 rivalry                  0.03125 1.6094379124341003 0.050294934763565634
+     7 happy                    0.03125 1.6094379124341003 0.050294934763565634
+     7 tennis                   0.03125 1.6094379124341003 0.050294934763565634
+     7 a                        0.03125 1.6094379124341003 0.050294934763565634
+     7 below-par                0.03125 1.6094379124341003 0.050294934763565634
+     7 game                     0.03125 1.6094379124341003 0.050294934763565634
+     7 roger                    0.03125 1.6094379124341003 0.050294934763565634
+     6 and                         0.08 0.5108256237659907  0.04086604990127926
+     8 to          0.043478260869565216 0.9162907318741551 0.039838727472789354
+     8 he          0.043478260869565216 0.9162907318741551 0.039838727472789354
+     8 nadal       0.043478260869565216 0.9162907318741551 0.039838727472789354
+     8 said        0.043478260869565216 0.9162907318741551 0.039838727472789354
+     8 federer     0.043478260869565216 0.9162907318741551 0.039838727472789354
+     6 india                       0.04 0.9162907318741551  0.03665162927496621
+     6 in                          0.04 0.9162907318741551  0.03665162927496621
+     7 nadal                    0.03125 0.9162907318741551 0.028634085371067347
+     7 to                       0.03125 0.9162907318741551 0.028634085371067347
+     7 india                    0.03125 0.9162907318741551 0.028634085371067347
+     7 he                       0.03125 0.9162907318741551 0.028634085371067347
+     7 federer                  0.03125 0.9162907318741551 0.028634085371067347
+     7 said                     0.03125 0.9162907318741551 0.028634085371067347
+     8 the         0.043478260869565216 0.5108256237659907 0.022209809728956118
+     8 and         0.043478260869565216 0.5108256237659907 0.022209809728956118
+     6 the                         0.04 0.5108256237659907  0.02043302495063963
+     7 and                      0.03125 0.5108256237659907  0.01596330074268721
+     7 the                      0.03125 0.5108256237659907  0.01596330074268721</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

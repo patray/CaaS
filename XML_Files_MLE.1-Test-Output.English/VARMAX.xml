@@ -1,0 +1,1997 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="klg1507052716326"> </a>
+	  <h1>VARMAX</h1>
+
+	  <a name="section_qyv_s34_zdb"> </a>
+   <p style="line-height: 1em;">VARMAX (Vector Autoregressive Moving Average model with eXogenous variables) extends the ARMA/ARIMA model in two ways:</p>
+   <ul>
+      <li>To work with time series with multiple response variables (vector time series).</li>
+      <li>To work with exogenous variables, or variables that are independent of the other variables in the system.</li>
+   </ul>
+   <p style="line-height: 1em;">The model includes both the dynamic relationship between the multiple response variables and the relationship between the dependent and independent variables.</p>
+
+   <a name="section_qvq_t34_zdb"> </a>
+   <h2>Nonseasonal VARMAX Model</h2>
+   <p style="line-height: 1em;">This formula represents a nonseasonal VARMAX model:</p>
+   <a name="fig_g4v_gdh_mw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <a name="table_mqq_pj4_zdb"> </a>
+   <table class="introtable">
+      <a name="table_mqq_pj4_zdb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Variable</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>Y</i>
+               <sub>
+                  <i>t</i>
+               </sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Time series made stationary. First term is autoregressive component, second term is exogenous component, third term is moving average component, the fourth term (<i>C</i>) is vector of constants, and fifth term (<i>E</i>
+               <sub>
+                  <i>t</i>
+               </sub>) is vector of residual errors.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>Y</i>
+               <sub>
+                  <i>t</i>
+               </sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Vector of <i>n</i> response variables.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>X</i>
+               <sub>
+                  <i>t</i>
+               </sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Vector of <i>m</i> exogenous variables.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>p</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of previous periods of endogenous variables included in model.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>q</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of previous periods included in moving average.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>b</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of previous periods of exogenous variables included.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Φ<sub>
+                  <i>i</i>
+               </sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>n</i> * <i>n</i> matrix of autoregressive parameters.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>B</i>
+               <sub>
+                  <i>i</i>
+               </sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>n</i> * <i>m</i> matrix of exogenous variable parameters.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Θ<sub>
+                  <i>i</i>
+               </sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>n</i> * <i>n</i> matrix of moving average parameters.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>E</i>
+               <sub>
+                  <i>t</i>
+               </sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Difference between actual and predicted value of <i>Y</i>
+               <sub>
+                  <i>t</i>
+               </sub>, (<i>Y</i>
+               <sub>
+                  <i>t</i>
+               </sub> - Ŷ<sub>
+                  <i>t</i>
+               </sub>).</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_mhp_v34_zdb"> </a>
+   <h2>Seasonal VARMAX Model</h2>
+   <p style="line-height: 1em;">This formula represents a seasonal VARMAX model:</p>
+   <p style="line-height: 1em;">(1 - Φ<sub>1</sub>Back - … - Φ<sub>
+         <i>p</i>
+      </sub>Back<sup>
+         <i>p</i>
+      </sup>)(1 - Φ<sub>1</sub>Back<sup>
+         <i>m</i>
+      </sup> - … - Φ<sub>
+         <i>sp</i>
+      </sub>Back<sup>
+         <i>m*sp</i>
+      </sup>)(1 - Back)<sup>
+         <i>d</i>
+      </sup>(1 - Back<sup>
+         <i>m</i>
+      </sup>)<sup>
+         <i>sd</i>
+      </sup>(<i>Y</i>
+      <sub>
+         <i>t</i>
+      </sub>) =</p>
+   <p style="line-height: 1em;"> 
+      <i>C</i> + (1 + Θ<sub>1</sub>Back + … + Θ<sub>
+         <i>q</i>
+      </sub>Back<sup>
+         <i>q</i>
+      </sup>) (1 + Θ<sub>1</sub>Back<sup>
+         <i>m</i>
+      </sup> + … + Θ<sub>
+         <i>sq</i>
+      </sub>Back<sup>
+         <i>m*sq</i>
+      </sup>) <i>E</i>
+      <sub>
+         <i>t</i>
+      </sub> + </p>
+   <p style="line-height: 1em;"> (<i>B</i>
+      <sub>1</sub> + <i>B</i>
+      <sub>2</sub>Back + … + <i>B</i>
+      <sub>
+         <i>b</i>-1</sub>Back<sup>
+         <i>b</i>
+      </sup>) (1 - Back)<sup>
+         <i>d</i>
+      </sup> (1 - Back<sup>
+         <i>m</i>
+      </sup>)<sup>
+         <i>sd</i>
+      </sup> 
+      <i>X</i>
+      <sub>
+         <i>t</i>
+      </sub>
+   </p>
+   <p style="line-height: 1em;">Variables are as in the nonseasonal VARMAX Model and the following table.</p>
+   <a name="table_tpx_kl4_zdb"> </a>
+   <table class="introtable">
+      <a name="table_tpx_kl4_zdb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Variable</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Back</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Back-shift operator, that is:<p style="line-height: 1em; margin: 0px;">
+                  <br/> Back(<i>y</i>
+                  <sub>
+                     <i>t</i>
+                  </sub>) = <i>y</i>
+                  <sub>
+                     <i>t</i>-1</sub>
+               </p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>m</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of periods in each season.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>d</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of differencing steps performed to stationarize time series.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>sp</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Seasonal parameter corresponding to <i>p</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>sq</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Seasonal parameter corresponding to <i>q</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>sd</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Seasonal parameter corresponding to <i>d</i>.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_cft_cj4_zdb"> </a>
+   <h2>Difference between VARMAX and R Function VARMA</h2>
+   <p style="line-height: 1em;">The results of the VARMAX function and the VARMA function in the R package MTS might not match exactly, because VARMA applies a boundary to the numerical optimization and VARMAX does not. Also, the default optimization method (the Method syntax element) is different for VARMA and VARMAX.</p>
+
+
+   <a name="zdw1507054166703"> </a>
+   <h2>VARMAX Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.11</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM VARMAX (
+  ON <i>input_table</i> [ AS InputTable ]
+    PARTITION BY { 1 | <i>partition_column</i> [,...] } ORDER BY <i>time_stamp_column</i> [,...]
+  { ON <i>orders_table</i> AS Orders PARTITION BY { 1 | <i>partition_column</i> [,...] } |
+    OrderP (<i>p</i>) OrderD (<i>d</i>) OrderQ (<i>q</i>) |
+    PDQ ('<i>p</i>, <i>d</i>, <i>q</i>')
+  }
+  USING
+  TargetColumns ('<i>target_column</i>' [,...])
+  [ ExogenousColumns ('<i>exogenous_column</i>' [,...]) ]
+  [ PartitionColumns ('<i>partition_column</i>' [,...]) ]
+  [ { SeasonalOrderP (<i>sp</i>) SeasonalOrderD (<i>sd</i>) SeasonalOrderQ (<i>sq</i>) |
+      SeasonalPDQ ('<i>sp</i>, <i>sd</i>, <i>sq</i>')
+    } Period (<i>period</i>)
+  ]
+  [ ExogenousOrder ('<i>b</i>') ]
+  [ Lag (<i>lag</i>) ]
+  [ IncludeMean ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ IncludeDrift ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'})]
+  [ MaxIterNum (<i>max_iteration_number</i>) ]
+  [ StepAhead (<i>predict_steps</i>) ]
+  [ FitMethod ({ 'SSE' | 'ML' }) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="arw1507054267366"> </a>
+	  <h2>VARMAX Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumns</dt>
+      <dd>Specify the InputTable columns containing the response data. Null values are allowed at the end of the series. If you specify StepAhead, the function reports predicted values for the missing values, using values from the predictor columns for those time periods.</dd>
+      <dt>ExogenousColumns</dt>
+      <dd>[Optional] Specify the InputTable columns containing the exogenous (independent) predictors.</dd>
+      <dd>Default behavior: The function calculates the model without exogenous vectors.</dd>
+      <dt>PartitionColumns</dt>
+      <dd>[Optional] Specify the InputTable partition columns to pass to the output.</dd>
+      <dt>OrderP</dt>
+      <dd>[Required if you omit Orders table and PDQ, disallowed otherwise.] Specify the value of the nonseasonal parameter <i>p</i> for the VARMAX model, an INTEGER in the range [0, 10].</dd>
+      <dt>OrderD</dt>
+      <dd>[Required if you omit Orders table and PDQ, disallowed otherwise.] Specify the value of the nonseasonal parameter <i>d</i> for the VARMAX model, the INTEGER 0 or 1.</dd>
+      <dt>OrderQ</dt>
+      <dd>[Required if you omit Orders table and PDQ, disallowed otherwise.] Specify the value of the nonseasonal parameter <i>q</i> for the VARMAX model, an INTEGER in the range [0, 10].</dd>
+      <dt>PDQ</dt>
+      <dd>[Required if you omit Orders table and OrderP, OrderD, and OrderQ; disallowed otherwise.] Specify the parameters <i>p</i>, <i>d</i>, and <i>q</i> for the VARMA part of the model. These values must be in the ranges for OrderP, OrderD, and OrderQ, respectively.</dd>
+      <dt>SeasonalOrderP</dt>
+      <dd>[Optional if you omit Orders table and SeasonalPDQ, disallowed otherwise.] Specify the value of the seasonal parameter <i>sp</i> for the VARMAX model, an INTEGER in the range [0, 10].</dd>
+      <dt>SeasonalOrderD</dt>
+      <dd>[Optional if you omit Orders table and SeasonalPDQ, disallowed otherwise.] Specify the value of the seasonal parameter <i>sd</i> for the VARMAX model, an INTEGER in the range [0, 3].</dd>
+      <dt>SeasonalOrderQ</dt>
+      <dd>[Optional if you omit Orders table and SeasonalPDQ, disallowed otherwise.] Specify the value of the seasonal parameter <i>sq</i> for the VARMAX model, an INTEGER in the range [0, 10].</dd>
+      <dt>SeasonalPDQ</dt>
+      <dd>[Optional if you omit Orders table and SeasonalOrderP, SeasonalOrderD, and SeasonalOrderQ; disallowed otherwise.] Specify seasonal parameters <i>sp</i>, <i>sd</i>, and <i>sq</i> for the VARMA part of the model. These values must be in the ranges for SeasonalOrderP, SeasonalOrderD, and SeasonalOrderQ, respectively.<p>
+            <b>Note:</b>  If you specify this syntax element, you must also specify the Period syntax element.</p>
+      </dd>
+      <dd>Default behavior: The function treats the model as nonseasonal.</dd>
+      <dt>Period</dt>
+      <dd>[Required if you specify SeasonalPDQ or SeasonalOrderP, SeasonalOrderD, and SeasonalOrderQ; disallowed otherwise.] Specify the period of each season. The <i>period</i> must be a positive INTEGER value.</dd>
+      <dd>Default behavior: The function treats the model as nonseasonal.</dd>
+      <dt>ExogenousOrder</dt>
+      <dd>[Optional] Specify the order of the exogenous variables. If the current time is <i>t</i> and ExogenousOrder is <i>b</i>, the following values of the exogenous time series are used in calculating the response: X<sub>
+            <i>t</i>
+         </sub> X<sub>
+            <i>t</i>-1</sub> ... X<sub>
+            <i>t</i>-<i>b</i>+1</sub>.</dd>
+      <dd>Default behavior: The function calculates the model without exogenous vectors.</dd>
+      <dt>Lag</dt>
+      <dd>[Optional] Specify the lag in the effect of the exogenous variables on the response variables. For example, if <i>lag</i> is 3, and ExogenousOrder is <i>b</i>, the prediction Y<sub>
+            <i>i</i>
+         </sub> is based on X<sub>
+            <i>i</i>-3</sub> to X<sub>
+            <i>i</i>-<i>b</i>-2</sub>.</dd>
+      <dd>Default: 0</dd>
+      <dt>IncludeMean</dt>
+      <dd>[Optional if you omit Orders table, disallowed otherwise.] Specify whether to add the mean vector of the response series in the VARMAX model.<p>
+            <b>Note:</b>  If this syntax element is 'true', the values of the difference parameters <i>d</i> (in the PDQ syntax element) and <i>sd</i> (in the SeasonalPDQ syntax element) must be 0.</p>
+      </dd>
+      <dd>Default: 'false'</dd>
+      <dt>IncludeDrift</dt>
+      <dd>[Optional if you omit Orders table, disallowed otherwise.] Specify whether to add the drift term of the response series in the VARMAX model. The drift term applies only when <i>d</i> is 1.<p>
+            <b>Note:</b>  IncludeDrift and IncludeMean cannot both be true. If either the syntax elements or order table specifies true for both IncludeDrift and IncludeMean, the function issues an error message.</p>
+      </dd>
+      <dd>Default: 'false'</dd>
+      <dt>MaxIterNum</dt>
+      <dd>[Optional] Specify the maximum number of iterations performed. The <i>max_iteration_number</i> must be a positive INTEGER value.</dd>
+      <dd>Default: 100</dd>
+      <dt>StepAhead</dt>
+      <dd>[Optional] Specify the number of steps to forecast after the end of the time series. The <i>predict_steps</i> must be a positive INTEGER value.</dd>
+      <dd>Default behavior: The function calculates no forecast values.</dd>
+      <dt>FitMethod</dt>
+      <dd>[Optional] Specify the method for fitting the model parameters:<a name="table_jwp_kly_fdb"> </a>
+         <table class="introtable">
+            <a name="table_jwp_kly_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'SSE'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Sum of squared error.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'ML'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Maximum likelihood. This method is more accurate, but slower to calculate.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+   </div>
+
+
+	
+   <a name="kny1507054403896"> </a>
+   <h2>VARMAX Input</h2>
+   <a name="section_qtp_sqc_m1b"> </a>
+   <a name="table_kht_qzs_wcb"> </a>
+   <table class="introtable">
+      <a name="table_kht_qzs_wcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">The alias, InputTable, is required only if you specify the optional Orders table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Orders</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] TimeSeriesOrders Output table. If omitted, you must specify the PDQ syntax element.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_enm_n1t_wcb"> </a>
+   <h3>InputTable Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>timestamp_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>timestamp_column</i>.] Sequence (time points) of input value.<p>
+                  <b>Note:</b>  If time points do not have uniform intervals, run Interpolator function on them before running VARMAX function on input table.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>partition_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>partition_column</i>.] Column by which input data is partitioned.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any numeric SQL data type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>target_column</i>.] Value of response variable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>exogenous_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any numeric SQL data type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>exogenous_column</i>.] Value of exogenous variable.</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">Each input time series must:<ul>
+         <li>Be an ordered sequence in a partition with uniform time intervals</li>
+         <li>Fit into memory</li>
+         <li>Not include NULL or numeric values, except as noted in the description of the ResponseColumns syntax element</li>
+      </ul>
+   </p>
+
+   <a name="bsp1507054465250"> </a>
+   <h2>VARMAX Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The VARMAX function outputs a model for each partition in the InputTable.</p>
+
+   <a name="section_vng_rbt_wcb"> </a>
+   <h3>Output Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>partition_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Identifier of <i>partition_column</i> from InputTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">coef</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Value from following table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">coef_value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Value explanation from following table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">stepahead</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Integer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only if StepAhead syntax element has positive value.] Identifier of future period. For example, for StepAhead (3), this column contains 1, 2, and 3 (in separate rows) to indicate the future period for which a predicted value appears in the next column.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">predict_columnname</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Double</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only if StepAhead syntax element has positive value.] [Column appears once for each specified <i>response_column</i>.] Predicted future values of response variable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_vvx_rbt_wcb"> </a>
+   <h3>Model Coefficients</h3>
+   <a name="table_N10087_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10087_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">coef</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">coef_value</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">coef</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Vector [<i>p</i>, <i>d</i>, <i>q</i>, <i>sp</i>, <i>sd</i>, <i>sq</i>, <i>b</i>].</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ar_params</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Matrixes Φ<sub>i</sub>, as vector of <i>p</i> matrixes, each of which is an <i>n</i> *<i>n</i> matrix. <i>p</i> is from coef vector and <i>n</i> is number of response variables specified in ResponseColumns syntax element.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ma_params</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Matrixes Φ<sub>i</sub>, as vector of <i>q</i> matrixes, each of which is an <i>n</i> *<i>n</i> matrix. <i>q</i> is from coef vector and <i>n</i> is number of response variables specified in ResponseColumns syntax element.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">exogenous_params</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Matrixes <i>B</i>
+               <sub>
+                  <i>i</i>
+               </sub>, shown as a vector of <i>b</i> matrixes, each of which is an <i>n</i> *<i>m</i> matrix. <i>b</i> is from coef vector, <i>n</i> is number of response variables specified in ResponseColumns syntax element, and <i>m</i> is number of exogenous variables specified in ExogenousColumns syntax element.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">seasonal_ar_params</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Matrix Φ<sub>si</sub> for seasonal parameters.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">seasonal_ma_params</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Matrix Φ<sub>si</sub> for seasonal parameters.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">mean_param</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with IncludeMean ('true').] Mean vector of response series.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">period</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Cycle period for seasonal models (0 for nonseasonal models).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">lag</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Lag value specified in function call.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">sigma</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">The variance matrix.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">aic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Akaike information criterion.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">bic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Bayesian information criterion.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">iterations</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of iterations performed.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">converged</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Whether algorithm converged.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="dac1510767741188"> </a>
+   <h2>VARMAX Examples</h2>
+   <a name="dql1507054600545"> </a>
+  <h3>VARMAX Example: No Exogenous Model</h3>
+
+  
+    <a name="section_f2q_j1y_m2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, finance_data3, has seasonally adjusted quarterly financial
+        data from West Germany between 1960 and 1982, in billions of Deutsche Marks. The table has
+        three time series—consumer expenditures, disposable income, and fixed investmen—partitioned
+        by the column id, which indicates the decade.</p>
+   <a name="table_fxm_dby_m2b"> </a>
+   <table class="introtable">
+      <a name="table_fxm_dby_m2b"> </a>
+        <h4 style="text-align: center;">finance_data3</h4>
+        
+          
+          
+          
+          
+          
+          
+          
+            <tr>
+              <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">period</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">expenditure</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">income</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">investment</div>
+         </th>
+            </tr>
+          
+          
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1960Q1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">415</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">451</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">180</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1960Q2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">421</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">465</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">179</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1960Q3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">434</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">485</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">185</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1960Q4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">448</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">493</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">192</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1961Q1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">459</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">509</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">211</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1961Q2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">458</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">520</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">202</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1961Q3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">479</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">521</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">207</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1961Q4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">487</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">540</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">214</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1962Q1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">497</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">548</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">231</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1962Q2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">510</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">558</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">229</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1962Q3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">516</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">574</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">234</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1962Q4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">525</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">583</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">237</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1963Q1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">529</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">591</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">206</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1963Q2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">538</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">599</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">250</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+            </tr>
+          
+        
+      </table>
+
+
+
+    <a name="section_byz_j1y_m2b"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">Three values are predicted (StepAhead (3)) for each time series with PDQ
+        (1, 1,
+      1).</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM VARMAX (
+  ON finance_data3 AS InputTable PARTITION BY id ORDER BY period
+  USING
+  TargetColumns ('expenditure', 'income', 'investment')
+  PartitionColumns ('id')
+  PDQ ('1, 1, 1')
+  IncludeMean ('false')
+  StepAhead (3)
+) AS dt ORDER BY id;</tt>
+   </pre>
+
+    <a name="section_fmm_k1y_m2b"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">Series id = 2 does not converge. You might improve convergence by adding more orders or more models.</p>
+   <pre>
+      <tt>
+ id coef               coef_value                                                                                                                                                                                       stepahead predict_expenditure predict_income     predict_investment 
+ -- ------------------ ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ --------- ------------------- ------------------ ------------------ 
+  1 ma_params          [[1.248390739091949, -1.265426674704899, 1.8366448514566578],[-0.04357992971257406, -0.8104294171113546, 3.1912081090547098],[0.5282557132572212, -0.8969134194646912, 0.6941781537982473]]      NULL                     NULL               NULL               NULL
+  1 aic                25.8626571338923                                                                                                                                                                                 NULL                     NULL               NULL               NULL
+  1 converged          false                                                                                                                                                                                            NULL                     NULL               NULL               NULL
+  1 seasonal_ar_params NULL                                                                                                                                                                                             NULL                     NULL               NULL               NULL
+  1 sigma              [[10937.698750122627, 10097.09183807659, 3520.1342920478005],[10097.09183807659, 14134.11499016197, 2999.6089815260793],[3520.1342920478005, 2999.6089815260793, 2433.4777442199834]]            NULL                     NULL               NULL               NULL
+  1 period             0                                                                                                                                                                                                NULL                     NULL               NULL               NULL
+  1 bic                26.630454816721365                                                                                                                                                                               NULL                     NULL               NULL               NULL
+  1 NULL               NULL                                                                                                                                                                                             3          1753.0780834153084  2213.770938403275  743.8238313279019
+  1 NULL               NULL                                                                                                                                                                                             1          1870.2700856952113  2220.305114150415  732.6964571772069
+  1 coef               1, 1, 1, 0, 0, 0, 0                                                                                                                                                                              NULL                     NULL               NULL               NULL
+  1 seasonal_ma_params NULL                                                                                                                                                                                             NULL                     NULL               NULL               NULL
+  1 exogenous_params   NULL                                                                                                                                                                                             NULL                     NULL               NULL               NULL
+  1 iterations         100                                                                                                                                                                                              NULL                     NULL               NULL               NULL
+  1 NULL               NULL                                                                                                                                                                                             2          1994.0913688056626  2240.692404271746  749.3573689292496
+  1 lag                0                                                                                                                                                                                                NULL                     NULL               NULL               NULL
+  1 ar_params          [[-2.342501109086588, 1.9423693188736098, 0.5665092606109724],[-0.23679729916046047, 0.463259213827403, -0.4228772439268348],[-0.05041900311204333, 0.3456632515726913, -0.3803950846917263]]    NULL                     NULL               NULL               NULL
+  2 ma_params          [[-1.7350580320377782, 2.253563262977889, 1.3630071115741689],[-2.5529132696801202, 2.8604609381524764, 0.8539594322792532],[-1.0527526199458779, 0.9124434365333087, 0.8251886996083113]]       NULL                     NULL               NULL               NULL
+  2 seasonal_ar_params NULL                                                                                                                                                                                             NULL                     NULL               NULL               NULL
+  2 seasonal_ma_params NULL                                                                                                                                                                                             NULL                     NULL               NULL               NULL
+  2 period             0                                                                                                                                                                                                NULL                     NULL               NULL               NULL
+  2 sigma              [[13901.648209349993, 14915.088344538926, 3504.4514805844747],[14915.088344538926, 20430.147818275578, 5617.087770107875],[3504.4514805844747, 5617.087770107875, 2572.3863667164956]]           NULL                     NULL               NULL               NULL
+  2 aic                25.67191854988387                                                                                                                                                                                NULL                     NULL               NULL               NULL
+  2 bic                26.439716232712936                                                                                                                                                                               NULL                     NULL               NULL               NULL
+  2 iterations         100                                                                                                                                                                                              NULL                     NULL               NULL               NULL
+  2 converged          false                                                                                                                                                                                            NULL                     NULL               NULL               NULL
+  2 NULL               NULL                                                                                                                                                                                             1          1610.2071609154068 1959.9484516211046  615.9731282343708
+  2 NULL               NULL                                                                                                                                                                                             2          1895.7603142841267 2113.7353384844932  562.4152008833979
+  2 NULL               NULL                                                                                                                                                                                             3           965.7973575959059 1398.1791635434158  645.9978584480411
+  2 lag                0                                                                                                                                                                                                NULL                     NULL               NULL               NULL
+  2 exogenous_params   NULL                                                                                                                                                                                             NULL                     NULL               NULL               NULL
+  2 ar_params          [[-4.059896316264422, 2.184439535900078, 1.9900866644404875],[-2.136312518482259, 0.2996326943183063, 2.8306729828361092],[0.48777641750942646, -0.4954211191320447, -0.38249865177522036]]      NULL                     NULL               NULL               NULL
+  2 coef               1, 1, 1, 0, 0, 0, 0                                                                                                                                                                              NULL                     NULL               NULL               NULL
+  3 NULL               NULL                                                                                                                                                                                             1           2291.751800546244  2771.519391960251  843.1553213951414
+  3 converged          false                                                                                                                                                                                            NULL                     NULL               NULL               NULL
+  3 iterations         100                                                                                                                                                                                              NULL                     NULL               NULL               NULL
+  3 aic                26.01717883870844                                                                                                                                                                                NULL                     NULL               NULL               NULL
+  3 sigma              [[4675.639154179282, -271.81096013599335, 500.1394808930519],[-271.81096013599335, 1347.982467607846, 256.8154939947388],[500.1394808930519, 256.8154939947388, 1326.5247222046553]]             NULL                     NULL               NULL               NULL
+  3 lag                0                                                                                                                                                                                                NULL                     NULL               NULL               NULL
+  3 bic                26.668280194196683                                                                                                                                                                               NULL                     NULL               NULL               NULL
+  3 period             0                                                                                                                                                                                                NULL                     NULL               NULL               NULL
+  3 seasonal_ma_params NULL                                                                                                                                                                                             NULL                     NULL               NULL               NULL
+  3 seasonal_ar_params NULL                                                                                                                                                                                             NULL                     NULL               NULL               NULL
+  3 exogenous_params   NULL                                                                                                                                                                                             NULL                     NULL               NULL               NULL
+  3 NULL               NULL                                                                                                                                                                                             2          2256.0140486155283  3057.017727562449 1012.7661239880138
+  3 ma_params          [[-0.6946133251302785, -0.21908174663171212, 2.0539095733809596],[-5.146412337538272, 1.8914154757069057, -0.023736634213482252],[-1.3446784229340576, -0.10492861623291512, 0.197379047992889]] NULL                     NULL               NULL               NULL
+  3 ar_params          [[1.4735147057787517, -0.3714896584284457, -1.637673972878577],[-0.49114758180592777, 2.419163855654859, 0.31427398834899123],[-1.6601973673615065, 1.665300190890637, 0.25555596015840437]]     NULL                     NULL               NULL               NULL
+  3 coef               1, 1, 1, 0, 0, 0, 0                                                                                                                                                                              NULL                     NULL               NULL               NULL
+  3 NULL               NULL                                                                                                                                                                                             3          1819.5270694940025 3818.5417557387937 1590.8833299459645</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+  
+   <a name="mcc1507055221022"> </a>
+   <h3>VARMAX Example: Exogenous Model</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">This example models the expenditure time series as a function of exogenous variables (income and investment) and the AR and MA parameters.</p>
+
+   <a name="section_qz2_pdy_m2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>finance_data3, as in VARMAX Example: No Exogenous Model</li>
+   </ul>
+
+   <a name="section_slr_pdy_m2b"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM VARMAX (
+  ON finance_data3 AS InputTable PARTITION BY id ORDER BY period
+  USING
+  TargetColumns ('expenditure')
+  ExogenousColumns ('income', 'investment')
+  PartitionColumns ('id')
+  PDQ ('1, 1, 1')
+  Lag (3)
+  ExogenousOrder (3)
+  IncludeMean ('false')
+  StepAhead (3)
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_xgb_qdy_m2b"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The model converges for all three decades.</p>
+   <pre>
+      <tt>
+ id coef               coef_value                                                                                                                            stepahead predict_expenditure 
+ -- ------------------ ------------------------------------------------------------------------------------------------------------------------------------- --------- ------------------- 
+  1 lag                3                                                                                                                                     NULL                     NULL
+  1 exogenous_params   [[0.1519680005451124, -0.6551050387116059]],[[3.435192616763898, -3.882673202143499]],[[1.3541313678881937, 1.6646325777482736]]      NULL                     NULL
+  1 bic                10.741829043275684                                                                                                                    NULL                     NULL
+  1 seasonal_ar_params NULL                                                                                                                                  NULL                     NULL
+  1 ar_params          [[-0.11089814304828957]]                                                                                                              NULL                     NULL
+  1 iterations         52                                                                                                                                    NULL                     NULL
+  1 seasonal_ma_params NULL                                                                                                                                  NULL                     NULL
+  1 NULL               NULL                                                                                                                                  1             4600.7706184855
+  1 period             0                                                                                                                                     NULL                     NULL
+  1 ma_params          [[0.19307253407851677]]                                                                                                               NULL                     NULL
+  1 aic                10.400585628684988                                                                                                                    NULL                     NULL
+  1 coef               1, 1, 1, 0, 0, 0, 3                                                                                                                   NULL                     NULL
+  1 sigma              [[21814.479344791267]]                                                                                                                NULL                     NULL
+  1 converged          true                                                                                                                                  NULL                     NULL
+  1 NULL               NULL                                                                                                                                  2           6373.998107354011
+  1 NULL               NULL                                                                                                                                  3           6350.744363017893
+  2 NULL               NULL                                                                                                                                  2          1687.7469213444433
+  2 NULL               NULL                                                                                                                                  1           1738.714144436625
+  2 period             0                                                                                                                                     NULL                     NULL
+  2 converged          true                                                                                                                                  NULL                     NULL
+  2 iterations         41                                                                                                                                    NULL                     NULL
+  2 seasonal_ma_params NULL                                                                                                                                  NULL                     NULL
+  2 ma_params          [[-0.8359845907086888]]                                                                                                               NULL                     NULL
+  2 bic                11.376308711954195                                                                                                                    NULL                     NULL
+  2 aic                11.035065297363499                                                                                                                    NULL                     NULL
+  2 seasonal_ar_params NULL                                                                                                                                  NULL                     NULL
+  2 sigma              [[41142.99197004428]]                                                                                                                 NULL                     NULL
+  2 NULL               NULL                                                                                                                                  3          1741.1916880853182
+  2 lag                3                                                                                                                                     NULL                     NULL
+  2 exogenous_params   [[-1.2720319560315987, 3.655852449852053]],[[0.8360385941734287, -2.302383393590858]],[[0.7593553302868498, -2.374110320858793]]      NULL                     NULL
+  2 ar_params          [[0.7108652352664463]]                                                                                                                NULL                     NULL
+  2 coef               1, 1, 1, 0, 0, 0, 3                                                                                                                   NULL                     NULL
+  3 ma_params          [[-0.0614288647351308]]                                                                                                               NULL                     NULL
+  3 seasonal_ar_params NULL                                                                                                                                  NULL                     NULL
+  3 seasonal_ma_params NULL                                                                                                                                  NULL                     NULL
+  3 period             0                                                                                                                                     NULL                     NULL
+  3 sigma              [[6.363011312881083E-13]]                                                                                                             NULL                     NULL
+  3 aic                -26.62855901221182                                                                                                                    NULL                     NULL
+  3 bic                -26.33918063199482                                                                                                                    NULL                     NULL
+  3 iterations         100                                                                                                                                   NULL                     NULL
+  3 converged          false                                                                                                                                 NULL                     NULL
+  3 NULL               NULL                                                                                                                                  1          2322.3532307390687
+  3 NULL               NULL                                                                                                                                  2          2383.7876893596203
+  3 NULL               NULL                                                                                                                                  3           2361.660078073284
+  3 lag                3                                                                                                                                     NULL                     NULL
+  3 exogenous_params   [[0.25875628651307314, -0.6072084966292083]],[[-0.05294450371858871, 0.1933161164790199]],[[0.5381262647961994, -1.2967359488966945]] NULL                     NULL
+  3 ar_params          [[0.18907298111234366]]                                                                                                               NULL                     NULL
+  3 coef               1, 1, 1, 0, 0, 0, 3                                                                                                                   NULL                     NULL</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="fdp1507055709467"> </a>
+  <h3>VARMAX Example: Seasonal Model, No Exogenous Model</h3>
+
+  
+    <a name="section_nyy_1gy_m2b"> </a>
+   <h4>Input</h4>
+   <ul>
+        <li>finance_data3, as in VARMAX Example: No Exogenous Model</li>
+
+      </ul>
+
+
+    <a name="section_twy_bgy_m2b"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">Seasonal modeling are specified by the Period and SeasonalPDQ syntax elements.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM VARMAX (
+  ON finance_data3 AS InputTable PARTITION BY id ORDER BY period
+  USING
+  TargetColumns ('expenditure', 'income', 'investment')
+  PartitionColumns ('id')
+  PDQ ('1,1,1')
+  SeasonalPDQ ('1,0,0')
+  Period (4)
+  IncludeMean ('false')
+  StepAhead (3)
+) AS dt ORDER BY id;</tt>
+   </pre>
+
+    <a name="section_dvk_cgy_m2b"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id coef               coef_value                                                                                                                                                                                                         stepahead predict_expenditure predict_income     predict_investment 
+ -- ------------------ ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ --------- ------------------- ------------------ ------------------ 
+  1 ma_params          [[0.047161415589433306, -1.906043453002955, 1.0468038966218294],[-0.13240014325688745, -1.718397893417201, 1.39178874725834],[0.0037687548122121994, -0.5051382020273312, -0.15314353469864087]]                   NULL                     NULL               NULL               NULL
+  1 aic                25.32292860210836                                                                                                                                                                                                  NULL                     NULL               NULL               NULL
+  1 converged          true                                                                                                                                                                                                               NULL                     NULL               NULL               NULL
+  1 seasonal_ar_params [[-0.16845518629067494, 1.6244951628223803, -1.919050728871083],[1.3604369899583515, 2.3278614226936565, -3.096311206806939],[0.692982567095393, 0.6025475118342052, -1.7567031588496334]]                         NULL                     NULL               NULL               NULL
+  1 sigma              [[8507.086753280108, 9128.51276469664, 1501.0110439314783],[9128.51276469664, 10931.74025041702, 1877.8340370539074],[1501.0110439314783, 1877.8340370539074, 2903.7551352984965]]                                 NULL                     NULL               NULL               NULL
+  1 period             4                                                                                                                                                                                                                  NULL                     NULL               NULL               NULL
+  1 bic                26.474625126351963                                                                                                                                                                                                 NULL                     NULL               NULL               NULL
+  1 NULL               NULL                                                                                                                                                                                                               3            2261.66509463083  4805.075647611341 -85.65885437898675
+  1 NULL               NULL                                                                                                                                                                                                               1          3008.4122472417243  5243.487089399085 1593.0015737498193
+  1 coef               1, 1, 1, 1, 0, 0, 0                                                                                                                                                                                                NULL                     NULL               NULL               NULL
+  1 seasonal_ma_params NULL                                                                                                                                                                                                               NULL                     NULL               NULL               NULL
+  1 exogenous_params   NULL                                                                                                                                                                                                               NULL                     NULL               NULL               NULL
+  1 iterations         90                                                                                                                                                                                                                 NULL                     NULL               NULL               NULL
+  1 NULL               NULL                                                                                                                                                                                                               2          3139.7419274225804   4677.14682761945 -160.6000488318316
+  1 lag                0                                                                                                                                                                                                                  NULL                     NULL               NULL               NULL
+  1 ar_params          [[0.6749792690680297, 0.09241813288404432, 0.5484884989127043],[1.0839981966998173, -0.23542155358055403, 0.14231078552096657],[1.2894538111710467, -0.9457973261338974, 0.38673451989311164]]                     NULL                     NULL               NULL               NULL
+  2 ma_params          [[-1.5756434415526015, 1.630187686487473, 2.1347097874729792],[-1.9435395521265888, 1.873384498811412, 2.6763882969664268],[-0.933312508854108, 0.49480536089543276, 1.590592606432673]]                           NULL                     NULL               NULL               NULL
+  2 seasonal_ar_params [[-2.973968196921355, 2.9573715910806713, -1.4339914670174523],[-3.1805599462697067, 3.3167662120040973, -2.1174689799806643],[-2.035395283487158, 1.2767914660698918, 1.2383397778611864]]                        NULL                     NULL               NULL               NULL
+  2 seasonal_ma_params NULL                                                                                                                                                                                                               NULL                     NULL               NULL               NULL
+  2 period             4                                                                                                                                                                                                                  NULL                     NULL               NULL               NULL
+  2 sigma              [[10013.563226714596, 10328.92305258156, 2522.651762868327],[10328.92305258156, 13660.58770687717, 3586.0393410620686],[2522.651762868327, 3586.0393410620686, 4065.2136506535103]]                                NULL                     NULL               NULL               NULL
+  2 aic                26.6464291226334                                                                                                                                                                                                   NULL                     NULL               NULL               NULL
+  2 bic                27.798125646877004                                                                                                                                                                                                 NULL                     NULL               NULL               NULL
+  2 iterations         100                                                                                                                                                                                                                NULL                     NULL               NULL               NULL
+  2 converged          false                                                                                                                                                                                                              NULL                     NULL               NULL               NULL
+  2 NULL               NULL                                                                                                                                                                                                               1          1886.5914476963292  2222.789211779163  728.0400718629573
+  2 NULL               NULL                                                                                                                                                                                                               2          1903.2071472190191 2210.4430886478253  746.9419150917527
+  2 NULL               NULL                                                                                                                                                                                                               3          1932.9016081238367 2310.3080468286544  755.5631886642103
+  2 lag                0                                                                                                                                                                                                                  NULL                     NULL               NULL               NULL
+  2 exogenous_params   NULL                                                                                                                                                                                                               NULL                     NULL               NULL               NULL
+  2 ar_params          [[-1.6168918787094855, 1.3975465858808604, -0.02967704587502138],[-0.6136719639019782, 0.6245910144797986, -0.004323898456822209],[-0.10656699187624753, -0.0041473039543114066, 0.2760541617316411]]              NULL                     NULL               NULL               NULL
+  2 coef               1, 1, 1, 1, 0, 0, 0                                                                                                                                                                                                NULL                     NULL               NULL               NULL
+  3 NULL               NULL                                                                                                                                                                                                               1            2286.73827930903  2666.389925343694  846.6929154260399
+  3 converged          false                                                                                                                                                                                                              NULL                     NULL               NULL               NULL
+  3 iterations         100                                                                                                                                                                                                                NULL                     NULL               NULL               NULL
+  3 aic                -44.60965861168598                                                                                                                                                                                                 NULL                     NULL               NULL               NULL
+  3 sigma              [[7.526043504203248E-8, -5.613039588268464E-8, 3.493979116954864E-8],[-5.613039588268464E-8, 1.6041066073702722E-7, -1.1143252721740114E-7],[3.493979116954864E-8, -1.1143252721740114E-7, 1.1268415707165419E-7]] NULL                     NULL               NULL               NULL
+  3 lag                0                                                                                                                                                                                                                  NULL                     NULL               NULL               NULL
+  3 bic                -43.63300657845361                                                                                                                                                                                                 NULL                     NULL               NULL               NULL
+  3 period             4                                                                                                                                                                                                                  NULL                     NULL               NULL               NULL
+  3 seasonal_ma_params NULL                                                                                                                                                                                                               NULL                     NULL               NULL               NULL
+  3 seasonal_ar_params [[-0.2101429741884885, 0.2796383976301956, -0.22814036733111545],[0.39208495397322296, -0.18940564549948544, -0.2544806668877057],[0.4733053379224758, -0.2671558233963303, -0.22331382713353207]]                 NULL                     NULL               NULL               NULL
+  3 exogenous_params   NULL                                                                                                                                                                                                               NULL                     NULL               NULL               NULL
+  3 NULL               NULL                                                                                                                                                                                                               2          2275.0386892095153   2674.72073694218  859.8962665935035
+  3 ma_params          [[0.4727104594654274, -0.4088587225958212, 0.2525235211650897],[-0.312645520932563, 0.33960805201909594, 0.23370759611826677],[0.4471490198322245, -0.4664238983816184, -0.24726031377126428]]                     NULL                     NULL               NULL               NULL
+  3 ar_params          [[1.2942647874597708, -0.9582895919745037, -0.3611398899762283],[0.8491941789939056, 0.13426472552340252, 0.10004993633165297],[-1.3595901466064593, 0.1927208494956761, 0.5089697698633536]]                      NULL                     NULL               NULL               NULL
+  3 coef               1, 1, 1, 1, 0, 0, 0                                                                                                                                                                                                NULL                     NULL               NULL               NULL
+  3 NULL               NULL                                                                                                                                                                                                               3          2245.3218790410156 2677.8225099270294  864.8036704818687</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+  
+   <a name="zss1507056125671"> </a>
+   <h3>VARMAX Example: Exogenous and Seasonal Models</h3>
+   <a name="section_nc3_x3y_m2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: finance_data3, as in VARMAX Example: No Exogenous Model</li>
+   </ul>
+
+   <a name="section_f1s_x3y_m2b"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM VARMAX (
+  ON finance_data3 AS InputTable PARTITION BY id ORDER BY period
+  USING
+  TargetColumns ('expenditure')
+  ExogenousColumns ('income', 'investment')
+  PartitionColumns ('id')
+  PDQ ('1, 1, 1')
+  SeasonalPDQ ('1, 0, 0')
+  Period (4)
+  Lag (3)
+  ExogenousOrder (3)
+  IncludeMean ('false')
+  StepAhead (3)
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_nm2_y3y_m2b"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id coef               coef_value                                                                                                                            stepahead predict_expenditure 
+ -- ------------------ ------------------------------------------------------------------------------------------------------------------------------------- --------- ------------------- 
+  1 lag                3                                                                                                                                     NULL                     NULL
+  1 exogenous_params   [[0.14136535289002805, -0.5764731379270335]],[[4.327609632621381, -3.6776117386402745]],[[1.5658681771405536, 1.7090892798326973]]    NULL                     NULL
+  1 bic                10.829562247171378                                                                                                                    NULL                     NULL
+  1 seasonal_ar_params [[-1.749468260264603]]                                                                                                                NULL                     NULL
+  1 ar_params          [[-0.083675090299998]]                                                                                                                NULL                     NULL
+  1 iterations         41                                                                                                                                    NULL                     NULL
+  1 seasonal_ma_params NULL                                                                                                                                  NULL                     NULL
+  1 NULL               NULL                                                                                                                                  1           3948.029466182273
+  1 period             4                                                                                                                                     NULL                     NULL
+  1 ma_params          [[0.16557702978800654]]                                                                                                               NULL                     NULL
+  1 aic                10.445663405756845                                                                                                                    NULL                     NULL
+  1 coef               1, 1, 1, 1, 0, 0, 3                                                                                                                   NULL                     NULL
+  1 sigma              [[21679.55531881341]]                                                                                                                 NULL                     NULL
+  1 converged          true                                                                                                                                  NULL                     NULL
+  1 NULL               NULL                                                                                                                                  2           5935.804907456769
+  1 NULL               NULL                                                                                                                                  3           5954.276592372843
+  2 ma_params          [[-0.8204637812812601]]                                                                                                               NULL                     NULL
+  2 seasonal_ar_params [[-5.614414697261441]]                                                                                                                NULL                     NULL
+  2 seasonal_ma_params NULL                                                                                                                                  NULL                     NULL
+  2 period             4                                                                                                                                     NULL                     NULL
+  2 sigma              [[32608.138895810247]]                                                                                                                NULL                     NULL
+  2 aic                10.853855657114226                                                                                                                    NULL                     NULL
+  2 bic                11.237754498528759                                                                                                                    NULL                     NULL
+  2 iterations         85                                                                                                                                    NULL                     NULL
+  2 converged          true                                                                                                                                  NULL                     NULL
+  2 NULL               NULL                                                                                                                                  1           1620.451901286435
+  2 NULL               NULL                                                                                                                                  2          1586.3420191931932
+  2 NULL               NULL                                                                                                                                  3          1658.0951344806858
+  2 lag                3                                                                                                                                     NULL                     NULL
+  2 exogenous_params   [[-0.9778053595354401, 2.6268103989144316]],[[4.974327689829748, -0.39732611440463356]],[[-2.326100821660923, -2.6208248381459405]]   NULL                     NULL
+  2 ar_params          [[0.67251029839066]]                                                                                                                  NULL                     NULL
+  2 coef               1, 1, 1, 1, 0, 0, 3                                                                                                                   NULL                     NULL
+  3 NULL               NULL                                                                                                                                  2          2372.4860996289876
+  3 NULL               NULL                                                                                                                                  1          2327.0431364124015
+  3 period             4                                                                                                                                     NULL                     NULL
+  3 converged          false                                                                                                                                 NULL                     NULL
+  3 iterations         100                                                                                                                                   NULL                     NULL
+  3 seasonal_ma_params NULL                                                                                                                                  NULL                     NULL
+  3 ma_params          [[-0.014945451170288799]]                                                                                                             NULL                     NULL
+  3 bic                -26.29272322661271                                                                                                                    NULL                     NULL
+  3 aic                -26.618273904356833                                                                                                                   NULL                     NULL
+  3 seasonal_ar_params [[0.13346859797280347]]                                                                                                               NULL                     NULL
+  3 sigma              [[5.360025155179078E-13]]                                                                                                             NULL                     NULL
+  3 NULL               NULL                                                                                                                                  3          2321.5615950896404
+  3 lag                3                                                                                                                                     NULL                     NULL
+  3 exogenous_params   [[0.2934923712302498, -0.6135109059450977]],[[-0.11162047294277623, 0.11996630573488476]],[[0.6145949488515016, -1.5210989053056008]] NULL                     NULL
+  3 ar_params          [[-0.2624228703654427]]                                                                                                               NULL                     NULL
+  3 coef               1, 1, 1, 1, 0, 0, 3                                                                                                                   NULL                     NULL</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="hyk1507056514956"> </a>
+	  <h3>VARMAX Example: Orders Table, One Time Series</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+			<p style="line-height: 1em;">This example uses an Orders table (output by the TimeSeriesOrders function) instead of a PDQ syntax element. The Orders table has one time series.</p>
+
+		
+   <a name="section_wcf_4ly_m2b"> </a>
+   <h4>Input</h4>
+   <a name="table_scr_5jl_wfb"> </a>
+   <table class="introtable">
+      <a name="table_scr_5jl_wfb"> </a>
+      <h4 style="text-align: center;">milk_timeseries</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">period</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">milkpound</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1962-01</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">578.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1962-02</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">609.8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1962-03</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">628.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1962-04</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">665.6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1962-05</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">713.8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1962-06</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">707.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1962-07</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">628.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1962-08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">588.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1962-09</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">576.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1962-10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">566.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1962-11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">561.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1962-12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">571.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1963-01</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">589.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1963-02</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">615.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1963-03</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">641.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1963-04</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">682.8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">17</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1963-05</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">728.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">18</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1963-06</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">726.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">19</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1963-07</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">648</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_jln_4ly_m2b"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM VARMAX (
+  ON milk_timeseries AS InputTable PARTITION BY 1 ORDER BY id
+  ON TimeSeriesOrders (
+  ON milk_timeseries AS InputTable PARTITION BY 1 ORDER BY id ASC
+  USING
+    TimestampColumns ('period')
+    ResponseColumn ('milkpound')
+  ) AS orders PARTITION BY 1
+  USING
+    TargetColumns ('milkpound')
+    MaxIterNum (1000)
+    FitMethod ('ML')
+) AS dt ;</tt>
+   </pre>
+   <a name="section_exd_ply_m2b"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ coef               coef_value                                     
+ ------------------ ---------------------------------------------- 
+ coef               0, 1, 2, 0, 0, 0, 0                           
+ ar_params          NULL                                          
+ ma_params          [[0.8569252788514398]],[[0.35803161161466235]]
+ exogenous_params   NULL                                          
+ seasonal_ar_params NULL                                          
+ seasonal_ma_params NULL                                          
+ drift_params       [0.7402653820420226]                          
+ period             0                                             
+ lag                0                                             
+ sigma              [[633.9229968930607]]                         
+ aic                6.490637168475567                             
+ bic                6.54954217073852                              
+ iterations         22                                            
+ converged          true</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="rid1507056868188"> </a>
+	  <h3>VARMAX Example: Orders Table, Two Time Series</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example uses an Orders table (output by the TimeSeriesOrders function) instead of a PDQ syntax element. The Orders table has two time series.</p>
+
+   <a name="section_dmd_wmy_m2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The InputTable, milk_3, is from ARIMA Example: OrdersTable, PartitionColumns, No Seasonality.</p>
+
+   <a name="section_r5l_wmy_m2b"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM VARMAX (
+  ON milk_3 AS InputTable PARTITION BY id_partition ORDER BY period
+  ON TimeSeriesOrders(
+  ON milk_3 AS InputTable PARTITION BY id_partition ORDER BY period ASC
+  USING
+    TimestampColumns ('period')
+    ResponseColumn ('milkpound')
+    PartitionColumns ('id_partition')
+  ) AS orders PARTITION BY id_partition
+  USING
+    TargetColumns ('milkpound')
+    PartitionColumns ('id_partition')
+    MaxIterNum (1000)
+    FitMethod ('ML')
+) AS dt ;</tt>
+   </pre>
+   <a name="section_pkw_wmy_m2b"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id_partition coef               coef_value                                     
+ ------------ ------------------ ---------------------------------------------- 
+            1 coef               1, 1, 1, 0, 0, 0, 0                           
+            2 coef               0, 1, 2, 0, 0, 0, 0                           
+            1 ar_params          [[0.34403170023658103]]                       
+            2 ar_params          NULL                                          
+            1 ma_params          [[0.5821427351731738]]                        
+            2 ma_params          [[0.8304444685178987]],[[0.39987632773261356]]
+            1 exogenous_params   NULL                                          
+            2 exogenous_params   NULL                                          
+            1 seasonal_ar_params NULL                                          
+            2 seasonal_ar_params NULL                                          
+            1 seasonal_ma_params NULL                                          
+            2 seasonal_ma_params NULL                                          
+            1 period             0                                             
+            2 period             0                                             
+            1 lag                0                                             
+            2 lag                0                                             
+            1 sigma              [[591.6645419709592]]                         
+            2 sigma              [[643.2306748042672]]                         
+            1 aic                6.468046205178683                             
+            2 aic                6.503886585224706                             
+            1 bic                6.546775890357835                             
+            2 bic                6.553846002691284                             
+            1 iterations         20                                            
+            2 iterations         23                                            
+            1 converged          true                                          
+            2 converged          true</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="muq1507057214647"> </a>
+	  <h3>VARMAX Example: Existing Orders Table</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+			<p style="line-height: 1em;">This example uses an existing Orders table instead of a PDQ syntax element or TimeSeriesOrders call.</p>
+
+		
+   <a name="section_wlj_tny_m2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: finance_data3, as in VARMAX Example: No Exogenous Model</li>
+      <li>Orders: orders_ex7</li>
+   </ul>
+   <a name="table_ybp_b4y_m2b"> </a>
+   <table class="introtable">
+      <a name="table_ybp_b4y_m2b"> </a>
+      <h4 style="text-align: center;">orders_ex7</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">p</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">d</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">q</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">include_drift</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">include_mean</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_cnr_tny_m2b"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM VARMAX (
+  ON finance_data3 AS InputTable PARTITION BY id ORDER BY period
+  ON orders_ex7 AS Orders PARTITION BY id
+  USING
+  TargetColumns ('expenditure')
+  PartitionColumns ('id')
+  MaxIterNum (1000)
+  FitMethod ('ML')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_kkg_5ny_m2b"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id coef               coef_value             
+ -- ------------------ ---------------------- 
+  1 sigma              [[24235.070398818556]]
+  1 drift_params       [35.1194422383902]    
+  1 iterations         22                    
+  1 coef               0, 1, 0, 0, 0, 0, 0   
+  1 seasonal_ar_params NULL                  
+  1 aic                10.146838104398181    
+  1 lag                0                     
+  1 period             0                     
+  1 seasonal_ma_params NULL                  
+  1 exogenous_params   NULL                  
+  1 ar_params          NULL                  
+  1 bic                10.189493531222018    
+  1 converged          true                  
+  1 ma_params          NULL                  
+  2 ma_params          NULL                  
+  2 seasonal_ar_params NULL                  
+  2 seasonal_ma_params NULL                  
+  2 period             0                     
+  2 sigma              [[45895.666666666664]]
+  2 aic                10.734125983458284    
+  2 bic                10.734125983458284    
+  2 iterations         1                     
+  2 converged          true                  
+  2 lag                0                     
+  2 exogenous_params   NULL                  
+  2 ar_params          NULL                  
+  2 coef               0, 1, 0, 0, 0, 0, 0   
+  3 period             0                     
+  3 converged          true                  
+  3 iterations         1                     
+  3 seasonal_ma_params NULL                  
+  3 ma_params          NULL                  
+  3 bic                10.214956949880218    
+  3 aic                10.214956949880218    
+  3 seasonal_ar_params NULL                  
+  3 sigma              [[27308.600000000002]]
+  3 lag                0                     
+  3 exogenous_params   NULL                  
+  3 ar_params          NULL                  
+  3 coef               0, 2, 0, 0, 0, 0, 0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

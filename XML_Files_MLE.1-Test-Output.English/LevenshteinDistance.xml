@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="gdz1507318085052"> </a>
+	  <h1>LevenshteinDistance</h1>
+
+	
+		<p style="line-height: 1em;">The LevenshteinDistance function computes the Levenshtein distance between two text values. The Levenshtein distance (or edit distance) is the number of edits needed to transform one string into the other. An edit is an insertion, deletion, or substitution of a single character.</p>
+
+		<p style="line-height: 1em;">The Levenshtein distance is useful for fuzzy matching of sequences and strings. The LevenshteinDistance function is often used to resolve a user-entered value to a standard value. For example, when a enters "Jon Dow" when searching for "John Doe".</p>
+
+		<p style="line-height: 1em;">A typical application of the LevenshteinDistance function is genome sequencing.</p>
+
+	
+   <a name="aom1507318179989"> </a>
+   <h2>LevenshteinDistance Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.4</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM LevenshteinDistance (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+  USING
+  TargetColumn ('<i>target_column</i>')
+  SourceColumns ({ '<i>source_column</i>' | <i>source_column_range</i> }[,...])
+  [ LevenshteinThreshold (<i>threshold</i>) ]
+  [ OutputDistanceColName ('<i>output_distance_column</i>') ]
+  [ OutputTargetColName ('<i>output_target_column</i>') ]
+  [ OutputSourceColName ('<i>output_source_column</i>') ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="jgi1507318550548"> </a>
+	  <h2>LevenshteinDistance Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumn</dt>
+      <dd>Specify the name of the input column that contains the target text.</dd>
+      <dt>SourceColumns</dt>
+      <dd>Specify the names of the input columns that contain the source text.</dd>
+      <dt>LevenshteinThreshold</dt>
+      <dd>[Optional] Specify whether to return the Levenshtein distance for a source-target pair. The <i>threshold</i> must a positive integer. The function returns the Levenshtein distance for a pair if it is less than or equal to <i>threshold</i>; otherwise, the function returns -1.</dd>
+      <dd>Default behavior: The function returns the Levenshtein distance of every pair.</dd>
+      <dt>OutputDistanceColName</dt>
+      <dd>[Optional] Specify the name of the output column that contains the Levenshtein distance for a source-target pair.</dd>
+      <dd>Default: 'distance'</dd>
+      <dt>OutputTargetColName</dt>
+      <dd>[Optional] Specify the name of the output column that contains the compared target text.</dd>
+      <dd>Default: 'target'</dd>
+      <dt>OutputSourceColName</dt>
+      <dd>[Optional] Specify the name of the output column that contains the compared source text.</dd>
+      <dd>Default: 'source'</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the input columns to copy to the output table.</dd>
+   </div>
+
+
+	
+   <a name="uzv1507318643048"> </a>
+   <h2>LevenshteinDistance Input</h2>
+   <a name="section_gfx_s3c_ycb"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>source_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CHARACTER or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Source text.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CHARACTER or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Target text.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="imb1507318713267"> </a>
+   <h2>LevenshteinDistance Output</h2>
+   <a name="section_bwb_r3c_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>output_distance_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Levenshtein distance of the source-target pair.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>output_target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Compared target text.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>output_source_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Compared source text.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="eap1510778841585"> </a>
+   <h2>LevenshteinDistance Example</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">The example uses the function to find differences in genome sequences.</p>
+
+   <a name="section_fvb_btf_pdb"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">These abbreviations apply to row 4 of the input table, levendist_input:</p>
+   <a name="table_s4q_lq1_j2b"> </a>
+   <table class="introtable">
+      <a name="table_s4q_lq1_j2b"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Abbreviation</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Meaning</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">A</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Adenine</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">C</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Cytosine</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">G</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Guanine</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">T</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Thymine</div>
+         </td>
+      </tr>
+   </table>
+
+   <pre>
+      <tt>
+ id |   src_text1    |   src_text2    |    tar_text    
+----+----------------+----------------+----------------
+  2 | hone           | fone           | phone
+  3 | acqiese        | acquire        | acquiesce
+  4 | aaaacccccgggga | cccgggaaccaacc | ccagggaaacccac
+  5 | alice          | allen          | allies
+  6 | angela         | angle          | angels
+  7 | senter         | center         | centre
+  8 | chef           | cheap          | chief
+  9 | circus         | circle         | circuit
+ 10 | debt           | debut          | debris
+ 11 | deal           | dell           | lead
+ 12 | bare           | bear           | bear
+(11 rows)
+</tt>
+   </pre>
+   <a name="section_ihl_btf_pdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM LevenshteinDistance (
+  ON levendist_input
+  USING
+  SourceColumns ('src_text1', 'src_text2')
+  TargetColumn ('tar_text')
+  LevenshteinThreshold (10)
+  Accumulate ('id')
+) AS dt ORDER BY id, source;</tt>
+   </pre>
+   <a name="section_fpv_btf_pdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ id target         source         distance 
+ -- -------------- -------------- -------- 
+  2 phone          fone                  2
+  2 phone          hone                  1
+  3 acquiesce      acqiese               2
+  3 acquiesce      acquire               3
+  4 ccagggaaacccac aaaacccccgggga       -1
+  4 ccagggaaacccac cccgggaaccaacc        4
+  5 allies         alice                 3
+  5 allies         allen                 2
+  6 angels         angela                1
+  6 angels         angle                 2
+  7 centre         center                2
+  7 centre         senter                3
+  8 chief          cheap                 3
+  8 chief          chef                  1
+  9 circuit        circle                3
+  9 circuit        circus                2
+ 10 debris         debt                  3
+ 10 debris         debut                 3
+ 11 lead           deal                  2
+ 11 lead           dell                  3
+ 12 bear           bare                  2
+ 12 bear           bear                  0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="gyt1506528434998"> </a>
+	  <h1>IFFT</h1>
+
+	  <p style="line-height: 1em;">The IFFT function uses an inverse Fast Fourier Transform (IFFT) algorithm (also called a Fourier synthesis algorithm) to reverse the Fast Fourier Transform (FFT) performed by the FFT function; that is, the IFFT function takes a frequency domain representation and combines the contributions of all the different frequencies to recover the original signal. A signal can be either real or complex, and can have one, two, or three dimensions. If the signal length is not a power of two, the function either pads or truncates it to the closest power of two.</p>
+
+   <a name="gos1506528516544"> </a>
+	  <h2>IFFT Syntax</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Version 1.1</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM IFFT (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable PARTITION BY <i>key</i> ORDER BY <i>time_column</i>
+  USING
+  TargetColumns ({ '<i>target_column</i>' | <i>target_column_range</i> }[,...])
+  [ Dimensions (<i>dimensions</i>) ]
+  [ MaxSignalLength(<i>max_signal_length</i>) ]
+  [ OutputPolarCoordinates ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ InputPolarCoordinates ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ PadSignal ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ RealValuedSignal ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+
+	
+   <a name="pmo1506528582443"> </a>
+	  <h2>IFFT Syntax Elements</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumns</dt>
+      <dd>Specify the names of one to 16 InputTable columns that contain the signal values on which to perform IFFT.</dd>
+      <dt>Dimensions</dt>
+      <dd>[Optional] Specify the number of dimensions in the signal. The parameter <i>dimensions</i> must be the INTEGER value 1, 2, or 3. (A time series has one dimension; an image has two or three.)</dd>
+      <dd>Default: 1</dd>
+      <dt>MaxSignalLength</dt>
+      <dd>[Optional] Specify the maximum signal length. The parameter <i>FFT_length</i> must be an INTEGER. If the signal length exceeds <i>FFT_length</i>, the function truncates it to <i>FFT_length</i>.<p>
+            <b>Note:</b>  In a signal with more than one dimension, each dimension must have the same length.</p>
+      </dd>
+      <dd>Default: 2<sup>24</sup>
+      </dd>
+      <dt>OutputPolarCoordinates</dt>
+      <dd>[Optional] Specify whether to output polar coordinates—(<i>magnitude</i>, <i>phase</i>).</dd>
+      <dd>Default: 'false'</dd>
+      <dt>InputPolarCoordinates</dt>
+      <dd>[Optional] Relevant only if RealValuedSignal is 'true'. Specify whether to read complex numbers as polar coordinates—(<i>magnitude</i>, <i>phase</i>).</dd>
+      <dd>Default: 'false'</dd>
+      <dt>PadSignal</dt>
+      <dd>[Optional] Specify whether to pad the input signal with zeros to round up to the closest power of two. If you specify 'false', the function truncates the input signal and rounds down to the closest power of 2<sup>
+            <i>dimensions</i>
+         </sup> that is less than the input signal.</dd>
+      <dd>Default: 'true'</dd>
+      <dt>RealValuedSignal</dt>
+      <dd>[Optional] Specify whether the value columns contain DOUBLE PRECISION values. If you specify 'false', the function interprets the values as complex numbers; therefore, they must be multiples of two.</dd>
+      <dd>Default: 'true'</dd>
+   </div>
+
+
+   <a name="rms1506528634653"> </a>
+	  <h2>IFFT Input</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>InputTable Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Time series identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>time_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NUMERIC</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Time axis of data. Repeatable results are ensured only if the values in this column are unique within each partition.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">real_value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with OutputPolarCoordinates ('false'), the default.] Real part of data on which to perform IFFT.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">imag_value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with OutputPolarCoordinates ('false'), the default.] Imaginary part of data on which to perform IFFT.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">mag_value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with OutputPolarCoordinates ('true').] Magnitude of data on which to perform IFFT.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">arg_value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with OutputPolarCoordinates ('true').] Syntax element of data on which to perform IFFT.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+	
+   <a name="rlb1506528691048"> </a>
+	  <h2>IFFT Output</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Time series identifiers.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">timestep</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column for ordering data. Not necessarily the same as InputTable <i>time_column</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>col</i>_real_value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with OutputPolarCoordinates ('false'), the default.] Real part of transformed data in column <i>col</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>col</i>_imag_value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with OutputPolarCoordinates ('false'), the default.] Imaginary part of transformed data in column <i>col</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>col</i>_mag_value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with OutputPolarCoordinates ('true').] Magnitude of transformed data in column <i>col</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>col</i>_arg_value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with OutputPolarCoordinates ('true').] Syntax element of transformed data in column <i>col</i>.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+	
+   <a name="ksw1510766372202"> </a>
+   <h2>IFFT Examples</h2>
+   <a name="moi1506528763718"> </a>
+	  <h3>IFFT Example: 1D Signal</h3>
+
+	
+		<a name="section_N10019_N10016_N10001"> </a>
+   <p style="line-height: 1em;">In this example, the signal is one-dimensional (1D).</p>
+
+   <a name="section_wzj_1hw_ldb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: fft_output1, output by FFT Example: 1D Signal</li>
+   </ul>
+
+   <a name="section_obt_1hw_ldb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE ifft_output_table1 AS (
+  SELECT * FROM IFFT (
+    ON fft_output1 AS InputTable PARTITION BY id_0 ORDER BY timestep
+    USING
+      TargetColumns ('real_value1', 'imag_value1')
+      Dimensions (1)
+      RealValuedSignal ('false')
+  ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_xvc_bhw_ldb"> </a>
+   <h4>Output</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ifft_output_table1;</tt>
+   </pre>
+   <pre>
+      <tt>
+ id_0 timestep real_real_value1 imag_real_value1       
+ ---- -------- ---------------- ---------------------- 
+    3        3              6.0                    0.0
+    3        2              5.0  6.123233995736766E-17
+    3        4              7.0 -6.123233995736766E-17
+    3        1              4.0                    0.0
+    1        1              1.0                    0.0
+    2        2              3.0                    0.0
+    2        1              2.0                    0.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="eab1506528945503"> </a>
+	  <h3>IFFT Example: 2D Signal</h3>
+
+	
+		<a name="section_N10019_N10016_N10001"> </a>
+   <p style="line-height: 1em;">In this example, the signal is two-dimensional (2D).</p>
+
+   <a name="section_wzj_1hw_ldb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: fft_output2, output by FFT Example: 2D Signal</li>
+   </ul>
+
+   <a name="section_obt_1hw_ldb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE ifft_output_table2 AS (
+  SELECT * FROM IFFT (
+    ON fft_output2 AS InputTable PARTITION BY id_0 ORDER BY timestep
+    USING
+    TargetColumns ('real_value1', 'imag_value1')
+    Dimensions (2)
+    RealValuedSignal ('false')
+  ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_xvc_bhw_ldb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ifft_output_table2;</tt>
+   </pre>
+   <pre>
+      <tt>
+ id_0 timestep real_real_value1 imag_real_value1 
+ ---- -------- ---------------- ---------------- 
+    1        3              3.0              0.0
+    1        4              4.0              0.0
+    1        2              2.0              0.0
+    1        1              1.0              0.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="eka1506529190721"> </a>
+	  <h3>IFFT Example: 3D Signal</h3>
+
+	
+		<a name="section_N10019_N10016_N10001"> </a>
+   <p style="line-height: 1em;">In this example, the signal is one-dimensional (3D).</p>
+
+   <a name="section_wzj_1hw_ldb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: fft_output3, output by FFT Example: 3D Signal</li>
+   </ul>
+
+   <a name="section_obt_1hw_ldb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE ifft_output_table3 AS (
+  SELECT * FROM IFFT (
+    ON fft_output3 AS inputtable PARTITION BY id_0 ORDER BY timestep
+    USING
+    TargetColumns ('real_value1', 'imag_value1')
+    Dimensions (3)
+    RealValuedSignal ('false')
+  ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_xvc_bhw_ldb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ifft_output_table3;</tt>
+   </pre>
+   <pre>
+      <tt>
+ id_0 timestep real_real_value1 imag_real_value1 
+ ---- -------- ---------------- ---------------- 
+    1        3              3.0              0.0
+    1        5              5.0              0.0
+    1        6              6.0              0.0
+    1        7              7.0              0.0
+    1        8              8.0              0.0
+    1        4              4.0              0.0
+    1        2              2.0              0.0
+    1        1              1.0              0.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

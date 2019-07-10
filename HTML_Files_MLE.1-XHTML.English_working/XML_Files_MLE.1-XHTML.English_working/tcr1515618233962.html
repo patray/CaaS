@@ -1,0 +1,500 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="copyright" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.rights.owner" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="RandomizedPCA" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="tcr1515618233962" />
+<meta name="DC.Language" content="en-us" />
+
+<link rel="stylesheet" type="text/css" href="css/normal_styles.css" />
+<title>RandomizedPCA</title>
+</head>
+<body>
+<div class="nested0" aria-labelledby="ariaid-title1" topicindex="1" topicid="tcr1515618233962" id="tcr1515618233962">
+	<h1 class="title topictitle1" id="ariaid-title1">RandomizedPCA</h1>
+
+	<div class="body conbody">
+		<p class="p">The RandomizedPCA function uses a randomized algorithm to identify the principal components of an input table in sparse format.</p>
+
+	</div>
+
+<div class="topic reference nested1" aria-labelledby="ariaid-title2" topicindex="2" topicid="gdh1515618237331" xml:lang="en-us" lang="en-us" id="gdh1515618237331">
+	<h2 class="title topictitle2" id="ariaid-title2">RandomizedPCA Syntax</h2>
+
+	<div class="body refbody">
+		<div class="section" id="gdh1515618237331__section_N10011_N1000E_N10001"><h3 class="title sectiontitle">Version 1.0</h3><pre class="pre codeblock"><code>SELECT * FROM RandomizedPCA (
+  <span class="ph">ON { <var class="keyword varname">table</var> | <var class="keyword varname">view</var> | (<var class="keyword varname">query</var>) }</span> AS InputTable
+  [ OUT TABLE MeanTable ('<var class="keyword varname">mean_table</var>') ]
+  USING
+  [ TargetColumns ({ '<var class="keyword varname">target_column</var>' | <var class="keyword varname">target_column_range</var> }[,...]) ]
+  [ TargetRank ('<var class="keyword varname">target_rank</var>') ]
+  [ OverSamples ('<var class="keyword varname">oversamples</var>') ]
+  [ PowerIterationNum ('<var class="keyword varname">power_iterations</var>') ]
+  RowIDColumn ('<var class="keyword varname">row_id_column</var>')
+  ColumnIDColumn ('<var class="keyword varname">column_id_column</var>')
+  ValueColumn ('<var class="keyword varname">value_column</var>')
+  [ NullHandling (<span class="keyword">{'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}</span>) ]
+  [ ZerosPadding (<span class="keyword">{'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}</span>) ]
+  [ Transpose (<span class="keyword">{'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}</span>) ]
+  [ Seed ('<var class="keyword varname">seed</var>') ]
+) AS <var class="keyword varname">alias</var> ORDER BY component_rank;
+</code></pre></div>
+
+	</div>
+<div class="related-links">
+<div class="linklistheader">Related Information</div>
+<ul class="linklist linklist relinfo">
+<div class="linklistmember"><a class="link" href="ndv1557782188375.html" title="See the syntax details for Machine Learning Engine analytic functions with syntax elements that specify ( {'column' | column_range }[,...] ).">Column Specification Syntax Elements</a></div></ul>
+</div>
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title3" topicindex="3" topicid="wwb1515618235096" xml:lang="en-us" lang="en-us" id="wwb1515618235096">
+	<h2 class="title topictitle2" id="ariaid-title3">RandomizedPCA Arguments</h2>
+
+	<div class="body refbody">
+		<div class="section" id="wwb1515618235096__section_N10011_N1000E_N10001"><dl class="dl parml"><dt class="dt pt dlterm">TargetColumns</dt>
+<dd class="dd pd">[Optional] Specify the columns that contain the attributes to transform.</dd>
+<dd class="dd pd ddexpand">Default behavior: The function transforms all attributes.</dd>
+<dt class="dt pt dlterm">TargetRank</dt>
+<dd class="dd pd">[Optional] Specify the approximate rank of the input matrix (the number of principal components to extract). The <var class="keyword varname">target_rank</var> must be in the range [1, 1600].</dd>
+<dd class="dd pd ddexpand">Default: The smaller of the number of input table rows and the number of input table columns.</dd>
+<dt class="dt pt dlterm">OverSamples</dt>
+<dd class="dd pd">[Optional] Specify the number of "extra" samples that the algorithm uses. The algorithm is initialized with <var class="keyword varname">target_rank</var> + <var class="keyword varname">oversamples</var> random vectors. The <var class="keyword varname">oversamples</var> must be in the range [0, 50].</dd>
+<dd class="dd pd ddexpand">Default: 10</dd>
+<dt class="dt pt dlterm">PowerIterationNum</dt>
+<dd class="dd pd">[Optional] Specify the number of power iterations to use to get an approximate basis for the input matrix. The <var class="keyword varname">power_iterations</var> must be in the range [0, 10].</dd>
+<dd class="dd pd ddexpand">Default: 0</dd>
+<dt class="dt pt dlterm">RowIDColumn</dt>
+<dd class="dd pd">Specify the name of the input table column containing the observation identifiers (which corresponds to the row index for data in dense format).</dd>
+<dt class="dt pt dlterm">ColumnIDColumn</dt>
+<dd class="dd pd">Specify the name of the input table column containing the attributes of the observations (which corresponds to the column index for data in dense format).</dd>
+<dt class="dt pt dlterm">ValueColumn</dt>
+<dd class="dd pd">Specify the name of the input table column containing the attribute values.</dd>
+<dt class="dt pt dlterm">NullHandling</dt>
+<dd class="dd pd">[Optional] Specify whether to handle NULL values in the input table as specified by ZerosPadding. If NullHandling is 'false', the function reports an error if the input table has any NULL values.</dd>
+<dd class="dd pd ddexpand">Default: 'false'</dd>
+<dt class="dt pt dlterm">ZerosPadding</dt>
+<dd class="dd pd">[Optional] Ignored if NullHandling is 'false'. Specify whether to replace each NULL value in the input table with zero. If NullHandling is 'true' and ZerosPadding is 'false', the function replaces each NULL value with the mean value of the attribute.</dd>
+<dd class="dd pd ddexpand">Default: 'false'</dd>
+<dt class="dt pt dlterm">Transpose</dt>
+<dd class="dd pd">[Optional] Specify whether to transpose the input matrix. Consider specifying 'true' if there are more than one million observations or if memory is limited (see <a class="xref" href="tcr1515618233962.html#equ1517949828621" title="">RandomizedPCA Troubleshooting</a>).</dd>
+<dd class="dd pd ddexpand">Default: 'false'</dd>
+<dt class="dt pt dlterm">Seed</dt>
+<dd class="dd pd">[Optional] Specify the random seed for generating the random matrix, and for repeatable results. The <var class="keyword varname">seed</var> must be a LONG value.</dd>
+<dd class="dd pd ddexpand">Default: 0</dd>
+</dl>
+</div>
+
+	</div>
+
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title4" topicindex="4" topicid="ruz1515618236196" xml:lang="en-us" lang="en-us" id="ruz1515618236196">
+	<h2 class="title topictitle2" id="ariaid-title4">RandomizedPCA Input</h2>
+
+	<div class="body refbody">
+		<div class="section" id="ruz1515618236196__section_N10011_N1000E_N10001"><h3 class="title sectiontitle">InputTable Schema</h3><p class="p">The input table has the data set whose principal components (eigenvectors) are to be returned.</p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="ruz1515618236196__table_cbq_vjz_tcb" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d178768e262">Column</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d178768e264">Data Type</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d178768e266">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e262 "><var class="keyword varname">row_id_column</var></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e264 ">INTEGER</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e266 ">Observation identifier. Observation identifiers must be consecutive integers starting with zero; for example: 0, 1, 2, ...</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e262 "><var class="keyword varname">column_id_column</var></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e264 ">INTEGER</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e266 ">Observation attribute.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e262 "><var class="keyword varname">value_column</var></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e264 ">DOUBLE PRECISION</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e266 ">Attribute value.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+	</div>
+
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title5" topicindex="5" topicid="jiw1515618236773" xml:lang="en-us" lang="en-us" id="jiw1515618236773">
+	<h2 class="title topictitle2" id="ariaid-title5">RandomizedPCA Output</h2>
+
+	<div class="body refbody">
+		<div class="section" id="jiw1515618236773__section_N10011_N1000E_N10001"><p class="p">Both output tables are required input for the RandomizedPCATransform function.</p>
+</div>
+<div class="section" id="jiw1515618236773__section_dnl_jnw_xcb"><h3 class="title sectiontitle">Output Table Schema</h3><p class="p">The function displays this table, but does not save it to the database. If you want to input this table to RandomizedPCATransform, create a database table, as in the input section of <a class="xref" href="tcr1515618233962.html#hio1515618235648" title="">RandomizedPCA Example</a>.</p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="jiw1515618236773__table_y42_5lz_tcb" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:20%" /><col style="width:20%" /><col style="width:60%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d178768e327">Column</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d178768e329">Data Type</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d178768e331">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e327 ">component_rank</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e329 ">INTEGER</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e331 ">Rank of principal component. Components are ranked in descending order of variance.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e327 ">attribute</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e329 ">VARCHAR</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e331 ">Attribute identifier, one of the following:<div class="p">
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="jiw1515618236773__table_lsb_ykj_cdb" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:50%" /><col style="width:50%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d178768e355">Identifier</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d178768e357">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e355 ">dimension_<var class="keyword varname">i</var></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e357 "><p class="p">Values of  <var class="keyword varname">i</var>th dimension of data set.</p>
+</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e355 "><var class="keyword varname">var</var></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e357 ">Variance of principal component.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e355 "><var class="keyword varname">var_proportion</var></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e357 ">Proportion of variance of principal component.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e355 "><var class="keyword varname">cumulative_var_proportion</var></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e357 ">Cumulative proportion of variance of principal component.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e327 ">value_col</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e329 ">DOUBLE PRECISION</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e331 ">Attribute value.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="jiw1515618236773__section_rkf_4nw_xcb"><h3 class="title sectiontitle">MeanTable Schema</h3><p class="p">The function saves this table to <var class="keyword varname">mean_table</var>, whose default value is MeanValuesTable in the current schema.</p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="jiw1515618236773__table_gdy_wlz_tcb" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d178768e411">Column</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d178768e413">Data Type</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d178768e415">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e411 "><var class="keyword varname">column_id_column</var></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e413 ">VARCHAR</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e415 ">Observation attribute.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e411 ">mean</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e413 ">DOUBLE PRECISION</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e415 ">Mean value of column.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+	</div>
+
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title6" topicindex="6" topicid="hio1515618235648" xml:lang="en-us" lang="en-us" id="hio1515618235648">
+	<h2 class="title topictitle2" id="ariaid-title6">RandomizedPCA Example</h2>
+<div class="body refbody"><div class="section" id="hio1515618235648__section_xwc_x4g_n2b"><h3 class="title sectiontitle">Input</h3><p class="p">The input table for this example, rpca_input, is a reformatted version of the table pca_scaled, from <a class="xref" href="cjv1558122294011.html#cpt1507736164224" title="">PCA Example</a>.</p>
+<p class="p">Reformatting used these steps:</p>
+<ol class="ol" id="hio1515618235648__ol_kbs_gp2_5cb"><li class="li">Apply the Unpivoting function to pca_scaled to create the table pca_scaled_unpivot:<pre class="pre codeblock"><code>CREATE MULTISET TABLE pca_scaled_unpivot AS (
+  SELECT * FROM Unpivoting (
+    ON pca_scaled
+    USING
+    TargetColumns ('age','bmi','bloodpressure','glucose','strokes','cigarettes','insulin','hdl')
+    AttributeColumn ('attribute')
+    ValueColumn ('value_col')
+    InputTypes ('false')
+    Accumulate ('pid')
+  ) AS dt
+) WITH DATA;
+</code></pre></li>
+<li class="li">Change the values in the column pid to start with 0 instead of 1:<pre class="pre codeblock"><code>UPDATE pca_scaled_unpivot
+  SET pid = pid - 1;
+</code></pre></li>
+<li class="li">Convert the attributes to integers:<pre class="pre codeblock"><code>UPDATE pca_scaled_unpivot
+  SET attribute = '0'
+  WHERE attribute = 'age';
+UPDATE pca_scaled_unpivot
+  SET attribute = '1'
+  WHERE attribute = 'bmi';
+UPDATE pca_scaled_unpivot
+  SET attribute = '2'
+  WHERE attribute = 'bloodpressure';
+UPDATE pca_scaled_unpivot
+  SET attribute = '3'
+  WHERE attribute = 'glucose';
+UPDATE pca_scaled_unpivot
+  SET attribute = '4'
+  WHERE attribute = 'strokes';
+UPDATE pca_scaled_unpivot
+  SET attribute = '5'
+  WHERE attribute = 'cigarettes';
+UPDATE pca_scaled_unpivot
+  SET attribute = '6'
+  WHERE attribute = 'insulin';
+UPDATE pca_scaled_unpivot
+  SET attribute = '7'
+  WHERE attribute = 'hdl';
+</code></pre></li>
+<li class="li">Create rpca_input:<pre class="pre codeblock"><code>CREATE MULTISET TABLE rpca_input AS (
+   SELECT pid,
+          CAST (attribute AS INTEGER) AS attribute,
+          CAST (value_col AS numeric) AS value_col
+   FROM pca_scaled_unpivot
+) WITH DATA;</code></pre></li>
+</ol>
+<p class="p">This query returns the following table:</p>
+<pre class="pre codeblock"><code>SELECT * FROM rpca_input ORDER BY pid, attribute;</code></pre>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="hio1515618235648__table_mvf_dpg_n2b" class="table" frame="border" border="1" rules="all"><div class="caption"><span class="tablecap">rpca_input</span></div><colgroup><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d178768e486">pid</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d178768e488">attribute</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d178768e490">value_col</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e486 ">0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e488 ">0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e490 ">1.0694163902193035</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e486 ">0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e488 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e490 ">0.18155283308068546</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e486 ">0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e488 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e490 ">0.20318081294278664</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e486 ">0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e488 ">3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e490 ">0.490608219974121</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e486 ">0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e488 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e490 ">0.24304199773308727</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e486 ">0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e488 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e490 ">0.9181038062833852</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e486 ">0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e488 ">6</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e490 ">-0.5467919054079076</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e486 ">0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e488 ">7</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e490 ">0.2909658083842115</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e486 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e488 ">0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e490 ">-0.6070614492334003</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e486 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e488 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e490 ">-0.595262806362141</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e486 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e488 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e490 ">-0.03125858660658243</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e486 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e488 ">3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e490 ">-1.3105758044063935</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e486 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e488 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e490 ">-1.1378784439321814</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e486 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e488 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e490 ">0.5822121698382442</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e486 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e488 ">6</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e490 ">-0.5467919054079076</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e486 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e488 ">7</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e490 ">-0.3026664110767116</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e486 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e488 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e490 ">...</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="hio1515618235648__section_gxq_x4g_n2b"><h3 class="title sectiontitle">SQL Call</h3><pre class="pre codeblock"><code>DROP TABLE meanvaluestable;
+
+CREATE MULTISET TABLE rpca_out AS (
+  SELECT * FROM RandomizedPCA (
+    ON rpca_input AS InputTable
+    USING
+    RowIdColumn ('pid')
+    ColumnIdColumn ('attribute')
+    ValueColumn ('value_col') 
+  ) AS dt
+) WITH DATA;
+</code></pre></div>
+<div class="section" id="hio1515618235648__section_ss1_y4g_n2b"><h3 class="title sectiontitle">Output</h3><p class="p">This query returns the following table:</p>
+<pre class="pre codeblock"><code>SELECT * FROM rpca_out ORDER BY 1,2;</code></pre>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="hio1515618235648__table_q4k_ppg_n2b" class="table" frame="border" border="1" rules="all"><div class="caption"><span class="tablecap">rpca_out</span></div><colgroup><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d178768e634">component_rank</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d178768e636">attribute</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d178768e638">value_col</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">-0.082098</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">0.387006</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">-0.0934565</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">0.0421627</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">-0.553172</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">6</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">0.55565</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">7</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">0.436851</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">0.165499</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">cumulative_var_proportion</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">0.282176</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">var</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">2.16711</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">var_proportion</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">0.282176</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">-0.602873</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">0.178612</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">-0.319031</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">-0.57002</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">-0.118936</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">6</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">-0.00519959</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">7</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">-0.394365</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">-0.090786</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">cumulative_var_proportion</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">0.546281</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">var</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">2.02833</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">var_proportion</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">0.264105</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e634 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e636 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e638 ">...</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">This query returns the following table:</p>
+<pre class="pre codeblock"><code>SELECT * FROM meanvaluestable;</code></pre>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="hio1515618235648__table_s1y_zpg_n2b" class="table" frame="border" border="1" rules="all"><div class="caption"><span class="tablecap">meanvaluestable</span></div><colgroup><col style="width:50%" /><col style="width:50%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d178768e816">attribute</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d178768e818">mean</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e816 ">6</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e818 ">-5e-18</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e816 ">0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e818 ">-2.256e-16</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e816 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e818 ">1.352e-16</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e816 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e818 ">4.4e-18</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e816 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e818 ">-6.08e-17</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e816 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e818 ">1.112e-16</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e816 ">3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e818 ">-9.68e-17</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e816 ">7</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d178768e818 ">-1.292e-17</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title7" topicindex="7" topicid="equ1517949828621" xml:lang="en-us" lang="en-us" id="equ1517949828621">
+	<h2 class="title topictitle2" id="ariaid-title7">RandomizedPCA Troubleshooting</h2>
+
+	<div class="body refbody">
+		<div class="section" id="equ1517949828621__section_N10011_N1000E_N10001"><h3 class="title sectiontitle">Problem: Memory limitations</h3>
+			<p class="p">The memory required by the algorithm is approximately <var class="keyword varname">n</var> * <var class="keyword varname">k</var>, where <var class="keyword varname">n</var> is the number of observations in the input table, and <var class="keyword varname">k</var> is the target rank.</p>
+
+		</div>
+<div class="section" id="equ1517949828621__section_ols_4w2_5cb"><h3 class="title sectiontitle">Workaround</h3><p class="p">Adjust these arguments as follows:</p>
+<ul class="ul" id="equ1517949828621__ul_r24_hy2_5cb"><li class="li">TargetRank: Reduce <var class="keyword varname">target_rank</var>.</li>
+<li class="li">Transpose: Specify 'true'.</li>
+</ul>
+</div>
+
+	</div>
+
+</div>
+</div>
+</body>
+</html>

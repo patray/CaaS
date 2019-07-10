@@ -1,0 +1,1218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="upu1507838518368"> </a>
+	  <h1>NeuralNet</h1>
+
+	
+		<p style="line-height: 1em;">The NeuralNet function uses backpropagation to train neural networks. You must provide input data and argument settings for training the networks; the function creates the fitted weights of the neural network. The NeuralNet function is optimized for performance on data sets with millions of rows.</p>
+
+	
+   <a name="fhf1507839003989"> </a>
+   <h2>NeuralNet Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.2</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NeuralNet (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  [ ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS WeightTable ]
+  OUT TABLE OutputTable (<i>output_table</i>)
+  USING
+  InputColumns ('<i>input_column</i>' [,...] )
+  ResponseColumns ('<i>response_column</i>' [,...] )
+  [ GroupByColumns ('<i>group_column</i>' [,...] ) ]
+  [ HiddenLayers ('<i>hidden_layers</i>' [,...] ) ]
+  [ "Threshold" ('<i>threshold</i>') ]
+  [ MaxIterNum ('<i>max_iterations</i>') ]
+  [ LearningRate ('<i>double</i>') ]
+  [ ActivationFunction ({ 'logistic' | 'tanh' }) ]
+  [ ErrorFunction ({ 'sse' | 'ce' }) ]
+  [ Algorithms ('<i>backprop</i>') ]
+  [ LinearOutput ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ Seed ('<i>seed</i>') ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="ezu1507839102976"> </a>
+	  <h2>NeuralNet Arguments</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputTable</dt>
+      <dd>Specify the table to which to output the trained network weight data.</dd>
+      <dt>InputColumns</dt>
+      <dd>Specify the name of the columns of the InputTable that contains the numerical predictor variables (x1, x2, x3, and so on).</dd>
+      <dt>ResponseColumns</dt>
+      <dd>Specify the names of the input table columns that contain the numerical dependent variables (y1, y2, y3, and so on). Every <i>response_column</i> has an output node in the neural network.</dd>
+      <dt>GroupByColumns</dt>
+      <dd>[Optional] Specify the weight table columns in which to output different neural networks for different groups.</dd>
+      <dt>HiddenLayers</dt>
+      <dd>[Optional] Specify the number of hidden neurons in each layer, from left to right. The <i>hidden_layers</i> must be a nonnegative INTEGER.</dd>
+      <dd>Default: 1 layer, 1 neuron. For example, HiddenLayers('5','5') produces a 3-layer network with 5 neurons in each hidden layer, while HiddenLayers('3') produces the network shown in Neural Networks.</dd>
+      <dt>Threshold</dt>
+      <dd>[Optional] Specify the threshold for the partial derivatives of the error function as stopping criteria. The <i>threshold</i> must be a DOUBLE value.</dd>
+      <dd>Default: 0.01</dd>
+      <dt>MaxIterNum</dt>
+      <dd>[Optional] Specify the maximum number of iterations for the training of the neural network. The <i>max_iterations</i> must be an INTEGER value.</dd>
+      <dd>Default: 1</dd>
+      <dt>LearningRate</dt>
+      <dd>[Optional] Specify the learning rate used by traditional backpropagation.</dd>
+      <dd>Default: 0.001</dd>
+      <dt>ActivationFunction</dt>
+      <dd>[Optional] Specify the name of the differentiable function that the function applies to the result of the cross-product of the neurons and the weights:<a name="table_qfp_4vz_fdb"> </a>
+         <table class="introtable">
+            <a name="table_qfp_4vz_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'logistic'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Logistic.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'tanh'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Hyperbolic tangent.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>ErrorFunction</dt>
+      <dd>[Optional] Specify the name of the differentiable function with which the function calculates the error:<a name="table_tjl_5vz_fdb"> </a>
+         <table class="introtable">
+            <a name="table_tjl_5vz_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'sse'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Sum of squared errors.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'ce'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Cross-entropy.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>Algorithms</dt>
+      <dd>[Optional] Specify the algorithm type that the function uses to calculate the neural network, 'backprop'.</dd>
+      <dt>LinearOutput</dt>
+      <dd>[Optional] Specify whether to apply the ActivationFunction to the output neurons.</dd>
+      <dd>Default: 'true'</dd>
+      <dt>Seed</dt>
+      <dd>[Optional] Specify the random seed the algorithm uses for repeatable results. The <i>seed</i> must be a LONG value.</dd>
+   </div>
+
+
+	
+   <a name="znw1507839206258"> </a>
+   <h2>NeuralNet Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>InputTable Schema</h3>
+   <a name="table_urg_5pr_rx"> </a>
+   <table class="introtable">
+      <a name="table_urg_5pr_rx"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>input_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any numeric type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>input_column</i>.] Predictor variable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>response_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any numeric type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>response_column</i>.] Response variable.</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">In both <i>input_column</i> and <i>response_column</i>, encode categorical variables as one column for each level. For example, suppose the column color shows color observations as 1 = red, 2 = blue, and 3 = green:</p>
+   <a name="table_etm_brk_tdb"> </a>
+   <table class="introtable">
+      <a name="table_etm_brk_tdb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">color</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">In the input table, represent the preceding column as three columns:</p>
+   <a name="table_hsx_krk_tdb"> </a>
+   <table class="introtable">
+      <a name="table_hsx_krk_tdb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">color_red</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">color_blue</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">color_green</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_az1_qkr_ycb"> </a>
+   <h3>WeightTable Schema</h3>
+   <p style="line-height: 1em;">This table is optional.</p>
+   <a name="table_rk2_hqr_rx"> </a>
+   <table class="introtable">
+      <a name="table_rk2_hqr_rx"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>group_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any numeric type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>group_column</i>.] Neural network output for group.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">weight_<i>n</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each attribute.] Initial weight for attribute <i>n</i>.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="dva1507839357945"> </a>
+   <h2>NeuralNet Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Message Schema</h3>
+   <a name="table_et4_3r3_ccb"> </a>
+   <table class="introtable">
+      <a name="table_et4_3r3_ccb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">message</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Reports number of iterations, whether function converged, and reach threshold.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_jql_zkr_ycb"> </a>
+   <h3>OutputTable Schema</h3>
+   <p style="line-height: 1em;">This table has the same schema as the NeuralNet Input WeightTable. It has a row for each neural network with one column for each weight. The weight columns are labeled 0, 1, 2, and so on, and are ordered by layer, origin node, and destination node.</p>
+   <p style="line-height: 1em;">For example, in the following output table, the weight in row 0 corresponds to w<sub>101</sub> in Neural Networks, column 1 corresponds to w<sub>102</sub>, and so on, up to column 12 corresponding to w<sub>231</sub>.</p>
+   <a name="table_N10069_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10069_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Corresponding Column in <i>output_table</i>
+            </div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Weight</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Initial layer</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">From neuron</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">To neuron</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">W<sub>101</sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Input layer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">X<sub>0</sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Φ<sub>1</sub>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">W<sub>102</sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Input layer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">X<sub>0</sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Φ<sub>2</sub>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">W<sub>103</sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Input layer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">X<sub>0</sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Φ<sub>3</sub>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">W<sub>111</sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Input layer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">X<sub>1</sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Φ<sub>1</sub>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">W<sub>123</sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Input layer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">X<sub>2</sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Φ<sub>3</sub>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">W<sub>201</sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Hidden layer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Φ<sub>0</sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Output</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">W<sub>231</sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Hidden layer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Φ<sub>3</sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Output</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="yxe1510709395073"> </a>
+   <h2>NeuralNet Example: Binary Classification</h2>
+   <a name="section_rlt_342_wdb"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">The input table, breast_cancer_data, is assessment data from biopsies of 699 breast tumors. Each tumor is rated on 9 predictor variables, and is classified as either benign (class1 = 0) or malignant (class1 = 1). The nine attributes (clumpthickness, uniformityofcellsize, uniformityofcellshape, marginaladhesion, singleepithelialcell, barenuclei, blandchromatin, normalnucleoli, mitoses) are scored on a scale of 1 to 10. The table has 150 rows.</p>
+   <a name="table_v2v_w42_wdb"> </a>
+   <table class="introtable">
+      <a name="table_v2v_w42_wdb"> </a>
+      <h4 style="text-align: center;">breast_cancer_data (Columns 1-5)</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">samplecode</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">clumpthickness</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">uniformityofcellsize</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">uniformityofcellshape</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">marginaladhesion</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1000025</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1002945</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1015425</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1016277</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1017023</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1017122</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1018099</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1018561</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1033078</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1033078</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1035283</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1036172</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_ets_fp2_wdb"> </a>
+   <table class="introtable">
+      <a name="table_ets_fp2_wdb"> </a>
+      <h4 style="text-align: center;">breast_cancer_data (Columns 6-11)</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">singleepithelialcell</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">barenuclei</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">blandchromatin</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">normalnucleoli</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">mitoses</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">class1</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_pz1_l42_wdb"> </a>
+   <h3>Split Input into Training and Testing Data Sets</h3>
+   <p style="line-height: 1em;">This code divides the 150 input table rows into a training data set (70%) and a testing data set (30%). The training data set is input for the NeuralNet function.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE breast_cancer_train;
+
+CREATE MULTISET TABLE breast_cancer_train AS (
+  SELECT TOP 489 * FROM breast_cancer_data ORDER BY samplecode ASC
+) WITH DATA;
+
+SELECT * FROM breast_cancer_train ORDER BY samplecode;</tt>
+   </pre>
+   <p>
+      <b>Note:</b>  This approach works because the input table rows are in random order. If the input table rows are not in random order, do the preceding task with the Sampling or RandomSample function.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE breast_cancer_test;
+CREATE MULTISET TABLE breast_cancer_test AS (
+  SELECT TOP 210 * FROM breast_cancer_data ORDER BY samplecode DESC
+) WITH DATA;
+
+SELECT * FROM breast_cancer_train ORDER BY samplecode;</tt>
+   </pre>
+   <a name="section_mgj_j42_wdb"> </a>
+   <h3>SQL Call</h3>
+   <p style="line-height: 1em;">To generate a reliable model, the function must converge at a low threshold value. The function typically requires thousands of iterations to converge at a low threshold, which can take hours.</p>
+   <p style="line-height: 1em;">For reproducibility, train a model with MaxIterNum ('6000') and use a Seed ('100').</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NeuralNet (
+  ON breast_cancer_train AS InputTable
+  OUT TABLE OutputTable (cancer_output)
+  USING
+  InputColumns ('clumpthickness', 'uniformityofcellsize', 'uniformityofcellshape',
+                'marginaladhesion', 'singleepithelialcell', 'barenuclei',
+                'blandchromatin', 'normalnucleoli', 'mitoses')
+  ResponseColumns ('class1')
+  HiddenLayers ('10')
+  MaxIterNum ('6000')
+  "Threshold" ('1')
+  Seed ('100')
+) AS dt;</tt>
+   </pre>
+   <a name="section_cwy_j42_wdb"> </a>
+   <h3>Output</h3>
+   <a name="table_dvd_dq2_wdb"> </a>
+   <table class="introtable">
+      <a name="table_dvd_dq2_wdb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">message</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <pre>
+                  <tt>
+Run 454 Iterations.
+neural net converge
+Reach Threshold: 0.999453645290726.</tt>
+               </pre>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">The output table has one row and 111 columns.</p>
+   <a name="table_jf2_gq2_wdb"> </a>
+   <table class="introtable">
+      <a name="table_jf2_gq2_wdb"> </a>
+      <h4 style="text-align: center;">cancer_output</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">0</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">1</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">2</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">...</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">110</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0.396465220665132</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.41852994540439</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.254420438186354</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.318075009369741</div>
+         </td>
+      </tr>
+   </table>
+
+
+</t:intro>

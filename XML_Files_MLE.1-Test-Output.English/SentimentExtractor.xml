@@ -1,0 +1,1094 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="nlo1507565530849"> </a>
+	  <h1>SentimentExtractor</h1>
+
+	
+		<p style="line-height: 1em;">The SentimentExtractor function extracts the sentiment (positive, negative, or neutral) of each input document or sentence, using either a classification model output by the function SentimentTrainer or a dictionary model.</p>
+
+		<p style="line-height: 1em;">The dictionary model consists of WordNet, a lexical database of the English language, and these negation words:</p>
+
+		<ul>
+			   <li>no</li>
+
+			   <li>not</li>
+
+			   <li>neither</li>
+
+			   <li>never</li>
+
+			   <li>scarcely</li>
+
+			   <li>hardly</li>
+
+			   <li>nor</li>
+
+			   <li>little</li>
+
+			   <li>nothing</li>
+
+			   <li>seldom</li>
+
+			   <li>few</li>
+
+		</ul>
+
+		<p style="line-height: 1em;">The function handles negated sentiments as follows:</p>
+
+		<ul>
+			   <li>-1 if the sentiment is negated (for example, "I am not happy")</li>
+
+			   <li>-1 if the sentiment and a negation word are separated by one word
+				(for example, "I am not very happy")</li>
+
+			   <li>+1 if the sentiment and a negation word are separated by two or more
+				words (for example, "I am not saying I am happy")</li>
+
+		</ul>
+   <p>
+      <b>Note:</b>  SentimentExtractor uses files that are preinstalled on ML Engine. For details, see Preinstalled Files That Functions Use.</p>
+	
+   <a name="oyy1507565577032"> </a>
+   <h2>SentimentExtractor Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 3.6</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SentimentExtractor (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } [ PARTITION BY ANY ]
+  [ ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS Dict DIMENSION ]
+  USING
+  TextColumn ('<i>text_column</i>')
+  [ InputLanguage ({ 'en' | 'zh_CN' | 'zh_TW' }) ]
+  [ InputModelFile ({ 'dictionary[:<i>dict_file</i>]' | 'classification:<i>input_model_file</i>' }) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+  [ AnalysisType ({ 'document' | 'sentence' }) ]
+  [ Priority ({ 'NONE' |
+                'NEGATIVE_RECALL' |
+                'NEGATIVE_PRECISION' | 
+                'POSITIVE_RECALL' |
+                'POSITIVE_PRECISION'
+              })
+  ]
+  [ OutputType ({ 'ALL' | 'POSITIVE' | 'NEGATIVE' }) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="pgt1507565930548"> </a>
+	  <h2>SentimentExtractor Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TextColumn</dt>
+      <dd>Specify the name of the input column that contains text from which to extract sentiments.</dd>
+      <dt>InputLanguage</dt>
+      <dd>[Optional] Specify the language of the input text:<a name="d59e19"> </a>
+         <table class="introtable">
+            <a name="d59e19"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'en'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">English</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'zh_CN'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Simplified Chinese</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'zh_TW'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Traditional Chinese</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>InputModelFile</dt>
+      <dd>[Optional] Specify the model type and file. The default model type is dictionary. If you omit this syntax element or specify dictionary without <i>dict_file</i>, then you must specify a dictionary table with alias Dict. If you specify both Dict and <i>dict_file</i>, then whenever their words conflict, Dict has higher priority.<p style="line-height: 1em;">The <i>dict_file</i> must be a text file in which each line contains only a sentiment word, a space, and the opinion score of the sentiment word.</p>
+         <p style="line-height: 1em;">If you specify classification <i>input_model_file</i>, then <i>input_model_file</i> must be the name of a model file created and installed on ML Engine by the function SentimentTrainer.</p>
+      </dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the input columns to copy to the output table.</dd>
+      <dt>AnalysisType</dt>
+      <dd>[Optional] Specify the level of analysis—whether to analyze each document (the default) or each sentence.</dd>
+      <dt>Priority</dt>
+      <dd>[Optional] Specify the highest priority when returning results:<a name="table_gql_ycz_fdb"> </a>
+         <table class="introtable">
+            <a name="table_gql_ycz_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'NONE'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Give all results same priority.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'NEGATIVE_RECALL'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Give highest priority to negative results, including those with lower-confidence sentiment classifications (maximizes number of negative results returned).</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'NEGATIVE_PRECISION'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Give highest priority to negative results with high-confidence sentiment classifications.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'POSITIVE_RECALL'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Give highest priority to positive results, including those with lower-confidence sentiment classifications (maximizes number of positive results returned).</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'POSITIVE_PRECISION'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Give highest priority to positive results with high-confidence sentiment classifications.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>OutputType</dt>
+      <dd>[Optional] Specify the kind of results to return:<a name="table_ckh_hdz_fdb"> </a>
+         <table class="introtable">
+            <a name="table_ckh_hdz_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'ALL'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Return all results.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'POSITIVE'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Return only results with positive sentiments.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'NEGATIVE'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Return only results with negative sentiments.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+   </div>
+
+
+	
+   <a name="ngi1507565984697"> </a>
+   <h2>SentimentExtractor Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Input Table Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10017_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10017_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>text_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Text from which to extract sentiment.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ljw_pvc_ycb"> </a>
+   <h3>Dict Schema</h3>
+   <p style="line-height: 1em;">This table is optional. The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10061_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10061_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>sentiment_word</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">First column, containing the Sentiment word.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>opinion_score</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Second column, containing the opinion score for sentiment word.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="zwc1507566313349"> </a>
+   <h2>SentimentExtractor Output</h2>
+   <a name="section_i2t_wvc_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">out_content</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only for AnalysisType ('SENTENCE').] Sentence.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">out_polarity</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left">
+            <div style="line-height: 1em;">Depends on value of out_content:<p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <a name="table_hns_pyl_ddb"> </a>
+                  <table class="introtable">
+                     <a name="table_hns_pyl_ddb"> </a>
+                     <tr>
+                        <th align="left">
+                           <div style="line-height: 1em;">out_content</div>
+                        </th>
+                        <th align="left">
+                           <div style="line-height: 1em;">out_polarity</div>
+                        </th>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">NULL</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Nothing</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">Empty string</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">UNKNOWN</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">Any other value</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">POS (positive), NEG (negative), or NEU (neutral)</div>
+                        </td>
+                     </tr>
+                  </table>
+
+               </p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">out_strength</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left">
+            <div style="line-height: 1em;">Strength of output_polarity:<p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <a name="table_zjd_3t3_v1b"> </a>
+                  <table class="introtable">
+                     <a name="table_zjd_3t3_v1b"> </a>
+                     <tr>
+                        <th align="left">
+                           <div style="line-height: 1em;">output_polarity</div>
+                        </th>
+                        <th align="left">
+                           <div style="line-height: 1em;">out_strength</div>
+                        </th>
+                        <th align="left">
+                           <div style="line-height: 1em;">Strength</div>
+                        </th>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">POS</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">0</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Neutral</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">NEG</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">1</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Higher than neutral</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">NEU</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">2</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Higher than 1</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">Other</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Nothing</div>
+                        </td>
+                        <td align="left"> </td>
+                     </tr>
+                  </table>
+
+               </p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">out_sentiment_words</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only when function uses dictionary model.] Sentiment words in document or sentence.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="bsf1510348215669"> </a>
+   <h2>SentimentExtractor Examples</h2>
+   <a name="fax1507566423356"> </a>
+   <h3>SentimentExtractor Examples Prerequisites</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">These files must be in the directory sentimentAnalysisModel, where they are preinstalled on ML Engine:</p>
+   <ul>
+      <li>default_sentiment_classification_model.bin</li>
+      <li>For English input text: default_sentiment_lexicon.txt</li>
+      <li>For Simplified Chinese input text: default_sentiment_lexicon_zh_cn.txt</li>
+      <li>For Traditional Chinese input text: default_sentiment_lexicon_zh_tw.txt</li>
+   </ul>
+
+   <a name="mih1507568379781"> </a>
+   <h3>SentimentExtractor Example: InputModelFile ('dictionary'), AnalysisType ('document')</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example uses the dictionary model file default_sentiment_lexicon.txt.</p>
+
+   <a name="section_ln4_2vq_t2b"> </a>
+   <h4>Input</h4>
+   <a name="table_hwb_hvq_t2b"> </a>
+   <table class="introtable">
+      <a name="table_hwb_hvq_t2b"> </a>
+      <h4 style="text-align: center;">sentiment_extract_input</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">product</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">category</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">review</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">camera</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">we primarily bought this camera for high image quality and excellent video capability without paying the price for a dslr. it has excelled in what we expected of it, and consequently represented excellent value for me. all my friends want my camera for their vacations. i would recommend this camera to anybody. definitely worth the price. plus, when you buy some accessories, it becomes even more powerful.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">office suite</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">it is the best office suite i have used to date. it is launched before office 2010 and it is ages ahead of it already. the fact that i could comfortable import xls, doc, ppt and modify them, and then export them back to the doc, xls, ppt is terrific. i needed the compatibility. it is a very intuitive suite and the drag drop functionality is terrific.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">camera</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">this is a nice camera, delivering good quality video images decent photos. light small, using easily obtainable, high quality minidv i love it. minor irritations include touchscreen based menu only digital photos can only be transferred via usb, requiring ilink and usb if you use ilink.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">gps</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">it is a fine gps. outstanding performance, works great. you can even get incredible coordinate accuracy from streets and trips to compare.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">gps</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">nice graphs and map route info. i would not run outside again without this unique gadget. great job. big display, good backlight, really watertight, training assistant. i use in trail running and it worked well through out the race.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">gps</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NEG</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">most of the complaints i have seen in here are from a lack of rtfm. i have never seen so many mistakes do to what i think has to be none update of data to the system. i wish i could make all the rating stars be empty.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">gps</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NEG</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">this machine is all screwed up. on my way home from a friends house it told me there is no possible route. i found their website support difficult to navigate. i am is so disappointed and just returned it and now looking for another one</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">camera</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NEG</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">i hate my camera, and im stuck with it. this camera sucks so bad, even the dealers on ebay have difficulty selling it. horrible indoors, does not capture fast action, screwy software, no suprise, and screwy audio/video codec that does not work with hardly any app.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">television</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NEG</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">$3k is way too much money to drop onto a piece of crap. poor customer support. after about 1 and a half years and hardly using the tv, a big yellow pixilated stain appeared. product is very inferior and subject to several lawsuits. i expressed my dissatisfaction with the situation as this is a known issue.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">camera</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NEG</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">i returned my camera to the vendor as i will not tolerate a sub standard product that is a known issue especially from vendor who will not admit that this needs to be removed from the shelf due to failing parts updated. due to the constant need for repair, i would never recommend this product.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_c4y_vll_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SentimentExtractor (
+  ON sentiment_extract_input
+  USING
+  TextColumn ('review')
+  InputModelFile ('dictionary')
+  AnalysisType ('document')
+  Accumulate ('id', 'product')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_yvk_wll_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id product      out_polarity out_strength out_sentiment_words                                                                                                                                            
+ -- ------------ ------------ ------------ -------------------------------------------------------------------------------------------------------------------------------------------------------------- 
+  1 camera       POS                     2 excellent 1, capability 1, excelled 1, excellent 1, recommend 1, worth 1, powerful 1. In total, positive score:7 negative score:0                             
+  2 office suite POS                     2 best 1, comfortable 1, terrific 1, intuitive 1, drag -1, terrific 1. In total, positive score:5 negative score:-1                                             
+  3 camera       POS                     2 nice 1, good 1, decent 1. In total, positive score:3 negative score:0                                                                                         
+  4 gps          POS                     2 fine 1, outstanding 1, works 1, great 1, incredible 1. In total, positive score:5 negative score:0                                                            
+  5 gps          POS                     2 nice 1, great 1, good 1, worked 1, well 1. In total, positive score:5 negative score:0                                                                        
+  6 gps          NEG                     2 complaints -1, lack -1, mistakes -1. In total, positive score:0 negative score:-3                                                                             
+  7 gps          NEG                     2 screwed -1, support 1, difficult -1, disapointed -1. In total, positive score:1 negative score:-3                                                             
+  8 camera       NEG                     2 hate -1, stuck -1, sucks -1, bad -1, difficulty -1, horrible -1, not fast -1, screwy -1, screwy -1, not work -1. In total, positive score:0 negative score:-10
+  9 television   NEG                     2 crap -1, poor -1, support 1, stain -1, inferior -1, issue -1. In total, positive score:1 negative score:-5                                                    
+ 10 camera       NEG                     2 issue -1, failing -1, never recommend -1. In total, positive score:0 negative score:-3</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="efd1507568677216"> </a>
+   <h3>SentimentExtractor Example: InputModelFile ('dictionary'), AnalysisType ('sentence')</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example uses the dictionary model file default_sentiment_lexicon.txt.</p>
+
+   <a name="section_pnk_4vq_t2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: sentiment_extract_input, as in SentimentExtractor Example: InputModelFile ('dictionary'), AnalysisType ('document')</li>
+   </ul>
+
+   <a name="section_c4y_vll_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SentimentExtractor (
+  ON sentiment_extract_input
+  USING
+  TextColumn ('review')
+  InputModelFile ('dictionary')
+  AnalysisType ('sentence')
+  Accumulate ('id', 'product')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_yvk_wll_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id product      out_content                                                                                                                                                                                                                                                                        out_polarity out_strength out_sentiment_words                                                                                       
+ -- ------------ ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- ------------ ------------ --------------------------------------------------------------------------------------------------------- 
+  1 camera       we primarily bought this camera for high image quality and excellent video capability without paying the price for a dslr  .it has excelled in what we expected of it , and consequently represented excellent value for me  .all my friends want my camera for their vacations  . POS                     2 excellent 1, capability 1, excelled 1, excellent 1. In total, positive score:4 negative score:0          
+  1 camera       i would recommend this camera to anybody  .definitely worth the price  .plus , when you buy some accessories , it becomes even more powerful                                                                                                                                       POS                     2 recommend 1, worth 1, powerful 1. In total, positive score:3 negative score:0                            
+  2 office suite the fact that i could comfortable import xls , doc , ppt and modify them , and then export them back to the doc , xls , ppt is terrific .                                                                                                                                          POS                     2 comfortable 1, terrific 1. In total, positive score:2 negative score:0                                   
+  2 office suite it is launched before office 2010 and it is ages ahead of it already  .                                                                                                                                                                                                            NEU                     0                                                                                                          
+  2 office suite i needed the compatibility  .it is a very intuitive suite and the drag    drop functionality is terrific .                                                                                                                                                                         POS                     2 intuitive 1, drag -1, terrific 1. In total, positive score:2 negative score:-1                           
+  2 office suite it is the best office suite i have used to date  .                                                                                                                                                                                                                                 POS                     2 best 1. In total, positive score:1 negative score:0                                                      
+  3 camera       this is a nice camera , delivering good quality video images decent photos  .                                                                                                                                                                                                      POS                     2 nice 1, good 1, decent 1. In total, positive score:3 negative score:0                                    
+  4 gps          outstanding performance ,  works great .                                                                                                                                                                                                                                           POS                     2 outstanding 1, works 1, great 1. In total, positive score:3 negative score:0                             
+  4 gps          it is a fine gps .                                                                                                                                                                                                                                                                 POS                     2 fine 1. In total, positive score:1 negative score:0                                                      
+  4 gps          you can even get incredible coordinate accuracy from streets and trips to compare .                                                                                                                                                                                                POS                     2 incredible 1. In total, positive score:1 negative score:0                                                
+  5 gps          great job.                                                                                                                                                                                                                                                                         POS                     2 great 1. In total, positive score:1 negative score:0                                                     
+  5 gps          big display , good backlight , really watertight , training assistant .i use in trail running and  it worked well through out the race                                                                                                                                             POS                     2 good 1, worked 1, well 1. In total, positive score:3 negative score:0                                    
+  5 gps          nice graphs and map route info  .i would not run outside again without this unique gadget  .                                                                                                                                                                                       POS                     2 nice 1. In total, positive score:1 negative score:0                                                      
+  6 gps          i wish i could make all the rating stars be empty .                                                                                                                                                                                                                                NEU                     0                                                                                                          
+  6 gps          i have never seen so many mistakes do to what i think has to be none update of data to the system .                                                                                                                                                                                NEG                     2 mistakes -1. In total, positive score:0 negative score:-1                                                
+  6 gps          most of the complaints i have seen in here are from a lack of rtfm.                                                                                                                                                                                                                NEG                     2 complaints -1, lack -1. In total, positive score:0 negative score:-2                                     
+  7 gps          i found their website support difficult to navigate .                                                                                                                                                                                                                              NEU                     0 support 1, difficult -1. In total, positive score:1 negative score:-1                                    
+  7 gps          i am is so disapointed and just returned it and now looking for another one                                                                                                                                                                                                        NEG                     2 disapointed -1. In total, positive score:0 negative score:-1                                             
+  7 gps          on my way home from a friends house it told me there is no possible route  .                                                                                                                                                                                                       NEU                     0                                                                                                          
+  7 gps          this machine is all screwed up  .                                                                                                                                                                                                                                                  NEG                     2 screwed -1. In total, positive score:0 negative score:-1                                                 
+  8 camera       horrible indoors , does not capture fast action, screwy software , no suprise , and screwy audio/video codec that does not work with hardly any app                                                                                                                                NEG                     2 horrible -1, not fast -1, screwy -1, screwy -1, not work -1. In total, positive score:0 negative score:-5
+  8 camera       this camera sucks so bad , even the dealers on ebay have difficulty selling it.                                                                                                                                                                                                    NEG                     2 sucks -1, bad -1, difficulty -1. In total, positive score:0 negative score:-3                            
+  8 camera       i hate my camera , and im stuck with it  .                                                                                                                                                                                                                                         NEG                     2 hate -1, stuck -1. In total, positive score:0 negative score:-2                                          
+  9 television   product is very inferior and subject to several lawsuits  .                                                                                                                                                                                                                        NEG                     2 inferior -1. In total, positive score:0 negative score:-1                                                
+  9 television   i expressed my dissatifaction with the situation as this is a known issue                                                                                                                                                                                                          NEG                     2 issue -1. In total, positive score:0 negative score:-1                                                   
+  9 television   after about 1 and a half years and hardly using the tv , a big yellow pixilated stain appeared.                                                                                                                                                                                    NEG                     2 stain -1. In total, positive score:0 negative score:-1                                                   
+  9 television   $3k is way too much money to drop onto a piece of crap .poor customer support .                                                                                                                                                                                                    NEG                     2 crap -1, poor -1, support 1. In total, positive score:1 negative score:-2                                
+ 10 camera       due to the constant need for repair , i would never recommend this product  .                                                                                                                                                                                                      NEG                     2 never recommend -1. In total, positive score:0 negative score:-1                                         
+ 10 camera       i returned my camera to the vendor as i will not tolerate a sub standard product that is a known issue especially from vendor who will not admt that this needs to be removed from the shelf due to failing parts updated  .                                                       NEG                     2 issue -1, failing -1. In total, positive score:0 negative score:-</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="pie1507569216214"> </a>
+   <h3>SentimentExtractor Example: InputModelFile ('classification:default_sentiment_classification_model.bin')</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example uses the maximum entropy classification model file default_sentiment_classification_model.bin.</p>
+
+   <a name="section_pnk_4vq_t2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: sentiment_extract_input, as in SentimentExtractor Example: InputModelFile ('dictionary'), AnalysisType ('document')</li>
+   </ul>
+
+   <a name="section_c4y_vll_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SentimentExtractor (
+  ON sentiment_extract_input
+  USING
+  TextColumn ('review')
+  InputModelFile ('classification:default_sentiment_classification_model.bin')
+  AnalysisType ('document')
+  Accumulate ('id')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_yvk_wll_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id out_polarity out_strength 
+ -- ------------ ------------ 
+  1 NEG                     2
+  2 POS                     2
+  3 NEG                     2
+  4 POS                     2
+  5 POS                     1
+  6 NEG                     2
+  7 NEG                     2
+  8 NEG                     2
+  9 NEG                     2
+ 10 NEG                     2</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="ver1507570541466"> </a>
+   <h3>SentimentExtractor Example: InputModelFile ('classification:sentimentmodel1.bin')</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">This example uses the model file sentimentmodel1.bin, output by the SentimentTrainer Example.</p>
+
+   <a name="section_pnk_4vq_t2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: sentiment_extract_input, as in SentimentExtractor Example: InputModelFile ('dictionary'), AnalysisType ('document')</li>
+   </ul>
+
+   <a name="section_c4y_vll_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SentimentExtractor (
+  ON sentiment_extract_input
+  USING
+  TextColumn ('review')
+  InputModelFile ('classification:sentimentmodel1.bin')
+  AnalysisType ('document')
+  Accumulate ('id')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_yvk_wll_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id out_polarity out_strength 
+ -- ------------ ------------ 
+  1 POS                     2
+  2 POS                     2
+  3 POS                     2
+  4 POS                     2
+  5 POS                     2
+  6 NEG                     2
+  7 NEG                     2
+  8 NEG                     2
+  9 NEG                     2
+ 10 NEG                     2</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="kmf1507571879335"> </a>
+   <h3>SentimentExtractor Example: Dictionary Table Instead of Model File</h3>
+   <a name="section_nxt_cml_pdb"> </a>
+   <p style="line-height: 1em;">This example uses a dictionary table, sentiment_word, instead of a model file.</p>
+
+   <a name="section_hvq_xvq_t2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: sentiment_extract_input, as in SentimentExtractor Example: InputModelFile ('dictionary'), AnalysisType ('document')</li>
+      <li>Dict: sentiment_word</li>
+   </ul>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <h4 style="text-align: center;">sentiment_word</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">word</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">opinion</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">screwed</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">excellent</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">incredible</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">terrific</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">outstanding</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">fun</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">love</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">nice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">big</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">update</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">constant</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">small</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">mistake</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">difficulty</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">disappointed</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">not tolerate</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">stuck</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">terrible</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">crap</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-2</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_c4y_vll_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SentimentExtractor (
+  ON sentiment_extract_input PARTITION BY ANY
+  ON sentiment_word AS Dict DIMENSION
+  USING
+  TextColumn ('review')
+  AnalysisType ('document')
+  Accumulate ('id', 'product')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_yvk_wll_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id product      out_polarity out_strength out_sentiment_words                                                       
+ -- ------------ ------------ ------------ ------------------------------------------------------------------------- 
+  1 camera       POS                     2 excellent 2, excellent 2. In total, positive score:4 negative score:0    
+  2 office suite POS                     2 terrific 2, terrific 2. In total, positive score:4 negative score:0      
+  3 camera       POS                     2 nice 1. In total, positive score:1 negative score:0                      
+  4 gps          POS                     2 outstanding 2, incredible 2. In total, positive score:4 negative score:0 
+  5 gps          POS                     2 nice 1, big 0. In total, positive score:1 negative score:0               
+  6 gps          NEU                     0 update 0. In total, positive score:0 negative score:0                    
+  7 gps          POS                     2 screwed 2. In total, positive score:2 negative score:0                   
+  8 camera       NEG                     2 stuck -1, difficulty -1. In total, positive score:0 negative score:-2    
+  9 television   NEG                     2 crap -2, big 0. In total, positive score:0 negative score:-2             
+ 10 camera       NEG                     2 not tolerate -1, constant 0. In total, positive score:0 negative score:-1</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

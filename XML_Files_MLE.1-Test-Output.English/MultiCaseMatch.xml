@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="eju1507835240829"> </a>
+	  <h1>MultiCaseMatch</h1>
+
+	
+		<p style="line-height: 1em;">The MultiCaseMatch function extends the capability of the SQL CASE statement by supporting matches to multiple criteria in a single row.</p>
+
+		<p style="line-height: 1em;">When SQL CASE finds a match, it outputs the result and immediately
+			proceeds to the next row without searching for more matches in the current row.</p>
+
+		<p style="line-height: 1em;">The MultiCaseMatch function iterates through the input data set only once and outputs matches whenever a match occurs. If multiple matches occur for a given input row, the function outputs one output row for each match.</p>
+
+		<p style="line-height: 1em;">Use the MultiCaseMatch function when the conditions in your CASE statement do not form a mutually exclusive set.</p>
+
+	
+   <a name="mdj1507835568043"> </a>
+   <h2>MultiCaseMatch Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.5</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM MultiCaseMatch (
+  ON (SELECT t.*, <i>condition</i> AS <i>case</i> [,...] FROM { <i>table</i> | <i>view</i> | (<i>query</i>) } AS t)
+  USING
+  Labels ('<i>case</i> AS "<i>label</i>"' [,...])
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="xqa1507835573379"> </a>
+	  <h2>MultiCaseMatch Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>Labels</dt>
+      <dd>Specify a label for each <i>case</i>. Each case corresponds to a <i>condition</i>, which is a SQL predicate that includes input column names. When an input value satisfies <i>condition</i>, that is a match, and the function outputs the input row and the corresponding label.</dd>
+   </div>
+
+
+	
+   <a name="nvl1507835618904"> </a>
+   <h2>MultiCaseMatch Input</h2>
+   <a name="section_pds_mhs_ycb"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>column_in_condition</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each column specified in a <i>condition</i>.]</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>other_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears zero or more times.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="nug1507835578504"> </a>
+   <h2>MultiCaseMatch Output</h2>
+   <a name="section_psy_khs_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>column_in_condition</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each column specified in a <i>condition</i>.] Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">labels</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each matching label.] Labels that correspond to case that <i>column_in_condition</i> value matches.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="eej1507836139044"> </a>
+   <h2>MultiCaseMatch Example</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example labels people with the age groups to which they belong, which overlap:</p>
+   <a name="table_qhz_jyw_v1b"> </a>
+   <table class="introtable">
+      <a name="table_qhz_jyw_v1b"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Age Group</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">infant</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Younger than 1 year</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">toddler</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1-2 years, inclusive</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">kid</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2-12 years, inclusive</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">teenager</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">13-19 years, inclusive</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">young adult</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">16-25 years, inclusive</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">adult</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">21-40 years, inclusive</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">middle-aged person</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">35-60 years, inclusive</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">senior citizen</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60 years or older</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_cc1_gf3_xdb"> </a>
+   <h3>Input</h3>
+   <a name="table_mdv_jf3_xdb"> </a>
+   <table class="introtable">
+      <a name="table_mdv_jf3_xdb"> </a>
+      <h4 style="text-align: center;">people_age</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">name</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">age</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">John</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Freddy</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Marie</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Tom Sawyer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">17</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Becky Thatcher</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Philip</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Joseph</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Roger</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">35</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Natalie</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">30</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Henry</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">40</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">George</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sir William</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">65</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_eqk_gf3_xdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM MultiCaseMatch (
+ON (SELECT t.*, 
+   (case when t.age &lt; 1 THEN '1' ELSE '0' END) AS case1,
+   (case when t.age &gt;= 1 AND t.age &lt;= 2 THEN '1' ELSE '0' END) AS case2,
+   (case when t.age &gt;= 2 AND t.age &lt;= 12 THEN '1' ELSE '0' END) AS case3,
+   (case when t.age &gt;= 13 AND t.age &lt;= 19 THEN '1' ELSE '0' END) AS case4,
+   (case when t.age &gt;= 16 AND t.age &lt;= 25 THEN '1' ELSE '0' END) AS case5,
+   (case when t.age &gt;= 21 AND t.age &lt;= 40 THEN '1' ELSE '0' END) AS case6,
+   (case when t.age &gt;= 35 AND t.age &lt;= 60 THEN '1' ELSE '0' END) AS case7,
+   (case when t.age &gt;= 60 THEN '1' ELSE '0' END) AS case8
+   FROM people_age AS t)
+USING
+   LABELS (
+     'case1 AS "infant"',
+     'case2 AS "toddler"',
+     'case3 AS "kid"',
+     'case4 AS "teenager"',
+     'case5 AS "young adult"',
+     'case6 AS "adult"',
+     'case7 AS "middle aged person"',
+     'case8 AS "senior citizen"')
+  ) AS dt;</tt>
+   </pre>
+   <a name="section_a1x_gf3_xdb"> </a>
+   <h3>Output</h3>
+   <p style="line-height: 1em;">Several people have two labels. For example, Freddy is both a toddler and a kid, and Tom Sawyer and Becky Thatcher are both teenagers and young adults.</p>
+   <pre>
+      <tt>
+ id name           age  labels             
+ -- -------------- ---- ------------------ 
+  7 joseph         25.0 young adult       
+  6 philip         22.0 young adult       
+  7 joseph         25.0 adult             
+  6 philip         22.0 adult             
+ 12 sir william    65.0 senior citizen    
+ 11 george         50.0 middle aged person
+  4 tom sawyer     17.0 teenager          
+  9 natalie        30.0 adult             
+  4 tom sawyer     17.0 young adult       
+ 10 henry          40.0 adult             
+  5 becky thatcher 16.0 teenager          
+ 10 henry          40.0 middle aged person
+  5 becky thatcher 16.0 young adult       
+  3 marie           6.0 kid               
+  1 john            0.5 infant            
+  8 roger          35.0 adult             
+  8 roger          35.0 middle aged person
+  2 freddy          2.0 toddler           
+  2 freddy          2.0 kid</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

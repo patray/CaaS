@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="copyright" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.rights.owner" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="Named Entity Finder Evaluator" />
+<meta name="abstract" content="This Machine Learning Engine function evaluates a Maximum Entropy model. Composed of NamedEntityFinderEvaluatorMap, NamedEntityFinderEvaluatorReduce." />
+<meta name="description" content="This Machine Learning Engine function evaluates a Maximum Entropy model. Composed of NamedEntityFinderEvaluatorMap, NamedEntityFinderEvaluatorReduce." />
+<meta name="DC.Relation" scheme="URI" content="qym1549987102806.html" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="mdm1507649775932" />
+<meta name="DC.Language" content="en-us" />
+
+<link rel="stylesheet" type="text/css" href="css/normal_styles.css" />
+<title>Named Entity Finder Evaluator</title>
+</head>
+<body>
+<div class="nested0" aria-labelledby="ariaid-title1" topicindex="1" topicid="mdm1507649775932" id="mdm1507649775932">
+	<h1 class="title topictitle1" id="ariaid-title1">Named Entity Finder Evaluator</h1>
+
+	<div class="body conbody">
+		<p class="p">The NamedEntityFinderEvaluatorMap and NamedEntityFinderEvaluatorReduce functions operate as a row and a partition function, respectively. Each function takes a set of evaluating data and creates the precision, recall, and F-measure values of a specified maximum entropy data model. Neither function supports regular-expression-based or dictionary-based models.</p>
+
+	</div>
+<div class="related-links">
+<div class="linklistheader">Related Information</div>
+<ul class="linklist linklist relinfo">
+<div class="linklistmember"><a class="link" href="qym1549987102806.html" title="Learn why you can get different results from a Machine Learning Engine analytic function using the same input tables and syntax element values.">Nondeterministic Results and UniqueID Syntax Element</a></div></ul>
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title2" topicindex="2" topicid="rio1507649945137" xml:lang="en-us" lang="en-us" id="rio1507649945137"><h2 class="title topictitle2" id="ariaid-title2">Named Entity Finder Evaluator Syntax</h2>
+<div class="body refbody"><div class="section" id="rio1507649945137__section_N1000E_N1000C_N10001"><h3 class="title sectiontitle">NamedEntityFinderEvaluatorReduce version 1.3, NamedEntityFinderEvaluatorMap version 1.4</h3><pre class="pre codeblock"><code>SELECT * FROM NamedEntityFinderEvaluatorReduce (
+  ON NamedEntityFinderEvaluatorMap (
+    <span class="ph">ON { <var class="keyword varname">table</var> | <var class="keyword varname">view</var> | (<var class="keyword varname">query</var>) }</span>
+    USING
+    TextColumn ('<var class="keyword varname">text_column</var>')
+    InputModelFile ('<var class="keyword varname">input_model_file</var>')
+  ) AS <var class="keyword varname">alias_1</var> PARTITION BY 1
+) AS <var class="keyword varname">alias_2</var>;</code></pre></div>
+</div>
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title3" topicindex="3" topicid="aui1507650041468" xml:lang="en-us" lang="en-us" id="aui1507650041468">
+	<h2 class="title topictitle2" id="ariaid-title3">Named Entity Finder Evaluator Syntax Elements</h2>
+
+	<div class="body refbody">
+		<div class="section" id="aui1507650041468__section_N10011_N1000E_N10001"><dl class="dl parml"><dt class="dt pt dlterm">TextColumn</dt>
+<dd class="dd pd">Specify the name of the input table column that contains the text to analyze.</dd>
+<dt class="dt pt dlterm">InputModelFile</dt>
+<dd class="dd pd">Specify name of the model file to evaluate.</dd>
+</dl>
+</div>
+
+	</div>
+
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title4" topicindex="4" topicid="nmu1507650106545" xml:lang="en-us" lang="en-us" id="nmu1507650106545"><h2 class="title topictitle2" id="ariaid-title4">NamedEntityFinderEvaluatorMap Input</h2>
+<div class="body refbody"><div class="section" id="nmu1507650106545__section_njv_hqc_ycb"><h3 class="title sectiontitle">Input Table Schema</h3>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="nmu1507650106545__table_N1000E_N1000C_N10001" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:17.24137931034483%" /><col style="width:13.793103448275861%" /><col style="width:68.96551724137932%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry nocellnorowborder" style="vertical-align:top;" id="d407148e134">Column</th>
+<th class="entry nocellnorowborder" style="vertical-align:top;" id="d407148e136">Data Type</th>
+<th class="entry cell-norowborder" style="vertical-align:top;" id="d407148e138">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry row-nocellborder" style="vertical-align:top;" headers="d407148e134 "><var class="keyword varname">text_column</var></td>
+<td class="entry row-nocellborder" style="vertical-align:top;" headers="d407148e136 ">VARCHAR</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e138 ">Text to analyze. Within the text, each entity must be identified with this syntax:<pre class="pre codeblock"><code>&lt;START:<var class="keyword varname">entity_type</var>&gt; <var class="keyword varname">entity</var> &lt;END&gt;</code></pre><p class="p">For example:</p>
+<pre class="pre codeblock"><code>&lt;START:location&gt;Country1&lt;END&gt; has arrived</code></pre></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title5" topicindex="5" topicid="gvx1507650176292" xml:lang="en-us" lang="en-us" id="gvx1507650176292"><h2 class="title topictitle2" id="ariaid-title5">NamedEntityFinderEvaluatorReduce Output</h2>
+<div class="body refbody"><div class="section" id="gvx1507650176292__section_svc_gqc_ycb"><h3 class="title sectiontitle">Output Table Schema</h3>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="gvx1507650176292__table_N1000E_N1000C_N10001" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:16.666666666666664%" /><col style="width:16.666666666666664%" /><col style="width:66.66666666666666%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry nocellnorowborder" style="vertical-align:top;" id="d407148e180">Column</th>
+<th class="entry nocellnorowborder" style="vertical-align:top;" id="d407148e182">Data Type</th>
+<th class="entry cell-norowborder" style="vertical-align:top;" id="d407148e184">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d407148e180 ">precision_val</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d407148e182 ">INTEGER</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d407148e184 ">Precision value of the model.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d407148e180 ">recall</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d407148e182 ">DOUBLE PRECISION</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d407148e184 ">Recall value of the model.</td>
+</tr>
+<tr class="row"><td class="entry row-nocellborder" style="vertical-align:top;" headers="d407148e180 ">f_measure</td>
+<td class="entry row-nocellborder" style="vertical-align:top;" headers="d407148e182 ">DOUBLE PRECISION</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e184 ">F-measure (F<span class="ph sub">1</span> score) of the model.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title6" topicindex="6" topicid="uhp1507650264997" xml:lang="en-us" lang="en-us" id="uhp1507650264997"><h2 class="title topictitle2" id="ariaid-title6">Named Entity Finder Evaluator Example</h2>
+<div class="body refbody"><div class="section" id="uhp1507650264997__section_tvv_qzk_pdb"><h3 class="title sectiontitle">Input</h3><ul class="ul" id="uhp1507650264997__ul_u2c_sw1_j2b"><li class="li">Input Table: nermem_sports_test, which has rows of sports news</li>
+<li class="li"><var class="keyword varname">model_file</var>: location.sports, output by <a class="xref" href="xpb1558540285690.html#eja1507218101866" title="">NamedEntityFinderTrainer Example</a></li>
+</ul>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="uhp1507650264997__table_nx4_wzk_pdb" class="table" frame="border" border="1" rules="all"><div class="caption"><span class="tablecap">Input Table: nermem_sports_test</span></div><colgroup><col style="width:50%" /><col style="width:50%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d407148e247">id</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d407148e249">content</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e247 ">3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e249 ">&lt;START:LOCATION&gt; LONDON &lt;END&gt; 1996-08-30</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e247 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e249 ">West Indian all-rounder &lt;START:PER&gt; Phil Simmons &lt;END&gt; took four for 38 on Friday as &lt;START:ORG&gt; Leicestershire &lt;END&gt; beat &lt;START:ORG&gt; Somerset &lt;END&gt; by an innings and 39 runs in two days to take over at the head of the county championship .</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e247 ">6</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e249 ">After bowling &lt;START:ORG&gt; Somerset &lt;END&gt; out for 83 on the opening morning at &lt;START:LOCATION&gt; Grace Road &lt;END&gt;</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e247 ">9</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e249 ">&lt;START:PER&gt; Hussain &lt;END&gt;</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e247 ">10</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e249 ">By the close &lt;START:ORG&gt; Yorkshire &lt;END&gt; had turned that into a 37-run advantage but off-spinner &lt;START:PER&gt; Such &lt;END&gt; had scuttled their hopes</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e247 ">11</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e249 ">At the &lt;START:LOCATION&gt; Oval &lt;END&gt;</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e247 ">12</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e249 ">He was well backed by &lt;START:LOCATION&gt; England &lt;END&gt; hopeful &lt;START:PER&gt; Mark Butcher &lt;END&gt; who made 70 as &lt;START:ORG&gt; Surrey &lt;END&gt; closed on 429 for seven</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e247 ">14</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e249 ">Australian &lt;START:PER&gt; Tom Moody &lt;END&gt; took six for 82 but &lt;START:PER&gt; Chris Adams &lt;END&gt;</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e247 ">16</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e249 ">They were held up by a gritty 84 from &lt;START:PER&gt; Paul Johnson &lt;END&gt; but ex-England fast bowler &lt;START:PER&gt; Martin McCague &lt;END&gt; took four for 55 .</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e247 ">20</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e249 ">&lt;START:LOCATION&gt; LONDON &lt;END&gt; 1996-08-30</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e247 ">22</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e249 ">&lt;START:LOCATION&gt; Leicester &lt;END&gt; : &lt;START:ORG&gt; Leicestershire &lt;END&gt; beat &lt;START:ORG&gt; Somerset &lt;END&gt; by an innings and 39 runs .</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e247 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d407148e249 ">...</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="uhp1507650264997__section_bdf_rzk_pdb"><h3 class="title sectiontitle">SQL Call</h3><pre class="pre codeblock"><code>SELECT * FROM NamedEntityFinderEvaluatorReduce (
+  ON NamedEntityFinderEvaluatorMap (
+    ON nermem_sports_test
+    USING
+    InputModelFile ('location.sports')
+    TextColumn ('content')
+  ) PARTITION BY 1
+) AS dt;</code></pre></div>
+<div class="section" id="uhp1507650264997__section_q2p_rzk_pdb"><h3 class="title sectiontitle">Output</h3><pre class="pre screen"> precision_val     recall             f_measure         
+ ----------------- ------------------ ----------------- 
+ 0.847457627118644 0.7936507936507936 0.819672131147541</pre>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="uhp1507650264997__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

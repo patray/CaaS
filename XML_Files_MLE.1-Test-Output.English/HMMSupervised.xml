@@ -1,0 +1,1409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="ghp1506985023985"> </a>
+	  <h1>HMMSupervised</h1>
+
+	  <p style="line-height: 1em;">The HMMSupervised function runs on the SQL-GR framework. The function can produce multiple HMM models simultaneously, where each model is learned from a set of sequences and where each sequence represents a vertex.</p>
+
+   <a name="mtr1506985077027"> </a>
+   <h2>HMMSupervised Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 2.0</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM HMMSupervised (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS Vertices
+    PARTITION BY [ <i>model_key</i> [,...]] <i>sequence_key_column</i> [,...] 
+    ORDER BY [ <i>model_key</i>, ] <i>time_ordered_sequence_column</i> ASC [,...]
+  [ OUT TABLE InitStateTable (<i>init_state_prob</i>) ]
+  [ OUT TABLE StateTransitionTable (<i>state_transition_prob</i>) ]
+  [ OUT TABLE EmissionTable (<i>emit_prob</i>)]
+  USING
+  [ ModelColumn ('<i>model_column</i>') ]
+  SeqColumn ('<i>sequence_column</i>')
+  ObservationColumn ('<i>observed_column</i>')
+  StateColumn ('<i>state_column</i>' [,...])
+  [ SkipColumn ('<i>skip_column</i>') ]
+  [ BatchSize (<i>batch_size</i>) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="qcj1506985141878"> </a>
+	  <h2>HMMSupervised Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>InitStateTable</dt>
+      <dd>[Optional] Specify the name for the initial state probability table that the function outputs.</dd>
+      <dd>Default: Pi in the current schema</dd>
+      <dt>StateTransitionTable</dt>
+      <dd>[Optional] Specify the name for the state transition probability table that the function outputs.</dd>
+      <dd>Default: A in the current schema</dd>
+      <dt>EmissionTable</dt>
+      <dd>[Optional] Specify the name for the emission probability table that the function outputs.</dd>
+      <dd>Default: B in the current schema</dd>
+      <dt>ModelColumn</dt>
+      <dd>[Required if PARTITION BY clause specifies <i>model_key</i>, disallowed otherwise.] Specify the name of the input column that contains the model attributes. The <i>model_column</i> must match a <i>model_key</i> in the PARTITION BY clause. The values in the columns can be either integers or strings.</dd>
+      <dt>SeqColumn</dt>
+      <dd>The name of the column that contains the sequence attribute. The <i>sequence_attribute</i> must be a sequence attribute in the PARTITION BY clause. A sequence must contain more than two observation symbols.</dd>
+      <dt>ObservationColumn</dt>
+      <dd>Specify the name of the Vertices column that contains the observed symbols. The function scans the Vertices table to find all possible observed symbols.<p>
+            <b>Note:</b>  Observed symbols are case-sensitive.</p>
+      </dd>
+      <dt>StateColumn</dt>
+      <dd>Specify the names of the Vertices columns that contain the state attributes. The state attributes are case-sensitive.</dd>
+      <dt>SkipColumn</dt>
+      <dd>[Optional] Specify the name of the Vertices column whose value determines whether the function skips the row. Each value in this column must be an INTEGER or VARCHAR that represents the value true or false (INTEGER 1 or 0 or VARCHAR 'true', 't', 'yes', 'y', '1', 'false', 'f', 'no', 'n', or '0'). If the value represents true, the function skips the row; otherwise it does not.</dd>
+      <dd>Default behavior: The function does not skip any rows.</dd>
+      <dt>BatchSize</dt>
+      <dd>[Optional] Specify the number of models to process. The <i>batch_size</i> must be a positive INTEGER value. If you specify <i>batch_size</i> and there is insufficient free memory, the function reduces the batch size.</dd>
+      <dd>Default behavior: The function determines the batch size dynamically, based on memory conditions.</dd>
+   </div>
+
+
+	
+   <a name="qwl1506985205606"> </a>
+   <h2>HMMSupervised Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Vertices Schema</h3>
+   <a name="table_xrw_sws_dbb"> </a>
+   <table class="introtable">
+      <a name="table_xrw_sws_dbb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>model_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Model identifier. Observations with same model identifier belong to same model. </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>sequence_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Identifier of a sequence of observed values. Each sequence represents a vertex.<p style="line-height: 1em; margin: 0px;">
+                  <br/>The PARTITION BY clause lists attributes that represent the unique sequence across the entire table.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>The ORDER BY clause sorts the observations in each sequence chronologically in ascending order.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>observed_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Observed symbol. Case-sensitive.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>skip_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;"> INTEGER or VARCHAR that represents the value true or false (INTEGER 1 or 0 or VARCHAR 'true', 't', 'yes', 'y', '1', 'false', 'f', 'no', 'n', or '0').</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with SkipColumn syntax element.] Whether to skip row: Yes if value represents true; no otherwise.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>state_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Hidden state that creates observation.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="iaa1506985291242"> </a>
+   <h2>HMMSupervised Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The HMMUnsupervised function outputs a message and outputs three tables through JDBC.</p>
+
+   <a name="section_i2n_vyv_xcb"> </a>
+   <h3>Output Message Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">message</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Reports that the models will be saved to the output tables after the training process successfully completes.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_omc_wyv_xcb"> </a>
+   <h3>InitStateTable Schema</h3>
+   <p style="line-height: 1em;">The function saves this table to <i>init_state_prob</i>, whose default value is Pi in the current schema.</p>
+   <a name="table_atj_hfm_nw"> </a>
+   <table class="introtable">
+      <a name="table_atj_hfm_nw"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>model_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BIGINT, INTEGER, or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with ModelColumn syntax element.] Model attribute.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">state</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Hidden state of learned HMM.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">probability</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Initial state probability determined by function.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_c2s_wyv_xcb"> </a>
+   <h3>StateTransitionTable Schema</h3>
+   <p style="line-height: 1em;">The function saves this table to <i>state_transition_prob</i>, whose default value is A in the current schema.</p>
+   <a name="table_btj_hfm_nw"> </a>
+   <table class="introtable">
+      <a name="table_btj_hfm_nw"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>model_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BIGINT, INTEGER, or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with ModelColumn syntax element.] Model attribute.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">from_state</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Hidden state of learned HMM, from which a transition emanates.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">to_state</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Hidden state of learned HMM, to which a transition is made.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">probability</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Probability of a transition from from_state to to_state.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_sfq_xyv_xcb"> </a>
+   <h3>EmissionTable Schema</h3>
+   <p style="line-height: 1em;">The function saves this table to <i>emit_prob</i>, whose default value is B in the current schema.</p>
+   <a name="table_ctj_hfm_nw"> </a>
+   <table class="introtable">
+      <a name="table_ctj_hfm_nw"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>model_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BIGINT, INTEGER, or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with ModelColumn syntax element.] Model attribute.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">state</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Hidden state of learned HMM.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">observed</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Symbol in observed_id column of input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">probability</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Probability of emitting observed symbol, given that HMM is in hidden state.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="gbb1506985375543"> </a>
+  <h2>HMMSupervised Example: Customer Loyalty Prediction</h2>
+
+  
+    <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">Customer loyalty
+        cannot be directly observed or measured, but can be inferred probabilistically. This use
+        case shows how to predict the loyalty level of customers to a retailer from customer
+        shopping patterns.</p>
+   <p style="line-height: 1em;">Customers who make frequent purchases or costlier
+        purchases tend to be more loyal to a brand than infrequent shoppers buying low-value items.
+        A customer who makes a purchase each week is more loyal than a customer who makes a purchase
+        once a year. Similarly, a customer spending more money is more loyal than a customer
+        spending less money.</p>
+   <p style="line-height: 1em;">You can use the shopping patterns of customers
+        with extensive purchase histories to build a Hidden Markov Model to analyze the loyalty of
+        new customers. Gaining insight about the loyalty levels of customers can help retailers
+        devise strategic marketing plans to retain loyal customers and convert low-loyalty customers
+        to high-loyalty. Retailers can also take proactive action to turn around the fading
+        relationship with customers who show a downward trajectory of loyalty. This is particularly
+        important for high-value customers.</p>
+   <p style="line-height: 1em;">The data set for this use case is
+        the shopping history of customers. This data set is transformed into observations that can
+        be used to train an HMM. Based on the time between purchases and the difference in amount
+        spent between purchases, purchases are classified into the following levels:</p>
+   <a name="table_N1001D_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1001D_N1000E_N1000C_N10001"> </a>
+        
+          
+          
+          
+            <tr>
+              <th align="left">
+            <div style="line-height: 1em;">Time between purchases</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">Difference in amount spent</div>
+         </th>
+            </tr>
+          
+          
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">Small (S)</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Less (L)</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">Medium (M)</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Same (S)</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">Large (L)</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">More (M)</div>
+         </td>
+            </tr>
+          
+        
+      </table>
+
+   <p style="line-height: 1em;">To determine the level that a purchase belongs to, you can use
+        K-Means clustering with K=3 to create clusters based on either time difference between
+        purchases or difference in amount spent. Purchases clustered using either metric are
+        classified into one of the three purchase levels. The observation associated with a purchase
+        is the combination of the levels from both metrics.</p>
+   <p style="line-height: 1em;">From the different
+        levels of time difference and spending amount difference between purchases, nine spending
+        profiles are possible:<a name="table_qd5_spb_v1b"> </a>
+      <table class="introtable">
+         <a name="table_qd5_spb_v1b"> </a>
+          
+            
+            
+            
+            
+              <tr>
+                <td align="left">
+               <div style="line-height: 1em;">SL</div>
+            </td>
+                <td align="left">
+               <div style="line-height: 1em;">SS</div>
+            </td>
+                <td align="left">
+               <div style="line-height: 1em;">SM</div>
+            </td>
+              </tr>
+              <tr>
+                <td align="left">
+               <div style="line-height: 1em;">ML</div>
+            </td>
+                <td align="left">
+               <div style="line-height: 1em;">MS</div>
+            </td>
+                <td align="left">
+               <div style="line-height: 1em;">MM</div>
+            </td>
+              </tr>
+              <tr>
+                <td align="left">
+               <div style="line-height: 1em;">LL</div>
+            </td>
+                <td align="left">
+               <div style="line-height: 1em;">LS</div>
+            </td>
+                <td align="left">
+               <div style="line-height: 1em;">LM</div>
+            </td>
+              </tr>
+            
+          
+        </table>
+
+These nine spending profiles serve as the observation symbols for the HMM.</p>
+   <p style="line-height: 1em;">Assuming that a customer has one of three loyalty levels—low (L), normal
+        (N), or high (H)—the number of hidden states is three. The business determines the
+        definitions of the loyalty levels.</p>
+   <p style="line-height: 1em;">This example uses supervised
+        learning, so each purchase in the input data set is labeled with the customer loyalty level.
+        You can use these labeled observations to train an HMM which can later be used to assign
+        loyalty levels to new, unlabeled purchase data.</p>
+
+
+    <a name="section_sh5_lgf_n2b"> </a>
+   <h3>Input</h3>
+   <a name="table_myx_zgf_n2b"> </a>
+   <table class="introtable">
+      <a name="table_myx_zgf_n2b"> </a>
+        <h4 style="text-align: center;">Vertices: customer_loyalty</h4>
+        
+          
+          
+          
+          
+          
+          
+          
+            <tr>
+              <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">user_id</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">seq_id</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">purchase_date</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">loyalty_level</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">observation</div>
+         </th>
+            </tr>
+          
+          
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-01</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">L</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">LL</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-02</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">L</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">ML</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-03</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">L</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">SL</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-04</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">L</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">LM</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-05</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">L</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">ML</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-06</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">L</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">LL</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-07</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">L</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">MM</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-08</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">L</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">MS</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-09</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">L</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">ML</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-10</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">L</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">LM</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">101</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-01</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">N</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">ML</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">102</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-02</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">L</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">LS</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">103</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-03</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">N</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">ML</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">104</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-04</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">N</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">ML</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">105</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-05</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">N</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">MS</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">106</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-06</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">N</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">ML</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">107</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-07</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">N</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">SM</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">108</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-08</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">N</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">MS</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">109</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-09</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">N</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">LL</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">110</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-10</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">N</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">MM</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">201</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-01</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">L</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">LL</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">202</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-02</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">L</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">LS</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">203</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-03</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">H</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">SS</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">204</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-04</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">H</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">SM</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">205</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-05</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">H</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">LL</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">206</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-06</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">N</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">ML</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">207</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-07</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">H</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">SS</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">208</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-08</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">H</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">MM</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">209</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-09</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">H</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">MS</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">210</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2014-01-10</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">H</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">ML</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+            </tr>
+          
+        
+      </table>
+
+
+
+    <a name="section_b2d_mgf_n2b"> </a>
+   <h3>SQL Call</h3>
+   <p style="line-height: 1em;">The following SQL query creates the probabilities with state
+        information:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE pi_loyalty;
+DROP TABLE A_loyalty;
+DROP TABLE B_loyalty;
+
+SELECT * FROM HMMSupervised (
+  ON customer_loyalty AS Vertices
+    PARTITION BY user_id, seq_id
+    ORDER BY user_id, seq_id, purchase_date ASC
+  OUT TABLE InitStateTable (pi_loyalty)
+  OUT TABLE StateTransitionTable (A_loyalty)
+  OUT TABLE EmissionTable (B_loyalty)
+  USING
+  ModelColumn ('user_id')
+  SeqColumn ('seq_id')
+  ObservationColumn ('observation')
+  StateColumn ('loyalty_level')
+) AS dt;</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM HMMSupervised(
+ON customer_loyalty AS Vertices PARTITION BY user_id, seq_id
+ORDER BY user_id, seq_id, purchase_date ASC
+OUT TABLE InitStateTable(pi_loyalty)
+OUT TABLE StateTransitionTable(A_loyalty)
+OUT TABLE EmissionTable(B_loyalty)
+USING
+ModelColumn('user_id')
+SeqColumn('seq_id')
+ObservationColumn('observation')
+StateColumn('loyalty_level')
+) AS dt ;</tt>
+   </pre>
+
+    <a name="section_d5n_mgf_n2b"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ message                                                                                             
+ --------------------------------------------------------------------------------------------------- 
+ HMM models will be saved to the  output tables once the training process is successfully completed.</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM pi_loyalty ORDER BY 1, 2;</tt>
+   </pre>
+   <pre>
+      <tt>
+ user_id state probability 
+ ------- ----- ----------- 
+       1 h             0.0
+       1 l             1.0
+       1 n             0.0
+       2 h             0.0
+       2 l             0.0
+       2 n             1.0
+       3 h             0.0
+       3 l             1.0
+       3 n             0.0</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM A_loyalty ORDER BY 1, 2, 3;</tt>
+   </pre>
+   <pre>
+      <tt>
+ user_id from_state to_state probability          
+ ------- ---------- -------- -------------------- 
+       1 h          h         0.16666666666666666
+       1 h          l          0.6666666666666666
+       1 h          n         0.16666666666666666
+       1 l          h        0.044444444444444446
+       1 l          l          0.9333333333333333
+       1 l          n        0.022222222222222223
+       1 n          h          0.3333333333333333
+       1 n          l          0.6666666666666666
+       1 n          n                         0.0
+       2 h          h         0.46153846153846156
+       2 h          l         0.23076923076923078
+       2 h          n          0.3076923076923077
+       2 l          h                         0.2
+       2 l          l                         0.1
+       2 l          n                         0.7
+       2 n          h         0.06578947368421052
+       2 n          l         0.07894736842105263
+       2 n          n          0.8552631578947368
+       3 h          h          0.9213483146067416
+       3 h          l         0.02247191011235955
+       3 h          n        0.056179775280898875
+       3 l          h                        0.75
+       3 l          l                        0.25
+       3 l          n                         0.0
+       3 n          h          0.8333333333333334
+       3 n          l                         0.0
+       3 n          n         0.16666666666666666</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM B_loyalty ORDER BY 1, 2, 3;</tt>
+   </pre>
+   <pre>
+      <tt>
+ user_id state observed probability          
+ ------- ----- -------- -------------------- 
+       1 h     ll                        0.0
+       1 h     lm                        0.0
+       1 h     ls                        0.0
+       1 h     ml                        0.0
+       1 h     mm        0.16666666666666666
+       1 h     ms                        0.5
+       1 h     sl        0.16666666666666666
+       1 h     sm        0.16666666666666666
+       1 h     ss                        0.0
+       1 l     ll         0.3076923076923077
+       1 l     lm        0.14285714285714285
+       1 l     ls        0.13186813186813187
+       1 l     ml        0.15384615384615385
+       1 l     mm       0.054945054945054944
+       1 l     ms        0.08791208791208792
+       1 l     sl       0.054945054945054944
+       1 l     sm        0.01098901098901099
+       1 l     ss       0.054945054945054944
+       1 n     ll                        0.0
+       1 n     lm                        0.0
+       1 n     ls         0.3333333333333333
+       1 n     ml         0.3333333333333333
+       1 n     mm                        0.0
+       1 n     ms         0.3333333333333333
+       1 n     sl                        0.0
+       1 n     sm                        0.0
+       1 n     ss                        0.0
+       2 h     ll                        0.0
+       2 h     lm        0.07692307692307693
+       2 h     ls                        0.0
+       2 h     ml        0.15384615384615385
+       2 h     mm        0.07692307692307693
+       2 h     ms        0.15384615384615385
+       2 h     sl        0.15384615384615385
+       2 h     sm        0.15384615384615385
+       2 h     ss        0.23076923076923078
+       2 l     ll                        0.1
+       2 l     lm                        0.2
+       2 l     ls                        0.3
+       2 l     ml                        0.0
+       2 l     mm                        0.2
+       2 l     ms                        0.0
+       2 l     sl                        0.2
+       2 l     sm                        0.0
+       2 l     ss                        0.0
+       2 n     ll        0.09090909090909091
+       2 n     lm        0.07792207792207792
+       2 n     ls        0.07792207792207792
+       2 n     ml         0.2077922077922078
+       2 n     mm        0.12987012987012986
+       2 n     ms        0.19480519480519481
+       2 n     sl        0.05194805194805195
+       2 n     sm        0.09090909090909091
+       2 n     ss        0.07792207792207792
+       3 h     ll        0.05555555555555555
+       3 h     lm       0.044444444444444446
+       3 h     ls        0.07777777777777778
+       3 h     ml        0.06666666666666667
+       3 h     mm        0.14444444444444443
+       3 h     ms         0.1111111111111111
+       3 h     sl        0.05555555555555555
+       3 h     sm                        0.2
+       3 h     ss        0.24444444444444444
+       3 l     ll                       0.25
+       3 l     lm                       0.25
+       3 l     ls                        0.5
+       3 l     ml                        0.0
+       3 l     mm                        0.0
+       3 l     ms                        0.0
+       3 l     sl                        0.0
+       3 l     sm                        0.0
+       3 l     ss                        0.0
+       3 n     ll                        0.0
+       3 n     lm                        0.0
+       3 n     ls        0.16666666666666666
+       3 n     ml         0.3333333333333333
+       3 n     mm        0.16666666666666666
+       3 n     ms                        0.0
+       3 n     sl                        0.0
+       3 n     sm        0.16666666666666666
+       3 n     ss        0.16666666666666666</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+  
+</t:intro>

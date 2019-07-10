@@ -1,0 +1,639 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="ymo1507842459658"> </a>
+	  <h1>PointInPolygon</h1>
+
+	
+		<p style="line-height: 1em;">The PointInPolygon function takes a list of location points and a list of
+			polygons and returns a list of binary values for every point and polygon combination,
+			which indicates whether the point is contained in the polygon.</p>
+
+		<a name="fig_ogl_sbr_pw"> </a>
+			<div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+		
+		<p>
+      <b>Note:</b>  The function works
+			only on 2D spatial objects.</p>
+   <p style="line-height: 1em;">The PointInPolygon function determines whether a given point in the plane lies inside or outside of a polygon. It has various applications in many fields such as computer graphics, geographical information systems (GIS), and CAD.</p>
+   <p style="line-height: 1em;">In the following example, point A is in the polygon and point B is outside of the polygon.</p>
+   <a name="fig_pyr_xbr_pw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <p style="line-height: 1em;">A use case for this function is to determine in which drive-time polygon surrounding a store a customer resides. This information helps in mailer targeting.</p>
+   <p style="line-height: 1em;">Another use case is to determine which cell phones are frequently within a polygon surrounding an airport. This information helps in identifying frequent fliers.</p>
+
+	
+   <a name="tzl1466004896356"> </a>
+   <h2>PointInPolygon Syntax</h2>
+   <a name="qcm1507842511202"> </a>
+   <h3>Small Polygon Count and Large Point Count</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h4>Version 1.3</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM PointInPolygon (
+  ON <i>source_table</i> AS SourceTable PARTITION BY ANY
+  ON <i>reference_table</i> AS ReferenceTable DIMENSION
+  USING
+  SourceLocationColumn ('<i>source_location_point_column</i>' [, '<i>source_location_point_column_2</i>' ])
+  ReferenceLocationColumn ('<i>reference_location_polygon_column</i>')
+  ReferenceNameColumns ({ '<i>reference_name_column</i>' | <i>reference_name_column_range</i> }[,...])
+  [ OutputAll ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="ehf1507842516163"> </a>
+   <h3>Large Polygon Count and Small Point Count</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h4>Version 1.3</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM PointInPolygon (
+  ON <i>dimension_table</i> AS SourceTable DIMENSION
+  ON <i>reference_table</i> AS ReferenceTable PARTITION BY ANY
+  USING
+  SourceLocationColumn ('<i>source_location_point_column</i>' [, '<i>source_location_point_column_2</i>' ])
+  ReferenceLocationColumn ('<i>reference_location_polygon_column</i>')
+  ReferenceNameColumns ({ '<i>reference_name_column</i>' | <i>reference_name_column_range</i> }[,...])
+  OutputAll ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'})
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="xrq1507842520598"> </a>
+   <h3>Only to Determine Relations of Points and Polygons in Same Group</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h4>Version 1.3</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM PointInPolygon (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS SourceTable PARTITION BY <i>group_key</i> 
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS ReferenceTable PARTITION BY <i>group_key</i>
+  USING
+  SourceLocationColumn ('<i>source_location_point_column</i>' [, '<i>source_location_point_column_2</i>' ])
+  ReferenceLocationColumn ('<i>reference_location_polygon_column</i>')
+  ReferenceNameColumns ({ '<i>reference_name_column</i>' | <i>reference_name_column_range</i> }[,...])
+  OutputAll ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'})
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="aya1507842524383"> </a>
+	  <h2>PointInPolygon Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>SourceLocationColumn</dt>
+      <dd>Specify the names of the SourceTable columns that contain the point coordinate values.<p style="line-height: 1em;">If you specify only one column, specify the point coordinates in well-known text (WKT) syntax. For example, the string 'POINT (30 10)' is the WKT markup syntax that describes a point with x coordinate 30 and y coordinate 10.</p>
+         <p style="line-height: 1em;">If you specify two columns, they represent the two coordinates of the input points (for example, latitude and longitude).</p>
+         <p>
+            <b>Tip:</b>  When you specify two columns, the output of the IPGeo function can be input to this function.</p>
+      </dd>
+      <dt>ReferenceLocationColumn</dt>
+      <dd>Specify the name of the ReferenceTable column that contains the polygon coordinate values. The column content must be of type WKT.</dd>
+      <dt>ReferenceNameColumns</dt>
+      <dd>Specify the names of the ReferenceTable columns that contain the polygon names. The function copies these columns to the output table.</dd>
+      <dt>OutputAll</dt>
+      <dd>[Optional] Specify whether to indicate in the output table when the point is not in a polygon.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the SourceTable columns to copy to the output table.</dd>
+   </div>
+
+
+	
+   <a name="vfj1507842528236"> </a>
+   <h2>PointInPolygon Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">SourceTable and ReferenceTable must use the same coordinate reference system.</p>
+
+   <a name="section_vmk_3sr_ycb"> </a>
+   <h3>SourceTable Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>source_location_point_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">If you specify only this column:<p style="line-height: 1em; margin: 0px;">
+                  <br/>CHARACTER or VARCHAR</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>If you also specify <i>source_location_point_column</i>_2:</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>SMALLINT, INTEGER, BIGINT, DOUBLE PRECISION, or NUMERIC</p>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">If you specify only this column: WKT content.<p style="line-height: 1em; margin: 0px;">
+                  <br/>If you also specify <i>source_location_point_column</i>_2: x coordinate of point.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>source_location_point_column</i>_2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SMALLINT, INTEGER, BIGINT, DOUBLE PRECISION, or NUMERIC</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">y coordinate of point.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_cpy_jsr_ycb"> </a>
+   <h3>ReferenceTable Schema</h3>
+   <a name="table_N10078_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10078_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>reference_location_polygon_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CHARACTER or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Polygon description.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>reference_location_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Polygon name.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="gxc1507842537070"> </a>
+   <h2>PointInPolygon Output</h2>
+   <a name="section_hkn_dsr_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">pip_flag</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1 if point is inside polygon, 0 otherwise.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>source_location_point_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in SourceTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">If source table has only this column: WKT content.<p style="line-height: 1em; margin: 0px;">
+                  <br/>If source table also has <i>source_location_point_column</i>_2: x coordinate of point.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>source_location_point_column</i>_2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in SourceTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears here only if it appears in source table.] y coordinate of point.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ref_<i>reference_location_polygon_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in ReferenceTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Polygon description.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ref_<i>reference_location_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in ReferenceTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Polygon name.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in SourceTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from SourceTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="kwd1507842547789"> </a>
+   <h2>PointInPolygon Examples</h2>
+   <a name="section_N10010_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">The goal of each example is to determine the airport terminal where each airline passenger is located.</p>
+
+   <a name="nhi1527002573251"> </a>
+	  <h3>PointInPolygon Example: OutputAll ('true')</h3>
+   <a name="section_bw1_c1h_xdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>SourceTable: source_passenger, which groups parsed location file formats and contains four passengers with known x and y coordinates</li>
+      <li>ReferenceTable: reference_terminal, which has the geographical locations of two airport terminals, A and B, specified as polygon coordinates, using WKT syntax</li>
+   </ul>
+   <a name="table_j5n_l1h_xdb"> </a>
+   <table class="introtable">
+      <a name="table_j5n_l1h_xdb"> </a>
+      <h4 style="text-align: center;">SourceTable: source_passenger</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">customer_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">source_location_point</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">customer_name</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POINT (300 20)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Maria</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POINT (300 10)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">John</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POINT (30 10)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Jeff</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POINT (400 20)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Macy</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_cmh_p1h_xdb"> </a>
+   <table class="introtable">
+      <a name="table_cmh_p1h_xdb"> </a>
+      <h4 style="text-align: center;">ReferenceTable: reference_terminal</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">terminal_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">reference_location_polygon</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">terminal_name</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POLYGON ((0 0, 100 0, 100 100, 0 100, 0 0))</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Terminal A</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POLYGON ((200 0, 400 0, 400 200, 200 200, 200 0))</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Terminal B</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_il5_vzg_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM PointInPolygon (
+  ON source_passenger AS SourceTable PARTITION BY ANY
+  ON reference_terminal AS ReferenceTable DIMENSION
+  USING
+  SourceLocationColumn ('source_location_point')
+  ReferenceLocationColumn ('reference_location_polygon')
+  ReferenceNameColumns ('terminal_name')
+  outputall ('true')
+  Accumulate ('customer_id', 'customer_name')
+) AS dt ORDER BY source_location_point,customer_id,customer_name;</tt>
+   </pre>
+   <a name="section_c4g_wzg_xdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The output table shows all passengers, whether or not they are in a terminal.</p>
+   <pre>
+      <tt>
+ source_location_point ref_reference_location_polygon                    ref_terminal_name pip_flag customer_id customer_name 
+ --------------------- ------------------------------------------------- ----------------- -------- ----------- ------------- 
+ point (30 10)         polygon ((200 0, 400 0, 400 200, 200 200, 200 0)) terminal b               0           1 jeff         
+ point (30 10)         polygon ((0 0, 100 0, 100 100, 0 100, 0 0))       terminal a               1           1 jeff         
+ point (300 10)        polygon ((0 0, 100 0, 100 100, 0 100, 0 0))       terminal a               0           2 john         
+ point (300 10)        polygon ((200 0, 400 0, 400 200, 200 200, 200 0)) terminal b               1           2 john         
+ point (300 20)        polygon ((200 0, 400 0, 400 200, 200 200, 200 0)) terminal b               1           3 maria        
+ point (300 20)        polygon ((0 0, 100 0, 100 100, 0 100, 0 0))       terminal a               0           3 maria        
+ point (400 20)        polygon ((200 0, 400 0, 400 200, 200 200, 200 0)) terminal b               0           4 macy         
+ point (400 20)        polygon ((0 0, 100 0, 100 100, 0 100, 0 0))       terminal a               0           4 macy</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="qnx1527002612641"> </a>
+	  <h3>PointInPolygon Example: OutputAll ('false')</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">As in PointInPolygon Example: OutputAll ('true'):<ul>
+         <li>SourceTable: source_passenger</li>
+         <li>ReferenceTable: reference_terminal</li>
+      </ul>
+   </p>
+
+		
+   <a name="section_il5_vzg_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM PointInPolygon(
+  ON source_passenger AS SourceTable PARTITION BY ANY
+  ON reference_terminal AS ReferenceTable DIMENSION
+  USING
+  SourceLocationColumn ('source_location_point')
+  ReferenceLocationColumn ('reference_location_polygon')
+  ReferenceNameColumns ('terminal_name')
+  outputall ('false')
+  Accumulate ('customer_id', 'customer_name')
+) AS dt ORDER BY source_location_point;</tt>
+   </pre>
+   <a name="section_c4g_wzg_xdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The output table includes only passengers inside a terminal. Macy is not in any terminal and does not appear in the output table.</p>
+   <pre>
+      <tt>
+ source_location_point ref_reference_location_polygon                    ref_terminal_name pip_flag customer_id customer_name 
+ --------------------- ------------------------------------------------- ----------------- -------- ----------- ------------- 
+ point (30 10)         polygon ((0 0, 100 0, 100 100, 0 100, 0 0))       terminal a               1           1 jeff         
+ point (300 10)        polygon ((200 0, 400 0, 400 200, 200 200, 200 0)) terminal b               1           2 john         
+ point (300 20)        polygon ((200 0, 400 0, 400 200, 200 200, 200 0)) terminal b               1           3 maria</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="bts1507842584764"> </a>
+   <h3>PointInPolygon Example: Passenger Coordinates in Columns</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The x and y coordinates of the passenger locations are in columns x and y, respectively.</p>
+
+   <a name="section_mvg_21h_xdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>SourceTable: source_passenger1, which groups parsed location file formats and contains four passengers with known x and y coordinates</li>
+      <li>ReferenceTable: reference_terminal, as in PointInPolygon Example: OutputAll ('true')</li>
+   </ul>
+   <a name="table_sxv_ych_xdb"> </a>
+   <table class="introtable">
+      <a name="table_sxv_ych_xdb"> </a>
+      <h4 style="text-align: center;">source_passenger1</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">customer_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">x</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">y</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">customer_name</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Jeff</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">300</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">John</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">300</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">20</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Maria</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">400</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">20</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Macy</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_il5_vzg_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM PointInPolygon (
+  ON source_passenger1 AS SourceTable PARTITION BY ANY
+  ON reference_terminal AS ReferenceTable dimension
+  USING
+  SourceLocationColumn ('x','y')
+  ReferenceLocationColumn ('reference_location_polygon')
+  ReferenceNameColumns ('terminal_name')
+  outputall ('false')
+  Accumulate ('customer_id', 'customer_name')
+) AS dt ORDER BY x,y ;
+</tt>
+   </pre>
+   <a name="section_c4g_wzg_xdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ x   y  ref_reference_location_polygon                    ref_terminal_name pip_flag customer_id customer_name 
+ --- -- ------------------------------------------------- ----------------- -------- ----------- ------------- 
+  30 10 polygon ((0 0, 100 0, 100 100, 0 100, 0 0))       terminal a               1           1 jeff         
+ 300 10 polygon ((200 0, 400 0, 400 200, 200 200, 200 0)) terminal b               1           2 john         
+ 300 20 polygon ((200 0, 400 0, 400 200, 200 200, 200 0)) terminal b               1           3 maria</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

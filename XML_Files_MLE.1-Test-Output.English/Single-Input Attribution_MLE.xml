@@ -1,0 +1,1260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="ifq1507592820945"> </a>
+	  <h1>Single-Input Attribution_MLE</h1>
+
+	  <p style="line-height: 1em;">The single-input version of the Attribution_MLE function accepts a single input table and gets other parameters from syntax elements.</p>
+
+   <a name="leh1507592901582"> </a>
+   <h2>Attribution_MLE Syntax (Single Input)</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 2.9</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Attribution_MLE (
+ ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY <i>expression</i> [,...] ORDER BY <i>timestamp_column</i> [,...] 
+  USING
+  EventColumn ('<i>event_column</i>')
+  ConversionEvents ('<i>conversion_event</i>' [,...])
+  [ ExcludeEvents ('<i>exclude_event</i>') ]
+  [ OptionalEvents ('<i>optional_event</i>' [,...]) ]
+  TimeColumn ('<i>time_column</i>')
+  WindowSize ('rows:<i>K</i> | seconds:<i>K</i> | rows:<i>K</i>&amp;seconds:<i>K</i>')
+  FirstModel ('<i>type</i>', { '<i>K</i>' | '<i>EVENT</i>:<i>WEIGHT</i>:<i>MODEL</i>:<i>PARAMETERS</i>' } [,...])
+  [ SecondModel ('<i>type</i>', { '<i>K</i>' | '<i>EVENT</i>:<i>WEIGHT</i>:<i>MODEL</i>:<i>PARAMETERS</i>' } [,...]) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <p>
+      <b>Note:</b>  In the FirstModel and SecondModel syntax elements, colons are parameter delimiters. If a parameter contains colons, enclose it in double quotation marks. For example:<pre style="margin-left: 2em; font-family: monospace;">
+         <tt style="font-family: monospace; font-size: larger;">
+FirstModel ('EVENT_REGULAR', '<b>"email:"</b>:0.19:LAST_CLICK:NA')</tt>
+      </pre>
+   </p>
+   <a name="zek1507592998201"> </a>
+	  <h2>Attribution_MLE Syntax Elements (Single Input)</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>EventColumn</dt>
+      <dd>Specify the name of the input column that contains the clickstream events.</dd>
+      <dt>ConversionEvents</dt>
+      <dd>Specify the conversion events. Each <i>conversion_event</i> is a string or integer.</dd>
+      <dt>ExcludeEvents</dt>
+      <dd>[Optional] Specify the events to exclude from the attribution calculation. Each <i>exclude_event</i> is a string or integer. An <i>exclude_event</i> cannot be a <i>conversion_event</i>.</dd>
+      <dt>OptionalEvents</dt>
+      <dd>[Optional] Specify the optional events. Each <i>optional_event</i> is a string or integer. An <i>optional_event</i> cannot be a <i>conversion_event</i> or <i>exclude_event</i>. The function attributes a conversion event to an optional event only if it cannot attribute it to a regular event.</dd>
+      <dt>TimeColumn</dt>
+      <dd>Specify the name of the input column that contains the timestamps of the clickstream events.</dd>
+      <dt>WindowSize</dt>
+      <dd>Specify how to determine the maximum window size for the attribution calculation:<a name="table_qqv_3zx_fdb"> </a>
+         <table class="introtable">
+            <a name="table_qqv_3zx_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">rows:</tt>
+                     <i>K</i>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Consider maximum number of events to attribute, excluding events of types specified in ExcludedEventTable, which means assigning attributions to at most <i>K</i> effective events before current impact event.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">seconds:</tt>
+                     <i>K</i>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Consider maximum time difference between current impact event and earliest effective event to attribute.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">rows:</tt>
+                     <i>K</i>
+                     <tt style="font-family: monospace;">&amp;seconds:</tt>
+                     <i>K2</i>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Consider both constraints and comply with stricter one.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>FirstModel</dt>
+      <dd>Specify the type and specification of the first model. For example:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+FirstModel ('EVENT_REGULAR', 'email:0.19:LAST_CLICK:NA', 'impression:0.81:WEIGHTED:0.4,0.3,0.2,0.1')</tt>
+         </pre>
+      </dd>
+      <dt>SecondModel</dt>
+      <dd>[Optional] Specify the type and distributions of the second model. For example:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+SecondModel ('EVENT_OPTIONAL', 'OrganicSearch:0.5:UNIFORM:NA', 'Direct:0.3:UNIFORM:NA', 'Referral:0.2:UNIFORM:NA')</tt>
+         </pre>
+      </dd>
+   </div>
+   <p style="line-height: 1em;">For more information about the FirstModel and SecondModel syntax elements, see Attribution Model Specification.</p>
+
+
+	
+   <a name="lkf1507593067393"> </a>
+   <h2>Attribution_MLE Input (Single Input)</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The input table schema is input table schema in Attribution_MLE Input (Multiple Inputs).</p>
+
+   <a name="lda1507593124646"> </a>
+   <h2>Attribution_MLE Output (Single Input)</h2>
+   <a name="section_N1000D_N1000B_N10001"> </a>
+   <p style="line-height: 1em;">The output table schema is the same as in Attribution_MLE Output (Multiple Inputs).</p>
+
+   <a name="pyc1507593192386"> </a>
+   <h2>Attribution_MLE Examples (Single Input)</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">These examples use the events and channels from the Attribution_MLE Example Event Types and Channels table in the Attribution_MLE Example (Multiple Inputs).</p>
+
+   <a name="dwp1507593248856"> </a>
+   <h3>Attribution_MLE Example (Single Input): One Regular Model, Multiple Optional Models</h3>
+   <a name="section_N10019_N10016_N10001"> </a>
+   <p style="line-height: 1em;">Using the single-input Attribution_MLE function, this example specifies one distribution model for regular events and one distribution model for each type of optional event.</p>
+
+   <a name="section_e3y_vvx_hdb"> </a>
+   <h4>Input</h4>
+   <a name="table_lmy_bwx_hdb"> </a>
+   <table class="introtable">
+      <a name="table_lmy_bwx_hdb"> </a>
+      <h4 style="text-align: center;">attribution_sample_table</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">user_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">event</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">time_stamp</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:01</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:03</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:05</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:07</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:09</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:11</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:13</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Email</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:15</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:17</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:19</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SocialNetwork</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:20</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Direct</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:21</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Referral</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:22</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">PaidSearch</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:23</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:29</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:31</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:33</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:36</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:38</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:43</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:47</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">OrganicSearch</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:49</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:51</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_shq_wvx_hdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Attribution_MLE (
+  ON attribution_sample_table PARTITION BY user_id
+    ORDER BY time_stamp
+  USING
+  EventColumn ('event')
+  ConversionEvents ('socialnetwork', 'paidsearch')
+  OptionalEvents ('organicsearch', 'direct', 'referral')
+  TimeColumn ('time_stamp')
+  WindowSize ('rows:10&amp;seconds:20')
+  FirstModel ('EVENT_REGULAR', 'email:0.19:LAST_CLICK:NA',
+          'impression:0.81:UNIFORM:NA')
+SecondModel ('EVENT_OPTIONAL', 'organicsearch:0.5:UNIFORM:NA',
+          'direct:0.3:UNIFORM:NA', 'referral:0.2:UNIFORM:NA')
+) AS dt ORDER BY 1, 3;</tt>
+   </pre>
+   <a name="section_nmc_xvx_hdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ user_id event         time_stamp                 attribution         time_to_conversion 
+ ------- ------------- -------------------------- ------------------- ------------------ 
+       1 impression    2001-09-27 23:00:01.000000 0.09000000357627869              -19.0
+       1 impression    2001-09-27 23:00:03.000000 0.09000000357627869              -17.0
+       1 impression    2001-09-27 23:00:05.000000 0.09000000357627869              -15.0
+       1 impression    2001-09-27 23:00:07.000000 0.09000000357627869              -13.0
+       1 impression    2001-09-27 23:00:09.000000 0.09000000357627869              -11.0
+       1 impression    2001-09-27 23:00:11.000000 0.09000000357627869               -9.0
+       1 impression    2001-09-27 23:00:13.000000 0.09000000357627869               -7.0
+       1 email         2001-09-27 23:00:15.000000  0.1899999976158142               -5.0
+       1 impression    2001-09-27 23:00:17.000000 0.09000000357627869               -3.0
+       1 impression    2001-09-27 23:00:19.000000 0.09000000357627869               -1.0
+       1 socialnetwork 2001-09-27 23:00:20.000000                NULL               NULL
+       1 direct        2001-09-27 23:00:21.000000  0.6000000238418579               -2.0
+       1 referral      2001-09-27 23:00:22.000000  0.4000000059604645               -1.0
+       1 paidsearch    2001-09-27 23:00:23.000000                NULL               NULL
+       2 impression    2001-09-27 23:00:29.000000                 0.0               NULL
+       2 impression    2001-09-27 23:00:31.000000                 0.0               NULL
+       2 impression    2001-09-27 23:00:33.000000                 0.0               NULL
+       2 impression    2001-09-27 23:00:36.000000                 0.0               NULL
+       2 impression    2001-09-27 23:00:38.000000                 0.0               NULL
+       2 impression    2001-09-27 23:00:43.000000 0.20000000298023224              -16.0
+       2 impression    2001-09-27 23:00:47.000000 0.20000000298023224              -12.0
+       2 impression    2001-09-27 23:00:51.000000 0.20000000298023224               -8.0
+       2 impression    2001-09-27 23:00:53.000000 0.20000000298023224               -6.0
+       2 impression    2001-09-27 23:00:55.000000 0.20000000298023224               -4.0
+       2 socialnetwork 2001-09-27 23:00:59.000000                NULL               NULL
+</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="cli1507593626882"> </a>
+   <h3>Attribution_MLE Example (Single Input): Multiple Regular Models, One Optional Model</h3>
+   <a name="section_N10019_N10016_N10001"> </a>
+   <p style="line-height: 1em;">Using the single-input Attribution_MLE function, this example specifies one distribution model for each type of regular event and one distribution model for optional events.</p>
+
+   <a name="section_irz_czx_hdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>attribution_sample_table, as in Attribution_MLE Example (Single Input): One Regular Model, Multiple Optional Models</li>
+   </ul>
+
+   <a name="section_xxf_dzx_hdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Attribution_MLE (
+  ON attribution_sample_table PARTITION BY user_id
+    ORDER BY time_stamp
+  USING
+  EventColumn ('event')
+  ConversionEvents ('socialnetwork', 'paidsearch')
+  OptionalEvents ('organicsearch', 'direct', 'referral')
+  TimeColumn ('time_stamp')
+  WindowSize ('rows:10&amp;seconds:20')
+  FirstModel ('EVENT_REGULAR', 'email:0.19:LAST_CLICK:NA',
+          'impression:0.81:UNIFORM:NA')
+  SecondModel ('EVENT_OPTIONAL', 'ALL:1:EXPONENTIAL:0.5,ROW')
+) AS dt ORDER BY 1, 3;</tt>
+   </pre>
+   <a name="section_w4m_dzx_hdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The only difference between this output and the output of Attribution_MLE Example (Single Input): One Regular Model, Multiple Optional Models is the attribution of the optional events.</p>
+   <pre>
+      <tt>
+ user_id event         time_stamp                 attribution         time_to_conversion 
+ ------- ------------- -------------------------- ------------------- ------------------ 
+       1 impression    2001-09-27 23:00:01.000000 0.09000000357627869              -19.0
+       1 impression    2001-09-27 23:00:03.000000 0.09000000357627869              -17.0
+       1 impression    2001-09-27 23:00:05.000000 0.09000000357627869              -15.0
+       1 impression    2001-09-27 23:00:07.000000 0.09000000357627869              -13.0
+       1 impression    2001-09-27 23:00:09.000000 0.09000000357627869              -11.0
+       1 impression    2001-09-27 23:00:11.000000 0.09000000357627869               -9.0
+       1 impression    2001-09-27 23:00:13.000000 0.09000000357627869               -7.0
+       1 email         2001-09-27 23:00:15.000000  0.1899999976158142               -5.0
+       1 impression    2001-09-27 23:00:17.000000 0.09000000357627869               -3.0
+       1 impression    2001-09-27 23:00:19.000000 0.09000000357627869               -1.0
+       1 socialnetwork 2001-09-27 23:00:20.000000                NULL               NULL
+       1 direct        2001-09-27 23:00:21.000000  0.3333333432674408               -2.0
+       1 referral      2001-09-27 23:00:22.000000  0.6666666865348816               -1.0
+       1 paidsearch    2001-09-27 23:00:23.000000                NULL               NULL
+       2 impression    2001-09-27 23:00:29.000000                 0.0               NULL
+       2 impression    2001-09-27 23:00:31.000000                 0.0               NULL
+       2 impression    2001-09-27 23:00:33.000000                 0.0               NULL
+       2 impression    2001-09-27 23:00:36.000000                 0.0               NULL
+       2 impression    2001-09-27 23:00:38.000000                 0.0               NULL
+       2 impression    2001-09-27 23:00:43.000000 0.20000000298023224              -16.0
+       2 impression    2001-09-27 23:00:47.000000 0.20000000298023224              -12.0
+       2 impression    2001-09-27 23:00:51.000000 0.20000000298023224               -8.0
+       2 impression    2001-09-27 23:00:53.000000 0.20000000298023224               -6.0
+       2 impression    2001-09-27 23:00:55.000000 0.20000000298023224               -4.0
+       2 socialnetwork 2001-09-27 23:00:59.000000                NULL               NULL
+</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="wtn1523039355491"> </a>
+	  <h3>Attribution_MLE Example (Single Input): Dynamic Weighted Distribution Models</h3>
+
+	  <a name="section_cw5_kvq_qgb"> </a>
+   <p style="line-height: 1em;">This example uses the single-input Attribution_MLE function.</p>
+
+
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>attribution_sample_table, as in Attribution_MLE Example (Single Input): One Regular Model, Multiple Optional Models</li>
+   </ul>
+
+		
+   <a name="section_yjv_gll_kdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Attribution_MLE (
+  ON attribution_sample_table PARTITION BY user_id
+    ORDER BY time_stamp
+  USING
+  EventColumn ('event')
+  ConversionEvents ('socialnetwork', 'paidsearch')
+  OptionalEvents ('organicsearch', 'direct', 'referral')
+  TimeColumn ('time_stamp')
+  WindowSize ('rows:10&amp;seconds:20')
+    
+  FirstModel ('EVENT_REGULAR', 'email:0.19:LAST_CLICK:NA',
+          'impression:0.81:WEIGHTED:0.4,0.3,0.2,0.1')
+  SecondModel ('EVENT_OPTIONAL', 'ALL:1:WEIGHTED:0.4,0.3,0.2,0.1')
+) AS dt ORDER BY 1, 3;</tt>
+   </pre>
+   <a name="section_dbj_hll_kdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ user_id event         time_stamp                 attribution         time_to_conversion 
+ ------- ------------- -------------------------- ------------------- ------------------ 
+       1 impression    2001-09-27 23:00:01.000000                 0.0               NULL
+       1 impression    2001-09-27 23:00:03.000000                 0.0               NULL
+       1 impression    2001-09-27 23:00:05.000000                 0.0               NULL
+       1 impression    2001-09-27 23:00:07.000000                 0.0               NULL
+       1 impression    2001-09-27 23:00:09.000000                 0.0               NULL
+       1 impression    2001-09-27 23:00:11.000000 0.08100000023841858               -9.0
+       1 impression    2001-09-27 23:00:13.000000 0.16200000047683716               -7.0
+       1 email         2001-09-27 23:00:15.000000  0.1899999976158142               -5.0
+       1 impression    2001-09-27 23:00:17.000000 0.24300000071525574               -3.0
+       1 impression    2001-09-27 23:00:19.000000  0.3240000009536743               -1.0
+       1 socialnetwork 2001-09-27 23:00:20.000000                NULL               NULL
+       1 direct        2001-09-27 23:00:21.000000  0.4285714328289032               -2.0
+       1 referral      2001-09-27 23:00:22.000000  0.5714285969734192               -1.0
+       1 paidsearch    2001-09-27 23:00:23.000000                NULL               NULL
+       2 impression    2001-09-27 23:00:29.000000                 0.0               NULL
+       2 impression    2001-09-27 23:00:31.000000                 0.0               NULL
+       2 impression    2001-09-27 23:00:33.000000                 0.0               NULL
+       2 impression    2001-09-27 23:00:36.000000                 0.0               NULL
+       2 impression    2001-09-27 23:00:38.000000                 0.0               NULL
+       2 impression    2001-09-27 23:00:43.000000                 0.0               NULL
+       2 impression    2001-09-27 23:00:47.000000 0.10000000149011612              -12.0
+       2 impression    2001-09-27 23:00:51.000000 0.20000000298023224               -8.0
+       2 impression    2001-09-27 23:00:53.000000 0.30000001192092896               -6.0
+       2 impression    2001-09-27 23:00:55.000000  0.4000000059604645               -4.0
+       2 socialnetwork 2001-09-27 23:00:59.000000                NULL               NULL</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="ezj1523039400390"> </a>
+	  <h3>Attribution_MLE Example (Single Input): Window Models</h3>
+   <a name="section_cw5_kvq_qgb"> </a>
+   <p style="line-height: 1em;">This example uses the single-input Attribution_MLE function.</p>
+
+   <a name="section_pkx_lll_kdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>attribution_sample_table, as in Attribution_MLE Example (Single Input): One Regular Model, Multiple Optional Models</li>
+   </ul>
+
+   <a name="section_yjv_gll_kdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Attribution_MLE (
+  ON attribution_sample_table PARTITION BY user_id
+    ORDER BY time_stamp
+  USING
+  EventColumn ('event')
+  ConversionEvents ('socialnetwork', 'paidsearch')
+  ExcludeEvents('email')
+  OptionalEvents ('organicsearch', 'direct', 'referral')
+  TimeColumn ('time_stamp')
+  WindowSize ('rows:10&amp;seconds:20')
+  FirstModel ('SEGMENT_ROWS', '3:0.5:EXPONENTIAL:0.5,ROW',
+          '4:0.3:WEIGHTED:0.4,0.3,0.2,0.1', '3:0.2:FIRST_CLICK:NA')
+  SecondModel ('SEGMENT_SECONDS', '6:0.5:UNIFORM:NA', '8:0.3:LAST_CLICK:NA',          '6:0.2:FIRST_CLICK:NA')
+) AS dt ORDER BY 1, 3;</tt>
+   </pre>
+   <a name="section_dbj_hll_kdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ user_id event         time_stamp                 attribution         time_to_conversion 
+ ------- ------------- -------------------------- ------------------- ------------------ 
+       1 impression    2001-09-27 23:00:01.000000 0.20000000298023224              -19.0
+       1 impression    2001-09-27 23:00:03.000000                 0.0               NULL
+       1 impression    2001-09-27 23:00:05.000000                 0.0               NULL
+       1 impression    2001-09-27 23:00:07.000000                 0.0               NULL
+       1 impression    2001-09-27 23:00:09.000000                 0.0               NULL
+       1 impression    2001-09-27 23:00:11.000000                 0.0               NULL
+       1 impression    2001-09-27 23:00:13.000000 0.30000001192092896               -7.0
+       1 impression    2001-09-27 23:00:17.000000                0.25               -3.0
+       1 impression    2001-09-27 23:00:19.000000                0.25               -1.0
+       1 socialnetwork 2001-09-27 23:00:20.000000                NULL               NULL
+       1 direct        2001-09-27 23:00:21.000000                 0.5               -2.0
+       1 referral      2001-09-27 23:00:22.000000                 0.5               -1.0
+       1 paidsearch    2001-09-27 23:00:23.000000                NULL               NULL
+       2 impression    2001-09-27 23:00:29.000000                 0.0               NULL
+       2 impression    2001-09-27 23:00:31.000000                 0.0               NULL
+       2 impression    2001-09-27 23:00:33.000000                 0.0               NULL
+       2 impression    2001-09-27 23:00:36.000000                 0.0               NULL
+       2 impression    2001-09-27 23:00:38.000000                 0.0               NULL
+       2 impression    2001-09-27 23:00:43.000000 0.20000000298023224              -16.0
+       2 impression    2001-09-27 23:00:47.000000                 0.0               NULL
+       2 impression    2001-09-27 23:00:51.000000 0.30000001192092896               -8.0
+       2 impression    2001-09-27 23:00:53.000000                0.25               -6.0
+       2 impression    2001-09-27 23:00:55.000000                0.25               -4.0
+       2 socialnetwork 2001-09-27 23:00:59.000000                NULL               NULL</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="nfp1523039631820"> </a>
+	  <h3>Attribution_MLE Example (Single Input): Single-Window Model</h3>
+   <a name="section_cw5_kvq_qgb"> </a>
+   <p style="line-height: 1em;">This example uses the single-input Attribution_MLE function.</p>
+
+   <a name="section_mxc_mll_kdb"> </a>
+   <h4>Input</h4>
+   <a name="table_efx_tnl_kdb"> </a>
+   <table class="introtable">
+      <a name="table_efx_tnl_kdb"> </a>
+      <h4 style="text-align: center;">attribution_sample_table3</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">user_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">event</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">time_stamp</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:07</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:09</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:11</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:13</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Email</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:15</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:17</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:19</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SocialNetwork</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:21</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">PaidSearch</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:23</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:29</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:31</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:33</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:47</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:51</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:53</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:55</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SocialNetwork</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:59</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_yjv_gll_kdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Attribution_MLE (
+  ON attribution_sample_table3 PARTITION BY user_id
+    ORDER BY time_stamp
+  USING
+  EventColumn ('event')
+  ConversionEvents ('socialnetwork', 'paidsearch')
+  ExcludeEvents('email')
+  TimeColumn ('time_stamp')
+  WindowSize ('rows:10&amp;seconds:20')
+  FirstModel ('SIMPLE', 'UNIFORM:NA')
+) AS dt ORDER BY 1, 3;</tt>
+   </pre>
+   <a name="section_dbj_hll_kdb"> </a>
+   <h4>Output</h4>
+   <a name="table_x4v_p4l_kdb"> </a>
+   <table class="introtable">
+      <a name="table_x4v_p4l_kdb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">user_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">event</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">time_stamp</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">attribution</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">time_to_conversion</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:07</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.166667</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:09</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.166667</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-12</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.166667</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.166667</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:17</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.166667</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:19</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.166667</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SocialNetwork</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:21</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">PaidSearch</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:23</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:29</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:31</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:47</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-12</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:51</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:53</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:55</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SocialNetwork</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:59</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+      </tr>
+   </table>
+
+   <pre>
+      <tt>
+ user_id event         time_stamp                 attribution        time_to_conversion 
+ ------- ------------- -------------------------- ------------------ ------------------ 
+       1 impression    2001-09-27 23:00:07.000000 0.1666666716337204              -14.0
+       1 impression    2001-09-27 23:00:09.000000 0.1666666716337204              -12.0
+       1 impression    2001-09-27 23:00:11.000000 0.1666666716337204              -10.0
+       1 impression    2001-09-27 23:00:13.000000 0.1666666716337204               -8.0
+       1 impression    2001-09-27 23:00:17.000000 0.1666666716337204               -4.0
+       1 impression    2001-09-27 23:00:19.000000 0.1666666716337204               -2.0
+       1 socialnetwork 2001-09-27 23:00:21.000000               NULL               NULL
+       1 paidsearch    2001-09-27 23:00:23.000000               NULL               NULL
+       2 impression    2001-09-27 23:00:29.000000                0.0               NULL
+       2 impression    2001-09-27 23:00:31.000000                0.0               NULL
+       2 impression    2001-09-27 23:00:33.000000                0.0               NULL
+       2 impression    2001-09-27 23:00:47.000000               0.25              -12.0
+       2 impression    2001-09-27 23:00:51.000000               0.25               -8.0
+       2 impression    2001-09-27 23:00:53.000000               0.25               -6.0
+       2 impression    2001-09-27 23:00:55.000000               0.25               -4.0
+       2 socialnetwork 2001-09-27 23:00:59.000000               NULL               NULL</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="mgu1523039456591"> </a>
+	  <h3>Attribution_MLE Example (Single Input): Unused Segment Windows</h3>
+   <a name="section_cw5_kvq_qgb"> </a>
+   <p style="line-height: 1em;">This example uses the single-input Attribution_MLE function.</p>
+
+   <a name="section_mxc_mll_kdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>attribution_sample_table3, as in Attribution_MLE Example (Single Input): Single-Window Model</li>
+   </ul>
+
+   <a name="section_yjv_gll_kdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Attribution_MLE (
+  ON attribution_sample_table3 PARTITION BY user_id
+    ORDER BY time_stamp
+  USING
+  EventColumn ('event')
+  ConversionEvents ('socialnetwork', 'paidsearch')
+  TimeColumn ('time_stamp')
+  WindowSize ('rows:10&amp;seconds:20')
+  
+  FirstModel ('SEGMENT_ROWS', '3:0.5:EXPONENTIAL:0.5,ROW',
+          '4:0.3:WEIGHTED:0.4,0.3,0.2,0.1', '3:0.2:FIRST_CLICK:NA')
+  SecondModel ('SEGMENT_SECONDS', '6:0.5:UNIFORM:NA',
+          '8:0.3:LAST_CLICK:NA', '6:0.2:FIRST_CLICK:NA')
+) AS dt ORDER BY 1, 3;</tt>
+   </pre>
+   <a name="section_dbj_hll_kdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ user_id event         time_stamp                 attribution        time_to_conversion 
+ ------- ------------- -------------------------- ------------------ ------------------ 
+       1 impression    2001-09-27 23:00:07.000000                0.0               NULL
+       1 impression    2001-09-27 23:00:09.000000                0.0               NULL
+       1 impression    2001-09-27 23:00:11.000000                0.0               NULL
+       1 impression    2001-09-27 23:00:13.000000              0.375               -8.0
+       1 email         2001-09-27 23:00:15.000000 0.2083333283662796               -6.0
+       1 impression    2001-09-27 23:00:17.000000 0.2083333283662796               -4.0
+       1 impression    2001-09-27 23:00:19.000000 0.2083333283662796               -2.0
+       1 socialnetwork 2001-09-27 23:00:21.000000               NULL               NULL
+       1 paidsearch    2001-09-27 23:00:23.000000               NULL               NULL
+       2 impression    2001-09-27 23:00:29.000000                0.0               NULL
+       2 impression    2001-09-27 23:00:31.000000                0.0               NULL
+       2 impression    2001-09-27 23:00:33.000000                0.0               NULL
+       2 impression    2001-09-27 23:00:47.000000                0.0               NULL
+       2 impression    2001-09-27 23:00:51.000000              0.375               -8.0
+       2 impression    2001-09-27 23:00:53.000000             0.3125               -6.0
+       2 impression    2001-09-27 23:00:55.000000             0.3125               -4.0
+       2 socialnetwork 2001-09-27 23:00:59.000000               NULL               NULL</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+</t:intro>

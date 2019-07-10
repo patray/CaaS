@@ -1,0 +1,535 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="obg1507213444211"> </a>
+	  <h1>LDAInference</h1>
+
+	
+		<p style="line-height: 1em;">The LDAInference function uses the model table from LDA Output to infer the topic distribution in a set of new documents. You can use the distribution for tasks such as classification and clustering.</p>
+
+	
+   <a name="icb1507213497834"> </a>
+   <h2>LDAInference Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.6</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM LDAInference (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS Model
+  OUT TABLE OutputTable (<i>output_table</i>)
+  USING
+  DocIDColumn ('<i>doc_id_column</i>')
+  WordColumn ('<i>word_column</i>')
+  [ CountColumn ('<i>count_column</i>') ]
+  [ OutputTopicNum ({ 'all' | <i>num_topics</i> }) ]
+  [ OutputTopicWordNum ({ 'none' | 'all' | <i>num_topic_words</i> }) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="nus1507213656280"> </a>
+	  <h2>LDAInference Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputTable</dt>
+      <dd>Specify the name of the output table that contains the topic distribution of each document in the input table, which the function creates in the database. This table must not already exist.</dd>
+      <dt>DocIDColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the document identifiers.</dd>
+      <dt>WordColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the words (one word in each row).</dd>
+      <dt>CountColumn</dt>
+      <dd>[Optional] Specify the name of the InputTable column that contains the count of the corresponding word in the row. The count is a NUMERIC value whose default value is 1.</dd>
+      <dt>OutputTopicNum</dt>
+      <dd>[Optional] Specify the number of top-weighted topics and their weights to include in the output table for each training document. The default value, 'all', specifies all topics and their weights. The value <i>num_topics</i> must be a positive integer.</dd>
+      <dt>OutputTopicWordNum</dt>
+      <dd>[Optional] Specify the number of top topic words and their topic identifiers to include in the output table for each training document. The default value, 'none', specifies no topic words or topic identifiers. The value 'all' specifies all topic words and their topic identifiers. The value <i>num_topic_words</i> must be a positive integer.</dd>
+   </div>
+
+
+	
+   <a name="ylv1507213549818"> </a>
+   <h2>LDAInference Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_gft_hhc_ycb"> </a>
+   <table class="introtable">
+      <a name="table_gft_hhc_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Has same schema as LDA Input InputTable (training table)</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Model</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Has same schema as LDA Output ModelTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ccz1507213593579"> </a>
+   <h2>LDAInference Output</h2>
+   <a name="section_lct_pnv_g2b"> </a>
+   <h3>Output Message Schema</h3>
+   <a name="table_qwr_snv_g2b"> </a>
+   <table class="introtable">
+      <a name="table_qwr_snv_g2b"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">message</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;"> VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Reports number of valid documents, number of recognized words in input, and perplexity.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">OutputTable has the same schema as the LDA Output OutputTable.</p>
+
+   <a name="ogk1510778709878"> </a>
+   <h2>LDAInference Example</h2>
+   <a name="section_kwg_wxg_n2b"> </a>
+   <h3>Input</h3>
+   <ul>
+      <li>InputTable: complaints_testtoken, a tokenized, filtered, input file created by applying the TextParser function to complaints_test, a log of vehicle complaints</li>
+      <li>Model: ldamodel, output by LDA Example</li>
+   </ul>
+   <a name="table_b34_2yg_n2b"> </a>
+   <table class="introtable">
+      <a name="table_b34_2yg_n2b"> </a>
+      <h4 style="text-align: center;">InputTable: complaints_test</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">doc_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">text_data</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ELECTRICAL CONTROL MODULE IS SHORTENING OUT, CAUSING THE VEHICLE TO STALL. ENGINE WILL BECOME TOTALLY INOPERATIVE. CONSUMER HAD TO CHANGE ALTERNATOR/ BATTERY AND STARTER, AND MODULE REPLACED 4 TIMES, BUT DEFECT STILL OCCURRING CANNOT DETERMINE WHAT IS CAUSING THE PROBLEM.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ABS BRAKES FAIL TO OPERATE PROPERLY, AND AIR BAGS FAILED TO DEPLOY DURING A CRASH AT APPROX. 28 MPH IMPACT. MANUFACTURER NOTIFIED.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">WHILE DRIVING AT 60 MPH GAS PEDAL GOT STUCK DUE TO THE RUBBER THAT IS AROUND THE GAS PEDAL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">THERE IS A KNOCKING NOISE COMING FROM THE CATALYITC CONVERTER ,AND THE VEHICLE IS STALLING. ALSO, HAS PROBLEM WITH THE STEERING.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CONSUMER WAS MAKING A TURN ,DRIVING AT APPROX 5- 10 MPH WHEN CONSUMER HIT ANOTHER VEHICLE. UPON IMPACT, DUAL AIRBAGS DID NOT DEPLOY . ALL DAMAGE WAS DONE FROM ENGINE TO TRANSMISSION,TO THE FRONT OF VEHICLE, AND THE VEHICLE CONSIDERED A TOTAL LOSS.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">WHEEL BEARING AND HUBS CRACKED, CAUSING THE METAL TO GRIND WHEN MAKING A RIGHT TURN. ALSO WHEN APPLYING THE BRAKES, PEDAL GOES TO THE FLOOR, CAUSE UNKNOWN. WAS ADVISED BY MIDAS NOT TO DRIVE VEHICLE- WHEELE COULD COME OFF.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DRIVING ABOUT 5-10 MPH, THE VEHICLE HAD A LOW FRONTAL IMPACT IN WHICH THE OTHER VEHICLE HAD NO DAMAGES. UPON IMPACT, DRIVER'S AND THE PASSENGER'S AIR BAGS DID NOT DEPLOY, RESULTING IN INJURIES. PLEASE PROVIDE FURTHER INFORMATION AND VIN#.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">THE AIR BAG WARNING LIGHT HAS COME ON. INDICATING AIRBAGS ARE INOPERATIVE.THEY WERE FIXED ONE AT THE TIME, BUT PROBLEM HAS REOCCURRED.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CONSUMER WAS DRIVING WEST WHEN THE OTHER CAR WAS GOING EAST. THE OTHER CAR TURNED IN FRONT OF CONSUMER'S VEHICLE, CONSUMER HIT OTHER VEHICLE AND STARTED TO SPIN AROUND ,COULDN'T STOP, RESULTING IN A CRASH. UPON IMPACT, AIRBAGS DIDN'T DEPLOY.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">WHILE DRIVING ABOUT 65 MPH AND THE TRANSMISISON MADE A STRANGE NOISE, AND THE LEFT FRONT AXLE LOCKED UP. THE DEALER HAS REPAIRED THE VEHICLE.</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">This example uses this stop words file, stopwords.txt:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+a
+an
+in
+is
+to
+into
+was
+the
+and
+this
+with
+they
+but
+will</tt>
+   </pre>
+   <p style="line-height: 1em;">To create a tokenized, filtered, input file for the LDAInference function, apply the TextParser function to complaints_test, using the file stopwords.txt:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE complaints_testtoken AS (
+  SELECT * FROM <b>TextParser</b> (
+    ON <b>complaints_test</b>
+    TextColumn ('text_data')
+    ToLowerCase ('true')
+    Stemming ('false')
+    ListPositions ('true')
+    <b>StopWords ('stopwords.txt')</b>
+    RemoveStopWords ('true')
+    Accumulate ('doc_id') 
+  ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_wqp_wxg_n2b"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM LDAInference (
+  ON complaints_testtoken AS InputTable
+  ON ldamodel AS Model
+  OUT TABLE OutputTable (ldaout2)
+  USING
+  DocIDColumn ('doc_id')
+  WordColumn ('token')
+  OutputTopicNum (5)
+  OutputTopicWordNum (5)
+) AS dt;</tt>
+   </pre>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM complaints_testtoken ORDER BY doc_id;</tt>
+   </pre>
+   <a name="table_hcv_nzg_n2b"> </a>
+   <table class="introtable">
+      <a name="table_hcv_nzg_n2b"> </a>
+      <h4 style="text-align: center;">complaints_testtoken</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">doc_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">token</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">frequency</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">position</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">electrical</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">control</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">module</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2,25</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">shortening</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">out</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">causing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6,37</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">vehicle</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">stall</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">engine</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">become</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">totally</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_egc_xxg_n2b"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ message                                                                                           
+ ------------------------------------------------------------------------------------------------- 
+ There are 10 valid documents with 153 recognized words in the input, the perplexity is 146.040212
+ Outputtable is created successfully. </tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ldaout2 ORDER BY docid, topicid;</tt>
+   </pre>
+   <pre>
+      <tt>
+ docid topicid topicweight          topicwords                                      
+ ----- ------- -------------------- ----------------------------------------------- 
+     1       0 0.004202361754413823 wipers,would,switch,when,on                    
+     1       1   0.9818923737738922 vehicle,causing,consumer,replaced,which        
+     1       2 0.004507796811204752 vehicle,manufacturer,would,transmission,problem
+     1       3 0.004313653081088213 did,not,deploy,hit,vehicle                     
+     1       4 0.005083814579401286 vehicle,side,car,engine,while                  
+     2       0  0.23870769504862557 wipers,would,switch,when,on                    
+     2       1 0.013331851654654326 vehicle,causing,consumer,replaced,which        
+     2       2  0.09802669464453168 vehicle,manufacturer,would,transmission,problem
+     2       3   0.6321839644685451 did,not,deploy,hit,vehicle                     
+     2       4 0.017749794183643395 vehicle,side,car,engine,while                  
+     3       0  0.02487023130390702 wipers,would,switch,when,on                    
+     3       1  0.38939182929425087 vehicle,causing,consumer,replaced,which        
+     3       2  0.22880351701600884 vehicle,manufacturer,would,transmission,problem
+     3       3  0.17393893594698806 did,not,deploy,hit,vehicle                     
+     3       4   0.1829954864388453 vehicle,side,car,engine,while                  
+     4       0 0.017412050629395465 wipers,would,switch,when,on                    
+     4       1  0.02674751176357119 vehicle,causing,consumer,replaced,which        
+     4       2   0.6146553050991005 vehicle,manufacturer,would,transmission,problem
+     4       3 0.016502037137102715 did,not,deploy,hit,vehicle                     
+     4       4   0.3246830953708302 vehicle,side,car,engine,while                  
+     5       0 0.061682117690179554 wipers,would,switch,when,on                    
+     5       1 0.007226496686956611 vehicle,causing,consumer,replaced,which        
+     5       2  0.07038616515924828 vehicle,manufacturer,would,transmission,problem
+     5       3   0.7114242472226594 did,not,deploy,hit,vehicle                     
+     5       4  0.14928097324095613 vehicle,side,car,engine,while                  
+     6       0  0.13471826421661065 wipers,would,switch,when,on                    
+     6       1  0.47822125749783323 vehicle,causing,consumer,replaced,which        
+     6       2  0.05589848757873593 vehicle,manufacturer,would,transmission,problem
+     6       3   0.2854434939021821 did,not,deploy,hit,vehicle                     
+     6       4 0.045718496804638104 vehicle,side,car,engine,while                  
+     7       0 0.007096264886642341 wipers,would,switch,when,on                    
+     7       1   0.2897611972252564 vehicle,causing,consumer,replaced,which        
+     7       2 0.007262190348990799 vehicle,manufacturer,would,transmission,problem
+     7       3   0.6854073542763487 did,not,deploy,hit,vehicle                     
+     7       4 0.010472993262761772 vehicle,side,car,engine,while                  
+     8       0  0.18451313388726223 wipers,would,switch,when,on                    
+     8       1   0.2594229641285835 vehicle,causing,consumer,replaced,which        
+     8       2  0.03883152533036032 vehicle,manufacturer,would,transmission,problem
+     8       3   0.3403368717029619 did,not,deploy,hit,vehicle                     
+     8       4  0.17689550495083203 vehicle,side,car,engine,while                  
+     9       0  0.10716645608023352 wipers,would,switch,when,on                    
+     9       1    0.011237010500215 vehicle,causing,consumer,replaced,which        
+     9       2 0.012090442989372539 vehicle,manufacturer,would,transmission,problem
+     9       3   0.5304589100317839 did,not,deploy,hit,vehicle                     
+     9       4  0.33904718039839515 vehicle,side,car,engine,while                  
+    10       0  0.10908056835555743 wipers,would,switch,when,on                    
+    10       1   0.1611027170455575 vehicle,causing,consumer,replaced,which        
+    10       2  0.13454850444953406 vehicle,manufacturer,would,transmission,problem
+    10       3   0.1412092067930684 did,not,deploy,hit,vehicle                     
+    10       4   0.4540590033562826 vehicle,side,car,engine,while</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

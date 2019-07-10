@@ -1,0 +1,958 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="dka1507571720248"> </a>
+	  <h1>TextTagger</h1>
+
+	
+		<p style="line-height: 1em;">The TextTagger function tags text documents according to user-defined rules that use text-processing and logical operators. The text in the documents can include Unicode emoticons (also called emojis).</p>
+   <p>
+      <b>Note:</b>  You can run queries with emojis only from the bteq prompt, not using Teradata Studio<sup>™</sup>.</p>
+		
+	
+   <a name="zve1507571874294"> </a>
+   <h2>TextTagger Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.7</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TextTagger (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY ANY
+  [ ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS Rules DIMENSION ]
+  USING
+  [ InputLanguage ({ 'en' | 'zh_CN' | 'zh_TW' }) ]
+  [ TaggingRules ('<i>rule</i> AS <i>tag</i>' [,...]) ]
+  [ Tokenize ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ OutputByTag ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ TagDelimiter ('<i>delimiter</i>') ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="eln1507571985386"> </a>
+	  <h2>TextTagger Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>InputLanguage</dt>
+      <dd>[Optional] Specify the language of the input text:<a name="d59e19"> </a>
+         <table class="introtable">
+            <a name="d59e19"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'en'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">English</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'zh_CN'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Simplified Chinese</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'zh_TW'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Traditional Chinese</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>TaggingRules</dt>
+      <dd>[Required if you do not specify a Rules table, disallowed otherwise.] Specify the tag names and tagging rules. For information about defining tagging rules, see Defining Tagging Rules.</dd>
+      <dt>Tokenize</dt>
+      <dd>[Optional] Specify whether the function tokenizes the input text before evaluating the rules and tokenizes the text string parameter in the rule definition when parsing a rule. <p style="line-height: 1em;">If you specify 'true', then you must also specify the InputLanguage syntax element. The function uses the value of InputLanguage to create the word tokenizer.</p>
+      </dd>
+      <dd>Default: 'false'</dd>
+      <dt>OutputByTag</dt>
+      <dd>[Optional] Specify whether the function outputs a tuple when a text document matches multiple tags.</dd>
+      <dd>Default: 'false' (One tuple in the output stands for one document and the matched tags are listed in the output column tag.)</dd>
+      <dt>TagDelimiter</dt>
+      <dd>[Optional] </dd>
+      <dd>Specify the delimiter, a string, that separates multiple tags in the output column tag if OutputByTag has the value 'false'. If OutputByTag has the value 'true', specifying this syntax element causes an error.</dd>
+      <dd>Default: ',' (comma)</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of text table columns to copy to the output table.<p>
+            <b>Note:</b>  Do not use the name 'tag' for an <i>accumulate_column</i>, because the function uses that name for the output table column that contains the tags.</p>
+      </dd>
+   </div>
+
+
+	
+   <a name="vrp1507572464616"> </a>
+   <h2>Defining Tagging Rules</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">You can specify tagging rules with either the TaggingRules syntax element or a Rules table.</p>
+
+   <a name="section_elr_53z_fdb"> </a>
+   <h3>Rules for Rule Operations Table</h3>
+   <ul>
+      <li>The operand <i>op</i>n (where n is 1, 2, or 3) can be any of the following:<a name="table_qby_vjz_fdb"> </a>
+         <table class="introtable">
+            <a name="table_qby_vjz_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">
+                     <i>op</i>n</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Rules for <i>op</i>n</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">String literal</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Enclose string literal in double quotation marks (for example, "Start countdown").<p style="line-height: 1em; margin: 0px;">
+                        <br/>If string literal contains double quotation marks, precede each double quotation mark with two backslashes (for example, "\\"Start countdown\\"").</p>
+                     <p style="line-height: 1em; margin: 0px;">
+                        <br/>Do not use the empty string ("").</p>
+                     <p style="line-height: 1em; margin: 0px;">
+                        <br/>If an operation has only string literal operands, matches are case-insensitive and do not consider overlapping.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">Java regular expression (<tt style="font-family: monospace;">regex"<i>exp</i>"</tt>)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">An operation with one or more Java regular expression operands uses fuzzy matching. Fuzzy matching evaluates original text input; that is, matching is case-sensitive and text is not tokenized.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">[<tt style="font-family: monospace;">superdist</tt> operation only] List of string literals or Java regular expressions</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">For details, see description of <tt style="font-family: monospace;">superdist</tt> operation in following table.</div>
+               </td>
+            </tr>
+         </table>
+
+      </li>
+      <li>The operands <i>lower</i> and <i>upper</i> are nonnegative integers.<p style="line-height: 1em;">You can omit either <i>lower</i> or <i>upper</i>, but not both. For example, all of the following are valid syntax for the contain operation:</p>
+         <pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+contain (<i>col</i>, <i>op1</i>, <i>lower</i>, <i>upper</i>)
+contain (<i>col</i>, <i>op1</i>, <i>lower</i>,)
+contain (<i>col</i>, <i>op1</i>,, <i>upper</i>)</tt>
+         </pre>
+         <p style="line-height: 1em;">If <i>x</i> is the number of times that <i>op1</i> appears in <i>col</i>, then the preceding operations have the following meanings, respectively:</p>
+         <p style="line-height: 1em;">
+            <i>lower</i> &lt;= <i>x</i> &lt;= <i>upper</i>
+         </p>
+         <p style="line-height: 1em;">
+            <i>lower</i> &lt;= <i>x</i>
+         </p>
+         <p style="line-height: 1em;">
+            <i>x</i> &lt;= <i>upper</i>
+         </p>
+         <p style="line-height: 1em;">The meanings of <i>lower</i>, <i>x</i>, and <i>upper</i> depend on the operation.</p>
+      </li>
+   </ul>
+
+   <a name="section_ecv_kjz_fdb"> </a>
+   <h3>Rule Operations</h3>
+   <p style="line-height: 1em;">This table summarizes the operations that a rule can use. For simplicity, the table shows only the syntax that specifies both <i>lower</i> and <i>upper</i>.</p>
+   <a name="table_N100C7_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100C7_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Syntax</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">equal (<i>col</i>, <i>op1</i>)</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns 'true' if the text in column <i>col</i> and the value of <i>op1</i> are equal; 'false' otherwise.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">contain (<i>col</i>, <i>op1</i>, <i>lower</i>, <i>upper</i>)</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns 'true' if, in column col, the number of times that the value of <i>op1</i> appears is in the range [<i>lower</i>, <i>upper</i>]; 'false' otherwise.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">dist (<i>col</i>, <i>op1</i>, <i>op2</i>, <i>lower</i>, <i>upper</i>)</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns 'true' if, in column col, the distance between the values of <i>op1</i> and <i>op2</i> (that is, the number of words between them) is in the range [<i>lower</i>, <i>upper</i>]; 'false' otherwise.<p style="line-height: 1em; margin: 0px;">
+                  <br/>The distance computation depends on the InputLanguage and UseTokenizer syntax elements.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>By default, InputLanguage is 'en' (English) and UseTokenizer is 'false', and words are delimited by whitespace characters.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>If InputLanguage is 'zh_cn' (Simplified Chinese) or 'zh_tw' (Traditional Chinese) and UseTokenizer is 'true', then the function performs word segmentation before computing the distance between words.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">superdist (<i>col</i>, <i>op1</i>, <i>op2</i>, <i>con1</i>, <i>op3</i>, <i>con2</i>)</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns 'true' if, in column <i>col</i>, the values of <i>op1</i>, <i>op2</i>, and <i>op3</i> satisfy the context rules <i>con1</i> and <i>con2</i>; 'false' otherwise.<p style="line-height: 1em; margin: 0px;">
+                  <br/>The rules <i>con1</i> and <i>con2</i> specify the context for inclusion and exclusion, as the following table shows.<a name="table_izm_mvw_ccb"> </a>
+                  <table class="introtable">
+                     <a name="table_izm_mvw_ccb"> </a>
+                     <tr>
+                        <th align="left">
+                           <div style="line-height: 1em;">con1 or con2 Value</div>
+                        </th>
+                        <th align="left">
+                           <div style="line-height: 1em;">con1 Meaning</div>
+                        </th>
+                        <th align="left">
+                           <div style="line-height: 1em;">con2 Meaning</div>
+                        </th>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">nw<i>n</i>
+                           </div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <i>op2</i> appears <i>n</i> or fewer words before or after <i>op1</i>.</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <i>op3</i> does not appear <i>n</i> or fewer words before or after <i>op1</i>.</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">nr<i>n</i>
+                           </div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <i>op2</i> appears <i>n</i> or fewer words after <i>op1</i>.</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <i>op3</i> does not appear <i>n</i> or fewer words after <i>op1</i>.</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">para</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <i>op2</i> appears in the same paragraph as <i>op1</i>.</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <i>op3</i> does not appear in the same paragraph as <i>op1</i>.</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">sent</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <i>op2</i> appears in the same sentence as <i>op1</i>.</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <i>op3</i> does not appear in the same sentence as <i>op1</i>.</div>
+                        </td>
+                     </tr>
+                  </table>
+
+               </p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>The distance computation depends on the InputLanguage and UseTokenizer syntax elements (for details, see the description of the dist operation).</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>A paragraph ends with either "\n" or "\r\n". A sentence ends with either period (.), question mark (?), or exclamation mark (!). The function fragments the input into paragraphs or sentences and then checks the context rule on each piece of text. If one piece satisfies the rule, then the function tags the whole input.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <i>op</i>n (where n is 1, 2, or 3) can be a list of words. Enclose the list in double quotation marks and separate the words with semicolons. For example: "good;bad;neutral"</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>If <i>op</i>n is a Java regular expression, then exp can be a list. Separate the items with semicolons. For example: regex"invest[\w]*;volatil[\w]*;risk"</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>When a list appears in an inclusion context, the rule is satisfied if at least one item appears in the context. When a list appears in an exclusion context, the rule is satisfied if no item appears in the context.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>The operand-context pairs after op1 are optional; that is, the following are valid syntax:</p>
+               <pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+superdist(<i>col</i>, <i>op1,,</i>,,)</tt>
+               </pre>
+               <pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+superdist(<i>col</i>, <i>op1</i>, <i>op2</i>, <i>con1</i>,,)</tt>
+               </pre>
+               <pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+superdist(<i>col, op1</i>,,, <i>op3</i>, <i>con2</i>)</tt>
+               </pre>
+               <pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+superdist(<i>col</i>, <i>op1</i>, <i>op2</i>, <i>con1</i>, <i>op3</i>, <i>con2</i>)</tt>
+               </pre>
+               <pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+superdist(<i>col</i>, <i>op1</i>,,,,)</tt>
+               </pre>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>The final syntax in the preceding list returns 'true' if <i>op1</i> appears in <i>col</i>.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">dict (<i>col</i>, "[<i>schema</i>/]<i>dictionary</i>",<i>lower</i>, <i>upper</i>)</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns 'true' if, in column col, the number of items (lines in the dictionary file) is in the range [<i>lower</i>, <i>upper</i>]; 'false' otherwise.<p>
+                  <b>Note:</b>  This operation requires that dictionary file [<i>schema</i>.] <i>dictionary</i> is installed on ML Engine. Dictionary name, <i>dictionary</i>, is case-sensitive. If dictionary is in public schema, you can omit schema name, <i>schema</i>.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">
+                  <i>operation1</i> and <i>operation2</i>
+               </tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns 'true' if both <i>operation1</i> and <i>operation2</i> return 'true'; 'false' otherwise.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">
+                  <i>operation1</i> or <i>operation2</i>
+               </tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns 'true' if one or both <i>operation1</i> or <i>operation2</i> returns 'true'; 'false' otherwise.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">not <i>operation</i>
+               </tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns 'true' if <i>operation</i> returns 'false'; 'false' if <i>operation</i> returns 'true'.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ihp1507572522447"> </a>
+   <h2>TextTagger Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_bdk_cdd_ycb"> </a>
+   <table class="introtable">
+      <a name="table_bdk_cdd_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains text to tag.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Rules</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Contains tagging rules. If you omit this table, specify tagging rules with TaggingRules syntax element.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_q4z_zcd_ycb"> </a>
+   <h3>InputTable Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them unless you specify them in rules.</p>
+   <a name="table_N1001B_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1001B_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>text_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Text to tag.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_qlw_bfk_ycb"> </a>
+   <h3>Rules Schema</h3>
+   <a name="table_N10062_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10062_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">tagname</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Name of tag.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">definition</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Definition of tag.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="fub1507572600554"> </a>
+   <h2>TextTagger Output</h2>
+   <a name="section_xqb_mdd_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from InputTable. Typically, one <i>accumulate_column</i> contains document identifiers.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">tag</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Tuple of tags that match text document. Tag names come from either TaggingRules syntax element or rules table. If text document matches no tag, its value in this column is an empty string.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ikt1510350102945"> </a>
+   <h2>TextTagger Examples</h2>
+   <a name="ldg1524604439044"> </a>
+	  <h3>TextTagger Example: TaggingRules</h3>
+
+	  <a name="section_mp3_gxq_t2b"> </a>
+   <h4>Input</h4>
+   <a name="table_ctd_3xq_t2b"> </a>
+   <table class="introtable">
+      <a name="table_ctd_3xq_t2b"> </a>
+      <h4 style="text-align: center;">text_inputs</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">title</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">content</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">catalog</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Chennai Floods</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Chennai floods have battered the capital city of Tamil Nadu and its adjoining areas. Normal life came to a standstill when roads were submerged in water and all modes of transport were severely affected. In the past, Chennai has had tsunamis and earthquakes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Regional</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Tennis Superstars</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Roger Federer born on 8 August 1981, is a greatest tennis player, who has been continuously ranked inside the top 10 since October 2002 and has won Wimbledon, USOpen, Australian and FrenchOpen titles mutiple times</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sports</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sports Rivalry</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">The Federer Nadal rivalry, known by many as Fedal, is between two professional tennis players, Roger Federer of Switzerland and Rafael Nadal of Spain. They are currently engaged in a storied rivalry, which many consider to be the greatest in tennis history. They have played 34 times, most recently in the 2015 Swiss Indoors final, and Nadal leads their eleven-year-old rivalry with an overall record of 231</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sports</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sports Rivalry</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">The India Pakistan cricket rivalry is one of the most intense sports rivalries in the world. An India-Pakistan cricket match has been estimated to attract up to one billion viewers, according to TV ratings firms and various other reports. The 2011 World Cup semifinal between the two teams attracted around 988 million television viewers</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sports</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sports Rivalry</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">An Ashes series is traditionally of five Tests, hosted in turn by England and Australia at least once every four years. As of August 2015, England hold the ashes, having won three of the five Tests in the 2015 Ashes series. Overall, Australia has won 32 series, England 32 and five series have been drawn.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sports</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TextTagger (
+  ON text_inputs
+  USING
+  TaggingRules ('contain(content, "floods", 1,) or
+          contain(content, "tsunamis", 1,) AS Natural-Disaster',
+         'contain(content, "Roger", 1,) and
+          contain(content, "Nadal", 1,) AS Tennis-Rivalry',
+         'contain(title, "Tennis", 1,) and
+          contain(content, "Roger", 1,) AS Tennis-Greats',
+         'contain(content, "India", 1,) and
+          contain(content, "Pakistan", 1,) AS Cricket-Rivalry',
+         'contain(content,"Australia",1,) and
+          contain(content, "England", 1,) AS The-Ashes'
+  )
+  OutputByTag ('true')
+  Accumulate ('id')
+) AS dt ORDER BY id;</tt>
+   </pre>
+		
+   <a name="section_of2_xdn_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id tag              
+ -- ---------------- 
+  1 Natural-Disaster
+  2 Tennis-Greats   
+  3 Tennis-Rivalry  
+  4 Cricket-Rivalry 
+  5 The-Ashes</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="sjg1507572965735"> </a>
+   <h3>TextTagger Example: Rules Table</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The Rules table, rule_inputs, defines the same rules as the TaggingRules syntax element in TextTagger Example: TaggingRules.</p>
+
+   <a name="section_nrd_qxq_t2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: text_inputs, as in TextTagger Example: TaggingRules</li>
+      <li>Rules: rule_inputs</li>
+   </ul>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <h4 style="text-align: center;">rule_inputs</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">tagname</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">definition</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Cricket-Rivalry</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">contain(content,"India",1,) and contain(content,"Pakistan",1,)</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Natural-Disaster</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">contain(content, "floods",1,) or contain(content,"tsunamis",1,)</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Tennis-Greats</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">contain(title,"Tennis",1,) and contain(content,"Roger",1,)</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Tennis-Rivalry</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">contain(content,"Roger",1,) and contain(content,"Nadal",1,)</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">The-Ashes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">contain(content,"Australia",1,) and contain(content,"England",1,)</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_kw3_22n_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TextTagger (
+  ON text_inputs PARTITION BY ANY
+  ON rule_inputs AS Rules DIMENSION
+  USING
+  Accumulate ('id')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_of2_xdn_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id tag              
+ -- ---------------- 
+  1 Natural-Disaster
+  2 Tennis-Greats   
+  3 Tennis-Rivalry  
+  4 Cricket-Rivalry 
+  5 The-Ashes</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="uae1507573336085"> </a>
+   <h3>TextTagger Example: TaggingRules, Dictionary File</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example uses this dictionary file, keywords.txt:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+floods
+tsunamis
+Roger
+Nadal
+India
+Pakistan
+England
+Australia</tt>
+   </pre>
+   <a name="section_xds_1yq_t2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: text_inputs, as in TextTagger Example: TaggingRules</li>
+   </ul>
+
+   <a name="section_ybt_d2n_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TextTagger (
+  ON text_inputs
+  USING
+  TaggingRules ('dict(content, "keywords.txt", 1,) AND
+          equal(title, "Chennai Floods") AS Natural-Disaster',
+         'dict(content, "keywords.txt", 2,) AND
+          equal(catalog, "sports") AS Great-Sports-Rivalry '
+  )
+  Accumulate ('id')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_of2_xdn_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id tag                  
+ -- -------------------- 
+  1 Natural-Disaster    
+  2                     
+  3 Great-Sports-Rivalry
+  4 Great-Sports-Rivalry
+  5 Great-Sports-Rivalry</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="hnm1524604523735"> </a>
+	  <h3>TextTagger Example: TaggingRules, Superdist</h3>
+
+	  <a name="section_xds_1yq_t2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: text_inputs, as in TextTagger Example: TaggingRules</li>
+   </ul>
+
+   <a name="section_fls_b2n_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TextTagger (
+  ON text_inputs
+  USING
+  TaggingRules ('superdist(content, "Chennai", "floods", sent, ,)
+          AS Chennai-Flood-Disaster',
+         'superdist(content, "Roger", "titles", para, "Nadal", para)
+          AS Roger-Champion',
+         'superdist(content, "Roger", "Nadal", para, ,)
+          AS Tennis-Rivalry',
+         'contain(content, regex"[A|a]shes", 2,)
+          AS Aus-Eng-Cricket',
+         'superdist(content, "Australia", "won", nw5, ,)
+          AS Aus-victory'
+    )
+  Accumulate ('id')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_of2_xdn_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id tag                         
+ -- --------------------------- 
+  1 Chennai-Flood-Disaster     
+  2 Roger-Champion             
+  3 Tennis-Rivalry             
+  4                            
+  5 Aus-Eng-Cricket,Aus-victory</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="opc1549476805193"> </a>
+	  <h3>TextTagger Example: Text, Unicode Emoticons (Emojis)</h3>
+
+	  <a name="section_hrx_nnq_jhb"> </a>
+   <p>
+      <b>Note:</b>  You can run queries with emojis only from the bteq prompt, not using Teradata Studio<sup>™</sup>.</p>
+
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+============================================
+Input
+============================================
+ id |      title_1      |                                                                                                                                                                                                        contents                                                                                                                                                                                                         | catalog  
+----+-------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------
+  1 | Chennai Floods    | Chennai floods have battered the capital city of Tamil Nadu and its adjoining areas 😩. Normal life came to a standstill when roads were submerged in water and all modes of transport were severely affected. In the past, Chennai has had tsunamis and earthquakes                                                                                                                                                       | Regional
+  2 | Tennis Superstars | Roger Federer born on 8 August 1981, is a greatest 👍 tennis player, who has been continuously ranked inside the top 10 since October 2002 and has won Wimbledon, USOpen, Australian and FrenchOpen titles mutiple times                                                                                                                                                                                                   | sports
+  3 | Sports Rivalry    | The Federer Nadal rivalry, known by many as Fedal, is between two professional tennis players, Roger Federer of Switzerland and Rafael Nadal of Spain. They are currently engaged in a storied rivalry, which many consider to be the greatest in tennis history. They have played 34 times, most recently in the 2015 Swiss Indoors final, and Nadal leads their eleven-year-old rivalry with an overall record of 231 | sports
+  4 | Sports Rivalry    | The India Pakistan cricket rivalry is one of the most intense 😣 sports rivalries in the world. An India-Pakistan cricket match has been estimated to attract up to one billion viewers, according to TV ratings firms and various other reports. The 2011 World Cup semifinal between the two teams attracted around 988 million television viewers                                                                       | sports
+  5 | Sports Rivalry    | An Ashes series is traditionally of five Tests, hosted in turn by England and Australia at least once every four years. As of August 2015, England hold the ashes, having won three of the five Tests in the 2015 Ashes series. Overall, Australia has won 32 series, England 32 and five series have been drawn.                                                                                                       | sports
+(5 rows)</tt>
+   </pre>
+   <a name="section_ev2_b41_sgb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TextTagger(
+ON text_inputs_emojis
+USING
+TaggingRules (
+ 'contain(contents, "👍", 1,) AS Thumbs',
+    'contain(contents, "👍", 1,) or
+        contain(contents, "greatest", 1,) AS Fabulous',
+    'contain(contents, "greatest", 1,) AS Wonderful',
+    'contain(contents, "😩", 1,) AS Weary',
+    'contain(title_1, "Tennis", 1,) and
+        contain(contents, "Roger", 1,) AS Tennis-Greats',
+    'contain(contents, "India", 1,) and
+        contain(contents, "Pakistan", 1,) AS Cricket-Rivalry',
+    'contain(contents,"Australia",1,) and
+        contain(contents, "England", 1,) AS The-Ashes'
+ )
+    OutputByTag ('true')
+    Accumulate ('id')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_tpl_b41_sgb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+         id tag
+----------- ---------------------------------------------------------------
+          1 Weary
+          2 Wonderful
+          2 Fabulous
+          2 Tennis-Greats
+          2 Thumbs
+          3 Wonderful
+          3 Fabulous
+          4 Cricket-Rivalry
+          5 The-Ashes</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

@@ -1,0 +1,933 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="gcy1506973913737"> </a>
+	  <h1>CoxHazardRatio</h1>
+
+	  <p style="line-height: 1em;">The CoxHazardRatio function takes as input the coefficient table output by the function CoxPH and outputs the hazard ratios between predictive features and either their corresponding reference features or their unit differences.</p>
+   <p>
+      <b>Note:</b>  The CoxPH and CoxHazardRatio functions do not support interaction terms (for example, using AGE*AGE as an item in the Cox proportional hazard model). The CoxHazardRatio function supports only relative hazard ratio calculation. It does not calculate or output confidence intervals.</p>
+   <a name="bsp1506974144043"> </a>
+   <h2>CoxHazardRatio Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.4</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM CoxHazardRatio (
+  ON <i>cox_coef_model_table</i> AS CoxCoeffModel DIMENSION
+  ON <i>predict_feature_table</i> AS PredictorValues PARTITION BY { 1 | <i>id</i> }
+  [ ON <i>ref_feature_table</i> AS ReferenceValues PARTITION BY { 1 | <i>id</i>} ]
+  USING
+  PredictFeatureNames ('<i>predict_feature</i>' [,...])
+  { PredictFeatureColumns ({ '<i>pf_value_column</i>' | <i>pf_value_column_range</i> }[,...]) |
+    PredictFeatureUnitsColumns ({ '<i>pf_unit_column</i>' | <i>pf_unit_column_range</i> }[,...])
+  }
+  [ RefFeatureColumns ({ '<i>rf_value_column</i>' | <i>rf_value_column_range</i> }[,...]) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="cbn1506974245869"> </a>
+	  <h2>CoxHazardRatio Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>PredictFeatureNames</dt>
+      <dd>Specify the names of the features in the Cox coefficient model (the CoefficientTable output by the CoxPH function).</dd>
+      <dt>PredictFeatureColumns</dt>
+      <dd>[Required if you omit PredictFeatureUnitsColumns, disallowed otherwise.] Specify the names of the columns that contain the values of the features in the Cox coefficient model. This syntax element must specify a column for each feature specified by PredictFeatureNames. The <i>i</i>th <i>predict_feature</i> corresponds to the <i>i</i>th <i>pf_value_column</i>.</dd>
+      <dt>PredictFeatureUnitsColumns</dt>
+      <dd>[Required if you omit PredictFeatureColumns, disallowed otherwise.] Specify the names of the columns that contain the unit values of the features in the Cox coefficient model. This syntax element must specify a column for each feature specified by PredictFeatureNames. The <i>i</i>th <i>predict_feature</i> corresponds to the <i>i</i>th <i>pf_unit_column</i>.</dd>
+      <dt>RefFeatureColumns</dt>
+      <dd>[Optional] The function ignores this syntax element if you specify PredictFeatureUnitsColumns.</dd>
+      <dd>Specify the names of the columns that contain the reference values. This syntax element must specify a column for each feature specified by PredictFeatureNames. The <i>i</i>th <i>predict_feature</i> corresponds to the <i>i</i>th <i>rf_value_column</i>.</dd>
+      <dd>Default behavior:  The reference values are the distinct feature-value combinations.</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the PredictorValues columns to copy to the output table.</dd>
+   </div>
+
+
+	
+   <a name="yhf1506974346427"> </a>
+   <h2>CoxHazardRatio Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_b4j_cvt_wcb"> </a>
+   <table class="introtable">
+      <a name="table_b4j_cvt_wcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CoxCoeffModel</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Cox coefficient model table. Has same schema as CoxPH Output CoefficientTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">PredictorValues</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Predict feature table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ReferenceValues</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Reference feature table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_zqj_svt_wcb"> </a>
+   <h3>PredictorValues Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10034_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10034_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>pf_value_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any numeric SQL data type or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>pf_value_column</i>.] Prediction variable value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>pf_unit_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any numeric SQL data type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>pf_unit_column</i>.] Prediction variable unit.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_dgv_5vt_wcb"> </a>
+   <h3>ReferenceValues Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10093_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10093_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>ref_feature_value_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Numeric or string</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>predict_feature</i>.] Prediction feature reference value.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="nqw1506974449651"> </a>
+   <h2>CoxHazardRatio Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The CoxHazardRatio function has one output table, whose schema depends on whether you specify the PredictFeatureColumns syntax element or the PredictFeatureUnitsColumns syntax element.</p>
+
+   <a name="section_gfl_c42_yfb"> </a>
+   <h3>Output Table Schema (PredictFeatureColumns Specified)</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in PredictorValues table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from PredictorValues table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>predict_feature</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as <i>pf_value_column</i> column in PredictorValues table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>predict_feature</i>.] Prediction feature value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>predict_feature_ref</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as <i>rf_value_column</i> in ReferenceValues table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>predict_feature</i>.] Prediction feature reference value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">hazardratio</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Hazard ratio between prediction feature and reference feature.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_wfb_d42_yfb"> </a>
+   <h3>Output Table Schema (PredictFeatureUnitsColumns Specified)</h3>
+   <a name="table_N10096_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10096_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in <i>predict_feature_table</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from PredictorValues table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>pf_unit_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as <i>pf_unit_column</i> column in PredictorValues table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>predict_feature</i>.] Unit differences of prediction features (for example, an increase or decrease of 5 units).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">hazardratio</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Hazard ratio for unit difference.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ohw1506974540687"> </a>
+   <h2>CoxHazardRatio Examples</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">These examples use different syntax elements and options for the CoxHazardRatio function.</p>
+
+   <a name="svb1506974752079"> </a>
+   <h3>CoxHazardRatio Example: No Reference Values</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">This example calculates four hazard ratios for each patient: using individual patient characteristics as a reference, and using the characteristics of each of the other three patients.</p>
+
+   <a name="section_rrd_t1t_r2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>CoxCoeffModel: lungcancer_coef, output by CoxPH Example</li>
+      <li>PredictorValues: lc_new_predictors, a list of four patients diagnosed with lung cancer<p style="line-height: 1em;">This table includes all attributes used in the input to the CoxPH function.</p>
+      </li>
+   </ul>
+   <a name="table_oxh_zbt_r2b"> </a>
+   <table class="introtable">
+      <a name="table_oxh_zbt_r2b"> </a>
+      <h4 style="text-align: center;">PredictorValues: lc_new_predictors</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">name</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">trt</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">celltype</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">karno</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">diagtime</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">age</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">prior</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">John</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">standard</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">squamous</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">63</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">James</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">standard</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">large</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">80</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">41</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Stella</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">test</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">smallcell</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">70</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">72</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Steffi</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">test</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">adeno</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">63</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_us5_h41_4db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM CoxHazardRatio (
+  ON lungcancer_coef AS CoxCoeffModel DIMENSION
+  ON lc_new_predictors AS PredictorValues PARTITION BY 1
+  USING
+  PredictFeatureNames ('trt','celltype','karno','diagtime','age','prior')
+  PredictFeatureColumns ('trt','celltype','karno','diagtime','age','prior')
+  Accumulate ('id','name')
+) AS dt;</tt>
+   </pre>
+   <a name="section_evg_341_4db"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id name   trt      celltype  karno diagtime age prior trt_ref  celltype_ref karno_ref diagtime_ref age_ref prior_ref hazardratio         
+ -- ------ -------- --------- ----- -------- --- ----- -------- ------------ --------- ------------ ------- --------- ------------------- 
+  4 steffi test     adeno        60        5  63 yes   test     adeno               60            5      63 yes                       1.0
+  3 stella test     smallcell    70        3  72 no    test     adeno               60            5      63 yes       0.44362587713756574
+  1 john   standard squamous     30        4  63 yes   test     adeno               60            5      63 yes        0.6027271149571112
+  2 james  standard large        80       12  41 no    test     adeno               60            5      63 yes       0.19687899554247046
+  4 steffi test     adeno        60        5  63 yes   test     smallcell           70            3      72 no         2.2541516433900584
+  3 stella test     smallcell    70        3  72 no    test     smallcell           70            3      72 no                        1.0
+  1 john   standard squamous     30        4  63 yes   test     smallcell           70            3      72 no         1.3586383166963207
+  2 james  standard large        80       12  41 no    test     smallcell           70            3      72 no        0.44379511135104377
+  4 steffi test     adeno        60        5  63 yes   standard squamous            30            4      63 yes        1.6591256228304212
+  3 stella test     smallcell    70        3  72 no    standard squamous            30            4      63 yes        0.7360310597095557
+  1 john   standard squamous     30        4  63 yes   standard squamous            30            4      63 yes                       1.0
+  2 james  standard large        80       12  41 no    standard squamous            30            4      63 yes       0.32664698610162896
+  4 steffi test     adeno        60        5  63 yes   standard large               80           12      41 no          5.079261996662724
+  3 stella test     smallcell    70        3  72 no    standard large               80           12      41 no         2.2532920584810046
+  1 john   standard squamous     30        4  63 yes   standard large               80           12      41 no         3.0614089293598203
+  2 james  standard large        80       12  41 no    standard large               80           12      41 no                        1.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="rna1506975150345"> </a>
+   <h3>CoxHazardRatio Example: No Reference Values, Partition by Name and ID</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The input table can be partitioned by either name or id and the hazard ratio is determined. Because reference values are not used in this example, partitioning by id gives the same result as identity comparison (that is, the patients are compared with themselves and the hazard ratio is one).</p>
+
+   <a name="section_rrd_t1t_r2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>CoxCoeffModel: lungcancer_coef, output by CoxPH Example</li>
+      <li>PredictorValues: lc_new_predictors, as in CoxHazardRatio Example: No Reference Values</li>
+   </ul>
+
+   <a name="section_us5_h41_4db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM CoxHazardRatio (
+  ON lungcancer_coef AS CoxCoeffModel DIMENSION
+  ON lc_new_predictors AS PredictorValues PARTITION BY name, id
+  USING
+  PredictFeatureNames ('trt','celltype','karno','diagtime','age','prior')
+  PredictFeatureColumns ('trt','celltype','karno','diagtime','age','prior')
+  Accumulate ('id','name')
+) AS dt;</tt>
+   </pre>
+   <a name="section_evg_341_4db"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id name   trt      celltype  karno diagtime age prior trt_ref  celltype_ref karno_ref diagtime_ref age_ref prior_ref hazardratio 
+ -- ------ -------- --------- ----- -------- --- ----- -------- ------------ --------- ------------ ------- --------- ----------- 
+  4 steffi test     adeno        60        5  63 yes   test     adeno               60            5      63 yes               1.0
+  1 john   standard squamous     30        4  63 yes   standard squamous            30            4      63 yes               1.0
+  3 stella test     smallcell    70        3  72 no    test     smallcell           70            3      72 no                1.0
+  2 james  standard large        80       12  41 no    standard large               80           12      41 no                1.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="yly1506980805486"> </a>
+  <h3>CoxHazardRatio Example: Reference Values</h3>
+
+  
+    <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">This example
+        compares each of the four new patients in the table lc_new_predictors with each of the
+        attribute reference values provided in the table lc_new_reference, and calculates a hazard
+        ratio.</p>
+
+   <a name="section_rrd_t1t_r2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>CoxCoeffModel: lungcancer_coef, output by CoxPH Example</li>
+      <li>PredictorValues: lc_new_predictors, as in CoxHazardRatio Example: No Reference Values</li>
+      <li>ReferenceValues: lc_new_reference, which has alternate sets of reference values for each attribute</li>
+   </ul>
+   <a name="table_tsp_r2t_r2b"> </a>
+   <table class="introtable">
+      <a name="table_tsp_r2t_r2b"> </a>
+      <h4 style="text-align: center;">ReferenceValues: lc_new_reference</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">trt</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">celltype</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">karno</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">diagtime</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">age</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">prior</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">standard</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">squamous</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">58</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">standard</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">smallcell</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">54</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">58</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">test</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">smallcell</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">52</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">61</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">test</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">adeno</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">standard</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">adeno</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">58</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">52</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">standard</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">large</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">70</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">55</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">test</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">squamous</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">64</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">57</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">test</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">large</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">62</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+    <a name="section_us5_h41_4db"> </a>
+   <h4>SQL
+      Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM CoxHazardRatio (
+  ON lungcancer_coef AS CoxCoeffModel DIMENSION
+  ON lc_new_predictors AS PredictorValues PARTITION BY 1
+  ON lc_new_reference AS ReferenceValues PARTITION BY 1
+  USING
+  PredictFeatureNames ('trt','celltype','karno','diagtime','age','prior')
+  PredictFeatureColumns ('trt','celltype','karno','diagtime','age','prior')
+  RefFeatureColumns ('trt','celltype','karno','diagtime','age','prior')
+  Accumulate ('id','name')
+) AS dt;</tt>
+   </pre>
+
+    <a name="section_evg_341_4db"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id name   trt      celltype  karno diagtime age prior trt_ref  celltype_ref karno_ref diagtime_ref age_ref prior_ref hazardratio         
+ -- ------ -------- --------- ----- -------- --- ----- -------- ------------ --------- ------------ ------- --------- ------------------- 
+  4 steffi test     adeno        60        5  63 yes   standard large               70            8      55 no          4.133930478527213
+  3 stella test     smallcell    70        3  72 no    standard large               70            8      55 no          1.833918534562352
+  1 john   standard squamous     30        4  63 yes   standard large               70            8      55 no         2.4916319907559776
+  2 james  standard large        80       12  41 no    standard large               70            8      55 no         0.8138840802548419
+  4 steffi test     adeno        60        5  63 yes   test     squamous            64           10      57 yes        3.5775643751551955
+  3 stella test     smallcell    70        3  72 no    test     squamous            64           10      57 yes         1.587100133944331
+  1 john   standard squamous     30        4  63 yes   test     squamous            64           10      57 yes        2.1562950544106316
+  2 james  standard large        80       12  41 no    test     squamous            64           10      57 yes        0.7043472806690806
+  4 steffi test     adeno        60        5  63 yes   test     adeno               60            5      60 yes         0.974218736747829
+  3 stella test     smallcell    70        3  72 no    test     adeno               60            5      60 yes        0.4321886416136069
+  1 john   standard squamous     30        4  63 yes   test     adeno               60            5      60 yes        0.5871880485371804
+  2 james  standard large        80       12  41 no    test     adeno               60            5      60 yes       0.19180320632956704
+  4 steffi test     adeno        60        5  63 yes   standard adeno               58            6      52 yes        1.1423866472468276
+  3 stella test     smallcell    70        3  72 no    standard adeno               58            6      52 yes        0.5067922784151168
+  1 john   standard squamous     30        4  63 yes   standard adeno               58            6      52 yes        0.6885474080606075
+  2 james  standard large        80       12  41 no    standard adeno               58            6      52 yes       0.22491193563108589
+  4 steffi test     adeno        60        5  63 yes   test     smallcell           52           12      61 no          1.133822548592944
+  3 stella test     smallcell    70        3  72 no    test     smallcell           52           12      61 no          0.502993022637895
+  1 john   standard squamous     30        4  63 yes   test     smallcell           52           12      61 no         0.6833855935867441
+  2 james  standard large        80       12  41 no    test     smallcell           52           12      61 no        0.22322584449038266
+  4 steffi test     adeno        60        5  63 yes   standard squamous            58           12      60 yes         4.048513897502304
+  3 stella test     smallcell    70        3  72 no    standard squamous            58           12      60 yes         1.796025528883085
+  1 john   standard squamous     30        4  63 yes   standard squamous            58           12      60 yes        2.4401491013053347
+  2 james  standard large        80       12  41 no    standard squamous            58           12      60 yes        0.7970673495799858
+  4 steffi test     adeno        60        5  63 yes   test     large               60            8      62 no         2.3570666129296187
+  3 stella test     smallcell    70        3  72 no    test     large               60            8      62 no          1.045655743632573
+  1 john   standard squamous     30        4  63 yes   test     large               60            8      62 no          1.420667959372799
+  2 james  standard large        80       12  41 no    test     large               60            8      62 no        0.46405690718027626
+  4 steffi test     adeno        60        5  63 yes   standard smallcell           54            8      58 no         1.5841279100453765
+  3 stella test     smallcell    70        3  72 no    standard smallcell           54            8      58 no          0.702760133591979
+  1 john   standard squamous     30        4  63 yes   standard smallcell           54            8      58 no          0.954796844944688
+  2 james  standard large        80       12  41 no    standard smallcell           54            8      58 no         0.3118815117405267</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+  
+   <a name="epp1506981026258"> </a>
+   <h3>CoxHazardRatio Example: RefFeatureColumns, Partition by ID</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">This example compares each of the four new patients in the table lc_new_predictors with each of the attribute reference values provided in the table lc_new_reference, partitioning by id and calculating the hazard ratio only when the patient id matches the reference id.</p>
+
+   <a name="section_rrd_t1t_r2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>CoxCoeffModel: lungcancer_coef, output by CoxPH Example</li>
+      <li>PredictorValues: lc_new_predictors, as in CoxHazardRatio Example: No Reference Values</li>
+      <li>ReferenceValues: lc_new_reference, as in CoxHazardRatio Example: Reference Values</li>
+   </ul>
+
+   <a name="section_us5_h41_4db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM CoxHazardRatio (
+  ON lungcancer_coef AS CoxCoeffModel DIMENSION
+  ON lc_new_predictors AS PredictorValues PARTITION BY id
+  ON lc_new_reference AS ReferenceValues PARTITION BY id
+  USING
+  PredictFeatureNames ('trt','celltype','karno','diagtime','age','prior')
+  PredictFeatureColumns ('trt','celltype','karno','diagtime','age','prior')
+  RefFeatureColumns ('trt','celltype','karno','diagtime','age','prior')
+  Accumulate ('id','name')
+) AS dt;</tt>
+   </pre>
+   <a name="section_evg_341_4db"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">Because the input is partitioned, the output table has only 4 rows. The attributes of patient Steffi are similar to those of reference id 4, so her hazard ratio is very close to 1.0 (0.97).</p>
+   <pre>
+      <tt>
+ id name   trt      celltype  karno diagtime age prior trt_ref  celltype_ref karno_ref diagtime_ref age_ref prior_ref hazardratio        
+ -- ------ -------- --------- ----- -------- --- ----- -------- ------------ --------- ------------ ------- --------- ------------------ 
+  3 stella test     smallcell    70        3  72 no    test     smallcell           52           12      61 no         0.502993022637895
+  2 james  standard large        80       12  41 no    standard smallcell           54            8      58 no        0.3118815117405267
+  1 john   standard squamous     30        4  63 yes   standard squamous            58           12      60 yes       2.4401491013053347
+  4 steffi test     adeno        60        5  63 yes   test     adeno               60            5      60 yes        0.974218736747829</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="rad1506981337009"> </a>
+   <h3>CoxHazardRatio Example: Units Values</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">A standard value or unit value is a value against which
+                an application makes comparisons. Unit values apply only to numerical variables.
+                This example increases the variable karno by 10%, decreases the variable age by 10%,
+                leaves the variable diagtime unchanged, and calculates the hazard ratios.</p>
+
+   <a name="section_rrd_t1t_r2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>CoxCoeffModel: lungcancer_coef, output by CoxPH Example</li>
+      <li>PredictorValues: result of querying lc_new_predictors, the PredictorValues table in CoxHazardRatio Example: No Reference Values</li>
+   </ul>
+
+   <a name="section_us5_h41_4db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM CoxHazardRatio (
+  ON lungcancer_coef AS CoxCoeffModel DIMENSION
+  ON (SELECT id, name, karno * (1.1) as karno,
+             diagtime * (1) AS diagtime,
+             age * (0.9) AS age
+        FROM lc_new_predictors) AS PredictorValues PARTITION BY 1
+  USING
+  PredictFeatureNames ('karno','diagtime','age')
+  PredictFeatureUnitsColumns ('karno','diagtime','age')
+  Accumulate ('id','name')
+) AS dt;</tt>
+   </pre>
+   <a name="section_evg_341_4db"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">Numerical attributes are scaled by the unit values for comparison.</p>
+   <pre>
+      <tt>
+ id name   karno_units diagtime_units age_units hazardratio          
+ -- ------ ----------- -------------- --------- -------------------- 
+  4 steffi          66              5      56.7  0.07001386005957994
+  3 stella          77              3      64.8 0.045469398856572085
+  1 john            33              4      56.7  0.20675151616448595
+  2 james           88             12      36.9  0.04043571764526463</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

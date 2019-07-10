@@ -1,0 +1,994 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="ohm1507917337702"> </a>
+	  <h1>DecisionForestPredict_MLE</h1>
+
+	
+		<p style="line-height: 1em;">The DecisionForestPredict_MLE function uses the model output by the DecisionForest function to create predictions on a response variable for a test set of data. The model can be stored in either a table or a file.</p>
+
+		<p>
+      <b>Note:</b>  DecisionForestPredict_MLE outputs the probability that each observation is in the <i>predicted</i> class. To use DecisionForestPredict_MLE output as input to the Receiver Operating Characteristic (ROC) function, you must first transform it to show the probability that each observation is in the <i>positive</i> class. One way to do this is to change the probability to (1- current probability) when the predicted class is negative.</p>
+	
+   <a name="vma1506534242250"> </a>
+   <h2>DecisionForestPredict_MLE Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.13</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM DecisionForestPredict_MLE (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY ANY
+  ON <i>model_table</i> AS Model DIMENSION
+  USING
+  [ NumericInputs ({ '<i>numeric_input_column</i>' | <i>numeric_input_column_range</i> }[,...]) ]
+  [ CategoricalInputs ({ '<i>categorical_input_column</i>' | <i>categorical_input_column_range</i> }[,...]) ]
+  IDColumn ('<i>id_column</i>')
+  [ Detailed ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="ydu1506534312751"> </a>
+	  <h2>DecisionForestPredict_MLE Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>NumericInputs</dt>
+      <dd>[Optional] Specify the names of the columns that contain the numeric predictor variables.</dd>
+      <dd>Default behavior: The function gets these variables from the model output by DecisionForest. If you specify this syntax element, you must specify it exactly as you specified it in the DecisionForest call that created the model.</dd>
+      <dt>CategoricalInputs</dt>
+      <dd>[Optional] Specify the names of the columns that contain the categorical predictor variables.</dd>
+      <dd>Default behavior: The function gets these variables from the model output by DecisionForest. If you specify this syntax element, you must specify it exactly as you specified it in the DecisionForest call that created the model.<p>
+            <b>Note:</b>  For information about columns that you must identify as categorical, see Identification of Categorical Columns.</p>
+      </dd>
+      <dt>IDColumn</dt>
+      <dd>Specify the column that contains a unique identifier for each test point in the test set.</dd>
+      <dt>Detailed</dt>
+      <dd>[Optional] Specify whether to output detailed information about the forest trees; that is, the decision tree and the specific tree information, including task index and tree index for each tree.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the input columns to copy to the output table.</dd>
+   </div>
+
+
+	
+   <a name="gsy1506534362113"> </a>
+   <h2>DecisionForestPredict_MLE Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_usv_fkk_ycb"> </a>
+   <table class="introtable">
+      <a name="table_usv_fkk_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains test data.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Model</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Has same schema as DecisionForest Output OutputTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_jzz_dkk_ycb"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_N10022_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10022_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Unique test point identifier. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>numeric_input_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NUMERIC, INTEGER, BIGINT, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>numeric_input_column</i>.] Numeric predictor variable. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>categorical_input_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, BIGINT, or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>categorical_input_column</i>.] Categorical predictor variable. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ter1506534421782"> </a>
+   <h2>DecisionForestPredict_MLE Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Table Schema</h3>
+   <p style="line-height: 1em;">The table has a set of predictions for each test point.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column copied from input table. Unique row identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>prediction</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Predicted test point value or predicted class, determined by model.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">confidence_lower</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Lower bound of confidence interval.<p style="line-height: 1em; margin: 0px;">
+                  <br/>For classification trees, confidence_lower and confidence_upper have the same value, which is the probability of the predicted class.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">confidence_upper</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Upper bound of confidence interval.<p style="line-height: 1em; margin: 0px;">
+                  <br/>For classification trees, confidence_lower and confidence_upper have the same value, which is the probability of the predicted class.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">tree_num</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with Detailed ('true').] Either the concatenation of task_index and tree_num from Model, to show which tree generated prediction, or 'final' to show overall prediction.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="vyd1510615797440"> </a>
+   <h2>DecisionForestPredict_MLE Example</h2>
+   <a name="section_rk3_fzq_42b"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">This example uses these input tables:<ul>
+         <li>Input table: housing_test, which has 54 observations of 14 variables</li>
+         <li>Model: rft_model, output by DecisionForest Example: TreeType ('classification'), OutOfBag ('false')</li>
+      </ul>
+   </p>
+   <a name="table_qfh_rzq_42b"> </a>
+   <table class="introtable">
+      <a name="table_qfh_rzq_42b"> </a>
+      <h4 style="text-align: center;">Input table: housing_test</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">sn</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">price</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">lotsize</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">bedrooms</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">bathrms</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">stories</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">driveway</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">recroom</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">fullbase</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">gashw</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">airco</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">garagepl</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">prefarea</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">homestyle</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">27000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1700</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">37900</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3185</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">42000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4960</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">38</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">67000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5170</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Eclectic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">53</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">68000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9166</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Eclectic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">104</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">132000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3500</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">bungalow</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">111</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">43000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5076</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">117</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">93000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3760</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Eclectic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">132</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">44500</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3850</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">140</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">43000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3750</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">142</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">40000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2650</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">157</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2953</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Eclectic</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_n4s_fzq_42b"> </a>
+   <h3>SQL Call</h3>
+   <p style="line-height: 1em;">Use the Accumulate syntax element to pass the homestyle variable, to easily compare the actual and predicted response for each observation.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE rf_housing_predict AS (
+  SELECT * FROM DecisionForestPredict_MLE (
+    ON housing_test PARTITION BY ANY
+    ON rft_model AS Model DIMENSION
+    USING
+    NumericInputs ('price ', 'lotsize ', 'bedrooms ', 'bathrms ',
+                   'stories ', 'garagepl')
+    CategoricalInputs ('driveway ', 'recroom ', 'fullbase ', 'gashw ',
+                       'airco ', 'prefarea')
+    IDColumn ('sn')
+    Accumulate ('homestyle')
+    Detailed ('false')
+  ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_tg2_gzq_42b"> </a>
+   <h3>Output</h3>
+   <p style="line-height: 1em;">The predicted response is in the prediction column and the original classification values are in the homestyle column. The upper and lower confidence intervals are also shown in the output table.</p>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM rf_housing_predict ORDER BY sn;</tt>
+   </pre>
+   <pre>
+      <tt>
+ homestyle sn  prediction confidence_lower confidence_upper 
+ --------- --- ---------- ---------------- ---------------- 
+ classic    13 classic                0.98             0.98
+ classic    16 classic                0.88             0.88
+ classic    25 classic                0.96             0.96
+ eclectic   38 eclectic               0.96             0.96
+ eclectic   53 eclectic               0.94             0.94
+ bungalow  104 bungalow               0.52             0.52
+ classic   111 classic                0.94             0.94
+ eclectic  117 eclectic               0.92             0.92
+ classic   132 classic                0.94             0.94
+ classic   140 classic                0.94             0.94
+ classic   142 classic                0.92             0.92
+ eclectic  157 eclectic                1.0              1.0
+ eclectic  161 eclectic               0.98             0.98
+ bungalow  162 bungalow               0.76             0.76
+ eclectic  176 eclectic               0.94             0.94
+ eclectic  177 eclectic               0.98             0.98
+ classic   195 classic                0.98             0.98
+ classic   198 classic                0.88             0.88
+ eclectic  224 eclectic               0.92             0.92
+ classic   234 classic                0.98             0.98
+ classic   237 classic                 0.8              0.8
+ classic   239 classic                 0.9              0.9
+ classic   249 classic                0.98             0.98
+ classic   251 classic                0.88             0.88
+ eclectic  254 eclectic                0.9              0.9
+ eclectic  255 eclectic               0.96             0.96
+ classic   260 classic                0.96             0.96
+ eclectic  274 eclectic               0.96             0.96
+ classic   294 classic                0.96             0.96
+ eclectic  301 eclectic               0.96             0.96
+ eclectic  306 eclectic               0.92             0.92
+ eclectic  317 eclectic               0.96             0.96
+ bungalow  329 bungalow               0.92             0.92
+ bungalow  339 bungalow               0.74             0.74
+ eclectic  340 eclectic               0.98             0.98
+ eclectic  353 eclectic               0.98             0.98
+ eclectic  355 eclectic                1.0              1.0
+ eclectic  364 eclectic               0.92             0.92
+ bungalow  367 bungalow               0.88             0.88
+ bungalow  377 bungalow               0.76             0.76
+ eclectic  401 eclectic                0.9              0.9
+ eclectic  403 eclectic               0.96             0.96
+ eclectic  408 eclectic               0.96             0.96
+ eclectic  411 eclectic               0.92             0.92
+ eclectic  440 eclectic               0.98             0.98
+ eclectic  441 eclectic               0.96             0.96
+ eclectic  443 eclectic               0.98             0.98
+ classic   459 classic                0.86             0.86
+ classic   463 classic                 0.9              0.9
+ eclectic  469 eclectic               0.88             0.88
+ eclectic  472 eclectic               0.96             0.96
+ bungalow  527 bungalow               0.58             0.58
+ bungalow  530 bungalow               0.56             0.56
+ eclectic  540 eclectic               0.86             0.86</tt>
+   </pre>
+   <a name="section_t3r_gzq_42b"> </a>
+   <h3>Prediction Accuracy</h3>
+   <p style="line-height: 1em;">This query returns the prediction accuracy:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT (SELECT count(sn) FROM rf_housing_predict
+  WHERE homestyle = prediction) / ( 1.00 * (SELECT count(sn)
+    FROM rf_housing_predict) ) AS pa;</tt>
+   </pre>
+   <pre>
+      <tt>
+ pa   
+ ---- 
+ 1.00</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

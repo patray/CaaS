@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="vca1507910662998"> </a>
+	  <h1>SVMDensePredict</h1>
+
+	  <p style="line-height: 1em;">The SVMDensePredict function takes the model output by the function SVMDense and a set of test samples in dense format and outputs a prediction for each sample.</p>
+
+   <a name="fhh1507910704781"> </a>
+   <h2>SVMDensePredict Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.5</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SVMDensePredict (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable PARTITION BY ANY
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS Model DIMENSION
+  USING
+  TargetColumns ({ '<i>target_column</i>' | <i>target_column_range</i> }[,...])
+  IDColumn ('<i>id_column</i>')
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+  [ OutputClassNum (<i>output_class_number</i>) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="qxs1507910716611"> </a>
+	  <h2>SVMDensePredict Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumns</dt>
+      <dd>Specify the InputTable columns that contain the attributes of the test samples. These columns must have numeric data types.</dd>
+      <dt>IDColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the identifiers of the test samples.</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the InputTable columns to copy to the output table.</dd>
+      <dt>OutputClassNum</dt>
+      <dd>[Optional] Valid only for multiple-class models. Specify the number of class columns in the output table. The <i>output_class_number</i> must be at least 1. If <i>output_class_number</i> is greater than 1, the output table has <i>output_class_number</i> class columns with corresponding predict_confidence values, instead of a single predicted result.</dd>
+      <dd>Default: 1</dd>
+   </div>
+
+
+	
+   <a name="hqk1507910720992"> </a>
+   <h2>SVMDensePredict Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_nzg_rcx_xcb"> </a>
+   <table class="introtable">
+      <a name="table_nzg_rcx_xcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sample table. Contains test data.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Model</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SVMDense Output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_wpc_bdx_xcb"> </a>
+   <h3>InputTable Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_mt4_tdt_nw"> </a>
+   <table class="introtable">
+      <a name="table_mt4_tdt_nw"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, SMALLINT, BIGINT, NUMERIC, VARCHAR, VARBYTE(<i>n</i>), or BLOB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Test sample identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>target_column</i>.] Test sample attribute.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="kmu1507910729061"> </a>
+   <h2>SVMDensePredict Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output (Sample) Table Schema</h3>
+   <p style="line-height: 1em;">The table has the predicted class of each test sample.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, SMALLINT, BIGINT, NUMERIC, VARCHAR, or BLOB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Test sample identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">predict_value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Predicted class of test sample.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">predict_confidence</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Prediction confidence, a value between 0 and 1. The higher the value, the more dependable the prediction.<p>
+                  <b>Note:</b>  Values may differ if function runs on a different cluster.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from InputTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="fph1510785051103"> </a>
+   <h2>SVMDensePredict Examples</h2>
+   <a name="ysn1524506057647"> </a>
+	  <h3>SVMDensePredict Example: Linear Model</h3>
+
+	  <a name="section_ukf_zy2_pdb"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The InputTable is iris_test (see SVMDense Examples Input).</p>
+
+
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SVMDensePredict (
+  ON svm_iris_test AS InputTable PARTITION BY ANY
+  ON densesvm_iris_linear_model AS Model DIMENSION
+  USING
+  IDColumn ('id')
+  TargetColumns ('[1:4]')
+  Accumulate ('id', 'species')
+) AS dt ORDER BY id;</tt>
+   </pre>
+		
+   <a name="section_r52_pw2_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id  predict_value predict_confidence species    
+ --- ------------- ------------------ ---------- 
+   5 setosa        0.8930489864790201 setosa    
+  10 setosa        0.8478503008204531 setosa    
+  15 setosa        0.9435414268383788 setosa    
+  20 setosa        0.8926152052489708 setosa    
+  25 setosa        0.8028876480914128 setosa    
+  30 setosa        0.8271583682379406 setosa    
+  35 setosa        0.8404517971834283 setosa    
+  40 setosa        0.8713055490800811 setosa    
+  45 setosa        0.8369500778190206 setosa    
+  50 setosa        0.8728279222724702 setosa    
+  55 versicolor    0.3525898414606273 versicolor
+  60 virginica     0.3970829011002614 versicolor
+  65 setosa        0.2439601287063938 versicolor
+  70 versicolor     0.437140897307735 versicolor
+  75 versicolor    0.3606246330397581 versicolor
+  80 versicolor    0.4043420087029081 versicolor
+  85 virginica     0.6011121310636303 versicolor
+  90 virginica     0.3259069930564529 versicolor
+  95 virginica     0.3226050943390659 versicolor
+ 100 versicolor     0.262845708656218 versicolor
+ 105 virginica     0.9640458942535832 virginica 
+ 110 virginica      0.938299170285442 virginica 
+ 115 virginica     0.9785511850672655 virginica 
+ 120 virginica     0.8272757260616834 virginica 
+ 125 virginica        0.8829607899355 virginica 
+ 130 virginica     0.5939406491097122 virginica 
+ 135 virginica      0.866594485274739 virginica 
+ 140 virginica     0.7840195674527638 virginica 
+ 145 virginica     0.9585081081894172 virginica 
+ 150 virginica     0.8439250769013166 virginica</tt>
+   </pre>
+   <p style="line-height: 1em;">The prediction accuracy with the linear model is 90%.</p>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="ywp1524506134536"> </a>
+	  <h3>SVMDensePredict Example: Polynomial Model</h3>
+
+	  <a name="section_ukf_zy2_pdb"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The InputTable is iris_test (see SVMDense Examples Input).</p>
+
+   <a name="section_bfr_tw2_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SVMDensePredict (
+  ON svm_iris_test AS InputTable PARTITION BY ANY
+  ON densesvm_iris_polynomial_model AS Model DIMENSION
+  USING
+  IDColumn ('id')
+  TargetColumns ('[1:4]')
+  Accumulate ('id', 'species')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_r52_pw2_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id  predict_value predict_confidence species    
+ --- ------------- ------------------ ---------- 
+  40 versicolor                   1.0 setosa    
+  15 versicolor                   1.0 setosa    
+  80 versicolor                   1.0 versicolor
+  30 versicolor                   1.0 setosa    
+ 120 versicolor                   1.0 virginica 
+  70 versicolor                   1.0 versicolor
+  55 versicolor                   1.0 versicolor
+  45 versicolor                   1.0 setosa    
+  95 versicolor                   1.0 versicolor
+  85 versicolor                   1.0 versicolor
+ 135 versicolor                   1.0 virginica 
+ 125 versicolor                   1.0 virginica 
+ 110 versicolor                   1.0 virginica 
+ 100 versicolor                   1.0 versicolor
+ 150 versicolor                   1.0 virginica 
+ 140 versicolor                   1.0 virginica 
+  35 versicolor                   1.0 setosa    
+  10 versicolor                   1.0 setosa    
+  50 versicolor                   1.0 setosa    
+  65 versicolor                   1.0 versicolor
+ 105 versicolor                   1.0 virginica 
+   5 versicolor                   1.0 setosa    
+  20 versicolor                   1.0 setosa    
+  60 versicolor                   1.0 versicolor
+  75 versicolor                   1.0 versicolor
+ 115 versicolor                   1.0 virginica 
+  90 versicolor                   1.0 versicolor
+ 130 versicolor                   1.0 virginica 
+  25 versicolor                   1.0 setosa    
+ 145 versicolor                   1.0 virginica</tt>
+   </pre>
+   <p style="line-height: 1em;">The prediction accuracy with the polynomial model is 73.34%.</p>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="nnw1524506187817"> </a>
+	  <h3>SVMDensePredict Example: Radial Basis Model (RBF) Model</h3>
+
+	  <a name="section_ukf_zy2_pdb"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The InputTable is iris_test (see SVMDense Examples Input).</p>
+
+   <a name="section_osq_ww2_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SVMDensePredict (
+  ON svm_iris_test AS InputTable PARTITION BY ANY
+  ON densesvm_iris_rbf_model AS Model DIMENSION
+  USING
+  IDColumn ('id')
+  TargetColumns ('[1:4]')
+  Accumulate ('id', 'species')
+) AS dt;</tt>
+   </pre>
+   <a name="section_r52_pw2_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id  predict_value predict_confidence species    
+ --- ------------- ------------------ ---------- 
+  15 setosa        0.7385483393472054 setosa    
+  40 setosa        0.7655937642945799 setosa    
+  30 setosa        0.7298716417937711 setosa    
+  80 versicolor    0.7436718606194627 versicolor
+  70 versicolor    0.7793994786635111 versicolor
+ 120 versicolor    0.5194353829462696 virginica 
+  45 setosa        0.7126723953274657 setosa    
+  55 versicolor     0.729124897076995 versicolor
+  85 versicolor    0.6519179139325773 versicolor
+  95 versicolor    0.7592587332013792 versicolor
+ 125 virginica     0.7801849930778062 virginica 
+ 135 virginica     0.6027178977087695 virginica 
+ 100 versicolor    0.7672244715471385 versicolor
+ 110 virginica     0.8000232182340721 virginica 
+ 140 virginica      0.727336415623223 virginica 
+ 150 virginica     0.6710416334973398 virginica 
+  10 setosa        0.7458089064928859 setosa    
+  35 setosa        0.7453645431971642 setosa    
+  65 versicolor    0.7373858156251796 versicolor
+  50 setosa        0.7673692057400023 setosa    
+ 105 virginica      0.815434489168222 virginica 
+   5 setosa        0.7684036735297366 setosa    
+  20 setosa        0.7611128425346556 setosa    
+  60 versicolor    0.7285586817303797 versicolor
+  75 versicolor    0.7986196380621525 versicolor
+ 115 virginica     0.7731681568677983 virginica 
+  90 versicolor      0.74240916353901 versicolor
+ 130 virginica     0.6725047451703315 virginica 
+  25 setosa        0.6965635243855159 setosa    
+ 145 virginica     0.7962867136735156 virginica</tt>
+   </pre>
+   <p style="line-height: 1em;">The prediction accuracy with the RBF model is 96.67%.</p>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="zpz1524506237965"> </a>
+	  <h3>SVMDensePredict Example: Sigmoid Model</h3>
+
+	  <a name="section_ukf_zy2_pdb"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The InputTable is iris_test (see SVMDense Examples Input).</p>
+
+   <a name="section_vbp_zw2_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SVMDensePredict (
+  ON svm_iris_test AS InputTable PARTITION BY ANY
+  ON densesvm_iris_sigmoid_model AS Model DIMENSION
+  USING
+  IDColumn ('id')
+  TargetColumns ('[1:4]')
+  Accumulate ('id', 'species')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_r52_pw2_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id  predict_value predict_confidence  species    
+ --- ------------- ------------------- ---------- 
+  15 versicolor     0.4883530642940746 setosa    
+  40 setosa         0.7512936305933052 setosa    
+  30 setosa         0.7538376126652868 setosa    
+  80 setosa          0.492997020351855 versicolor
+  70 setosa         0.5282518747134544 versicolor
+ 120 versicolor     0.4842104361280752 virginica 
+  45 setosa         0.6692352221503245 setosa    
+  55 virginica      0.6277744946755262 versicolor
+  85 versicolor     0.4777261735539528 versicolor
+  95 versicolor    0.43830212791799356 versicolor
+ 125 virginica      0.7071734899673707 virginica 
+ 135 virginica      0.5647031277441849 virginica 
+ 100 versicolor     0.4883529744024775 versicolor
+ 110 virginica      0.7144340753119391 virginica 
+ 140 virginica      0.7071734897650853 virginica 
+ 150 virginica      0.4900817623630807 virginica 
+  10 setosa         0.7313326517714932 setosa    
+  35 setosa         0.7313328953999549 setosa    
+  65 versicolor    0.42594378895144014 versicolor
+  50 setosa         0.7324267215323783 setosa    
+ 105 virginica      0.6650225505175886 virginica 
+   5 setosa         0.7512940125415541 setosa    
+  20 setosa         0.7086716896388802 setosa    
+  60 setosa         0.6623905667950132 versicolor
+  75 virginica      0.5878417628800174 versicolor
+ 115 versicolor    0.47113014582100954 virginica 
+  90 setosa         0.5282518795864501 versicolor
+ 130 virginica      0.7071734902236154 virginica 
+  25 setosa         0.7317647572581247 setosa    
+ 145 virginica      0.7071734901029515 virginica</tt>
+   </pre>
+   <p style="line-height: 1em;">The prediction accuracy with the sigmoid model is 70%.</p>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+</t:intro>

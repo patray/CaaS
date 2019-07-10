@@ -1,0 +1,647 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="ktq1507841046186"> </a>
+	  <h1>GeometryOverlay</h1>
+
+	
+		<p style="line-height: 1em;">The GeometryOverlay function takes two geometries described by the
+			well-known text (WKT) markup language and outputs the result of overlaying them, as
+			specified by the boundary operator.</p>
+
+		<p style="line-height: 1em;">You can use this function to prepare sets of geometries for input to the PointInPolygon function. For example, you can use this function to prepare a geometry that contains all cellular phone reception polygons near an airport to create a geometry that is useful for identifying frequent fliers.</p>
+
+		<p>
+      <b>Note:</b>  The function works
+			only on 2D spatial objects.</p>
+	
+   <a name="unc1466004897816"> </a>
+   <h2>GeometryOverlay Syntax</h2>
+   <a name="ywa1507841106941"> </a>
+   <h3>UNION, INTERSECTION, DIFFERENCE and SYMDIFFERENCE</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h4>Version 1.3</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GeometryOverlay (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS SourceTable PARTITION BY { ANY | <i>key</i> }
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS ReferenceTable { DIMENSION | PARTITION BY <i>key</i> }
+  USING
+  SourceLocationColumn ('<i>source_location_column</i>')
+  ReferenceLocationColumn ('<i>ref_location_column</i>')
+  ReferenceNameColumns ({ '<i>ref_name_column</i>' | <i>ref_name_column_range</i> }[,...])
+  BoundaryOperator ({ 'UNION' | 'INTERSECTION' | 'DIFFERENCE' | 'SYMDIFFERENCE' })
+  [ OutputAll ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="jdg1507841111498"> </a>
+   <h3>CONVEXHULL</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h4>Version 1.3</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GeometryOverlay (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+  USING
+  SourceLocationColumn ('<i>source_location_column</i>')
+  BoundaryOperator ('CONVEXHULL')
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="pju1507841115813"> </a>
+   <h3>BUFFER</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h4>Version 1.3</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GeometryOverlay (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+  USING
+  SourceLocationColumn ('<i>source_location_column</i>')
+  BoundaryOperator ('BUFFER')
+  Distance ('<i>distance</i>')
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="qug1507841137419"> </a>
+	  <h2>GeometryOverlay Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>SourceLocationColumn</dt>
+      <dd>Specify the name of the SourceTable column that contains the polygon description in WKT format.</dd>
+      <dt>ReferenceLocationColumn</dt>
+      <dd>Specify the name of the ReferenceTable column that contains the location of the polygon description in WKT format.</dd>
+      <dt>ReferenceNameColumns</dt>
+      <dd>Specify the names of the ReferenceTable columns that contain the names of the polygons.</dd>
+      <dt>BoundaryOperator</dt>
+      <dd>Specify a boundary (geometry overlay) operator from the following table.<a name="table_N10094_N1000C_N10001"> </a>
+         <table class="introtable">
+            <a name="table_N10094_N1000C_N10001"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Boundary Operator</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Result</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">UNION</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <a name="fig_svw_x4f_lw"> </a>
+                     <div style="text-align: center;">
+                        <div style="margin: auto; display: inline-block">
+                           <img src="data:image/png;base64,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"
+                                width=""
+                                height=""/>
+                        </div>
+                     </div>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Result contains area covered by source polygon and area covered by reference polygon (blue area in figure).</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">INTERSECTION</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <a name="fig_ls3_z4f_lw"> </a>
+                     <div style="text-align: center;">
+                        <div style="margin: auto; display: inline-block">
+                           <img src="data:image/png;base64,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"
+                                width=""
+                                height=""/>
+                        </div>
+                     </div>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Result contains area that is common to source and reference polygons (blue area in figure).</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">DIFFERENCE</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <a name="fig_qr1_bpf_lw"> </a>
+                     <div style="text-align: center;">
+                        <div style="margin: auto; display: inline-block">
+                           <img src="data:image/png;base64,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"
+                                width=""
+                                height=""/>
+                        </div>
+                     </div>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Result contains area covered only by source polygon (blue area in figure).</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">SYMDIFFERENCE</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <a name="fig_jjn_cpf_lw"> </a>
+                     <div style="text-align: center;">
+                        <div style="margin: auto; display: inline-block">
+                           <img src="data:image/png;base64,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"
+                                width=""
+                                height=""/>
+                        </div>
+                     </div>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Result contains area covered by only source polygon or only reference polygon (blue area in figure).</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">CONVEXHULL</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <a name="fig_qdf_gpf_lw"> </a>
+                     <div style="text-align: center;">
+                        <div style="margin: auto; display: inline-block">
+                           <img src="data:image/png;base64,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"
+                                width=""
+                                height=""/>
+                        </div>
+                     </div>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Result contains smallest convex set that contains source polygon in Euclidean plane (blue area in figure).</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">BUFFER</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <a name="fig_ntz_kpf_lw"> </a>
+                     <div style="text-align: center;">
+                        <div style="margin: auto; display: inline-block">
+                           <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEsAAABACAYAAABSiYopAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAArdSURBVHhe3Zx5bBTnGYd/M2uv72vt9ckaG2ODMZepggItagIpNARQmkBDk6gHbVSakFQRAnGUhBIVSKISzjT9IyKNQlsIbbkCaaKmoQ0NQRAbm4DB8b22F3t9395j+n6zs4Dxzje7jsCzPJIF8xqhnd883/u9s96xIBEYMRIKn96JBFMi6D9SajpEENDS0oLi916gvxuUYuB8o7A27PobvrTHIyIsRKnol/5BFybHteL11UuVSuCIyp8BI7mcOHrOJgcluV26/woPNeBUUTMcg4PKGQTOiM1au+MwStri6UWMOO+7zoATmBjdjDfWPqFUAmNEZ+pwDOKDL6+TVaFKJTgINxrwcWkb+vr7lUpgjMistTveJ6sSgsoqL8yu/Bg7dqz5oVLxn4DPtp+uyokLTUFnlZdwo4iPLraiu6dXqfhPwGat+f37KG03kVWCUhmOJIhwOEdvlDCG0GuT3MrRcDy9y069KzC7Agqrr68P3/rFfkzIL5B3GJ+IIehqKEPh2Eg4Vf7JnYQ2PXxRMwhTeg6g8hoF0YBrZZdx9q0fIyY6SqlqE1BYL752EGXdSQhjV84XNPw1t3Rg3bwwLF44xXMJ7zYRoXjrnc9x6Go0YiONSnE4NHYhJ7wJe9YvVyra+N2zenp78XFJG6159QFUoulY7LZi8fcnw93aB3eP465/SS29WLlsBtobK2XL1QgLEfHplQ50dHYrFW38Dmv9rmOwjMtTX37MquYWrH9sPK3XUTBKwbNORPxqbgo6utSbuEQ9zZKdi3V7jikVbfwKq6u7B59cbpenYDWYVYaeeiz8XgHco7H8bkHqd+CZpTPQYavQtOvMtR60tXcqFT5+hbVu9zFkZpNVkrpVTc12bFqaB/Q6lOLoIdslCVj1UBrZ1eMp+oDZNSZrPJ3fcaXCRzOs9s4u/OdKJ8JoPlFDggHG3gbMn5cPN+ucOkDqc2DF44XotFVp2CXg88o+2FvblYo6mmFt3HOCelUu9SqVuYWsui5bNUEXVnmRW5dbwPPz0+iCqzdx2a6xOdiw94RSUYcbVmtbJ06XkVWc2xpmVeRAIx6aO1E3Vnlhdv30B4XobqrWtquiD032NqXiG25YG/YdR6a8A3KsamrGxsf00atux2MXPHZ18O3KpJ1xwz6+Xaph2Vs75J1CdQAl3AhBlKMR83TUq26H2fUTsqvHzrfLSBv9uaoBNDa1KpXhqIa1fg+zinqV2j0Ws+q6DZuW5dPEOvI31O40sl10n/rrBRlo6+iiA98XX567aGfk9S6fYbG1+0VVH6XNtyrGeR0PfHeCbq3yIvU78fSj09HbzOxSnxXZGFlkdcJqsyuVofgMax1ZxVLWsmrzEwW6tsqLbJfDjdWPWGgAVbeLvVORkTlO1a5hYbE1e57u2vlWGRDruo7vzBmve6u8uMmu5UumodfO5i6+XSUNEmobmpTKTYaFxXqVJSuHa5XNZsOW5ZOBbv3tgFwG3Vi7OEseiXh2jRmbTXadVAo3GRJWva0FRXVOTatMUjNmzc6B2xEcVnlhdi1bNAUDrTWQeHZRKqU2CdXW60rFw5Cw1u89TvdKfKsaGxuxeTnrVUFmlReya41sVwcd+JZC3hmZXfuG2nUjrLqGZhRbXfK8oQazyizYcf9s6lVBZpUXZtdSssvVXie/U6IGs+syiVVZZ1Mqt4S1nnaAzGy+VQ0NZNWPWK/S/w7Ipd9FO2Omtl1Z4yiXm3bJYVVbm1Da6JbTVIPNVSkGO2bOCr5edTvs/bbHF0+Dq6OWa5dBkHDNLqK8ukE+luNhVvHnKhEN9Va88tRUoCvIrfLS58TaJVloaWNvzXB2xkzqXW+ekg9Fa6MdV5oEskoe3XzipkxTQ1sx477soLfKC7Pr0YVT4W4nuzg7o4FyqWgNRRX1LkNXbOFmMS6T4lC3ytZYjzdXTII5OpzCVg812KBVhqx4EadKOhEZEa5Ub0dCdFwCzheVQHTSyVPv5sICimQfK7p3cvIgSTCGGOj8nKorkcG+NTDohPjSz+eivrZGNsgntG5T0i1Yvf8CEBOmFO8RooxYd+ArJJqT5eB8QrnU19dh488ehJhtSUWOyQGXWz1ag+BGZVcMyi7WQQzhbJlBhEgr5eQ/L0GKGUPLUb0PuyUB6RE9mDTe4tkNtz77MKy1dIPJsSvDkomN7xXfO3ZFhmDrP8phTkrkW2WtwSsrF8iHcjq5WenIS3LDRSmqYYALVX3xuFRUE/R2MauOnSwlqywQ1H5oTLA8xkT1Y/rELPn4xllvX7UQddWV1Ow5dqVnYNOBkuC3K8KAV49WIinRRAccq2qr5VXn5UYyrHcVpMjvkanCelftQDwuXqiGGIQfZGMwq46e/AqIpV6lYdXY2EEU5FqUyi1hMbYyu2qquHalp2Xgpb+UAtHqn1DRNWEGbD9aoWmVlazatuqmVYwhqYzNSMGUVEHDLhfqB0woPs/s4rxFoUOYVUc+vARDvEavoslgXLwDE8eNUSoehim0ddUjsJJd6jujhLT0NPzmz0FoF1m17UgFEk0JdMCxqo6sem6oVYxhiWSmmzE1nezi3AKyndHmTMSFc5VBY5cYHoLDH5TCmDCWa5WTrMo1OZGXnaFUbuJTn22rFtGa5e2MEvWuNOpdl4LHLqMBrx+vhMkUTwe+rWLnW0/z5u+eXahUhuIzjYzUJMwYEyJ/lFANkexqciXh3NkK3dvFrDp47CLCTFlcq1ivnkDzZm5WmlIZioo6Hrvqqr/m2pWWloqX/0rbsN7tMorYcbIGpoQ4OlC3ykpzJpsI1FANKzXZhJnZYZp2tUhm/O9MuW7tYlYdOFKMsESawjWsKkijXZDmTTVUw2JsfW4RaqvKuXalpqZgy6ErZJf+HiKQb97o1mznh3UwxcfSgbpVtVUV8vny4IaVnJSAWTmRGOA8AMDsahOSceYzsov3o6FRQGBWHS1GhJZV9K1pGQaaM81KxTfcsBjy3FVdwbUrJSUZvz1IdkXqxy6PVQLe8MOquhqyis5TC82wkmirnT0+QtOuTkMKPtORXUJEKN6lXhVlzuZaxXoys8qSxreKoRkWY9vzi8ku/s6YTHa9rBO7ZKvomu0iqxLiYuiAYxWtmu10fv7gV1gJpPG386LILvWbRmZXjzENn56+Nup2Mav2/70IMcns+R31z+QPuiTMsIQgPSVRqfDxKywGS79OY2dMMSdhy+EyIGr07JKtope496MGxMdFyzVfsPOorfoar76wRKlo43dYcbExeCA/jmuXQHb1kV3/+qQMYkIERArtbn8JiZF4+/AFxKSwXsW3amZ2OF1gdlPtHwE9FcYeS7l/5bvImzgJvEfouhvLMD0zknszfqdgHeBc9QASMsarNnZBFFF+9Sr+vXM5zIlsqvePgMJivPjaIeUxOqXgA4mEddCVGy1CaWQQJPUVMOgSYAlpwB83PaVU/CPgsHp6ejHzl8yuiWSX+gvSK16rTu9ejkT5XtF//O5ZXqKiIrFgmgn9g8EXFGOAbgLnTIgOOChGwGYx2KP+9z3zDnIn5Kv3Lh3CdsDy8qv4754nlfkrMAI2ixERHo75UxPkX1kSTLCdfE5e9IiCYozILAb7NSWFK95GLm9n1BGsV127Woazf2APkUcq1cAYkVmMUKMRDxeaZbvY0+x6/2IP1z6YHzvioBgjNktGcmHqk7thNnM+L6AHBM+Ttuf/tAphdJFHBvB/EmVA3KedfzsAAAAASUVORK5CYII="
+                                width=""
+                                height=""/>
+                        </div>
+                     </div>
+                     <p style="line-height: 1em; margin: 0px;">
+                        <br/>
+                        <a name="fig_rvx_4pf_lw"> </a>
+                        <div style="text-align: center;">
+                           <div style="margin: auto; display: inline-block">
+                              <img src="data:image/png;base64,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"
+                                   width=""
+                                   height=""/>
+                           </div>
+                        </div>
+                     </p>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Result contains source polygon and specified buffer.<p style="line-height: 1em; margin: 0px;">
+                        <br/>A positive buffer extends area of polygon. In upper figure, result includes both buffer (blue) and source polygon (pale pink).</p>
+                     <p style="line-height: 1em; margin: 0px;">
+                        <br/>A negative buffer decreases area of polygon. In lower figure, result includes only source polygon (blue).</p>
+                     <p>
+                        <b>Note:</b>  For buffer operation, eight segments is adopted in curve approximation for corners.</p>
+                  </div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>Distance</dt>
+      <dd>[Required with BoundaryOperator('BUFFER').] Specify the distance by which to extend or decrease the polygon.</dd>
+      <dt>OutputAll</dt>
+      <dd>[Optional] Specify whether to include the result of nonintersection geometries in the output table.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the source table columns to copy to the output table.</dd>
+   </div>
+
+
+	
+   <a name="ckl1507841141820"> </a>
+   <h2>GeometryOverlay Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">SourceTable and ReferenceTable must use the same coordinate reference system.</p>
+
+   <a name="section_xxb_xsr_ycb"> </a>
+   <h3>SourceTable Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>source_location_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Description of source polygon in WKT markup language.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ubj_zsr_ycb"> </a>
+   <h3>ReferenceTable Schema</h3>
+   <p style="line-height: 1em;">Not used for the boundary operators CONVEXHULL and BUFFER.</p>
+   <a name="table_N1005B_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1005B_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>ref_location_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Location of polygon description in WKT format.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>ref_name_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Name of polygon.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="gzy1507841146086"> </a>
+   <h2>GeometryOverlay Output</h2>
+   <a name="section_wtl_rsr_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">overlay_boundary</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Description of resulting geometry in WKT markup language.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">overlay_flag</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column does not appear with BoundaryOperator ('CONVEXHULL') or BoundaryOperator ('BUFFER'). ] 1 if SourceTable and ReferenceTable polygons intersect, otherwise 0.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>ref_ref_name_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Name of polygon (copied from ReferenceTable).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Source table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from SourceTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="vwe1510710488986"> </a>
+   <h2>GeometryOverlay Examples</h2>
+   <a name="vdv1527005895297"> </a>
+	  <h3>GeometryOverlay Example: Intersection</h3>
+
+	  <a name="section_nk3_dpr_t2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>SourceTable: source_gatetype, which contains the geometrical coordinates of US and international gates in three airport terminals (A, B, and C)</li>
+      <li>ReferenceTable: ref_terminal, which contains the terminal coordinates in WKT syntax</li>
+   </ul>
+   <a name="table_l2l_fpr_t2b"> </a>
+   <table class="introtable">
+      <a name="table_l2l_fpr_t2b"> </a>
+      <h4 style="text-align: center;">SourceTable: source_gatetype</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">boundary_coordinates</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">boundary_name</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">boundary_attributes</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">US Gates</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">US</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POLYGON ((50 50, 50 150, 150 150, 150 50,50 50))</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">International Gates</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">International</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_wjz_3pr_t2b"> </a>
+   <table class="introtable">
+      <a name="table_wjz_3pr_t2b"> </a>
+      <h4 style="text-align: center;">ReferenceTable: ref_terminal</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">boundary_coordinates</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">boundary_name</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">boundary_attributes</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POLYGON ((0 0, 100 0, 100 100, 0 100, 0 0))</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Terminal A</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">A</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POLYGON ((100 0, 200 0, 200 100, 100 100, 100 0))</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Terminal B</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">B</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POLYGON ((0 100, 100 100, 100 200, 0 200, 0 100))</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Terminal C</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">C</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GeometryOverlay (
+  ON source_gatetype AS SourceTable PARTITION BY ANY
+  ON ref_terminal AS ReferenceTable DIMENSION
+  USING
+  SourceLocationColumn ('boundary_coordinates')
+  ReferenceLocationColumn ('boundary_coordinates')
+  ReferenceNameColumns ('boundary_name')
+  BoundaryOperator ('intersection')
+  OutputAll ('false')
+  Accumulate ('boundary_attributes')
+) AS dt ;</tt>
+   </pre>
+		
+   <a name="section_uh2_zgh_xdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The output shows that all domestic gates are within Terminal A. International gates are spread over all three terminals.</p>
+   <pre>
+      <tt>
+ overlay_boundary                                      ref_boundary_name overlay_flag boundary_attributes 
+ ----------------------------------------------------- ----------------- ------------ ------------------- 
+ POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))         terminal a                   1 domestic           
+ POLYGON ((50 50, 50 100, 100 100, 100 50, 50 50))     terminal a                   1 international      
+ POLYGON ((150 100, 150 50, 100 50, 100 100, 150 100)) terminal b                   1 international      
+ POLYGON ((50 100, 50 150, 100 150, 100 100, 50 100))  terminal c                   1 international</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="ekr1507841164754"> </a>
+   <h3>GeometryOverlay Example: Union</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example computes the union of area for both the gates and the terminals.</p>
+
+   <a name="section_dvs_mpr_t2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">Input tables are from GeometryOverlay Example: Intersection:</p>
+   <ul>
+      <li>SourceTable: source_gatetype, which contains the geometrical coordinates of US and international gates in three airport terminals (A, B, and C)</li>
+      <li>ReferenceTable: ref_terminal, which contains the terminal coordinates in WKT syntax</li>
+   </ul>
+
+   <a name="section_klt_bhh_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GeometryOverlay (
+  ON source_gatetype AS SourceTable PARTITION BY id
+  ON ref_terminal AS ReferenceTable PARTITION BY id
+  USING
+  SourceLocationColumn ('boundary_coordinates')
+  ReferenceLocationColumn ('boundary_coordinates')
+  ReferenceNameColumns ('boundary_name')
+  BoundaryOperator ('union')
+  OutputAll ('false')
+  Accumulate ('boundary_name','id')
+) AS dt ;</tt>
+   </pre>
+   <a name="section_uh2_zgh_xdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">Because all US gates are within Terminal A, the union of the area specified by the domestic gates and the area of Terminal A is just Terminal A, as shown in the first row of the output. The second row shows the union of the coordinates of the international gates and all three terminals.</p>
+   <pre>
+      <tt>
+ overlay_boundary                                                                  ref_boundary_name overlay_flag boundary_name        id 
+ --------------------------------------------------------------------------------- ----------------- ------------ -------------------- -- 
+ POLYGON ((0 0, 0 100, 100 100, 100 0, 0 0))                                       terminal a                   1 domestic gates        1
+ POLYGON ((50 50, 50 150, 150 150, 150 100, 200 100, 200 0, 100 0, 100 50, 50 50)) terminal b                   1 international gates   2</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="eml1507841189781"> </a>
+   <h3>GeometryOverlay Example: Buffer (Single Input)</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">This example uses the buffer operator to expand the US or international gates by a distance of 2.</p>
+
+   <a name="section_dvs_mpr_t2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>SourceTable: source_gatetype, which contains the geometrical coordinates of US and international gates in three airport terminals (A, B, and C), from GeometryOverlay Example: Intersection</li>
+   </ul>
+
+   <a name="section_ygh_chh_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GeometryOverlay (
+  ON source_gatetype AS SourceTable 
+  USING
+  SourceLocationColumn ('boundary_coordinates')
+  BoundaryOperator ('buffer')
+  Distance (2)
+  Accumulate ('boundary_name', 'id')
+) AS dt;</tt>
+   </pre>
+   <a name="section_uh2_zgh_xdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ overlay_boundary                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     boundary_name        id 
+ ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ -------------------- -- 
+ POLYGON ((10 8, 9.609819355967742 8.03842943919354, 9.234633135269819 8.152240934977428, 8.888859533960796 8.33706077539491, 8.585786437626904 8.585786437626904, 8.337060775394908 8.888859533960796, 8.152240934977426 9.23463313526982, 8.03842943919354 9.609819355967744, 8 10, 8 20, 8.03842943919354 20.390180644032256, 8.152240934977426 20.76536686473018, 8.33706077539491 21.111140466039203, 8.585786437626904 21.414213562373096, 8.888859533960796 21.66293922460509, 9.23463313526982 21.847759065022572, 9.609819355967744 21.96157056080646, 10 22, 20 22, 20.390180644032256 21.96157056080646, 20.76536686473018 21.847759065022572, 21.111140466039206 21.66293922460509, 21.414213562373096 21.414213562373096, 21.66293922460509 21.111140466039203, 21.847759065022572 20.76536686473018, 21.96157056080646 20.390180644032256, 22 20, 22 10, 21.96157056080646 9.609819355967744, 21.847759065022572 9.23463313526982, 21.66293922460509 8.888859533960796, 21.414213562373096 8.585786437626904, 21.111140466039206 8.33706077539491, 20.76536686473018 8.152240934977426, 20.390180644032256 8.03842943919354, 20 8, 10 8))                               domestic gates        1
+ POLYGON ((50 48, 49.609819355967744 48.03842943919354, 49.23463313526982 48.15224093497743, 48.8888595339608 48.33706077539491, 48.58578643762691 48.58578643762691, 48.33706077539491 48.8888595339608, 48.15224093497743 49.23463313526982, 48.038429439193536 49.609819355967744, 48 50, 48 150, 48.038429439193536 150.39018064403226, 48.15224093497743 150.76536686473017, 48.33706077539491 151.11114046603922, 48.58578643762691 151.4142135623731, 48.8888595339608 151.66293922460508, 49.23463313526982 151.8477590650226, 49.609819355967744 151.96157056080645, 50 152, 150 152, 150.39018064403226 151.96157056080645, 150.76536686473017 151.8477590650226, 151.11114046603922 151.66293922460508, 151.4142135623731 151.4142135623731, 151.66293922460508 151.11114046603922, 151.8477590650226 150.76536686473017, 151.96157056080645 150.39018064403226, 152 150, 152 50, 151.96157056080645 49.609819355967744, 151.8477590650226 49.23463313526982, 151.66293922460508 48.8888595339608, 151.4142135623731 48.58578643762691, 151.11114046603922 48.33706077539491, 150.76536686473017 48.15224093497743, 150.39018064403226 48.038429439193536, 150 48, 50 48)) international gates   2</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

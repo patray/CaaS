@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="pin1507820879472"> </a>
+	  <h1>URIUnpack</h1>
+
+	
+		<p style="line-height: 1em;">The URIUnpack function unpacks hierarchical uniform resource identifiers
+			(URIs); that is, it outputs their constituent components and the values of specified
+			query parameters.</p>
+
+		<p style="line-height: 1em;">To repack the unpacked URIs, input the URIUnpack output to the function URIPack.</p>
+
+	
+   <a name="wiu1507820915286"> </a>
+   <h2>URIUnpack Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.5</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM URIUnpack (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+  USING
+  URIColumn ('<i>uri_column</i>')
+  [ Queries ('<i>query_parameter</i>' [,...]) ]
+  [ OutputType ({ 'scheme' | 'host' | 'path' | 'fragment' }) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+  [ PrintNullQueries ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="dfi1507820919773"> </a>
+	  <h2>URIUnpack Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>URIColumn</dt>
+      <dd>Specify the name of the input table column that contains the URIs to unpack. Malformed URIs are ignored.</dd>
+      <dt>Queries</dt>
+      <dd>[Optional] Specify the names of the query parameters whose values to extract from the URIs. </dd>
+      <dt>OutputType</dt>
+      <dd>[Optional] Specify the URI components (outside the query) to output. If you specify 'path', the function outputs the URI path in normalized form (for example, it reduces /./bar/baz to /bar/baz.</dd>
+      <dd>Default: All four components</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the input table columns to copy to the output table.</dd>
+      <dt>PrintNullQueries</dt>
+      <dd>[Optional] Specify whether to output URIs that contain none of the parameters specified by the Queries syntax element.</dd>
+      <dd>Default: 'true'</dd>
+   </div>
+
+
+	
+   <a name="phj1507820923359"> </a>
+   <h2>URIUnpack Input</h2>
+   <a name="section_abb_vvs_ycb"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>uri_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">URI to unpack.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="wkv1507820927059"> </a>
+   <h2>URIUnpack Output</h2>
+   <a name="section_vd5_z3g_5cb"> </a>
+   <h3>URIUnpack Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">scheme</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with OutputType ('scheme')]. Scheme of URI.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">host</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with OutputType ('host')]. Host of URI.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">path</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with OutputType ('path')]. Path of URI.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">fragment</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with OutputType ('fragment')]. Fragment of URI.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>query_parameter</i>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>or</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <i>query_parameter_</i>
+               </p>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>query_parameter</i>.] Value of <i>query_parameter</i>.<p style="line-height: 1em; margin: 0px;">
+                  <br/>Column name is <i>query_parameter</i> unless <i>query_parameter</i> is an <i>accumulate_column</i>, in which case column name is <i>query_parameter_</i>.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ckf_1jg_5cb"> </a>
+   <h3>Key Hierarchical URI Components</h3>
+   <p style="line-height: 1em;">The examples in the following table are from this sample URI: </p>
+   <p style="line-height: 1em;">
+      <tt style="font-family: monospace;">https://www.sample.com/webph?p1=chrome&amp;p2=hello%20world&amp;p3=UTF-8#fragment</tt>
+   </p>
+   <a name="table_N1001B_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1001B_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Component</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Example</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">scheme</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">https</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">host</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.sample.com</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">path</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">/webhp</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">query</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">?p1=chrome&amp;p2=hello%20world&amp;p3=UTF-8<p style="line-height: 1em; margin: 0px;">
+                  <br/>A query starts with a question mark (?). An ampersand (&amp;) precedes each query parameter. Here, the query parameters are p1, p2, and p3. Their values are chrome, hello%20world, and UTF-8, respectively. %20 represents a space character.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">fragment</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">#fragment1</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="mwb1510713266020"> </a>
+   <h2>URIUnpack Example</h2>
+   <a name="section_nbz_ts4_xdb"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">The input table, uris_input, has five URIs, some of which include percent-encoded characters.</p>
+   <a name="table_mxw_1t4_xdb"> </a>
+   <table class="introtable">
+      <a name="table_mxw_1t4_xdb"> </a>
+      <h4 style="text-align: center;">uris_input</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">uri_column</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">'https://www.sample.com/webhp?p1=chrome&amp;ph=hello+world&amp;p3=UTF-8#fragment1'</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">'http://www.ietf.org/rfc/rfc2396.txt'</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">'ldap://[2001:db8::7]/c=GB?objectClass?one'</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">'telnet://192.0.2.16:80/'</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">'http://www.bar.com/baz/foo?p1=netscape&amp;p2=%7bhello+world%7d&amp;p3=UTF#This+%2Bis+%2Bfragment+%2Btoo'</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_yv5_5s4_xdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM URIUnpack (
+  ON uris_input
+  USING
+  URIColumn ('uri_column')
+  Queries ('p1','p2','p3')
+  OutputType ('SCHEME','HOST','PATH','FRAGMENT')
+  Accumulate ('id')
+  PrintNullQueries ('true')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_hrp_vs4_xdb"> </a>
+   <h3>Output</h3>
+   <p style="line-height: 1em;">The characters encoded in the input table as %20, %7b, %7d, and %2B are decoded in the output table as the space character, left brace ({), right brace (}), and plus sign (+), respectively. When a URI does not have a specified parameter, the value of that parameter is NULL.</p>
+   <pre>
+      <tt>
+ id scheme host           path             p1       p2            p3    fragment             
+ -- ------ -------------- ---------------- -------- ------------- ----- -------------------- 
+  1 https  www.google.com /webhp           chrome   hello world   utf-8 fragment1           
+  2 http   www.ietf.org   /rfc/rfc2396.txt null     null          null  null                
+  3 ldap   [2001:db8::7]  /c=gb            null     null          null  null                
+  4 telnet 192.0.2.16     /                null     null          null  null                
+  5 http   www.bar.com    /baz/foo         netscape {hello world} utf   this+is+fragment+too</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

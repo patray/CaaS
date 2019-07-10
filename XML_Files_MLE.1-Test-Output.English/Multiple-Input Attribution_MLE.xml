@@ -1,0 +1,915 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="rbe1506030154959"> </a>
+	  <h1>Multiple-Input Attribution_MLE</h1>
+
+	  <p style="line-height: 1em;">The multiple-input version of the Attribution_MLE function accepts one or more input tables and gets many parameters from other dimension tables.</p>
+   <a name="fig_jlj_4rn_lw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <a name="uqp1507592291489"> </a>
+   <h2>Attribution_MLE Syntax (Multiple Inputs)</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 2.9</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Attribution_MLE (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY <i>user_id</i> ORDER BY <i>timestamp_column</i> 
+  [ ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY <i>user_id</i> ORDER BY <i>timestamp_column</i> ][,...]
+  ON <i>conversion_event_table</i> AS ConversionEventTable DIMENSION
+  [ ON <i>excluding_event_table</i> AS ExcludedEventTable DIMENSION ]
+  [ ON <i>optional_event_table</i> AS OptionalEventTable DIMENSION ]
+  ON <i>first_model_table</i> AS FirstModelTable DIMENSION
+  [ ON <i>second_model_table</i> AS SecondModelTable DIMENSION ]
+  USING
+  EventColumn ('<i>event_column</i>')
+  TimeColumn ('<i>timestamp_column</i>')
+  WindowSize ({ 'rows:<i>K</i>' | 'seconds:<i>K</i>' | 'rows:<i>K</i>&amp;seconds:<i>K2</i>' })
+) AS <i>alias</i> ORDER BY <i>user_id</i>,<i>time_stamp</i>;</tt>
+   </pre>
+   <a name="nwj1507592418107"> </a>
+	  <h2>Attribution_MLE Syntax Elements (Multiple Inputs)</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>EventColumn</dt>
+      <dd>Specify the name of the input column that contains the clickstream events.</dd>
+      <dt>TimeColumn</dt>
+      <dd>Specify the name of the input column that contains the timestamps of the clickstream events.</dd>
+      <dt>WindowSize</dt>
+      <dd>Specify how to determine the maximum window size for the attribution calculation:<a name="table_a4k_nyx_fdb"> </a>
+         <table class="introtable">
+            <a name="table_a4k_nyx_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">rows:</tt>
+                     <i>K</i>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Assign attributions to at most <i>K</i> events before conversion event, excluding events of types specified in ExcludedEventTable.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">seconds:</tt>
+                     <i>K</i>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Assign attributions only to rows not more than <i>K</i> seconds before conversion event.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">rows:</tt>
+                     <i>K</i>
+                     <tt style="font-family: monospace;">&amp;seconds:</tt>
+                     <i>K2</i>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Apply both constraints and comply with stricter one.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+   </div>
+
+
+	
+   <a name="ruu1507592122911"> </a>
+    <h2>Attribution_MLE Input (Multiple Inputs)</h2>
+
+    
+        <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Required</h3>
+   <a name="table_sv1_plq_vcb"> </a>
+   <table class="introtable">
+      <a name="table_sv1_plq_vcb"> </a>
+                <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains clickstream data for computing attributions.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ConversionEventTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains conversion events.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">FirstModelTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Defines first model.</div>
+         </td>
+      </tr>
+            </table>
+
+
+
+        <a name="section_llc_jlq_vcb"> </a>
+   <h3>Optional</h3>
+   <a name="table_rd1_ylq_vcb"> </a>
+   <table class="introtable">
+      <a name="table_rd1_ylq_vcb"> </a>
+                <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1-4 additional input tables</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contain additional clickstream data. Specifying these tables lets you co-group attributes from all specified input tables (for example, ad_click, impressions, and conversions).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ExcludedEventTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains events to exclude from attribution.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">OptionalEventTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains optional events.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">SecondModelTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Defines second model.</div>
+         </td>
+      </tr>
+            </table>
+
+
+
+        <a name="section_u4r_fmq_vcb"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_N10050_N1003F_N1002B_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10050_N1003F_N1002B_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>userid_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">User identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>event_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Event from clickstream.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>time_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, SMALLINT, BIGINT, TIMESTAMP, or TIME</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Event timestamp.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ndv_rmq_vcb"> </a>
+   <h3>ConversionEventTable Schema</h3>
+   <a name="table_N100A7_N1003F_N1002B_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100A7_N1003F_N1002B_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>conversion_events</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each conversion event.] Conversion event value (string or integer).</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_fs3_xmq_vcb"> </a>
+   <h3>FirstModelTable and SecondModelTable Schema</h3>
+   <a name="table_N1014F_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1014F_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Row identifier. Rows are numbered 0, 1, 2, and so on.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">model</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Row 0: Model type.<p style="line-height: 1em; margin: 0px;">
+                  <br/>Row 1, ..., <i>n</i>: Distribution model definition.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>SIMPLE model: Model table has single row that specifies model type and parameters.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>Other model types: <i>n</i> is number of rows or events included in model.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>For model type and specification definitions, see Attribution Model Specification.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_iqn_tmq_vcb"> </a>
+   <h3>ExcludedEventTable Schema</h3>
+   <a name="table_N100DE_N1003F_N1002B_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100DE_N1003F_N1002B_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>excluding_event</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each excluded event.] Excluded event (string or integer). Cannot be a conversion event.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_tm1_vmq_vcb"> </a>
+   <h3>OptionalEventTable Schema</h3>
+   <a name="table_N10115_N1003F_N1002B_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10115_N1003F_N1002B_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>optional_event</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each optional event.] Optional event (string or integer). Cannot be a conversion or excluded event. Function attributes conversion event to optional event only if it cannot attribute it to regular event.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+    
+   <a name="fhs1507592546378"> </a>
+   <h2>Attribution_MLE Output (Multiple Inputs)</h2>
+   <a name="section_avc_bnm_wcb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">user_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">User identifier from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">event</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Clickstream event from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">time_stamp</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">TIMESTAMP</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Event timestamp from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">attribution</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Fraction of attribution for conversion event that is attributed to this event.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">time_to_conversion</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Elapsed time between attributable event and conversion event.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="anw1506030212637"> </a>
+   <h2>Attribution_MLE Example (Multiple Inputs)</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">This example uses models to assign attribution weights to these events and channels:</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Event Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Channels</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">conversion</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SocialNetwork, PaidSearch</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">excluding</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Email</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">optional</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Direct, Referral, OrganicSearch</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ngh_vjh_zdb"> </a>
+   <h3>Input</h3>
+   <a name="table_xr1_3kh_zdb"> </a>
+   <table class="introtable">
+      <a name="table_xr1_3kh_zdb"> </a>
+      <h4 style="text-align: center;">attribution_sample_table1</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">user_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">event</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">time_stamp</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:01</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:05</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Email</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:15</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:31</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:51</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_st2_mkh_zdb"> </a>
+   <table class="introtable">
+      <a name="table_st2_mkh_zdb"> </a>
+      <h4 style="text-align: center;">attribution_sample_table2</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">user_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">event</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">time_stamp</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:19</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SocialNetwork</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:20</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Direct</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:21</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Referral</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:22</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">PaidSearch</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:23</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:29</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:31</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:33</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:36</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">impression</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2001-09-27 23:00:38</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_zk3_rkh_zdb"> </a>
+   <table class="introtable">
+      <a name="table_zk3_rkh_zdb"> </a>
+      <h4 style="text-align: center;">ConversionEventTable</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">conversion_events</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">PaidSearch</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">SocialNetwork</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_fjq_tkh_zdb"> </a>
+   <table class="introtable">
+      <a name="table_fjq_tkh_zdb"> </a>
+      <h4 style="text-align: center;">ExcludedEventTable</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">excluding_events</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Email</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_sjk_vkh_zdb"> </a>
+   <table class="introtable">
+      <a name="table_sjk_vkh_zdb"> </a>
+      <h4 style="text-align: center;">OptionalEventTable</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">optional_events</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Direct</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">OrganicSearch</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Referral</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">The following two model tables apply the distribution models by rows and by seconds, respectively.</p>
+   <a name="table_jbq_1lh_zdb"> </a>
+   <table class="introtable">
+      <a name="table_jbq_1lh_zdb"> </a>
+      <h4 style="text-align: center;">FirstModelTable</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">model</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SEGMENT_ROWS</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3:0.5:EXPONENTIAL:0.5,SECOND</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4:0.3:WEIGHTED:0.4,0.3,0.2,0.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3:0.2:FIRST_CLICK:NA</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_rrq_dlh_zdb"> </a>
+   <table class="introtable">
+      <a name="table_rrq_dlh_zdb"> </a>
+      <h4 style="text-align: center;">SecondModelTable</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">model</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SEGMENT_SECONDS</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6:0.5:UNIFORM:NA</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8:0.3:LAST_CLICK:NA</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6:0.2:FIRST_CLICK:NA</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ixq_vjh_zdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Attribution_MLE (
+  ON attribution_sample_table1 AS input1
+    PARTITION BY user_id
+    ORDER BY time_stamp
+  ON attribution_sample_table2 AS input2
+    PARTITION BY user_id
+    ORDER BY time_stamp
+  ON conversion_event_table AS ConversionEventTable DIMENSION
+  ON excluding_event_table AS ExcludedEventTable DIMENSION
+  ON optional_event_table AS OptionalEventTable DIMENSION
+  ON model1_table AS FirstModelTable DIMENSION
+  ON model2_table AS SecondModelTable DIMENSION
+  USING
+  EventColumn ('event')
+  TimeColumn ('time_stamp')
+  WindowSize ('rows:10&amp;seconds:20')
+) AS dt ;</tt>
+   </pre>
+   <a name="section_svb_wjh_zdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ user_id event         time_stamp                 attribution        time_to_conversion 
+ ------- ------------- -------------------------- ------------------ ------------------ 
+       1 impression    2001-09-27 23:00:19.000000 0.7142857313156128               -1.0
+       1 impression    2001-09-27 23:00:01.000000 0.2857142984867096              -19.0
+       1 impression    2001-09-27 23:00:05.000000                0.0               NULL
+       1 socialnetwork 2001-09-27 23:00:20.000000               NULL               NULL
+       1 referral      2001-09-27 23:00:22.000000                0.5               -1.0
+       1 direct        2001-09-27 23:00:21.000000                0.5               -2.0
+       1 paidsearch    2001-09-27 23:00:23.000000               NULL               NULL
+</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

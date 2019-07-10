@@ -1,0 +1,1060 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="emh1506030790876"> </a>
+	  <h1>Burst</h1>
+
+	  <p style="line-height: 1em;">The Burst function bursts (splits) a time interval into a series of shorter "burst" intervals and allocates values from the time intervals into the new, shorter subintervals. The Burst function is useful for allocating values from overlapping time intervals into user-defined time intervals (for example, when a cable company has customer data from overlapping time intervals, which it wants to analyze by dividing into uniform time intervals). The Burst function supports several allocation methods.</p>
+   <p style="line-height: 1em;">The burst intervals can have either the same length (specified by the TimeInterval syntax element), the same number of data points (specified by the NumPoints syntax element), or specific start and end times (specified by time_table).</p>
+
+   <a name="udr1506030997728"> </a>
+   <h2>Burst Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 2.5</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Burst (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+    PARTITION BY <i>id</i> [ ORDER BY <i>order_column</i> ]
+  [ ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS TimeIntervalTable
+    PARTITION BY <i>id</i> [ ORDER BY <i>ordering_column</i> ] ]
+  USING
+  TimeColumn ('<i>start_time_column</i>', '<i>end_time_column</i>')
+  [ TimeInterval (<i>numeric_value</i>) ]
+  TargetColumns ({ '<i>target_column</i>' | <i>target_column_range</i> }[,...])
+  [ TimeDataType (<i>data_type</i>) ]
+  [ ValueDataType (<i>value_type</i> [,...]) ]
+  [ StartTime ('<i>start_time</i>') ]
+  [ EndTime ('<i>end_time</i>') ]
+  [ NumPoints (<i>data_points</i>) ]
+  [ ValuesBeforeFirst ('<i>before_first_value</i>' [,...]) ]
+  [ ValuesAfterLast ('<i>after_last_value</i>' [,...]) ]
+  [ SplitCriteria ({ 'nosplit' | 'proportional' | 'random' | 'gaussian' | 'poisson' }) ]
+  [ Seed (<i>seed</i>) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="umj1506031042722"> </a>
+	  <h2>Burst Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TimeColumn</dt>
+      <dd>Specify the names of the InputTable columns that contain the start and end times of the time interval to be burst.</dd>
+      <dt>TimeInterval</dt>
+      <dd>[Optional] Specify exactly one of TimeIntervalTable, TimeInterval, or NumPoints.</dd>
+      <dd>Specify the length of each burst time interval. This value must be either INTEGER or DOUBLE PRECISION.</dd>
+      <dt>TargetColumns</dt>
+      <dd>Specify the names of InputTable columns to copy to the output table.</dd>
+      <dt>TimeDataType</dt>
+      <dd>[Optional] Specify the data type of the output columns that correspond to the input table columns that TimeColumn specifies (<i>start_time_column</i> and <i>end_time_column</i>).<p style="line-height: 1em;">If you omit this syntax element, the function infers the data type of <i>start_time_column</i> and <i>end_time_column</i> from the input table and uses the inferred data type for the corresponding output table columns.</p>
+         <p style="line-height: 1em;">If you specify this syntax element, the function can transform the input data to the specified output data type only if both the input column data type and the specified output column data type are in this list:<ul>
+               <li>INTEGER</li>
+               <li>BIGINT</li>
+               <li>SMALLINT</li>
+               <li>DOUBLE PRECISION</li>
+               <li>NUMERIC</li>
+               <li>NUMERIC(<i>n</i>[,<i>m</i>])</li>
+            </ul>
+         </p>
+      </dd>
+      <dt>ValueDataType</dt>
+      <dd>[Optional] Specify the data types of the output columns that correspond to the input table columns that TargetColumns specifies.<p style="line-height: 1em;">If you omit this syntax element, the function infers the data type of each <i>target_column</i> from the input table and uses the inferred data type for the corresponding output table column.</p>
+         <p style="line-height: 1em;">If you specify ValueDataType, it must be the same size as TargetColumns. That is, if TargetColumns specifies <i>n</i> columns, ValueDataType must specify <i>n</i> data types. For <i>i</i> in [1, <i>n</i>], <i>value_column_i</i> has <i>value_type_i</i>. However, <i>value_type_i</i> can be empty; for example:</p>
+         <pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+TargetColumns ('c1', 'c2', 'c3')
+ValueDataType (INTEGER, ,VARCHAR)</tt>
+         </pre>
+         <p style="line-height: 1em;">If you specify this syntax element, the function can transform the input data to the specified output data type only if both the input column data type and the specified output column data type are in this list:<ul>
+               <li>INTEGER</li>
+               <li>BIGINT</li>
+               <li>SMALLINT</li>
+               <li>DOUBLE PRECISION</li>
+               <li>NUMERIC</li>
+               <li>NUMERIC(<i>n</i>[,<i>m</i>])</li>
+            </ul>
+         </p>
+      </dd>
+      <dt>StartTime</dt>
+      <dd>[Optional] Specify the start time for the time interval to be burst.</dd>
+      <dd>Default: value in <i>start_time_column</i>
+      </dd>
+      <dt>EndTime</dt>
+      <dd>[Optional] Specify the end time for the time interval to be burst.</dd>
+      <dd>Default: value in <i>end_time_column</i>
+      </dd>
+      <dt>NumPoints</dt>
+      <dd>[Optional] Specify exactly one of TimeIntervalTable, TimeInterval, or NumPoints.<p style="line-height: 1em;">Specify the number of data points in each burst time interval. This value must be an INTEGER.</p>
+      </dd>
+      <dt>ValuesBeforeFirst</dt>
+      <dd>[Optional] Specify the values to use if <i>start_time</i> is before <i>start_time_column</i>. Each of these values must have the same data type as its corresponding <i>target_column</i>. Values of data type VARCHAR are case-insensitive.</dd>
+      <dd>If you specify ValuesBeforeFirst, it must be the same size as TargetColumns. That is, if TargetColumns specifies <i>n</i> columns, ValuesBeforeFirst must specify <i>n</i> values. For <i>i</i> in [1, <i>n</i>], <i>value_column_i</i> has the value <i>before_first_value_i</i>. However, <i>before_first_value_i</i> can be empty; for example:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+TargetColumns ('c1', 'c2', 'c3')
+ValuesBeforeFirst (1, ,'abc')</tt>
+         </pre>
+      </dd>
+      <dd>If <i>before_first_value_i</i> is empty, <i>value_column_i</i> has the value NULL.</dd>
+      <dd>Default: <i>value_column_i</i> has the value NULL for <i>i</i> in [1, <i>n</i>].</dd>
+      <dt>ValuesAfterLast</dt>
+      <dd>[Optional] Specify the values to use if <i>end_time</i> is after <i>end_time_column</i>. Each of these values must have the same data type as its corresponding <i>target_column</i>. Values of data type VARCHAR are case-insensitive.</dd>
+      <dd>If you specify ValuesAfterLast, it must be the same size as TargetColumns. That is, if TargetColumns specifies <i>n</i> columns, ValuesAfterLast must specify <i>n</i> values. For <i>i</i> in [1, <i>n</i>], <i>value_column_i</i> has the value <i>after_last_value_i</i>. However, <i>after_last_value_i</i> can be empty; for example:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+TargetColumns ('c1', 'c2', 'c3')
+ValuesAfterLast (1, ,'abc')</tt>
+         </pre>
+      </dd>
+      <dd>If <i>after_last_value_i</i> is empty, <i>value_column_i</i> has the value NULL.</dd>
+      <dd>Default: <i>value_column_i</i> has the value NULL for <i>i</i> in [1, <i>n</i>].</dd>
+      <dt>SplitCriteria</dt>
+      <dd>[Optional] Specify how to split <i>target_column</i> values into subintervals:<a name="table_otq_g1y_fdb"> </a>
+         <table class="introtable">
+            <a name="table_otq_g1y_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'nosplit'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">The function assigns to each subinterval the sum of the values in the rows in that interval. See Burst Example: TimeInterval, SplitCriteria ('nosplit') and Burst Example: TimeIntervalTable File (where SplitCriteria defaults to 'nosplit').</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'proportional'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">The function does the following:<ol>
+                        <li>Determines the number of subintervals for each row.</li>
+                        <li>Divides the <i>target_column</i> values evenly across all subintervals.</li>
+                        <li>Adds the contributions from all rows to each subinterval.</li>
+                     </ol>
+                     <p style="line-height: 1em; margin: 0px;">
+                        <br/>See Burst Example: TimeInterval, SplitCriteria ('proportional').</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'random'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">The function does the following:<ol>
+                        <li>Determines the number of subintervals for each row.</li>
+                        <li>Draws <i>x</i>
+                           <sub>
+                              <i>i</i>
+                           </sub> for each subinterval <i>i</i>.<p style="line-height: 1em; margin: 0px;">
+                              <br/>The distribution is uniform on (0,1). The value assigned to each subinterval except the last is:</p>
+                           <img src="data:image/png;base64,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"
+                                width=""
+                                height=""/>
+                           <p style="line-height: 1em; margin: 0px;">
+                              <br/>where <i>Value</i> is the value of the input table for that row.</p>
+                           <p style="line-height: 1em; margin: 0px;">
+                              <br/>The value assigned to the last subinterval is:</p>
+                           <img src="data:image/png;base64,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"
+                                width=""
+                                height=""/>
+                        </li>
+                        <li>Adds the contributions from all rows to each subinterval.</li>
+                     </ol>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'gaussian'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">The function does the following:<p style="line-height: 1em; margin: 0px;">
+                        <br/>
+                        <ol>
+                           <li>Determines the number of subintervals for each row.</li>
+                           <li>Draws <i>x</i>
+                              <sub>
+                                 <i>i</i>
+                              </sub> for each subinterval <i>i</i>.<p style="line-height: 1em; margin: 0px;">
+                                 <br/>The distribution is a standard normal distribution. The value assigned to each subinterval except the last, and the value assigned to the last subinterval, are calculated with the equations shown for 'random'.</p>
+                           </li>
+                           <li>Adds the contributions from all rows to each subinterval.</li>
+                        </ol>
+                     </p>
+                     <p style="line-height: 1em; margin: 0px;">
+                        <br/>See Burst Example: TimeInterval, SplitCriteria ('gaussian').</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'poisson'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <p>
+                        <b>Note:</b>  
+                        <ul>
+                           <li>Use 'poisson' only if the means of each <i>target_column</i> is nonnegative.</li>
+                           <li>For data sets with an expected mean value greater than 40, Teradata recommends selecting 'gaussian' instead of 'poisson'. The performance of the 'poisson' option decreases as the mean of the data set increases. </li>
+                        </ul>
+                     </p>
+                     <p style="line-height: 1em; margin: 0px;">
+                        <br/>The function does the following:<ol>
+                           <li>Determines the number of subintervals for each row.</li>
+                           <li>Draws <i>x</i>
+                              <sub>
+                                 <i>i</i>
+                              </sub> for each subinterval <i>i</i>.<p style="line-height: 1em; margin: 0px;">
+                                 <br/>The distribution is a Poisson distribution with mean:</p>
+                              <p style="line-height: 1em; margin: 0px;">
+                                 <br/>
+                                 <i>Value</i> / <i>number_of_subintervals</i>
+                              </p>
+                              <p style="line-height: 1em; margin: 0px;">
+                                 <br/>Each subinterval is assigned this value:</p>
+                              <img src="data:image/png;base64,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"
+                                   width=""
+                                   height=""/>
+                           </li>
+                           <li>Adds the contributions from all rows to each subinterval.</li>
+                        </ol>
+                     </p>
+                  </div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>Seed</dt>
+      <dd>
+         <p style="line-height: 1em;">[Optional] Use only if SplitCriteria is 'random' or 'gaussian'. Specify the value for initializing the random number generator the algorithm uses for repeatable results (for more information, see Nondeterministic Results and UniqueID Syntax Element).</p>
+         <p style="line-height: 1em;">Default: 0</p>
+      </dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of InputTable columns (other than those specified by TimeColumn and TargetColumns) to copy to the output table.</dd>
+      <dd>Default behavior: The function copies to the output table only the columns specified by TimeColumn and TargetColumns.</dd>
+   </div>
+
+
+	
+   <a name="mfw1506031093992"> </a>
+   <h2>Burst Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_wl1_frm_wcb"> </a>
+   <table class="introtable">
+      <a name="table_wl1_frm_wcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains time intervals to burst.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">TimeIntervalTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Contains start and end times of burst intervals. This table lets you use different time intervals and partitions the data accordingly.<p style="line-height: 1em; margin: 0px;">
+                  <br/>If you omit this table, you must specify either the TimeInterval or NumPoints syntax element.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ejs_dxc_1db"> </a>
+   <h3>InputTable Schema</h3>
+   <p style="line-height: 1em;">Each row contains a time interval to burst.</p>
+   <a name="table_N10017_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10017_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>start_time_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, BIGINT, SMALLINT, DOUBLE PRECISION, NUMERIC, DATE, TIME, TIME(<i>n</i>), TIMESTAMP</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Interval start time.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>end_time_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, BIGINT, SMALLINT, DOUBLE PRECISION,NUMERIC, DATE, TIME, TIME(<i>n</i>), TIMESTAMP, TIMESTAMP(<i>n</i>)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Interval end time.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, BIGINT, SMALLINT, DOUBLE PRECISION, NUMERIC, CHARACTER, CHARACTER(<i>n</i>), VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column to copy to output table.<p style="line-height: 1em; margin: 0px;">
+                  <br/>If SplitCriteria is not 'nosplit', ValueDataType must be DOUBLE PRECISION.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Column to copy to output table.<p style="line-height: 1em; margin: 0px;">
+                  <br/>Typically, one <i>accumulate_column</i> is a row identifier, such as 'id'.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_swk_2xc_1db"> </a>
+   <h3>TimeIntervalTable Schema</h3>
+   <p style="line-height: 1em;">Each row contains the start and end times of a burst interval.</p>
+   <a name="table_N100CE_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100CE_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>id</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Row identifier.<p style="line-height: 1em; margin: 0px;">
+                  <br/>If InputTable row <i>i</i> is to be burst into <i>n</i> intervals, TimeIntervalTable has <i>n</i> rows with id value <i>i</i>.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>burst_start_time</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, BIGINT, SMALLINT, DOUBLE PRECISION, NUMERIC, DATE, TIME, TIME(<i>n</i>), TIMESTAMP, TIMESTAMP(<i>n</i>)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Interval start time.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>burst_end_time</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, BIGINT, SMALLINT, DOUBLE PRECISION, NUMERIC, DATE, TIME, TIME(<i>n</i>), TIMESTAMP</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Interval end time.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="png1506031144943"> </a>
+   <h2>Burst Output</h2>
+   <a name="section_g3c_m4m_wcb"> </a>
+   <h3>Output Table Schema</h3>
+   <p style="line-height: 1em;">Each row contains a burst interval. Columns copied from InputTable appear in the same order in the output table.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>] Column copied from InputTable.<p style="line-height: 1em; margin: 0px;">
+                  <br/>Typically, one <i>accumulate_column</i> is a row identifier, such as 'id'.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">burst_start</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, BIGINT, SMALLINT, DOUBLE PRECISION, NUMERIC, DATE, TIME, TIME(<i>n</i>), TIMESTAMP, TIMESTAMP(<i>n</i>)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Interval start time.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">burst_end</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, BIGINT, SMALLINT, DOUBLE PRECISION, NUMERIC, DATE, TIME, TIME(<i>n</i>), TIMESTAMP, TIMESTAMP(<i>n</i>)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Interval end time.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">burst_duration</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Interval duration (burst_end - burst_start).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, BIGINT, SMALLINT, DOUBLE PRECISION, NUMERIC, CHARACTER, VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>target_column</i>] Column copied from InputTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="vsl1510717808699"> </a>
+   <h2>Burst Examples</h2>
+   <a name="wpp1506031220436"> </a>
+   <h3>Burst Example: TimeInterval, SplitCriteria ('nosplit')</h3>
+   <a name="section_cfh_pfn_scb"> </a>
+   <h4>Input</h4>
+   <a name="table_t2s_5fn_scb"> </a>
+   <table class="introtable">
+      <a name="table_t2s_5fn_scb"> </a>
+      <h4 style="text-align: center;">InputTable: burst_example</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">start_time_column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">end_time_column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">num_custs</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-08-05</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-08-10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">400</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-08-03</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-08-09</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">500</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-08-04</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-08-08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">200</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-08-01</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-08-04</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">600</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_v2s_pfn_scb"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">The SQL call bursts the data for a duration of 1 day (86400 seconds).</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Burst(
+  ON burst_example AS InputTable PARTITION BY id ORDER BY id
+  USING
+  TimeColumn ('start_time_column', 'end_time_column')
+  TimeInterval (86400)
+  TargetColumns ('num_custs')
+  StartTime ('08/01/2010')
+  EndTime ('08/10/2010')
+  SplitCriteria ('nosplit')
+  Accumulate ('id')
+) AS dt ;</tt>
+   </pre>
+   <a name="section_vjv_qfn_scb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The value assigned to each subinterval is the sum of all rows contributing to the subinterval. For example, 2010-08-06 is covered by the first 3 rows of the input table: 400 + 500 + 200 = 1100.</p>
+   <pre>
+      <tt>
+ id num_custs burst_start burst_end  burst_duration 
+ -- --------- ----------- ---------- -------------- 
+  1     600.0 2010-08-01  2010-08-02        86400.0
+  1     600.0 2010-08-02  2010-08-03        86400.0
+  1    1100.0 2010-08-03  2010-08-04        86400.0
+  1     700.0 2010-08-04  2010-08-05        86400.0
+  1    1100.0 2010-08-05  2010-08-06        86400.0
+  1    1100.0 2010-08-06  2010-08-07        86400.0
+  1    1100.0 2010-08-07  2010-08-08        86400.0
+  1     900.0 2010-08-08  2010-08-09        86400.0
+  1     400.0 2010-08-09  2010-08-10        86400.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="zyq1506031561279"> </a>
+   <h3>Burst Example: TimeInterval, SplitCriteria ('proportional')</h3>
+   <a name="section_jsy_vhn_scb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: burst_example from Burst Example: TimeInterval, SplitCriteria ('nosplit')</li>
+   </ul>
+
+   <a name="section_ty4_whn_scb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Burst (
+  ON burst_example AS InputTable PARTITION BY id ORDER BY id
+  USING
+  TimeColumn ('start_time_column', 'end_time_column')
+  TimeInterval (86400)
+  TargetColumns ('num_custs')
+  StartTime ('08/01/2010')
+  EndTime ('08/10/2010')
+  SplitCriteria ('proportional')
+  Accumulate ('id')
+) AS dt ;</tt>
+   </pre>
+   <a name="section_pm1_xhn_scb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The value assigned to each subinterval is determined by dividing the value from each row by the number of subintervals in the row. For example, the value assigned to 2010-08-06 is based on the first 3 rows of the input table: 400/5 + 500/6 + 200/4 = 80 + 83.33 + 50 = 213.33</p>
+   <pre>
+      <tt>
+ id num_custs          burst_start burst_end  burst_duration 
+ -- ------------------ ----------- ---------- -------------- 
+  1              200.0 2010-08-01  2010-08-02        86400.0
+  1              200.0 2010-08-02  2010-08-03        86400.0
+  1  283.3333333333333 2010-08-03  2010-08-04        86400.0
+  1 133.33333333333331 2010-08-04  2010-08-05        86400.0
+  1 213.33333333333331 2010-08-05  2010-08-06        86400.0
+  1 213.33333333333331 2010-08-06  2010-08-07        86400.0
+  1 213.33333333333331 2010-08-07  2010-08-08        86400.0
+  1 163.33333333333331 2010-08-08  2010-08-09        86400.0
+  1               80.0 2010-08-09  2010-08-10        86400.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="dsd1517502201145"> </a>
+	  <h3>Burst Example: TimeInterval, SplitCriteria ('gaussian')</h3>
+
+	  <a name="section_j5l_bkn_scb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: burst_example from Burst Example: TimeInterval, SplitCriteria ('nosplit')</li>
+   </ul>
+
+   <a name="section_kry_bkn_scb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Burst (
+  ON burst_example AS InputTable PARTITION BY id ORDER BY id
+  USING
+  TimeColumn ('start_time_column', 'end_time_column')
+  TimeInterval (86400)
+  TargetColumns ('num_custs')
+  StartTime ('08/01/2010')
+  EndTime ('08/10/2010')
+  SplitCriteria ('gaussian')
+  Accumulate ('id')
+) AS dt;</tt>
+   </pre>
+   <a name="section_osf_ckn_scb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The num_custs column values can vary, due to the random component of the calculation. For details, see the description of SplitCriteria in Burst Syntax Elements.</p>
+   <pre>
+      <tt>
+ id num_custs burst_start burst_end  burst_duration 
+ -- --------- ----------- ---------- -------------- 
+  1     126.0 2010-08-01  2010-08-02        86400.0
+  1     144.0 2010-08-02  2010-08-03        86400.0
+  1     385.0 2010-08-03  2010-08-04        86400.0
+  1      96.0 2010-08-04  2010-08-05        86400.0
+  1     245.0 2010-08-05  2010-08-06        86400.0
+  1     211.0 2010-08-06  2010-08-07        86400.0
+  1     254.0 2010-08-07  2010-08-08        86400.0
+  1     171.0 2010-08-08  2010-08-09        86400.0
+  1      68.0 2010-08-09  2010-08-10        86400.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="mzn1517502326793"> </a>
+	  <h3>Burst Example: TimeIntervalTable File</h3>
+   <a name="section_j5l_bkn_scb"> </a>
+   <h4>Input</h4>
+   <a name="table_wgw_tnn_scb"> </a>
+   <table class="introtable">
+      <a name="table_wgw_tnn_scb"> </a>
+      <h4 style="text-align: center;">InputTable: finance_data</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">start_time_column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">end_time_column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">expenditure</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">income</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">investment</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2007-07-10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">415</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">451</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">180</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2007-07-10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">421</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">465</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">179</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2007-07-10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">434</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">485</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">185</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2007-07-10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">448</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">493</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">192</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2007-07-10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">459</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">509</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">211</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_nn1_xnn_scb"> </a>
+   <table class="introtable">
+      <a name="table_nn1_xnn_scb"> </a>
+      <h4 style="text-align: center;">TimeIntervalTable: time_table2</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">burst_start</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">burst_end</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-07-05</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-07-05</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-07-10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-07-05</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-07-05</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-07-10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-07-10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-07-04</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-07-04</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-07-07</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-07-07</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-07-10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-07-02</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-07-02</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-07-04</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-07-04</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-07-06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-07-06</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-07-08</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-07-08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-07-10</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_kry_bkn_scb"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">The call specifies the ValuesBeforeFirst and ValuesAfterLast syntax elements. SplitCriteria defaults to 'nosplit'.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Burst (
+  ON finance_data AS InputTable PARTITION BY id ORDER BY id
+  ON time_table2 AS TimeIntervalTable PARTITION BY id ORDER BY burst_start
+  USING
+  TimeColumn ('start_time_column', 'end_time_column')
+  TargetColumns ('expenditure', 'income', 'investment')
+  StartTime ('06/30/1967')
+  EndTime ('07/10/1967')
+  ValuesBeforeFirst ('NULL','NULL','NULL')
+  ValuesAfterLast ('NULL','NULL','NULL')
+  Accumulate ('id')
+) AS dt ;</tt>
+   </pre>
+   <a name="section_osf_ckn_scb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id expenditure income investment burst_start burst_end  burst_duration 
+ -- ----------- ------ ---------- ----------- ---------- -------------- 
+  2       421.0  465.0      179.0 1967-06-30  1967-07-05       432000.0
+  3       434.0  485.0      185.0 1967-06-30  1967-07-10       864000.0
+  4       448.0  493.0      192.0 1967-06-30  1967-07-04       345600.0
+  2       421.0  465.0      179.0 1967-07-05  1967-07-10       432000.0
+  1       415.0  451.0      180.0 1967-06-30  1967-07-05       432000.0
+  4       448.0  493.0      192.0 1967-07-04  1967-07-07       259200.0
+  1       415.0  451.0      180.0 1967-07-05  1967-07-10       432000.0
+  4       448.0  493.0      192.0 1967-07-07  1967-07-10       259200.0
+  5       459.0  509.0      211.0 1967-06-30  1967-07-02       172800.0
+  5       459.0  509.0      211.0 1967-07-02  1967-07-04       172800.0
+  5       459.0  509.0      211.0 1967-07-04  1967-07-06       172800.0
+  5       459.0  509.0      211.0 1967-07-06  1967-07-08       172800.0
+  5       459.0  509.0      211.0 1967-07-08  1967-07-10       172800.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+</t:intro>

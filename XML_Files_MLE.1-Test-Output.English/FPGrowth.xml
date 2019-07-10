@@ -1,0 +1,1101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="hkq1507748964948"> </a>
+	  <h1>FPGrowth</h1>
+
+	
+		<p style="line-height: 1em;">The FPGrowth (frequent pattern growth) function uses an FP-growth algorithm to create association rules from patterns in a data set, and then determines their interestingness.</p>
+
+	
+   <a name="bmw1507749182429"> </a>
+   <h2>FPGrowth Background</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">The purpose of association rule mining is to identify strong rules in databases, using different measures of interestingness, and then discover regularities between products in large-scale transaction data recorded by point-of-sale (POS) systems in supermarkets. For example, the association rule {onions, potatoes}=&gt;{hamburger} indicates that if a customer buys onions and potatoes together, he or she is likely to buy hamburger. Unlike sequence mining, association rule mining typically does not consider the order of items, either within a transaction or across transactions.</p>
+   <p style="line-height: 1em;">Association rules are used in making marketing decisions, such as when to offer promotional pricing or where to place products. They are also useful in many other areas, such as Web usage mining, intrusion detection, continuous production, and bioinformatics. However, association rule mining in large databases is computationally expensive, especially when there is a large number of patterns.</p>
+   <p style="line-height: 1em;">An efficient, scalable method for mining the complete set of frequent patterns from a data set is the frequent-pattern growth (FP-growth) algorithm. The FP-growth algorithm stores crucial information about frequent pattern growth in a frequent-pattern tree (FP-tree), an extended prefix-tree structure of compressed information, and then uses a divide-and-conquer strategy. Because the FP-tree retains the item set association information, the FP-growth algorithm does not do candidate generations, which are computationally expensive.</p>
+   <p style="line-height: 1em;">The FPGrowth function does the following:</p>
+   <ol>
+      <li>Divides a large data set into independent partitions.</li>
+      <li>Compresses the data in each partition, creating an FP-tree to represent association information between items.</li>
+      <li>Divides the FP-tree into conditional databases, each associated with one frequent pattern.</li>
+      <li>Mines each conditional database for patterns.</li>
+      <li>Creates association rules from the patterns.<p style="line-height: 1em;">To create an association rule from a pattern, the function takes one or more items in the pattern as the consequence and the remaining items as the antecedent. In the rule {onions, potatoes}=&gt;{hamburger}, {onions, potatoes} is the antecedent and {hamburger} is the consequence.</p>
+      </li>
+      <li>Determines the interestingness of the association rules.</li>
+   </ol>
+   <p>
+      <b>Note:</b>  The FPGrowth function automatically truncates long transactions by removing low-frequency items, guaranteeing that a single transaction creates at most 1 million patterns. Automatic truncation depends only on the value of the MaxPatternLength syntax element.</p>
+   <a name="ppg1507749188210"> </a>
+   <h2>FPGrowth Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.12</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM FPGrowth (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  [ OUT TABLE OutputPatternsTable (<i>output_patterns_table</i>) ]
+  [ OUT TABLE OutputRulesTable (<i>output_rules_table</i>) ]
+  USING
+  TargetColumns ({ '<i>target_column</i>' | <i>target_column_range</i> }[,...] )
+  TransactionIDColumns ({ '<i>trans_id_column</i>' | <i>trans_id_column_range</i> }[,...])
+  [ PatternsOrRules ({ 'patterns' | 'rules' | 'both' }) ]
+  [ GroupByColumns ({ '<i>group_by_column</i>' | <i>group_by_column_range</i> }[,...]) ]
+  [ PatternDistributionKeyColumn ('<i>p_distribution_key_column</i>') ]
+  [ RuleDistributionKeyColumn ('<i>r_distribution_key_column</i>') ]
+  [ CompressionLevel ({ 'nocompress' | 'high' | 'medium' | 'low' }) ]
+  [ GroupSize (<i>group_size</i>) ]
+  [ MinSupport (<i>min_support</i>) ]
+  [ MinConfidence (<i>min_confidence</i>) ]
+  [ MaxPatternLength (<i>pattern_length</i>) ]
+  [ AntecedentCountRange ('<i>lower-bound_upper_bound</i>') ]
+  [ ConsequenceCountRange ('<i>lower-bound_upper_bound</i>') ]
+  [ Delimiter ('<i>delimiter</i>') ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="gfm1507749191870"> </a>
+	  <h2>FPGrowth Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputPatternsTable</dt>
+      <dd>[Required if PatternsOrRules is 'patterns' or 'both', disallowed otherwise.] Specify the name of the table where the function outputs the patterns.</dd>
+      <dt>OutputRulesTable</dt>
+      <dd>[Required if PatternsOrRules is 'patterns' or 'both', disallowed otherwise.] Specify the name of the table where the function outputs the rules.</dd>
+      <dt>TargetColumns</dt>
+      <dd>Specify the names of the InputTable columns that contain transaction items to analyze.</dd>
+      <dt>TransactionIDColumns</dt>
+      <dd>Specify the names of the InputTable columns that contain identifiers for the transaction items.<p>
+            <b>Note:</b>  Do not specify the same column in both this syntax element and the GroupByColumns syntax element, because this causes incorrect counting in the partitions.</p>
+      </dd>
+      <dt>PatternsOrRules</dt>
+      <dd>[Optional] Specify whether the function outputs patterns, rules, or both. An example of a pattern is {onions, potatoes, hamburger}.</dd>
+      <dd>Default: 'both'</dd>
+      <dt>GroupByColumns</dt>
+      <dd>[Optional] Specify the names of InputTable columns that define the partitions into which the function groups the input data and calculates output for it. At least one column must be usable as a distribution key.<p>
+            <b>Note:</b>  Do not specify the same column in both this syntax element and the TransactionIDColumns syntax element, because this causes incorrect counting in the partitions.</p>
+      </dd>
+      <dd>Default behavior: The function considers all input data to be in a single partition.</dd>
+      <dt>PatternDistributionKeyColumn</dt>
+      <dd>[Optional] Specify the name of the InputTable column to use as the distribution key for <i>output_patterns_table</i>.</dd>
+      <dd>Default: 'pattern_tranitemcolumns'.</dd>
+      <dt>RuleDistributionKeyColumn</dt>
+      <dd>[Optional] Specify the name of the InputTable column to use as the distribution key for <i>output_rules_table</i>.</dd>
+      <dd>Default: 'antecedent_tranitemcolumns'</dd>
+      <dt>CompressionLevel</dt>
+      <dd>[Optional] Specify the compression level the output tables.</dd>
+      <dd>Realized compression ratios depend on both this value and the data characteristics. These ratios typically range from 3x to 12x. For more information about compression, see the Teradata Database documentation.</dd>
+      <dd>Default: 'nocompress'</dd>
+      <dt>GroupSize</dt>
+      <dd>[Optional] Specify the number of transaction items to assign to each worker. This value must be an INTEGER in the range from 1 to the number of distinct transaction items, inclusive. For a machine with limited RAM, use a relatively small value.</dd>
+      <dd>Default: 4</dd>
+      <dt>MinSupport</dt>
+      <dd>[Optional] Specify the minimum support value of returned patterns (including the specified support value). This value must be a NUMERIC in the range [0, 1].</dd>
+      <dd>Default: 0.05</dd>
+      <dt>MinConfidence</dt>
+      <dd>[Optional] Specify the minimum confidence value of returned patterns (including the specified confidence value). This value must be a NUMERIC in the range [0, 1].</dd>
+      <dd>Default: 0.8</dd>
+      <dt>MaxPatternLength</dt>
+      <dd>[Optional] Specify the maximum length of returned patterns. The length of a pattern is the sum of the item numbers in the antecedent and consequence columns. This value must be an INTEGER greater than 2. MaxPatternLength also limits the length of returned rules to this value.</dd>
+      <dd>Default: 10</dd>
+      <dt>AntecedentCountRange</dt>
+      <dd>[Optional] Specify the range for <i>na</i>, the number of items in the antecedent. The function returns only patterns for which <i>na</i> is in the range [<i>lower_bound</i>, <i>upper_bound</i>]. The <i>lower_bound</i> must be greater an integer greater than 0. The <i>lower_bound</i> and <i>upper_bound</i> can be equal.</dd>
+      <dd>Default: '1-infinite'</dd>
+      <dt>ConsequenceCountRange</dt>
+      <dd>[Optional] Specify the range for <i>nc</i>, the number of items in the consequence. The function returns only patterns for which <i>nc</i> is in the range [<i>lower_bound</i>, <i>upper_bound</i>]. The <i>lower_bound</i> must be greater an integer greater than 0. The <i>lower_bound</i> and <i>upper_bound</i> can be equal.</dd>
+      <dd>Default: '1-1'</dd>
+      <dt>Delimiter</dt>
+      <dd>[Optional] Specify the delimiter that separates items in the output.</dd>
+      <dd>Default: ',' (comma)</dd>
+   </div>
+
+
+	
+   <a name="ahl1507749195688"> </a>
+   <h2>FPGrowth Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>InputTable Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any except BYTEINT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>target_column</i>.] Transaction item.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>trans_id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>trans_id_column</i>.] Transaction item identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>group_by_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>group_by_column</i>.] Defines partition for input data. At least one <i>group_by_column</i> must be usable as a distribution key.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>p_distribution_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Distribution key for OutputPatternsTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>r_distribution_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Distribution key for OutputRulesTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="pvf1507749199820"> </a>
+   <h2>FPGrowth Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The FPGrowth function outputs a message and either a pattern table, a rule table, or both (depending on the PatternsOrRules syntax element).</p>
+
+   <a name="section_e5g_ktk_ycb"> </a>
+   <h3>Output Message Schema</h3>
+   <a name="table_gzj_vms_rcb"> </a>
+   <table class="introtable">
+      <a name="table_gzj_vms_rcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">output_information</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Reports that patterns and rules are kept in tables specified in OutputPatternsTable and OutputRulesTable syntax elements.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_rwl_ltk_ycb"> </a>
+   <h3>OutputPatternsTable Schema</h3>
+   <a name="table_N10017_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10017_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>group_by_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>group_by_column</i>.] Column copied from InputTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">pattern_<i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Pattern composed of transaction items.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">length_of_pattern</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of items in pattern.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">count</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BIGINT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of occurrence of pattern.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">support</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Percentage of transactions that contain the pattern <tt style="font-family: monospace;">count/<i>t</i>
+               </tt>, where <i>t</i> is number of transactions.<p style="line-height: 1em; margin: 0px;">
+                  <br/>For example, if eggs and milk were purchased together 3 times in 5 transactions, the support value is 3/5, 60%.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_cgt_ntk_ycb"> </a>
+   <h3>OutputRulesTable Schema</h3>
+   <a name="table_N10097_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10097_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Contents</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">antecedent_<i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Items in the antecedent of the rule.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">consequence_<i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Items in the consequence of the rule.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">count_of_antecedent</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of items in the antecedent of the rule.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">count_of_consequence</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of items in the consequence of the rule.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cntb</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BIGINT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of transactions that contain both the antecedent and consequence.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cnt_antecedent</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BIGINT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of transactions that contain the antecedent.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cnt_consequence</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BIGINT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of transactions that contain the consequence.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">score</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Product of two conditional probabilities:<p style="line-height: 1em; margin: 0px;">
+                  <br/>(cntb / cnt_<sub>antecedent)</sub> * (cntb / cnt_consequence)</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">support</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Percentage of transactions that contain both the antecedent and consequence: cntb/t, where t is the number of transactions.<p style="line-height: 1em; margin: 0px;">
+                  <br/>For example, if eggs and milk were purchased together 3 times in 5 transactions, then the support value is 3/5, 60%.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">confidence</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Percentage of transactions that contain the antecedent that also contain the consequence:<p style="line-height: 1em; margin: 0px;">
+                  <br/>cntb / cnt_antecedent</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>For example, for the antecedent milk and consequence butter, if cntb=3 and cnt_antecedent=4, then the confidence value is 3/4, 75%. In other words, 75% of the time, when a person buys milk, the person also buys butter.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">lift</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Ratio of the observed support value to the expected support value if the antecedent and consequence are independent:<p style="line-height: 1em; margin: 0px;">
+                  <br/>(cntb/t) / ((cnt_antecedent/t) * (cnt_consequence/t))</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">conviction</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">More reliable alternative to confidence:<p style="line-height: 1em; margin: 0px;">
+                  <br/>(1-cnt_consequence/t) / (1-cntb/cnt_antecedent)</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">leverage</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Difference between the percentage of transactions that contain both the antecedent and consequence (cntb/t) and the expectation for cntb/t if the antecedent and consequence were statistically independent:<p style="line-height: 1em; margin: 0px;">
+                  <br/>(cntb/t) - ((cnt_antecedent/t) * (cnt_consequence/t))</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">coverage</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Percentage of transactions in which the rule applies:<p style="line-height: 1em; margin: 0px;">
+                  <br/>cnt_antecedent/t</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>Another name for coverage is antecedent support.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">chi_square</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Chi-squared test result, used to test the hypothesis that the antecedent and consequence are not associated. The formula follows this table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">z_score</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Significance of cntb, assuming that it follows a normal distribution:<p style="line-height: 1em; margin: 0px;">
+                  <br/>(cntb - mean(cntb)) / standard_deviation(cntb)</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>If every cntb is the same, then standard_deviation(cntb) is 0, and the function does not compute z_score.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_npr_stk_ycb"> </a>
+   <h3>Formula for chi_square Value</h3>
+   <p style="line-height: 1em;">(t * (cntb * (t + cntb - cnt_antecedent - cnt_consequence) - (cnt_antecedent - cntb) *</p>
+   <p style="line-height: 1em;">  (cnt_consequence - cntb))**2) /</p>
+   <p style="line-height: 1em;">  (cnt_antecedent * (t - cnt_antecedent) * cnt_consequence * (t - cnt_consequence))</p>
+
+   <a name="kzl1510706447354"> </a>
+   <h2>FPGrowth Example</h2>
+   <a name="section_hnc_xww_42b"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">The InputTable has sales transaction data of an office supply chain store by different geographic regions and customer segments. The column <i>product</i> specifies the items that are purchased by a customer in a given transaction (column <i>orderid</i>).</p>
+   <a name="table_uzq_2xw_42b"> </a>
+   <table class="introtable">
+      <a name="table_uzq_2xw_42b"> </a>
+      <h4 style="text-align: center;">InputTable: sales_transaction</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">orderid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">orderdate</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">orderqty</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">region</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">customer_segment</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">prd_category</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">product</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-10-13 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nunavut</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Small Business</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Office Supplies</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Storage &amp; Organization</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">293</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2012-10-01 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">49</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nunavut</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Consumer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Office Supplies</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Appliances</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">293</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2012-10-01 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">27</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nunavut</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Consumer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Office Supplies</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Binders and Binder Accessories</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">483</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2011-07-10 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nunavut</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Corporate</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Telephones and Communication</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">515</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-08-28 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">19</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nunavut</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Consumer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Office Supplies</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Appliances</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">515</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-08-28 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">21</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nunavut</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Consumer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Furniture</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Office Furnishings</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">613</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2011-06-17 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nunavut</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Corporate</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Office Supplies</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Binders and Binder Accessories</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">613</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2011-06-17 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nunavut</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Corporate</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Office Supplies</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Storage &amp; Organization</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">643</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2011-03-24 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">21</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nunavut</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Corporate</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Office Supplies</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Storage &amp; Organization</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">678</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-02-26 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">44</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nunavut</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Home Office</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Office Supplies</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Paper</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">807</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-11-23 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">45</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nunavut</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Home Office</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Office Supplies</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Paper</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">807</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-11-23 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nunavut</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Home Office</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Office Supplies</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Rubber Bands</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">868</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2012-06-08 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nunavut</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Home Office</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Office Supplies</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Appliances</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ep4_xww_42b"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM FPGrowth (
+  ON sales_transaction AS InputTable
+  OUT TABLE OutputRulesTable (fpgrowth_out_rule)
+  OUT TABLE OutputPatternsTable (fpgrowth_out_pattern)
+  USING
+  TargetColumns ('product')
+  TransactionIDColumns ('orderid')
+  GroupByColumns ('region')
+  MinSupport (0.01)
+  MinConfidence (0.0)
+  MaxPatternLength (4)
+  ConsequenceCountRange ('1-1')
+  PatternsOrRules ('both')
+) AS dt;</tt>
+   </pre>
+   <a name="section_x11_yww_42b"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ output_information                                                              
+ ------------------------------------------------------------------------------- 
+ Patterns are kept in pattern table specified in the argument OutputPatternTable
+ Rules are kept in rule table specified in the argument OutputRuleTable</tt>
+   </pre>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM fpgrowth_out_pattern ORDER BY region, pattern_product;</tt>
+   </pre>
+   <pre>
+      <tt>
+ region                pattern_product                                             length_of_pattern count support              
+ --------------------- ----------------------------------------------------------- ----------------- ----- -------------------- 
+ atlantic              appliances,chairs &amp; chairmats                                               2     1  0.05555555555555555
+ atlantic              chairs &amp; chairmats,computer peripherals                                     2     1  0.05555555555555555
+ atlantic              labels,pens &amp; art supplies                                                  2     1  0.05555555555555555
+ atlantic              office furnishings,binders and binder accessories                           2     1  0.05555555555555555
+ atlantic              office furnishings,computer peripherals                                     2     1  0.05555555555555555
+ atlantic              office furnishings,paper                                                    2     1  0.05555555555555555
+ atlantic              office furnishings,paper,storage &amp; organization                             3     1  0.05555555555555555
+ atlantic              office furnishings,storage &amp; organization                                   2     1  0.05555555555555555
+ atlantic              paper,labels                                                                2     1  0.05555555555555555
+ atlantic              paper,storage &amp; organization                                                2     1  0.05555555555555555
+ northwest territories binders and binder accessories,computer peripherals                         2     3 0.011152416356877323
+ northwest territories binders and binder accessories,office furnishings                           2     4  0.01486988847583643
+ northwest territories binders and binder accessories,office machines                              2     3 0.011152416356877323
+ northwest territories binders and binder accessories,rubber bands                                 2     3 0.011152416356877323
+ northwest territories binders and binder accessories,telephones and communication                 2     4  0.01486988847583643
+ northwest territories computer peripherals,chairs &amp; chairmats                                     2     3 0.011152416356877323
+ northwest territories computer peripherals,storage &amp; organization                                 2     3 0.011152416356877323
+ northwest territories office furnishings,pens &amp; art supplies                                      2     3 0.011152416356877323
+ northwest territories office machines,pens &amp; art supplies                                         2     3 0.011152416356877323
+ northwest territories paper,computer peripherals                                                  2     5  0.01858736059479554
+ northwest territories paper,rubber bands                                                          2     3 0.011152416356877323
+ northwest territories paper,storage &amp; organization                                                2     4  0.01486988847583643
+ northwest territories pens &amp; art supplies,labels                                                  2     3 0.011152416356877323
+ northwest territories storage &amp; organization,tables                                               2     3 0.011152416356877323
+ northwest territories telephones and communication,computer peripherals                           2     3 0.011152416356877323
+ northwest territories telephones and communication,office furnishings                             2     3 0.011152416356877323
+ northwest territories telephones and communication,storage &amp; organization                         2     5  0.01858736059479554
+ nunavut               appliances,computer peripherals                                             2     1 0.017857142857142856
+ nunavut               appliances,office furnishings                                               2     1 0.017857142857142856
+ nunavut               binders and binder accessories,appliances                                   2     2  0.03571428571428571
+ nunavut               binders and binder accessories,chairs &amp; chairmats                           2     1 0.017857142857142856
+ nunavut               binders and binder accessories,computer peripherals                         2     1 0.017857142857142856
+ nunavut               binders and binder accessories,storage &amp; organization                       2     1 0.017857142857142856
+ nunavut               bookcases,tables                                                            2     1 0.017857142857142856
+ nunavut               computer peripherals,bookcases                                              2     1 0.017857142857142856
+ nunavut               computer peripherals,office furnishings                                     2     1 0.017857142857142856
+ nunavut               computer peripherals,office furnishings,bookcases                           3     1 0.017857142857142856
+ nunavut               labels,rubber bands                                                         2     1 0.017857142857142856
+ nunavut               office furnishings,bookcases                                                2     1 0.017857142857142856
+ nunavut               paper,binders and binder accessories                                        2     1 0.017857142857142856
+ nunavut               paper,binders and binder accessories,chairs &amp; chairmats                     3     1 0.017857142857142856
+ nunavut               paper,chairs &amp; chairmats                                                    2     1 0.017857142857142856
+ nunavut               paper,computer peripherals                                                  2     1 0.017857142857142856
+ nunavut               paper,labels                                                                2     1 0.017857142857142856
+ nunavut               paper,rubber bands                                                          2     1 0.017857142857142856
+ nunavut               paper,telephones and communication                                          2     1 0.017857142857142856
+ nunavut               paper,telephones and communication,labels                                   3     1 0.017857142857142856
+ nunavut               telephones and communication,labels                                         2     2  0.03571428571428571
+ nunavut               telephones and communication,office furnishings                             2     1 0.017857142857142856</tt>
+   </pre>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM fpgrowth_out_rule ORDER BY region, score;</tt>
+   </pre>
+   <pre>
+      <tt>
+ region                antecedent_product                                consequence_product            count_of_antecedent count_of_consequence cntb cnt_antecedent cnt_consequence score                 support              confidence          lift               conviction         leverage               coverage             chi_square           z_score             
+ --------------------- ------------------------------------------------- ------------------------------ ------------------- -------------------- ---- -------------- --------------- --------------------- -------------------- ------------------- ------------------ ------------------ ---------------------- -------------------- -------------------- ------------------- 
+ atlantic              office furnishings                                paper                                            1                    1    1              5               4                  0.05  0.05555555555555555                 0.2                0.9 0.9722222222222222  -0.006172839506172846   0.2777777777777778  0.01978021978021978                NULL
+ atlantic              paper                                             office furnishings                               1                    1    1              4               5                  0.05  0.05555555555555555                0.25                0.9 0.9629629629629629  -0.006172839506172846   0.2222222222222222  0.01978021978021978                NULL
+ atlantic              binders and binder accessories                    office furnishings                               1                    1    1              3               5   0.06666666666666667  0.05555555555555555  0.3333333333333333                1.2 1.0833333333333333   0.009259259259259252  0.16666666666666666 0.055384615384615386                NULL
+ atlantic              office furnishings                                binders and binder accessories                   1                    1    1              5               3   0.06666666666666667  0.05555555555555555                 0.2                1.2 1.0416666666666667   0.009259259259259252   0.2777777777777778 0.055384615384615386                NULL
+ atlantic              labels                                            paper                                            1                    1    1              3               4   0.08333333333333333  0.05555555555555555  0.3333333333333333                1.5 1.1666666666666665   0.018518518518518517  0.16666666666666666   0.2571428571428571                NULL
+ atlantic              paper                                             labels                                           1                    1    1              4               3   0.08333333333333333  0.05555555555555555                0.25                1.5 1.1111111111111112   0.018518518518518517   0.2222222222222222   0.2571428571428571                NULL
+ atlantic              computer peripherals                              office furnishings                               1                    1    1              2               5                   0.1  0.05555555555555555                 0.5                1.8 1.4444444444444444   0.024691358024691353   0.1111111111111111   0.5538461538461539                NULL
+ atlantic              office furnishings                                computer peripherals                             1                    1    1              5               2                   0.1  0.05555555555555555                 0.2                1.8  1.111111111111111   0.024691358024691353   0.2777777777777778   0.5538461538461539                NULL
+ atlantic              labels                                            pens &amp; art supplies                              1                    1    1              3               2   0.16666666666666666  0.05555555555555555  0.3333333333333333                3.0  1.333333333333333   0.037037037037037035  0.16666666666666666                  1.8                NULL
+ atlantic              pens &amp; art supplies                               labels                                           1                    1    1              2               3   0.16666666666666666  0.05555555555555555                 0.5                3.0 1.6666666666666667   0.037037037037037035   0.1111111111111111                  1.8                NULL
+ atlantic              office furnishings                                storage &amp; organization                           1                    1    1              5               1                   0.2  0.05555555555555555                 0.2                3.6 1.1805555555555554   0.040123456790123455   0.2777777777777778   2.7529411764705882                NULL
+ atlantic              paper,storage &amp; organization                      office furnishings                               2                    1    1              1               5                   0.2  0.05555555555555555                 1.0                3.6               NULL   0.040123456790123455  0.05555555555555555   2.7529411764705882                NULL
+ atlantic              storage &amp; organization                            office furnishings                               1                    1    1              1               5                   0.2  0.05555555555555555                 1.0                3.6               NULL   0.040123456790123455  0.05555555555555555   2.7529411764705882                NULL
+ atlantic              storage &amp; organization                            paper                                            1                    1    1              1               4                  0.25  0.05555555555555555                 1.0                4.5               NULL   0.043209876543209874  0.05555555555555555   3.7058823529411766                NULL
+ atlantic              office furnishings,storage &amp; organization         paper                                            2                    1    1              1               4                  0.25  0.05555555555555555                 1.0                4.5               NULL   0.043209876543209874  0.05555555555555555   3.7058823529411766                NULL
+ atlantic              chairs &amp; chairmats                                appliances                                       1                    1    1              2               2                  0.25  0.05555555555555555                 0.5                4.5 1.7777777777777777   0.043209876543209874   0.1111111111111111            3.4453125                NULL
+ atlantic              appliances                                        chairs &amp; chairmats                               1                    1    1              2               2                  0.25  0.05555555555555555                 0.5                4.5 1.7777777777777777   0.043209876543209874   0.1111111111111111            3.4453125                NULL
+ atlantic              chairs &amp; chairmats                                computer peripherals                             1                    1    1              2               2                  0.25  0.05555555555555555                 0.5                4.5 1.7777777777777777   0.043209876543209874   0.1111111111111111            3.4453125                NULL
+ atlantic              paper                                             storage &amp; organization                           1                    1    1              4               1                  0.25  0.05555555555555555                0.25                4.5 1.2592592592592593   0.043209876543209874   0.2222222222222222   3.7058823529411766                NULL
+ atlantic              computer peripherals                              chairs &amp; chairmats                               1                    1    1              2               2                  0.25  0.05555555555555555                 0.5                4.5 1.7777777777777777   0.043209876543209874   0.1111111111111111            3.4453125                NULL
+ atlantic              office furnishings,paper                          storage &amp; organization                           2                    1    1              1               1                   1.0  0.05555555555555555                 1.0               18.0               NULL    0.05246913580246913  0.05555555555555555                 18.0                NULL
+ northwest territories office furnishings                                telephones and communication                     1                    1    3             38              40  0.005921052631578947 0.011152416356877323 0.07894736842105263 0.5309210526315788 0.9242697822623474  -0.009853374055084923   0.1412639405204461   1.7007492555326387 -0.5958795715311238
+ northwest territories telephones and communication                      office furnishings                               1                    1    3             40              38 0.0059210526315789476 0.011152416356877323               0.075 0.5309210526315788 0.9283633075454636  -0.009853374055084923  0.14869888475836432   1.7007492555326387 -0.5958795715311238
+ northwest territories computer peripherals                              binders and binder accessories                   1                    1    3             30              44  0.006818181818181818 0.011152416356877323                 0.1 0.6113636363636363  0.929368029739777  -0.007089454264037258  0.11152416356877323   0.9973157093952073 -0.5958795715311238
+ northwest territories binders and binder accessories                    computer peripherals                             1                    1    3             44              30  0.006818181818181819 0.011152416356877323 0.06818181818181818 0.6113636363636363 0.9534862634871701  -0.007089454264037258  0.16356877323420074   0.9973157093952073 -0.5958795715311238
+ northwest territories computer peripherals                              telephones and communication                     1                    1    3             30              40                0.0075 0.011152416356877323                 0.1             0.6725 0.9458901280462618   -0.00543110238940866  0.11152416356877323   0.6325906250570974 -0.5958795715311238
+ northwest territories telephones and communication                      computer peripherals                             1                    1    3             40              30  0.007500000000000001 0.011152416356877323               0.075             0.6725 0.9605144177634883   -0.00543110238940866  0.14869888475836432   0.6325906250570974 -0.5958795715311238
+ northwest territories office machines                                   binders and binder accessories                   1                    1    3             23              44  0.008893280632411068 0.011152416356877323 0.13043478260869565 0.7974308300395256 0.9618959107806692  -0.002833017785823856  0.08550185873605948   0.2018189137754355 -0.5958795715311238
+ northwest territories binders and binder accessories                    office machines                                  1                    1    3             44              23  0.008893280632411068 0.011152416356877323 0.06818181818181818 0.7974308300395256 0.9814126394052045  -0.002833017785823856  0.16356877323420074   0.2018189137754355 -0.5958795715311238
+ northwest territories binders and binder accessories                    telephones and communication                     1                    1    4             44              40   0.00909090909090909  0.01486988847583643 0.09090909090909091 0.6113636363636362 0.9364312267657993   -0.00945260568538301  0.16356877323420074   1.3878221516474791  0.8512565307587487
+ northwest territories telephones and communication                      binders and binder accessories                   1                    1    4             40              44  0.009090909090909092  0.01486988847583643                 0.1 0.6113636363636362  0.929368029739777   -0.00945260568538301  0.14869888475836432   1.3878221516474791  0.8512565307587487
+ northwest territories office furnishings                                binders and binder accessories                   1                    1    4             38              44  0.009569377990430622  0.01486988847583643 0.10526315789473684 0.6435406698564593 0.9348349005029521  -0.008236480977322037   0.1412639405204461   1.0995475833753345  0.8512565307587487
+ northwest territories binders and binder accessories                    office furnishings                               1                    1    4             44              38  0.009569377990430622  0.01486988847583643 0.09090909090909091 0.6435406698564593 0.9446096654275093  -0.008236480977322037  0.16356877323420074   1.0995475833753345  0.8512565307587487
+ northwest territories pens &amp; art supplies                               office furnishings                               1                    1    3             23              38  0.010297482837528604 0.011152416356877323 0.13043478260869565  0.923340961098398  0.987546468401487  -9.259131300009688E-4  0.08550185873605948  0.02431326959707827 -0.5958795715311238
+ northwest territories office furnishings                                pens &amp; art supplies                              1                    1    3             38              23  0.010297482837528604 0.011152416356877323 0.07894736842105263  0.923340961098398 0.9928836962294212  -9.259131300009688E-4   0.1412639405204461  0.02431326959707827 -0.5958795715311238
+ northwest territories computer peripherals                              storage &amp; organization                           1                    1    3             30              29  0.010344827586206896 0.011152416356877323                 0.1 0.9275862068965517 0.9913258983890954   -8.70634734180014E-4  0.11152416356877323 0.021394640023084693 -0.5958795715311238
+ northwest territories storage &amp; organization                            computer peripherals                             1                    1    3             29              30  0.010344827586206896 0.011152416356877323 0.10344827586206896 0.9275862068965517 0.9909922790963682   -8.70634734180014E-4  0.10780669144981413 0.021394640023084693 -0.5958795715311238
+ northwest territories computer peripherals                              chairs &amp; chairmats                               1                    1    3             30              22  0.013636363636363636 0.011152416356877323                 0.1 1.2227272727272727 1.0202395704254439  0.0020314810464200327  0.11152416356877323  0.14919290135101632 -0.5958795715311238
+ northwest territories chairs &amp; chairmats                                computer peripherals                             1                    1    3             22              30  0.013636363636363637 0.011152416356877323 0.13636363636363635 1.2227272727272727 1.0287614948151047  0.0020314810464200327  0.08178438661710037  0.14919290135101632 -0.5958795715311238
+ northwest territories storage &amp; organization                            paper                                            1                    1    4             29              40  0.013793103448275862  0.01486988847583643 0.13793103448275862 0.9275862068965517 0.9875092936802974 -0.0011608463122400187  0.10780669144981413 0.029771871706068362  0.8512565307587487
+ northwest territories paper                                             storage &amp; organization                           1                    1    4             40              29  0.013793103448275864  0.01486988847583643                 0.1 0.9275862068965517 0.9913258983890954 -0.0011608463122400187  0.14869888475836432 0.029771871706068362  0.8512565307587487
+ northwest territories pens &amp; art supplies                               office machines                                  1                    1    3             23              23  0.017013232514177693 0.011152416356877323 0.13043478260869565 1.5255198487712665 1.0516728624535316  0.0038418485095562524  0.08550185873605948   0.6494055345828021 -0.5958795715311238
+ northwest territories office machines                                   pens &amp; art supplies                              1                    1    3             23              23  0.017013232514177693 0.011152416356877323 0.13043478260869565 1.5255198487712665 1.0516728624535316  0.0038418485095562524  0.08550185873605948   0.6494055345828021 -0.5958795715311238
+ northwest territories binders and binder accessories                    rubber bands                                     1                    1    3             44              10  0.020454545454545454 0.011152416356877323 0.06818181818181818 1.8340909090909088  1.033275908967268   0.005071792816572463  0.16356877323420074   1.4130237120237121 -0.5958795715311238
+ northwest territories rubber bands                                      binders and binder accessories                   1                    1    3             10              44  0.020454545454545454 0.011152416356877323                 0.3 1.8340909090909088 1.1949017525225705   0.005071792816572463  0.03717472118959108   1.4130237120237121 -0.5958795715311238
+ northwest territories paper                                             computer peripherals                             1                    1    5             40              30  0.020833333333333332  0.01858736059479554               0.125 1.1208333333333333  1.015400955921402   0.002003841848509557  0.14869888475836432  0.08611397867144154  2.2983926330486213
+ northwest territories computer peripherals                              paper                                            1                    1    5             30              40  0.020833333333333336  0.01858736059479554 0.16666666666666666 1.1208333333333333 1.0215613382899627   0.002003841848509557  0.11152416356877323  0.08611397867144154  2.2983926330486213
+ northwest territories storage &amp; organization                            telephones and communication                     1                    1    5             29              40  0.021551724137931032  0.01858736059479554  0.1724137931034483 1.1594827586206897 1.0286555142503098  0.0025566258067190907  0.10780669144981413  0.14440792363097926  2.2983926330486213
+ northwest territories telephones and communication                      storage &amp; organization                           1                    1    5             40              29  0.021551724137931036  0.01858736059479554               0.125 1.1594827586206897 1.0196494954859268  0.0025566258067190907  0.14869888475836432  0.14440792363097926  2.2983926330486213
+ northwest territories rubber bands                                      paper                                            1                    1    3             10              40                0.0225 0.011152416356877323                 0.3 2.0174999999999996  1.216144450345194  0.0056245767747819956  0.03717472118959108   1.8782174048658764 -0.5958795715311238
+ northwest territories paper                                             rubber bands                                     1                    1    3             40              10                0.0225 0.011152416356877323               0.075 2.0174999999999996 1.0408921933085502  0.0056245767747819956  0.14869888475836432   1.8782174048658764 -0.5958795715311238
+ northwest territories labels                                            pens &amp; art supplies                              1                    1    3             16              23  0.024456521739130436 0.011152416356877323              0.1875 2.1929347826086953 1.1255361738633114  0.0060668039413496215  0.05947955390334572     2.26348631725061 -0.5958795715311238
+ northwest territories pens &amp; art supplies                               labels                                           1                    1    3             23              16  0.024456521739130436 0.011152416356877323 0.13043478260869565 2.1929347826086953 1.0815985130111525  0.0060668039413496215  0.08550185873605948     2.26348631725061 -0.5958795715311238
+ northwest territories tables                                            storage &amp; organization                           1                    1    3             12              29   0.02586206896551724 0.011152416356877323                0.25 2.3189655172413794 1.1895910780669146   0.006343195920454388  0.04460966542750929   2.6403046591976387 -0.5958795715311238
+ northwest territories storage &amp; organization                            tables                                           1                    1    3             29              12   0.02586206896551724 0.011152416356877323 0.10344827586206896 2.3189655172413794 1.0656276808693166   0.006343195920454388  0.10780669144981413   2.6403046591976387 -0.5958795715311238
+ nunavut               paper                                             binders and binder accessories                   1                    1    1             12              10  0.008333333333333333 0.017857142857142856 0.08333333333333333 0.4666666666666666 0.8961038961038961  -0.020408163265306124  0.21428571428571427   0.9444005270092226  -0.304997140665209
+ nunavut               binders and binder accessories                    paper                                            1                    1    1             10              12  0.008333333333333333 0.017857142857142856                 0.1 0.4666666666666666  0.873015873015873  -0.020408163265306124  0.17857142857142858   0.9444005270092226  -0.304997140665209
+ nunavut               telephones and communication                      paper                                            1                    1    1              7              12  0.011904761904761904 0.017857142857142856 0.14285714285714285 0.6666666666666666 0.9166666666666666  -0.008928571428571428                0.125  0.24242424242424243  -0.304997140665209
+ nunavut               paper                                             telephones and communication                     1                    1    1             12               7  0.011904761904761904 0.017857142857142856 0.08333333333333333 0.6666666666666666 0.9545454545454546  -0.008928571428571428  0.21428571428571427  0.24242424242424243  -0.304997140665209
+ nunavut               paper                                             computer peripherals                             1                    1    1             12               6  0.013888888888888888 0.017857142857142856 0.08333333333333333 0.7777777777777778 0.9740259740259741  -0.005102040816326533  0.21428571428571427   0.0905050505050505  -0.304997140665209
+ nunavut               computer peripherals                              paper                                            1                    1    1              6              12  0.013888888888888888 0.017857142857142856 0.16666666666666666 0.7777777777777778 0.9428571428571428  -0.005102040816326533  0.10714285714285714   0.0905050505050505  -0.304997140665209
+ nunavut               chairs &amp; chairmats                                paper                                            1                    1    1              5              12  0.016666666666666666 0.017857142857142856                 0.2 0.9333333333333332 0.9821428571428571  -0.001275510204081634  0.08928571428571429 0.006654783125371361  -0.304997140665209
+ nunavut               computer peripherals                              binders and binder accessories                   1                    1    1              6              10  0.016666666666666666 0.017857142857142856 0.16666666666666666 0.9333333333333332 0.9857142857142857  -0.001275510204081634  0.10714285714285714 0.006492753623188406  -0.304997140665209
+ nunavut               binders and binder accessories                    computer peripherals                             1                    1    1             10               6  0.016666666666666666 0.017857142857142856                 0.1 0.9333333333333332 0.9920634920634921  -0.001275510204081634  0.17857142857142858 0.006492753623188406  -0.304997140665209
+ nunavut               binders and binder accessories                    storage &amp; organization                           1                    1    1             10               6  0.016666666666666666 0.017857142857142856                 0.1 0.9333333333333332 0.9920634920634921  -0.001275510204081634  0.17857142857142858 0.006492753623188406  -0.304997140665209
+ nunavut               paper                                             chairs &amp; chairmats                               1                    1    1             12               5  0.016666666666666666 0.017857142857142856 0.08333333333333333 0.9333333333333332 0.9935064935064936  -0.001275510204081634  0.21428571428571427 0.006654783125371361  -0.304997140665209
+ nunavut               storage &amp; organization                            binders and binder accessories                   1                    1    1              6              10  0.016666666666666666 0.017857142857142856 0.16666666666666666 0.9333333333333332 0.9857142857142857  -0.001275510204081634  0.10714285714285714 0.006492753623188406  -0.304997140665209
+ nunavut               binders and binder accessories                    chairs &amp; chairmats                               1                    1    1             10               5                  0.02 0.017857142857142856                 0.1 1.1199999999999999 1.0119047619047619  0.0019132653061224476  0.17857142857142858 0.017186700767263426  -0.304997140665209
+ nunavut               chairs &amp; chairmats                                binders and binder accessories                   1                    1    1              5              10                  0.02 0.017857142857142856                 0.2 1.1199999999999999 1.0267857142857142  0.0019132653061224476  0.08928571428571429 0.017186700767263426  -0.304997140665209
+ nunavut               labels                                            paper                                            1                    1    1              4              12  0.020833333333333332 0.017857142857142856                0.25 1.1666666666666667 1.0476190476190477  0.0025510204081632647  0.07142857142857142  0.03263403263403263  -0.304997140665209
+ nunavut               paper                                             labels                                           1                    1    1             12               4  0.020833333333333332 0.017857142857142856 0.08333333333333333 1.1666666666666667  1.012987012987013  0.0025510204081632647  0.21428571428571427  0.03263403263403263  -0.304997140665209
+ nunavut               computer peripherals                              appliances                                       1                    1    1              6               6  0.027777777777777776 0.017857142857142856 0.16666666666666666 1.5555555555555556 1.0714285714285714   0.006377551020408162  0.10714285714285714  0.24888888888888888  -0.304997140665209
+ nunavut               appliances                                        computer peripherals                             1                    1    1              6               6  0.027777777777777776 0.017857142857142856 0.16666666666666666 1.5555555555555556 1.0714285714285714   0.006377551020408162  0.10714285714285714  0.24888888888888888  -0.304997140665209
+ nunavut               telephones and communication                      office furnishings                               1                    1    1              7               5   0.02857142857142857 0.017857142857142856 0.14285714285714285 1.5999999999999999             1.0625    0.00669642857142857                0.125   0.2823529411764706  -0.304997140665209
+ nunavut               office furnishings                                telephones and communication                     1                    1    1              5               7  0.028571428571428574 0.017857142857142856                 0.2 1.5999999999999999            1.09375    0.00669642857142857  0.08928571428571429   0.2823529411764706  -0.304997140665209
+ nunavut               computer peripherals                              office furnishings                               1                    1    1              6               5   0.03333333333333333 0.017857142857142856 0.16666666666666666 1.8666666666666665 1.0928571428571427   0.008290816326530611  0.10714285714285714  0.49484967320261436  -0.304997140665209
+ nunavut               appliances                                        office furnishings                               1                    1    1              6               5   0.03333333333333333 0.017857142857142856 0.16666666666666666 1.8666666666666665 1.0928571428571427   0.008290816326530611  0.10714285714285714  0.49484967320261436  -0.304997140665209
+ nunavut               office furnishings                                computer peripherals                             1                    1    1              5               6   0.03333333333333333 0.017857142857142856                 0.2 1.8666666666666665 1.1160714285714286   0.008290816326530611  0.08928571428571429  0.49484967320261436  -0.304997140665209
+ nunavut               office furnishings                                appliances                                       1                    1    1              5               6   0.03333333333333333 0.017857142857142856                 0.2 1.8666666666666665 1.1160714285714286   0.008290816326530611  0.08928571428571429  0.49484967320261436  -0.304997140665209
+ nunavut               telephones and communication,labels               paper                                            2                    1    1              2              12  0.041666666666666664 0.017857142857142856                 0.5 2.3333333333333335 1.5714285714285714    0.01020408163265306  0.03571428571428571    1.005611672278339  -0.304997140665209
+ nunavut               paper                                             rubber bands                                     1                    1    1             12               2  0.041666666666666664 0.017857142857142856 0.08333333333333333 2.3333333333333335  1.051948051948052    0.01020408163265306  0.21428571428571427    1.005611672278339  -0.304997140665209
+ nunavut               rubber bands                                      paper                                            1                    1    1              2              12  0.041666666666666664 0.017857142857142856                 0.5 2.3333333333333335 1.5714285714285714    0.01020408163265306  0.03571428571428571    1.005611672278339  -0.304997140665209
+ nunavut               binders and binder accessories                    appliances                                       1                    1    2             10               6   0.06666666666666667  0.03571428571428571                 0.2 1.8666666666666665 1.1160714285714286   0.016581632653061222  0.17857142857142858   1.0972753623188405  3.2787192621510006
+ nunavut               appliances                                        binders and binder accessories                   1                    1    2              6              10   0.06666666666666667  0.03571428571428571  0.3333333333333333 1.8666666666666665  1.232142857142857   0.016581632653061222  0.10714285714285714   1.0972753623188405  3.2787192621510006
+ nunavut               binders and binder accessories,chairs &amp; chairmats paper                                            2                    1    1              1              12   0.08333333333333333 0.017857142857142856                 1.0  4.666666666666667               NULL   0.014030612244897957 0.017857142857142856   3.7333333333333334  -0.304997140665209
+ nunavut               bookcases                                         computer peripherals                             1                    1    1              2               6   0.08333333333333333 0.017857142857142856                 0.5  4.666666666666667 1.7857142857142858   0.014030612244897957  0.03571428571428571   3.3461728395061727  -0.304997140665209
+ nunavut               computer peripherals                              bookcases                                        1                    1    1              6               2   0.08333333333333333 0.017857142857142856 0.16666666666666666  4.666666666666667  1.157142857142857   0.014030612244897957  0.10714285714285714   3.3461728395061727  -0.304997140665209
+ nunavut               paper,chairs &amp; chairmats                          binders and binder accessories                   2                    1    1              1              10                   0.1 0.017857142857142856                 1.0                5.6               NULL   0.014668367346938774 0.017857142857142856    4.683636363636364  -0.304997140665209
+ nunavut               office furnishings                                bookcases                                        1                    1    1              5               2                   0.1 0.017857142857142856                 0.2                5.6 1.2053571428571428   0.014668367346938774  0.08928571428571429    4.302687000726216  -0.304997140665209
+ nunavut               bookcases                                         office furnishings                               1                    1    1              2               5                   0.1 0.017857142857142856                 0.5                5.6 1.8214285714285714   0.014668367346938774  0.03571428571428571    4.302687000726216  -0.304997140665209
+ nunavut               labels                                            rubber bands                                     1                    1    1              4               2                 0.125 0.017857142857142856                0.25                7.0 1.2857142857142858   0.015306122448979591  0.07142857142857142    5.743589743589744  -0.304997140665209
+ nunavut               rubber bands                                      labels                                           1                    1    1              2               4                 0.125 0.017857142857142856                 0.5                7.0 1.8571428571428572   0.015306122448979591  0.03571428571428571    5.743589743589744  -0.304997140665209
+ nunavut               labels                                            telephones and communication                     1                    1    2              4               7   0.14285714285714285  0.03571428571428571                 0.5                4.0               1.75   0.026785714285714284  0.07142857142857142    5.538461538461538  3.2787192621510006
+ nunavut               paper,labels                                      telephones and communication                     2                    1    1              1               7   0.14285714285714285 0.017857142857142856                 1.0                8.0               NULL               0.015625 0.017857142857142856    7.127272727272727  -0.304997140665209
+ nunavut               telephones and communication                      labels                                           1                    1    2              7               4   0.14285714285714285  0.03571428571428571  0.2857142857142857                4.0                1.3   0.026785714285714284                0.125    5.538461538461538  3.2787192621510006
+ nunavut               office furnishings,bookcases                      computer peripherals                             2                    1    1              1               6   0.16666666666666666 0.017857142857142856                 1.0  9.333333333333334               NULL    0.01594387755102041 0.017857142857142856    8.484848484848484  -0.304997140665209
+ nunavut               computer peripherals,bookcases                    office furnishings                               2                    1    1              1               5                   0.2 0.017857142857142856                 1.0               11.2               NULL   0.016262755102040817 0.017857142857142856   10.385454545454545  -0.304997140665209
+ nunavut               paper,binders and binder accessories              chairs &amp; chairmats                               2                    1    1              1               5                   0.2 0.017857142857142856                 1.0               11.2               NULL   0.016262755102040817 0.017857142857142856   10.385454545454545  -0.304997140665209
+ nunavut               paper,telephones and communication                labels                                           2                    1    1              1               4                  0.25 0.017857142857142856                 1.0               14.0               NULL   0.016581632653061222 0.017857142857142856   13.236363636363636  -0.304997140665209
+ nunavut               tables                                            bookcases                                        1                    1    1              1               2                   0.5 0.017857142857142856                 1.0               28.0               NULL    0.01721938775510204 0.017857142857142856   27.490909090909092  -0.304997140665209
+ nunavut               computer peripherals,office furnishings           bookcases                                        2                    1    1              1               2                   0.5 0.017857142857142856                 1.0               28.0               NULL    0.01721938775510204 0.017857142857142856   27.490909090909092  -0.304997140665209
+ nunavut               bookcases                                         tables                                           1                    1    1              2               1                   0.5 0.017857142857142856                 0.5               28.0 1.9642857142857142    0.01721938775510204  0.03571428571428571   27.490909090909092  -0.304997140665209</tt>
+   </pre>
+   <p style="line-height: 1em;">The output tables contain only those rows that conform to MinSupport of 0.01. The rest of the rows that violate the condition are deleted.</p>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

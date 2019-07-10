@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="ihm1507069875331"> </a>
+   <h1>ShapleyAddOnePlayer</h1>
+   <p style="line-height: 1em;">The ShapleyAddOnePlayer function takes a table of sorted combinations, output by either ShapleyGenerateCombination or ShapleySortCombinations, and outputs a table. The ShapleyAddOnePlayer input and output tables are queried by the SQL Statements to Compute the Shapley Value.</p>
+   <a name="dgy1507069934741"> </a>
+   <h2>ShapleyAddOnePlayer Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.4</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ShapleyAddOnePlayer (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY <i>key</i>
+  USING
+  CombinationColumn ('<i>combination_column</i>')
+  SizeColumn ('<i>size_column</i>')
+  ValueColumn ('<i>value_column</i>')
+  NumPlayers (<i>number_of_players</i>)
+  [ Delimiter ('<i>delimiter</i>') ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="vme1507070009738"> </a>
+	  <h2>ShapleyAddOnePlayer Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>CombinationColumn</dt>
+      <dd>Specify the name of the input table column that contains the combinations.</dd>
+      <dt>SizeColumn</dt>
+      <dd>Specify the name of the input table column that contains the size of each combination.</dd>
+      <dt>ValueColumn</dt>
+      <dd>Specify the name of the input table column that contains the characteristic value of each combination.</dd>
+      <dt>NumPlayers</dt>
+      <dd>Specify the number of players in the game, a positive integer.</dd>
+      <dt>Delimiter</dt>
+      <dd>[Optional] Specify the character that separates player numbers in combinations. The value of <i>delimiter</i> must be one of the following:<ul>
+            <li>' ' (space) (Default)</li>
+            <li>',' (comma)</li>
+            <li>';' (semicolon)</li>
+            <li>'.' (period)</li>
+            <li>'#' (pound sign)</li>
+            <li>'%' (percent sign)</li>
+            <li>'&amp;' (ampersand)</li>
+         </ul>
+      </dd>
+   </div>
+
+
+	
+   <a name="eig1507070069598"> </a>
+   <h2>ShapleyAddOnePlayer Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The input table has the same schema as the ShapleySortCombinations Output table.</p>
+
+   <a name="ett1507766993147"> </a>
+   <h2>ShapleyAddOnePlayer Output</h2>
+   <a name="section_arm_2g5_pdb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">comb1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Combination represented by input table column comb.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">comb2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Combination produced by adding one new player to comb1.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">player</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of the player added to comb1 to produce comb2.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">size</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Size of comb1.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Payoff value of comb1.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">divisor</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Divisor used to compute factor that Shapley value calculation must use to weigh effect of adding the player to comb1.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="mao1507070359696"> </a>
+   <h2>SQL Statements to Compute the Shapley Value</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">Assume that the ShapleyAddOnePlayer input and output tables have the names InputTable and OutputTable, respectively.</p>
+   <p style="line-height: 1em;">To compute a table that contains the Shapley value of each player:</p>
+   <ol>
+      <li>Create a table that contains the weighted payoff produced by adding a player to each combination. For example:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE stratum AS (
+  SELECT player,
+    (InputTable.value - OutputTable.value) / divisor AS partial_value,
+      OutputTable.size AS size
+  FROM inputTable INNER JOIN
+  OutputTable ON (InputTable.comb = OutputTable.comb2)
+) WITH DATA PARTITION BY player;</tt>
+         </pre>
+      </li>
+      <li>Create a table that contains the partial Shapley value produced when each player is added to a combination of a given size. For example:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE stratum_avg AS (
+  SELECT player, size, SUM(partial_value) AS partial_avg
+  FROM stratum GROUP BY player, size
+) WITH DATA PARTITION BY player;</tt>
+         </pre>
+      </li>
+      <li>Create a table that lists the Shapley value for each player. For example:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE shapley_values AS (
+  SELECT player, SUM(partial_avg) / numberOfPlayers AS shapley_value
+  FROM stratum_avg GROUP BY player
+) WITH DATA PARTITION BY player;</tt>
+         </pre>
+      </li>
+   </ol>
+   <p style="line-height: 1em;">Alternatively, combine the preceding statements into this statement:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE shapley_values AS (
+  SELECT player, SUM(partial_avg) / numberOfPlayers AS shapley_value
+  FROM (
+    SELECT player, size, SUM(partial_value) AS partial_avg
+    FROM (
+      SELECT player,
+        (inputTable.value - outputTable.value) / divisor AS partial_value,
+        outputTable.size AS size
+      FROM inputTable INNER JOIN
+        outputTable ON (inputTable.comb=outputTable.comb2)
+      ) AS stratum
+      GROUP BY player, size
+    ) AS stratum_avg
+  GROUP BY player
+) WITH DATA PARTITION BY player;</tt>
+   </pre>
+   <p style="line-height: 1em;">To normalize the Shapley values, so that their sum is 1:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT player, shapley_value / (
+  SELECT SUM(shapley_value)
+  FROM shapley_values
+  ) AS normalized__shapley_values
+FROM shapley_values;</tt>
+   </pre>
+</t:intro>

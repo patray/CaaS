@@ -1,0 +1,1473 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="xju1507161026486"> </a>
+	  <h1>GLM2Predict</h1>
+
+	  <p style="line-height: 1em;">The GLM2Predict function uses the model and (optionally) the regularization table output by the GLM2 function to perform generalized linear model prediction on new input data.</p>
+
+   <a name="ymf1507161070573"> </a>
+	  <h2>GLM2Predict Syntax</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Version 1.2</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GLM2Predict (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS input PARTITION BY ANY
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS model DIMENSION ORDER BY "category"
+  [ ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS regularization DIMENSION ]
+  [ USING 
+    [ Lambda (<i>lambda</i> [,...])) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+  ]
+) AS <i>alias</i>;</tt>
+   </pre>
+
+	
+   <a name="mjn1507161169765"> </a>
+	  <h2>GLM2Predict Arguments</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>Lambda</dt>
+      <dd>[Optional if you specify a regularization table, disallowed otherwise] Specify which <i>lambda</i> values in the regularization table to use to make predictions.<p style="line-height: 1em;">If you omit the regularization table and Lambda argument, the function uses the minLambda value from the model table. (In the model table, minLambda appears in the level column.)</p>
+         <p style="line-height: 1em;">If you specify the regularization table but omit the Lambda argument, the function uses all <i>lambda</i> values in the regularization table.</p>
+         <p style="line-height: 1em;">If the Lambda argument specifies a <i>lambda</i> value that is not in the regularization table, the function uses the <i>lambda</i> value in the regularization table that is closest to the value that you specified.</p>
+      </dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of input table columns to copy to the output table.</dd>
+   </div>
+
+
+	
+   <a name="qgm1507161211008"> </a>
+	  <h2>GLM2Predict Input</h2>
+
+	  <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_ugd_vrv_xcb"> </a>
+   <table class="introtable">
+      <a name="table_ugd_vrv_xcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">input</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains new data.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">model</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">GLM2 Output ModelTable</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_vpz_1sv_xcb"> </a>
+   <h3>input Schema</h3>
+   <a name="table_N10021_N10019_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10021_N10019_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>predictor_variable_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears one or more times.] Independent/predictor variables. Cannot be NULL.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+   <a name="yzj1507161253765"> </a>
+	  <h2>GLM2Predict Output</h2>
+   <a name="section_cpq_5qk_pz"> </a>
+   <p style="line-height: 1em;">The output table schema depends on whether you specify the regularization table and Lambda argument.</p>
+
+   <a name="section_p4r_fsv_xcb"> </a>
+   <h3>Output Table Schema, Regularization Table or Lambda Omitted</h3>
+   <p style="line-height: 1em;">If you omit the regularization table, or specify the regularization table but omit the Lambda argument, the output table has the following schema.</p>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">prediction</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Score of input data, given by equation g<sup>-1</sup>(Xβ), where g<sup>-1</sup> is the inverse link function, X is the predictors, and β is the vector of coefficients estimated by the GLM2 function.<p style="line-height: 1em; margin: 0px;">
+                  <br/>For BINOMIAL classification, a predicted value close to 1 indicates a high probability of class 1. A predicted value close to 0 indicates a high probability of class 0. For other values of Family, scores are expected values of dependent/response variable, conditional on predictors.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">lambda</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Lambda value used for prediction. <p style="line-height: 1em; margin: 0px;">
+                  <br/>If you omit both the regularization table and Lambda argument, this value is the minLambda value from the model table.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_xd4_tsv_xcb"> </a>
+   <h3>Output Table Schema, Regularization Table and Lambda Specified</h3>
+   <a name="table_yz3_5tk_pz"> </a>
+   <table class="introtable">
+      <a name="table_yz3_5tk_pz"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">prediction</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Score of input data, given by equation g<sup>-1</sup>(Xβ), where g<sup>-1</sup> is the inverse link function, X is the predictors, and β is the vector of coefficients estimated by the GLM2 function.<p style="line-height: 1em; margin: 0px;">
+                  <br/>For BINOMIAL classification, a predicted value close to 1 indicates a high probability of class 1. A predicted value close to 0 indicates a high probability of class 0. For other values of Family, scores are expected values of dependent/response variable, conditional on predictors.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">reqlambda</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Lambda value that you specified. </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">matchedlambda</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Lambda value used for prediction. </div>
+         </td>
+      </tr>
+   </table>
+
+
+
+   <a name="ieu1510786066485"> </a>
+   <h2>GLM2Predict Examples</h2>
+   <a name="bhw1507161290967"> </a>
+	  <h3>GLM2Predict Example 1: Elastic Net for Gaussian Regression Prediction</h3>
+
+	
+		<a name="section_N10014_N10010_N10001"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: glm2_elastic_net, as in GLM2 Example 3: Elastic Net for Gaussian Regression Analysis</li>
+      <li>Model table: glm2_elastic_net_model, output by Example 3</li>
+   </ul>
+
+   <a name="section_ztm_mwh_4db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GLM2Predict (
+  ON glm2_elastic_net AS "input" PARTITION BY ANY
+  ON glm2_elastic_net_model AS "model" DIMENSION ORDER BY "category"
+  USING
+  Accumulate ('id', 'employed')
+) AS dt;</tt>
+   </pre>
+   <a name="section_rcj_nwh_4db"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">For each input table row, the output has a predicted value and the value of lambda used for the prediction. The Lambda argument was not specified, so the function used the MinLambda value from the model table, glm2_elastic_net_model.</p>
+   <a name="table_kwl_lxh_4db"> </a>
+   <table class="introtable">
+      <a name="table_kwl_lxh_4db"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">year</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">employed</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">lambda</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">prediction</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1947</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60.323</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00334451683575075</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">59.9414468498859</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1948</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">61.122</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00334451683575075</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">61.0021678204426</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1949</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60.171</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00334451683575075</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60.3241980362794</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1950</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">61.187</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00334451683575075</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">61.7107753923761</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1951</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">63.221</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00334451683575075</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">63.6156383593725</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1952</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">63.639</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00334451683575075</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">64.1341757230033</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1953</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">64.989</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00334451683575075</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">64.6267871265043</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1954</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">63.761</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00334451683575075</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">63.8946066816632</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1955</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66.019</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00334451683575075</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">65.9912182654679</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1956</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">67.857</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00334451683575075</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66.8166314439588</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1957</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">68.169</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00334451683575075</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">67.5400909226123</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1958</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66.513</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00334451683575075</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66.8174308174622</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1959</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">68.655</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00334451683575075</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">68.97512639576</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1960</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">69.564</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00334451683575075</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">69.4412744745363</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1961</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">69.331</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00334451683575075</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">69.3204175104195</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1962</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">70.551</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00334451683575075</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">70.920014180151</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1947</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60.323</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00334451683575075</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">59.9414468498859</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1948</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">61.122</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00334451683575075</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">61.0021678204426</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1949</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60.171</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00334451683575075</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60.3241980362794</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+	
+   <a name="arv1507161442825"> </a>
+	  <h3>GLM2Predict Example 2: Ridge for Logistic Regression Prediction</h3>
+
+	  <a name="section_N10014_N10010_N10001"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table is admissions_test, as in GLMPredict_MLE Example: Logistic Distribution Prediction.</p>
+
+   <a name="section_ztm_mwh_4db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE admissionspredict AS ( 
+  SELECT * FROM GLM2Predict (
+    ON admissions_test AS "input" PARTITION BY ANY
+    ON glm2_ridge_model AS model DIMENSION ORDER BY "category"
+    USING
+    Accumulate ('id', 'admitted')
+  ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_rcj_nwh_4db"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The Lambda argument was omitted, so the function used the MinLambda value from the model table, glm2_ridge_model.</p>
+   <a name="table_xwy_lyh_4db"> </a>
+   <table class="introtable">
+      <a name="table_xwy_lyh_4db"> </a>
+      <h4 style="text-align: center;">admissionspredict</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">admitted</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">lambda</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">prediction</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.36511507224068</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">52</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.726496251808762</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">54</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.717408337408593</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">56</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.919800062501089</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">58</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.922851378346457</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">60</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.85873303873771</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">62</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.920338525565984</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">64</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.64109016094362</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">66</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.724430371300696</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">68</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.873776484269566</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">51</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.367806580390766</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">53</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.576347719419299</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">55</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.941897375877604</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">57</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.920293780069925</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">59</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.859789291096852</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">61</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.638418344069472</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">63</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.919755040923749</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">65</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.639825641071193</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">67</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.295549223237937</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">69</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.919167656796922</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_fny_5yh_4db"> </a>
+   <h4>Binary Prediction Values</h4>
+   <p style="line-height: 1em;">To convert the prediction values that the function produced to binary predictions of admission (1 or 0), use these SQL commands:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+UPDATE admissionspredict 
+SET prediction = 1 WHERE prediction &gt; 0.5;
+
+UPDATE admissionspredict 
+SET prediction = 0 WHERE prediction &lt; 0.5;</tt>
+   </pre>
+   <a name="table_nxp_bc3_4db"> </a>
+   <table class="introtable">
+      <a name="table_nxp_bc3_4db"> </a>
+      <h4 style="text-align: center;">admissionspredict</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">admitted</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">lambda</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">prediction</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">52</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">54</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">56</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">58</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">60</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">62</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">64</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">66</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">68</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">53</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">55</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">57</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">59</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">61</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">63</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">65</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">69</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">51</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">67</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083135455847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+   <a name="zxr1507161649539"> </a>
+	  <h3>GLM2Predict Example 3: Lambda</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+			<p style="line-height: 1em;">This example specifies the lambda value for the function to use to make predictions.</p>
+
+		
+   <a name="section_N10014_N10010_N10001"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: glm2_elastic_net, as in GLM2 Example 3: Elastic Net for Gaussian Regression Analysis</li>
+      <li>Model table: glm2_elastic_net_model, output by Example 3</li>
+   </ul>
+
+   <a name="section_ztm_mwh_4db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GLM2Predict (
+  ON glm2_elastic_net AS "input" PARTITION BY ANY
+  ON glm2_elastic_net_2model AS model DIMENSION ORDER BY "category"
+  ON glm2_4regularization AS regularization DIMENSION
+  USING
+  Lambda (0.08)
+  Accumulate ('years')
+) AS dt;</tt>
+   </pre>
+   <a name="section_rcj_nwh_4db"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The column reqlambda contains the lambda value specified in the function call. The column matchlambda contains the lambda value from the regularization table that is closest to the specified lambda value. The prediction is based on the matchlambda value.</p>
+   <a name="table_qyr_b23_4db"> </a>
+   <table class="introtable">
+      <a name="table_qyr_b23_4db"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">year</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">reqlambda</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">matchlambda</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">prediction</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1947</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">59.8535034597256</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1948</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60.8829002182784</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1949</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60.8820302999021</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1950</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">61.6403716672329</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1951</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">63.4310398083475</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1952</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">64.1020378021382</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1953</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">64.6471801473782</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1954</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">64.6785991667163</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1955</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">65.5656274176636</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1956</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66.3515363855062</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1957</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">67.2411366517317</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1958</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">67.4928827126838</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1959</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">68.552275426539</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1960</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">69.1940427944872</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1961</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">69.754203661846</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1962</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">70.8026323797505</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+	
+</t:intro>

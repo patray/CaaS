@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="ixr1510338180588"> </a>
+   <h1>ShapleyGenerateCombination</h1>
+   <p style="line-height: 1em;">The ShapleyGenerateCombination function takes combinations of players and creates input for ShapleyAddOnePlayer.</p>
+   <a name="wct1507063225682"> </a>
+   <h2>ShapleyGenerateCombination Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.3</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ShapleyGenerateCombination (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="lof1507063323809"> </a>
+   <h2>ShapleyGenerateCombination Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Input Table Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">index</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">First column of table. Contains bit strings that indicate which players are in the combination. Length of each bit string is total number of players. Each bit represents a player. Bit has value 1 if player is in the combination and 0 otherwise. Most and least significant bits represent first and last players, respectively. Each row represents a unique combination.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">payoff</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Second column of table. Contains observed payoff value for corresponding combination in index column.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="hct1507063399449"> </a>
+   <h2>ShapleyGenerateCombination Output</h2>
+   <a name="section_fyl_4tw_xcb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">comb</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Combination, represented by space-separated player numbers. For example, '1 2' or '2 3 4 5'. First player is number 1, second is number 2, and so on.<p>
+                  <b>Note:</b>  For correct Shapley values, the comb column values must be unique.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">size</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Combination size.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Assigned value of combination.</div>
+         </td>
+      </tr>
+   </table>
+
+
+</t:intro>

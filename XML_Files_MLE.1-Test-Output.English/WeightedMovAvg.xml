@@ -1,0 +1,824 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="csg1507062040313"> </a>
+	  <h1>WeightedMovAvg</h1>
+
+	  <p style="line-height: 1em;">The WeightedMovAvg function computes the weighted moving average of points in a series, applying arithmetically decreasing factors to older data points. In an <i>n</i>-point weighted moving average, the most recent data point has weight <i>n</i>, the second most recent data point has weight (<i>n</i> - 1), and so on, until the weight is zero. All weights are normalized by the factor <i>n</i> (<i>n</i> +1)/2.</p>
+
+   <a name="cbr1507062238968"> </a>
+   <h2>WeightedMovAvg Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.3</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM WeightedMovAvg (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY <i>partition_column</i> ORDER BY <i>order_column</i>
+  [ USING 
+    [ TargetColumns ({ '<i>target_column</i>' | '<i>target_column_range</i>' }[,...]) ]
+    [ WindowSize (<i>window_size</i>) ]
+    [ IncludeFirst ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="sae1507062294177"> </a>
+	  <h2>WeightedMovAvg Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumns</dt>
+      <dd>[Optional] Specify the names of the input columns for which to compute the weighted moving average. The function copies these columns to the output table.</dd>
+      <dd>Default behavior: The function copies these columns to the output table but does not compute their weighted moving averages.</dd>
+      <dt>WindowSize</dt>
+      <dd>[Optional] Specify the number of old values to consider for computing the new weighted moving average.</dd>
+      <dd>Default: '10'</dd>
+      <dt>IncludeFirst</dt>
+      <dd>[Optional] Specify whether to output the first <i>window_size</i> rows. Because the weighted moving average for the first <i>window_size</i> rows is undefined, the function returns NULL values for those columns.</dd>
+      <dd>Default: 'false'</dd>
+   </div>
+
+
+	
+   <a name="wpa1507062379232"> </a>
+   <h2>WeightedMovAvg Input</h2>
+   <a name="section_vfr_vkw_xcb"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>partition_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, BIGINT, NUMERIC, or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column by which input data is partitioned. This column must contain all rows that contain entity to average. For example, if function is to return exponential moving average of a particular stock share price, all transactions of that stock must be in one partition.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>order_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, BIGINT, TIME, or TIMESTAMP</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column by which input table is ordered.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, BIGINT, or NUMERIC</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>target_column</i>.] Values to average.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="clr1507062441229"> </a>
+   <h2>WeightedMovAvg Output</h2>
+   <a name="section_whw_tkw_xcb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>_mavg</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Weighted moving average of <i>target_column</i> values when row was added to data set.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="jpe1510783756095"> </a>
+   <h2>WeightedMovAvg Example</h2>
+   <a name="section_jxf_yvf_ndb"> </a>
+   <p style="line-height: 1em;">This example computes the weighted moving average for stockprice and volume for three companies.</p>
+
+   <a name="section_lcf_mrj_4db"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">The input table, stock_data, contains hypothetical stock price and volume data of three companies between 17 May 1961 and 21 June 1961.</p>
+   <p style="line-height: 1em;">Each partition contains all the rows of an entity. For example, if the weighted moving average of a particular equity share price is required, then all transactions of that equity share are in one partition. Rows are ordered from earliest to latest date.</p>
+   <a name="table_f3q_trj_4db"> </a>
+   <table class="introtable">
+      <a name="table_f3q_trj_4db"> </a>
+      <h4 style="text-align: center;">stock_data</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">name</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">period</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">stockprice</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">volume</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-1700:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">460</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">640000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-1800:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">457</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">707200</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-1900:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">452</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">747200</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-2200:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">459</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3312e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-2300:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">462</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.848e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-2400:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">459</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">779200</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-2500:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">463</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">528000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-2600:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">479</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">843200</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-2900:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">493</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.728e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-3100:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">490</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">880000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-0100:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">492</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">760000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-0200:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">498</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.848e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-0500:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">499</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3472e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-0600:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">497</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.48e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-0700:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">496</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.0912e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-0800:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">490</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.096e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-0900:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">489</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">760000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-1200:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">478</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">904000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-1300:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">487</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.9552e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-1400:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">491</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.0912e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-1500:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">487</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3232e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-1600:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">482</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">376000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-1900:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">479</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">339200</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-2000:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">478</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">640000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-2100:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">479</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">640000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-1700:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">68.2502</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.7264e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-1800:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">67.7501</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.6704e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-1900:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">68.375</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5168e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-2200:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">67.1251</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.8528e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-2300:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">67.1251</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.7184e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-2400:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.2672e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_fj4_mrj_4db"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM WeightedMovAvg (
+  ON stock_vol PARTITION BY id ORDER BY period
+  USING
+  TargetColumns ('stockprice', 'volume')
+  WindowSize (5)
+  IncludeFirst ('true')
+) AS dt ORDER BY id, period;</tt>
+   </pre>
+   <a name="section_tjz_mrj_4db"> </a>
+   <h3>Output</h3>
+   <p style="line-height: 1em;">Because the window size is 5, the stockprice_mavg and volume_mavg columns contain the weighted average value of the previous five rows (days). Because of IncludeFirst ('true'), the output table includes the first five rows even though they contain null values for those columns.</p>
+   <pre>
+      <tt>
+ id name period                     stockprice volume    stockprice_mavg    volume_mavg        
+ -- ---- -------------------------- ---------- --------- ------------------ ------------------ 
+  1 ibm  1961-05-17 00:00:00.000000      460.0  640000.0               NULL               NULL
+  1 ibm  1961-05-18 00:00:00.000000      457.0  707200.0               NULL               NULL
+  1 ibm  1961-05-19 00:00:00.000000      452.0  747200.0               NULL               NULL
+  1 ibm  1961-05-22 00:00:00.000000      459.0 1331200.0               NULL               NULL
+  1 ibm  1961-05-23 00:00:00.000000      462.0 1848000.0              458.4 1257386.6666666667
+  1 ibm  1961-05-24 00:00:00.000000      459.0  779200.0 458.73333333333335 1165546.6666666667
+  1 ibm  1961-05-25 00:00:00.000000      463.0  528000.0 460.46666666666664  980693.3333333334
+  1 ibm  1961-05-26 00:00:00.000000      479.0  843200.0  467.1333333333333  912853.3333333334
+  1 ibm  1961-05-29 00:00:00.000000      493.0 1728000.0  476.6666666666667 1133546.6666666667
+  1 ibm  1961-05-31 00:00:00.000000      490.0  880000.0 482.93333333333334          1045120.0
+  1 ibm  1961-06-01 00:00:00.000000      492.0  760000.0              488.0  981226.6666666666
+  1 ibm  1961-06-02 00:00:00.000000      498.0 1848000.0  492.8666666666667          1281280.0
+  1 ibm  1961-06-05 00:00:00.000000      499.0 1347200.0 495.73333333333335          1326400.0
+  1 ibm  1961-06-06 00:00:00.000000      497.0 1480000.0              496.6 1382186.6666666667
+  1 ibm  1961-06-07 00:00:00.000000      496.0 1091200.0  496.8666666666667 1324906.6666666667
+  1 ibm  1961-06-08 00:00:00.000000      490.0 1096000.0 494.73333333333335 1255146.6666666667
+  1 ibm  1961-06-09 00:00:00.000000      489.0  760000.0              492.4 1050986.6666666667
+  1 ibm  1961-06-12 00:00:00.000000      478.0  904000.0              487.0           967360.0
+  1 ibm  1961-06-13 00:00:00.000000      487.0 1955200.0              486.0          1263680.0
+  1 ibm  1961-06-14 00:00:00.000000      491.0 1091200.0              487.0          1240320.0
+  1 ibm  1961-06-15 00:00:00.000000      487.0 1323200.0              487.0 1294293.3333333333
+  1 ibm  1961-06-16 00:00:00.000000      482.0  376000.0 485.53333333333336 1017386.6666666666
+  1 ibm  1961-06-19 00:00:00.000000      479.0  339200.0 483.53333333333336  753813.3333333334
+  1 ibm  1961-06-20 00:00:00.000000      478.0  640000.0  481.1333333333333           628160.0
+  1 ibm  1961-06-21 00:00:00.000000      479.0  640000.0  479.6666666666667  590186.6666666666
+  2 ge   1961-05-17 00:00:00.000000   68.25024 2726400.0               NULL               NULL
+  2 ge   1961-05-18 00:00:00.000000  67.750082 1670400.0               NULL               NULL
+  2 ge   1961-05-19 00:00:00.000000  68.375038 1516800.0               NULL               NULL
+  2 ge   1961-05-22 00:00:00.000000   67.12512 1852800.0               NULL               NULL
+  2 ge   1961-05-23 00:00:00.000000   67.12512 1718400.0  67.53343986666667          1774720.0
+  2 ge   1961-05-24 00:00:00.000000       66.0 1267200.0  66.95839986666665          1564800.0
+  2 ge   1961-05-25 00:00:00.000000  66.500158 2006400.0  66.70009519999999          1698560.0
+  2 ge   1961-05-26 00:00:00.000000   64.12512 2515200.0  65.73343946666667          1979520.0
+  2 ge   1961-05-29 00:00:00.000000  64.750082 2236800.0  65.25843226666667          2101120.0
+  2 ge   1961-05-31 00:00:00.000000  65.375038 2227200.0  65.15007960000001          2193920.0
+  2 ge   1961-06-01 00:00:00.000000  66.624962 2659200.0  65.57504040000002          2396800.0
+  2 ge   1961-06-02 00:00:00.000000  66.874557 1200000.0  66.04153540000001          2020480.0
+  2 ge   1961-06-05 00:00:00.000000  67.000322 1478400.0  66.52499213333336          1790720.0
+  2 ge   1961-06-06 00:00:00.000000  67.249918 1219200.0  66.89996740000002          1543680.0
+  2 ge   1961-06-07 00:00:00.000000  65.875202 1084800.0   66.6500482666667          1319680.0
+  2 ge   1961-06-08 00:00:00.000000  66.124798  643200.0  66.44998353333338          1024640.0
+  2 ge   1961-06-09 00:00:00.000000  66.500158 1296000.0   66.4083830666667          1081600.0
+  2 ge   1961-06-12 00:00:00.000000  67.750082 1017600.0  66.80838386666672          1039360.0
+  2 ge   1961-06-13 00:00:00.000000  67.499519 1152000.0  67.07487966666673          1072640.0
+  2 ge   1961-06-14 00:00:00.000000  67.249918 1238400.0  67.24153506666673          1139200.0
+  2 ge   1961-06-15 00:00:00.000000  66.249601 1219200.0   66.9831037333334          1189120.0
+  2 ge   1961-06-16 00:00:00.000000  64.500481 1584000.0  66.13331220000005          1322240.0
+  2 ge   1961-06-19 00:00:00.000000   64.87488 1056000.0  65.54163213333338          1260160.0
+  2 ge   1961-06-20 00:00:00.000000  63.624962  835200.0  64.72499286666671          1121920.0
+  2 ge   1961-06-21 00:00:00.000000  63.874557 1142400.0  64.24985573333338          1107200.0
+  3 pg   1961-05-17 00:00:00.000000     18.375 1032000.0               NULL               NULL
+  3 pg   1961-05-18 00:00:00.000000      18.25 1435200.0               NULL               NULL
+  3 pg   1961-05-19 00:00:00.000000     17.625 1582000.0               NULL               NULL
+  3 pg   1961-05-22 00:00:00.000000      17.75  317200.0               NULL               NULL
+  3 pg   1961-05-23 00:00:00.000000     17.625  608800.0 17.791666666666668           864080.0
+  3 pg   1961-05-24 00:00:00.000000      17.75 1038800.0 17.733333333333334  878666.6666666666
+  3 pg   1961-05-25 00:00:00.000000      17.25  911200.0              17.55  850266.6666666666
+  3 pg   1961-05-26 00:00:00.000000       17.5 2005600.0 17.516666666666666          1221600.0
+  3 pg   1961-05-29 00:00:00.000000       18.0 1672800.0 17.658333333333335          1453760.0
+  3 pg   1961-05-31 00:00:00.000000       18.0 1735600.0 17.783333333333335          1616480.0
+  3 pg   1961-06-01 00:00:00.000000       21.5 1228400.0              19.05 1535013.3333333333
+  3 pg   1961-06-02 00:00:00.000000       22.0  635600.0 20.233333333333334 1243306.6666666667
+  3 pg   1961-06-05 00:00:00.000000       22.0  434800.0               21.1           903040.0
+  3 pg   1961-06-06 00:00:00.000000       22.5  570800.0 21.833333333333332  712826.6666666666
+  3 pg   1961-06-07 00:00:00.000000       23.0 1582000.0 22.433333333333334  933146.6666666666
+  3 pg   1961-06-08 00:00:00.000000      22.75  984800.0 22.616666666666667           964640.0
+  3 pg   1961-06-09 00:00:00.000000       23.0  922400.0               22.8  991573.3333333334
+  3 pg   1961-06-12 00:00:00.000000     23.125  339600.0 22.958333333333332           805120.0
+  3 pg   1961-06-13 00:00:00.000000     24.125  909200.0             23.375           814880.0
+  3 pg   1961-06-14 00:00:00.000000     24.125  916000.0 23.683333333333334  804346.6666666666
+  3 pg   1961-06-15 00:00:00.000000     24.375  538000.0               24.0  712213.3333333334
+  3 pg   1961-06-16 00:00:00.000000     24.625  438800.0 24.291666666666668           616800.0
+  3 pg   1961-06-19 00:00:00.000000       24.5  620000.0 24.433333333333334  614026.6666666666
+  3 pg   1961-06-20 00:00:00.000000     24.375  952800.0 24.441666666666666  703493.3333333334
+  3 pg   1961-06-21 00:00:00.000000     24.625  520400.0 24.516666666666666           645920.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

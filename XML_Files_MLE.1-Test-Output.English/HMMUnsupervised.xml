@@ -1,0 +1,1273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="paj1506983920374"> </a>
+	  <h1>HMMUnsupervised</h1>
+
+	  <p style="line-height: 1em;">The HMMUnsupervised function runs on the SQL-GR framework. The function can produce multiple HMM models simultaneously, where each model is learned from a set of sequences and where each sequence represents a vertex.</p>
+
+   <a name="ide1506983961751"> </a>
+   <h2>HMMUnsupervised Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.9</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM HMMUnsupervised (
+  ON { <i>table_name</i> | <i>view_name</i> | (<i>query</i>) } AS Vertices
+    PARTITION BY [ <i>model_key</i> [,...]] <i>sequence_key_attributes</i> 
+    ORDER BY [ <i>model_key</i>, ] <i>time_ordered_sequence_attributes</i> ASC
+  [ OUT TABLE InitStateTable (<i>init_state_prob</i>) ]
+  [ OUT TABLE StateTransitionTable (<i>state_transition_prob</i>) ]
+  [ OUT TABLE EmissionTable (<i>emit_prob</i>)]
+  USING 
+  [ ModelColumn ('<i>model_column</i>') ]
+  SeqColumn ('<i>sequence_column</i>')
+  ObservationColumn ('<i>observed_column</i>')
+  HiddenStateNum (<i>hidden_states</i>)
+  [ MaxIterNum (<i>max_iterations</i>) ]
+  [ Epsilon (<i>epsilon</i>) ]
+  [ SkipColumn ('<i>skip_column</i>') ]
+  [ InitMethods ( { 'random' | 'flat' | 'input' }, '<i>seed</i>') ]
+  [ InitParams ('<i>init_state_probability_vector</i>',
+                '<i>state_transition_probability_matrix</i>',
+                '<i>observation_emission_probability_matrix</i>')
+  ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="crh1506984007221"> </a>
+	  <h2>HMMUnsupervised Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>InitStateTable</dt>
+      <dd>[Optional] Specify the name for the initial state probability table that the function outputs.</dd>
+      <dd>Default: Pi in the current schema</dd>
+      <dt>StateTransitionTable</dt>
+      <dd>[Optional] Specify the name for the state transition probability table that the function outputs.</dd>
+      <dd>Default: A in the current schema</dd>
+      <dt>EmissionTable</dt>
+      <dd>[Optional] Specify the name for the emission probability table that the function outputs.</dd>
+      <dd>Default: B in the current schema</dd>
+      <dt>ModelColumn</dt>
+      <dd>[Required if PARTITION BY clause specifies <i>model_key</i>, disallowed otherwise.] Specify the name of the Vertices column that contains the model attributes. The <i>model_column</i> must match a <i>model_key</i> in the PARTITION BY clause. The values in the columns can be either integers or strings.</dd>
+      <dt>SeqColumn</dt>
+      <dd>Specify the name of the Vertices column that contains the sequence attribute. The <i>sequence_column</i> must be a sequence attribute in the PARTITION BY clause and contain more than two observation symbols.</dd>
+      <dt>ObservationColumn</dt>
+      <dd>Specify the name of the Vertices column that contains the observed symbols. The function scans the input table to find all possible observed symbols.<p>
+            <b>Note:</b>  Observed symbols are case-sensitive.</p>
+      </dd>
+      <dt>HiddenStateNum</dt>
+      <dd>Specify the number of hidden states.<p>
+            <b>Note:</b>  The number of hidden states can influence model quality and performance, so choose the number appropriately.</p>
+      </dd>
+      <dt>MaxIterNum</dt>
+      <dd>[Optional] Specify the number of iterations that the training process runs before the function completes.</dd>
+      <dd>Default: 10</dd>
+      <dt>Epsilon</dt>
+      <dd>
+         <p style="line-height: 1em;">[Optional] Specify the threshold value that determines the convergence of HMM training. If the parameter value difference is less than the threshold, the training process converges.</p>
+         <p style="line-height: 1em;">Default behavior: Only MaxIterNum determines when the training process converges.</p>
+      </dd>
+      <dt>SkipColumn</dt>
+      <dd>[Optional] Specify the name of the Vertices column whose value determines whether the function skips the row. Each value in this column must be an INTEGER or VARCHAR that represents the value true or false (INTEGER 1 or 0 or VARCHAR 'true', 't', 'yes', 'y', '1', 'false', 'f', 'no', 'n', or '0'). If the value represents true, the function skips the row; otherwise it does not.</dd>
+      <dd>Default behavior: The function does not skip any rows.</dd>
+      <dt>InitMethods</dt>
+      <dd>[Optional] Specify the method for creating the initial parameters for the initial state probabilities, state transition probabilities, and observation emission probabilities:<a name="table_whw_xry_fdb"> </a>
+         <table class="introtable">
+            <a name="table_whw_xry_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'random'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Initial parameters are based on uniform distribution.<p>
+                        <b>Note:</b>  The <i>seed</i> is meaningful only with <tt style="font-family: monospace;">'random'</tt>. Specify the random seed the algorithm uses for repeatable results (for more information, see Nondeterministic Results and UniqueID Syntax Element).</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'flat'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Probabilities are equal. Each cell in matrix or vector contains same probability.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'input'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Function takes initial parameters from InitParams syntax element.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>InitParams</dt>
+      <dd>[Required with InitMethods ('input')] When InitMethods specifies 'input', this syntax element specifies the initial parameters for the models:<a name="table_zpv_jsy_fdb"> </a>
+         <table class="introtable">
+            <a name="table_zpv_jsy_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">InitParams Item</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <i>init_state_probability_vector</i>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Vector that contains initial state probabilities for model.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <i>state_transition_probability_matrix</i>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Matrix that contains state transition probabilities for model.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <i>observation_emission_probability_matrix</i>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Matrix that contains observation emission probabilities for model.</div>
+               </td>
+            </tr>
+         </table>
+
+         <p style="line-height: 1em;">For example, if the NumberHiddenStates syntax element specifies three hidden states and two observed symbols ('yes' and 'no'), these are the InitParams values:<a name="table_ktt_yty_fdb"> </a>
+            <table class="introtable">
+               <a name="table_ktt_yty_fdb"> </a>
+               <tr>
+                  <th align="left">
+                     <div style="line-height: 1em;">InitParams Item</div>
+                  </th>
+                  <th align="left">
+                     <div style="line-height: 1em;">Value</div>
+                  </th>
+               </tr>
+               <tr>
+                  <td align="left">
+                     <div style="line-height: 1em;">
+                        <i>init_state_probability_vector</i>
+                     </div>
+                  </td>
+                  <td align="left">
+                     <div style="line-height: 1em;">
+                        <tt style="font-family: monospace;">'0.3333333333 0.3333333333 0.3333333333'</tt>
+                     </div>
+                  </td>
+               </tr>
+               <tr>
+                  <td align="left">
+                     <div style="line-height: 1em;">
+                        <i>state_transition_probability_matrix</i>
+                     </div>
+                  </td>
+                  <td align="left">
+                     <div style="line-height: 1em;">
+                        <tt style="font-family: monospace;">'0.3333333333 0.3333333333 0.3333333333;</tt>
+                        <p style="line-height: 1em; margin: 0px;">
+                           <br/>
+                           <tt style="font-family: monospace;"> 0.3333333333 0.3333333333 0.3333333333;</tt>
+                        </p>
+                        <p style="line-height: 1em; margin: 0px;">
+                           <br/>
+                           <tt style="font-family: monospace;"> 0.3333333333 0.3333333333 0.3333333333'</tt>
+                        </p>
+                     </div>
+                  </td>
+               </tr>
+               <tr>
+                  <td align="left">
+                     <div style="line-height: 1em;">
+                        <i>observation_emission_probability_matrix</i>
+                     </div>
+                  </td>
+                  <td align="left">
+                     <div style="line-height: 1em;">
+                        <tt style="font-family: monospace;">'no:0.25 yes:0.75; no:0.35 yes:0.65; no:0.45 yes:0.55'</tt>
+                     </div>
+                  </td>
+               </tr>
+            </table>
+
+         </p>
+         <p style="line-height: 1em;">The sum of the probabilities in each row for the initial state probabilities, state transition probabilities, or observation emission probabilities parameters must round to 1.0. The number of states and the number of observed symbols must be consistent with the NumberHiddenStates syntax element and the observed symbols in the input table; otherwise, the function displays error messages.</p>
+      </dd>
+   </div>
+
+
+	
+   <a name="utx1506984060944"> </a>
+   <h2>HMMUnsupervised Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Vertices Schema</h3>
+   <a name="table_xrw_sws_dbb"> </a>
+   <table class="introtable">
+      <a name="table_xrw_sws_dbb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>model_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Model identifier. Observations with same model identifier belong to same model. </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>sequence_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Identifier of a sequence of observed values. Each sequence represents a vertex.<p style="line-height: 1em; margin: 0px;">
+                  <br/>The PARTITION BY clause lists attributes that represent the unique sequence across the entire table.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>The ORDER BY clause sorts the observations in each sequence chronologically in ascending order.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>observed_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Observed symbol. Case-sensitive.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>skip_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;"> INTEGER or VARCHAR that represents the value true or false (INTEGER 1 or 0 or VARCHAR 'true', 't', 'yes', 'y', '1', 'false', 'f', 'no', 'n', or '0').</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with SkipColumn syntax element.] Whether to skip row: Yes if value represents true; no otherwise.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="xxe1506984452573"> </a>
+   <h2>HMMUnsupervised Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The HMMUnsupervised function outputs a message and outputs three tables through JDBC.</p>
+
+   <a name="section_sfx_twv_xcb"> </a>
+   <h3>Output Message Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">message</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Reports that the models will be saved to the output tables after the training process successfully completes.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_r2n_5wv_xcb"> </a>
+   <h3>InitStateTable Schema</h3>
+   <p style="line-height: 1em;">The function saves this table to <i>init_state_prob</i>, whose default value is Pi in the current schema.</p>
+   <a name="table_klf_4dm_nw"> </a>
+   <table class="introtable">
+      <a name="table_klf_4dm_nw"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>model_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BIGINT, INTEGER, or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with ModelColumn syntax element.] Model attribute.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">state</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Hidden state of learned HMM.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">probability</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Initial state probability determined by function.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_zt2_wwv_xcb"> </a>
+   <h3>StateTransitionTable Schema</h3>
+   <p style="line-height: 1em;">The function saves this table to <i>state_transition_prob</i>, whose default value is A in the current schema.</p>
+   <a name="table_llf_4dm_nw"> </a>
+   <table class="introtable">
+      <a name="table_llf_4dm_nw"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>model_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BIGINT, INTEGER, or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with ModelColumn syntax element.] Model attribute.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">from_state</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Hidden state of learned HMM, from which a transition emanates.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">to_state</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Hidden state of learned HMM, to which a transition is made.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">probability</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Probability of a transition from from_state to to_state.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_yn1_ywv_xcb"> </a>
+   <h3>EmissionTable Schema</h3>
+   <p style="line-height: 1em;">The function saves this table to <i>emit_prob</i>, whose default value is B in the current schema.</p>
+   <a name="table_mlf_4dm_nw"> </a>
+   <table class="introtable">
+      <a name="table_mlf_4dm_nw"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>model_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BIGINT, INTEGER, or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with ModelColumn syntax element.] Model attribute.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">state</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Hidden state of learned HMM.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">observed</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Symbol in observed_id column of input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">probability</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Probability of emitting observed symbol, given that HMM is in hidden state.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ksv1506984594893"> </a>
+    <h2>HMMUnsupervised Example: Loan Default Prediction</h2>
+
+    
+        <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">Financial
+                institutions try to predict defaulting customers by analyzing previous transaction
+                data. To reduce the number of defaulting customers, the financial institution may
+                suggest default prevention initiatives to customers.</p>
+   <p style="line-height: 1em;">Loan
+                status updates depend on customer payments. You can use loan status updates to build
+                a Hidden Markov Model (HMM) to predict loan defaults. The following table shows the
+                possible loan statuses and their observation symbols. The observation symbols are
+                used to build the HMM.</p>
+   <a name="table_N1001D_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1001D_N1000E_N1000C_N10001"> </a>
+                
+                    
+                    
+                    
+                        <tr>
+                            <th align="left">
+            <div style="line-height: 1em;">Loan Status</div>
+         </th>
+                            <th align="left">
+            <div style="line-height: 1em;">Symbol</div>
+         </th>
+                        </tr>
+                    
+                    
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">current</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">late</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">one month late</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">two months late</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">three months late</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">four months late</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">defaulted</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">paid</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+                        </tr>
+                    
+                
+            </table>
+
+
+            <p style="line-height: 1em;">Use all transaction sequences ending with "paid" to train one model
+                and all sequences ending with "defaulted" to train a second model. Evaluate the
+                current sequence of statuses for a customer against both models. Base the default
+                prediction on the model that gives a higher probability.</p>
+   <p style="line-height: 1em;">The
+                hidden states of the HMM inherently indicate the financial health of the customer. A
+                hidden state with a high probability of emission of defaulted status indicates poor
+                financial health, while a hidden state with high probability of emission of paid
+                status indicates good financial health.</p>
+
+
+        <a name="section_ldl_cbf_n2b"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">The Vertices table, loan_prediction, contains data for training the two models. The model_id column has loan status—1 for a paid loan, 2 for a defaulted loan. Rows with model_id=1 are used to train the first model; rows with model_id=2 are used to train the second model. Defaulted loans have observed_id=7; paid loans end have observed_id=8. The seq_vertex_id column provides the ordering of the symbols in the sequences.</p>
+   <a name="table_ccp_kbf_n2b"> </a>
+   <table class="introtable">
+      <a name="table_ccp_kbf_n2b"> </a>
+                <h4 style="text-align: center;">Vertices: loan_prediction</h4>
+                
+                    
+                    
+                    
+                    
+                    
+                        <tr>
+                            <th align="left">
+            <div style="line-height: 1em;">model_id</div>
+         </th>
+                            <th align="left">
+            <div style="line-height: 1em;">seq_id</div>
+         </th>
+                            <th align="left">
+            <div style="line-height: 1em;">seq_vertex_id</div>
+         </th>
+                            <th align="left">
+            <div style="line-height: 1em;">observed_id</div>
+         </th>
+                        </tr>
+                    
+                    
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">17</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+                            <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+                        </tr>
+                    
+                
+            </table>
+
+
+
+        <a name="section_mqv_cbf_n2b"> </a>
+   <h3>SQL
+            Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE pi_loan;
+DROP TABLE A_loan;
+DROP TABLE B_loan;
+
+SELECT * FROM HMMUnsupervised (
+  ON loan_prediction AS Vertices
+    PARTITION BY model_id, seq_id
+    ORDER BY seq_vertex_id
+  OUT TABLE InitStateTable (pi_loan)
+  OUT TABLE StateTransitionTable (A_loan)
+  OUT TABLE EmissionTable (B_loan)
+  USING 
+  ModelColumn ('model_id')
+  SeqColumn ('seq_id')
+  ObservationColumn ('observed_id')
+  HiddenStateNum (3)
+  InitMethods ('random')
+) AS dt;</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM HMMUnsupervised(
+ON loan_prediction AS Vertices PARTITION BY model_id, seq_id
+ORDER BY seq_vertex_id
+OUT TABLE InitStateTable(pi_loan)
+OUT TABLE StateTransitionTable(A_loan)
+OUT TABLE EmissionTable(B_loan)
+USING
+ModelColumn('model_id')
+SeqColumn('seq_id')
+ObservationColumn('observed_id')
+HiddenStateNum(3)
+InitMethods('random')
+) AS dt ;</tt>
+   </pre>
+
+        <a name="section_vm3_dbf_n2b"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ message                                                                                             
+ --------------------------------------------------------------------------------------------------- 
+ HMM models will be saved to the  output tables once the training process is successfully completed.
+
+SELECT * FROM pi_loan ORDER BY 1, 2, 3;</tt>
+   </pre>
+   <pre>
+      <tt>
+ model_id state probability            
+ -------- ----- ---------------------- 
+        1 0     1.9046716874764173E-11
+        1 1     1.3028751241725672E-12
+        1 2         0.9999999999796504
+        2 0       0.017791936081545466
+        2 1       0.012540722577073648
+        2 2         0.9696673413413809</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM A_loan ORDER BY 1, 2, 3;</tt>
+   </pre>
+   <pre>
+      <tt>
+ model_id from_state to_state probability          
+ -------- ---------- -------- -------------------- 
+        1 0          0        0.034350221654187815
+        1 0          1          0.9656493269833311
+        1 0          2        4.513624811896442E-7
+        1 1          0           0.943657329840527
+        1 1          1         0.05633694510467473
+        1 1          2        5.725054798558155E-6
+        1 2          0        0.016131381366779184
+        1 2          1         0.11988350200836678
+        1 2          2          0.8639851166248538
+        2 0          0        0.006066428449697642
+        2 0          1          0.7535894555154948
+        2 0          2         0.24034411603480746
+        2 1          0          0.6291758649110152
+        2 1          1         0.13451837399524283
+        2 1          2         0.23630576109374207
+        2 2          0         0.09591775004852725
+        2 2          1          0.1484849472359561
+        2 2          2          0.7555973027155165</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM B_loan ORDER BY 1, 2, 3;</tt>
+   </pre>
+   <pre>
+      <tt>
+ model_id state observed probability            
+ -------- ----- -------- ---------------------- 
+        1 0        1       0.008891457654605486
+        1 0        2       5.468041729835976E-9
+        1 0        3      4.1391822187081835E-9
+        1 0        4        0.27160363157687994
+        1 0        5      2.2063825107513166E-8
+        1 0        6         0.6142876565496275
+        1 0        7        0.10521722254783777
+        1 0        8       0.019644702389412974
+        1 1        1        6.76987232427815E-5
+        1 1        2        0.06232468547238135
+        1 1        3        0.13122140151624764
+        1 1        4       0.021965148206372923
+        1 1        5        0.19092781165768866
+        1 1        6         0.4713908643412146
+        1 1        7        0.12210239008285201
+        1 1        8        0.19138971490485823
+        1 2        1         0.9879618077382735
+        1 2        2       8.449631929911974E-4
+        1 2        3       0.011077522833205329
+        1 2        4      1.1570559134744652E-4
+        1 2        5      1.356901157720188E-10
+        1 2        6     4.1261346059402553E-10
+        1 2        7      9.587888533000593E-11
+        1 2        8        0.08108497126039647
+        2 0        1         0.5958941361046881
+        2 0        2      1.3089471188240957E-4
+        2 0        3      1.2661579814008092E-4
+        2 0        4         0.2505368195493097
+        2 0        5      6.596053412122555E-10
+        2 0        6        0.08043035096135323
+        2 0        7        0.17227888424304832
+        2 0        8         0.0728811822150213
+        2 1        1         0.4440144412391816
+        2 1        2        0.08543890999226664
+        2 1        3         0.2104246992667131
+        2 1        4         6.3966539144571E-7
+        2 1        5        0.09245389189993217
+        2 1        6        0.03274628512838264
+        2 1        7       0.030281066209571193
+        2 1        8         0.1349211328081325
+        2 2        1         0.9700830457796161
+        2 2        2      0.0029351316912068154
+        2 2        3      0.0022187354229495494
+        2 2        4       6.829831755368084E-5
+        2 2        5       5.944648340203616E-6
+        2 2        6      1.7075168214740832E-4
+        2 2        7        0.08820983879215442
+        2 2        8       0.024518092458186168</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+    
+</t:intro>

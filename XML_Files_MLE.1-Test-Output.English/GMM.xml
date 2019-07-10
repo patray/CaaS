@@ -1,0 +1,1205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="mwd1507666023473"> </a>
+	  <h1>GMM</h1>
+
+	
+		<p style="line-height: 1em;">GMM is a driver function that fits a Gaussian Mixture Model (GMM) to data supplied in an input table. You specify whether GMM uses a basic GMM algorithm with a fixed number of clusters or a Dirichlet Process GMM (DP-GMM) algorithm with a variable number of clusters.</p>
+
+		<p style="line-height: 1em;">The output table of the GMM function can be input to the function GMMPredict.</p>
+
+	
+   <a name="mvg1507666059016"> </a>
+   <h2>GMM Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.3</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GMM (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InitialValues PARTITION BY 1
+  ON <i>input_table</i> AS InputTable
+  OUT TABLE OutputTable (<i>output_table</i>)
+  USING
+  { MaxClusterNum (<i>max_clusters</i>) | ClusterNum (<i>clusters</i>) }
+  [ CovarianceType ({ 'diagonal' | 'spherical' | 'tied' | 'full' }) ]
+  [ Tolerance (<i>tolerance</i>) ]
+  [ MaxIterNum (<i>max_iterations</i>) ]
+  [ ConcentrationParam (<i>concentration</i>) ]
+  [ PackOutput ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="hio1507666156895"> </a>
+	  <h2>GMM Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputTable</dt>
+      <dd>Specify the name of the output table to which the function outputs cluster information. The table must not already exist.</dd>
+      <dt>MaxClusterNum</dt>
+      <dd>[Required if you omit ClusterNum, disallowed otherwise.] Specify the maximum number of clusters in a Dirichlet Process model and causes the function to use the DP-GMM algorithm. This value must have the data type INTEGER.</dd>
+      <dd>Default: 20</dd>
+      <dt>ClusterNum</dt>
+      <dd>[Required if you omit MaxClusterNum, disallowed otherwise.] Specify the number of clusters in a model and causes the function to use the basic GMM algorithm. This value must have the data type INTEGER and be greater than 0.</dd>
+      <dd>Default: 10</dd>
+      <dt>CovarianceType</dt>
+      <dd>[Optional] Specify the covariance matrix type, thereby determining how many parameters the function estimates for each cluster, where <i>D</i> is the number of dimensions in the matrix:<a name="table_xqz_qmz_fdb"> </a>
+         <table class="introtable">
+            <a name="table_xqz_qmz_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'diagonal'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Each covariance matrix has zeros on nondiagonal. Function estimates <i>D</i> parameters for each cluster.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'spherical'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Each covariance matrix is of form σI. Function estimates one parameter for each cluster.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'tied'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Each cluster has the same covariance matrix. Function estimates (1/2)<i>D</i> (<i>D</i> -1) parameters.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'full'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Each cluster has an arbitrary covariance matrix. Function estimates (1/2)<i>D</i> (<i>D</i> -1) parameters for each cluster.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>Tolerance</dt>
+      <dd>[Optional] Specify the minimum change in log-likelihood between iterations that causes the function to terminate. This value must have the data type DOUBLE PRECISION and be greater than 0.</dd>
+      <dd>Default: 0.001</dd>
+      <dt>MaxIterNum</dt>
+      <dd>[Optional] Specify the maximum number of iterations for which the function runs. This value must have the data type INTEGER and be greater than 0.</dd>
+      <dd>Default: 10</dd>
+      <dt>ConcentrationParam</dt>
+      <dd>[Optional] Specify this syntax element only if you specify MaxClusterNum. Specify the concentration parameter, α, which determines the number of clusters that the DP-GMM algorithm creates. This value must have the data type DOUBLE PRECISION and be greater than 0.</dd>
+      <dd>The expected number of clusters is α log N, where N is the number of points in the data set; therefore, a larger α value tends to cause the algorithm to find more clusters.</dd>
+      <dd>Default: 0.001</dd>
+      <dt>PackOutput</dt>
+      <dd>[Optional] Specify whether the function packs the output.</dd>
+      <dd>Default: 'false'</dd>
+   </div>
+
+
+	
+   <a name="moo1507666272749"> </a>
+   <h2>GMM Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_rjz_tjd_ycb"> </a>
+   <table class="introtable">
+      <a name="table_rjz_tjd_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains input data to cluster.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InitialValues</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Table or view that contains initial values for weight, mean, and covariance of each cluster. If this table or view is empty, function terminates without executing.<p style="line-height: 1em; margin: 0px;">
+                  <br/>If you do not specify a table or view, you must use query <tt style="font-family: monospace;">ON (SELECT 1)</tt>, which causes function to determine initial values as follows:<a name="table_ems_ykm_ddb"> </a>
+                  <table class="introtable">
+                     <a name="table_ems_ykm_ddb"> </a>
+                     <tr>
+                        <th align="left">
+                           <div style="line-height: 1em;">Characteristic</div>
+                        </th>
+                        <th align="left">
+                           <div style="line-height: 1em;">Initial Value</div>
+                        </th>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">weight</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Same for all clusters.</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">mean</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Selected from multivariate standard normal distribution centered at origin.</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">covariance</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Covariance matrix computed by function and assigned to each cluster.</div>
+                        </td>
+                     </tr>
+                  </table>
+
+               </p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_vp1_4jd_ycb"> </a>
+   <h3>InputTable Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Leftmost column. Data point identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">dim_<i>n</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any numeric SQL data type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each dimension.] Data in dimension <i>i</i>.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_pt2_qjd_ycb"> </a>
+   <h3>InitialValues Table Schema</h3>
+   <a name="table_N10069_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10069_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">weight</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any numeric SQL data type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Initial weight of cluster.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">dim_<i>n</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any numeric SQL data type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each dimension.] Initial mean of cluster.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">covariance</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Initial covariance of cluster. Possible values depend on CovarianceType.<p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <a name="table_k2g_5lm_ddb"> </a>
+                  <table class="introtable">
+                     <a name="table_k2g_5lm_ddb"> </a>
+                     <tr>
+                        <th align="left">
+                           <div style="line-height: 1em;">CovarianceType</div>
+                        </th>
+                        <th align="left">
+                           <div style="line-height: 1em;">Possible Values</div>
+                        </th>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <tt style="font-family: monospace;">'spherical'</tt>
+                           </div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Positive numeric value (for example, 1.0.)</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <tt style="font-family: monospace;">'diagonal'</tt>
+                           </div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">JSON representation of DOUBLE PRECISION array (for example, [1.0,2.0,3.0,4.0])</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <tt style="font-family: monospace;">'tied'</tt> or <tt style="font-family: monospace;">'full'</tt>
+                           </div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">JSON representation of two-dimensional DOUBLE PRECISION array (for example, [[1.0,2.0],[2.0,4.0]])</div>
+                        </td>
+                     </tr>
+                  </table>
+
+               </p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ytf1507666317864"> </a>
+   <h2>GMM Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The GMM function outputs a message and a table. The OutputTable schema depends on the PackOutput syntax element.</p>
+
+   <a name="section_nrx_wmd_ycb"> </a>
+   <h3>Output Message Properties</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Property</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Value</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Output Table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Table name specified in OutputTable syntax element.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Algorithm Used</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Algorithm that function used—Basic GMM or DP-DMM.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;"> </div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Stopping Criterion</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Why function stopped—reached iteration limit or convergence.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Delta Log Likelihood</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Change in mean log-likelihood for each data point between next-to-final and final iterations.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Number of Iterations</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of iterations that function performed before stopping.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Number of Clusters Found</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of clusters in GMM.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Covariance Type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Spherical, diagonal, tied, or full.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;"> </div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Number of Data Points</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of data points in data set.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Global Mean</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Mean of data set.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Global Covariance</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Covariance of data set.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;"> </div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Log Likelihood</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Log-likelihood of data, given GMM.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Akaike Information Criterion</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Akaike Information Criterion.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Bayesian Information Criterion</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Bayesian Information Criterion.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_xyf_fnd_ycb"> </a>
+   <h3>OutputTable Schema, PackOutput ('false') (Default)</h3>
+   <a name="table_N100C0_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100C0_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cluster_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Cluster identification number.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">points_assigned</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of points in training data set assigned to  cluster.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">covariance_type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Covariance type.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">weight</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Weight assigned to cluster.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">dim_<i>n</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each dimension.] Mean of cluster <i>n.</i>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cov_<i>n</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each dimension.] Covariance of cluster <i>n</i>.<p style="line-height: 1em; margin: 0px;">
+                  <br/>Depends on CovarianceType:</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <a name="table_bm1_xnm_ddb"> </a>
+                  <table class="introtable">
+                     <a name="table_bm1_xnm_ddb"> </a>
+                     <tr>
+                        <th align="left">
+                           <div style="line-height: 1em;">CovarianceType</div>
+                        </th>
+                        <th align="left">
+                           <div style="line-height: 1em;">cov_<i>n</i>
+                           </div>
+                        </th>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <tt style="font-family: monospace;">'spherical'</tt>
+                           </div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Single covariance column. Each row contains DOUBLE PRECISION value.</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <tt style="font-family: monospace;">'diagonal'</tt>
+                           </div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <i>D</i> covariance rows, each containing a DOUBLE PRECISION value.</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <tt style="font-family: monospace;">'tied'</tt> or <tt style="font-family: monospace;">'full'</tt>
+                           </div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <i>D</i>(<i>D</i>-1) covariance rows, each containing a DOUBLE PRECISION value.</div>
+                        </td>
+                     </tr>
+                  </table>
+
+               </p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">log_determinant</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Log determinant of covariance matrix.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">prec</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Precision matrix, inverse of covariance matrix. Precision matrix is serialized and stored to improve performance of GMMPredict function.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_fp2_gnd_ycb"> </a>
+   <h3>OutputTable Schema, PackOutput ('true')</h3>
+   <a name="table_N10199_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10199_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cluster_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Cluster identification number.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">points_assigned</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of points in training data set assigned to cluster.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">covariance_type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of points in training data set assigned to cluster.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">weight</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Weight assigned to cluster.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">mean</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Vector of <i>D</i> DOUBLE PRECISION values that specify mean of each cluster (for example, [4.5, 2.3, 1.3]).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">covariance</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Depends on CovarianceType:<p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <a name="table_oqt_2xr_ddb"> </a>
+                  <table class="introtable">
+                     <a name="table_oqt_2xr_ddb"> </a>
+                     <tr>
+                        <th align="left">
+                           <div style="line-height: 1em;">CovarianceType</div>
+                        </th>
+                        <th align="left">
+                           <div style="line-height: 1em;">covariance</div>
+                        </th>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <tt style="font-family: monospace;">'spherical'</tt>
+                           </div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Single covariance column. Each row contains DOUBLE PRECISION value.</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <tt style="font-family: monospace;">'diagonal'</tt>, <tt style="font-family: monospace;">'tied'</tt>,  or <tt style="font-family: monospace;">'full'</tt>
+                           </div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Single covariance column. Each row contains a white-space separated list of <i>D</i>*<i>D</i> DOUBLE PRECISION values.</div>
+                        </td>
+                     </tr>
+                  </table>
+
+               </p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">log_determinant</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Log determinant of covariance matrix.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">prec</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Precision matrix, inverse of covariance matrix. Precision matrix is serialized and stored to improve performance of GMMPredict function.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="btu1510703684716"> </a>
+   <h2>GMM Examples</h2>
+   <a name="zym1507666381888"> </a>
+   <h3>GMM Examples Input</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The table gmm_iris_input contains raw data, which has values for four attributes—sepal_length, sepal_width, petal_length, and petal_width—which are the data dimensions. The table does not include the species column, because the goal is data clustering, not classification. Each example outputs three clusters.</p>
+   <p style="line-height: 1em;">From the raw data, a train set and a test set are created.</p>
+   <p style="line-height: 1em;">The function GMM uses the train set to create the model. The GMMPredict function uses the model information to predict clusters for the test data.</p>
+
+   <a name="section_vqq_5dt_wbb"> </a>
+   <h4>Raw Data Table gmm_iris_input</h4>
+   <a name="table_N1001A_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1001A_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_pqf_sdt_wbb"> </a>
+   <h4>Split Input into Training and Testing Data Sets</h4>
+   <p style="line-height: 1em;">The following code divides the 150 data rows into a training data set (80%) and a testing data set (20%). The GMM examples use gmm_iris_train; the GMMPredict example uses gmm_iris_test.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE gmm_iris_train;
+DROP TABLE gmm_iris_test;
+
+CREATE MULTISET TABLE gmm_iris_train AS (
+  SELECT * FROM gmm_iris_input WHERE id MOD 5 &lt;&gt; 0
+) WITH DATA;
+
+CREATE MULTISET TABLE gmm_iris_test AS (
+  SELECT * FROM gmm_iris_input WHERE id MOD 5 = 0
+) WITH DATA;</tt>
+   </pre>
+   <p>
+      <b>Note:</b>  Alternatively, you can do the preceding task with the Sampling or RandomSample function.</p>
+   <a name="pak1525196771161"> </a>
+	  <h3>GMM Example: Basic GMM, Spherical Covariance, Packed Output</h3>
+
+	  <a name="section_ukk_kpx_xhb"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">See GMM Examples Input.</p>
+
+   <a name="section_jwr_b1l_rdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GMM (
+  ON (SELECT 1) AS InitialValues PARTITION BY 1
+  ON gmm_iris_train AS InputTable
+  OUT TABLE OutputTable (gmm_output_ex1)
+  USING
+  ClusterNum (3)
+  CovarianceType ('spherical')
+  MaxIterNum (10)
+  PackOutput (1)
+) AS dt ;</tt>
+   </pre>
+   <a name="section_m1f_c1l_rdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">Because the SQL call specifies PackOutput (1), a single mean column displays a vector containing the mean value for each dimension.</p>
+   <pre>
+      <tt>
+property			value
+-----------------------------  -------------------------------------------------------------------------------------------------------------
+Output Table			Table Name Specified in OutputTable argument
+Algorithm Used			Basic GMM
+	
+Stopping Criterion		Algorithm converged with tolerance 0.001
+Delta Log Likelihood		0
+Number of Iterations		5
+Number of Clusters		3
+Covariance Type	spherical
+Number of Data Points		120
+Global Mean			[5.866, 3.055, 3.770, 1.205]
+Global Covariance		[[0.7197, -0.04204, 1.326, 0.5265], [-0.04204, 0.1916, -0.3241, -0.1213], [1.326, -0.3241, 3.167, 1.298], [0.5265, -0.1213, 1.298, 0.5708]]
+	
+Log Likelihood			-332.722
+Akaike Information Criterion	699.444 on 17 parameters
+Bayesian Information Criterion	746.831 on 17 parameters</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM gmm_output_ex1;</tt>
+   </pre>
+   <pre>
+      <tt>
+cluster_id	points_assigned	covariance_type	weight		mean										covariance	log_determinant		prec
+0		1		spherical	8.33E-03	[4.5, 2.3, 1.3, 0.3]								1.00E-12	-1.10524084463714E 002	1.00E+12
+1		39		spherical	3.25E-01	[5.01025640674348, 3.4461538411338686, 1.446153846741701, 0.25128205118815566]	0.072353714	-1.05047539703453E 001	13.82099057
+2		80		spherical	6.67E-01	[6.299999998810369, 2.873750003735264, 4.933749991865624, 1.6812499968280563]	0.351423837	-4.18304908500248E 000	2.845566791</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="tox1507666830590"> </a>
+   <h3>GMM Example: Basic GMM, Diagonal Covariance, Unpacked Output</h3>
+   <a name="section_bfy_hpx_xhb"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">See GMM Examples Input.</p>
+
+   <a name="section_fm1_2bt_rdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE gmm_output_ex2;
+
+SELECT * FROM GMM(
+  ON (SELECT 1) AS InitialValues PARTITION BY 1
+  ON gmm_iris_train AS InputTable
+  OUT TABLE OutputTable (gmm_output_ex2)
+  USING
+  ClusterNum (3)
+  CovarianceType ('diagonal')
+  MaxIterNum (10)
+  PackOutput (0)
+) AS dt;</tt>
+   </pre>
+   <a name="section_vpp_2bt_rdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">Because the SQL call specifies PackOutput (0), the mean for each dimension is output in a separate column.</p>
+   <pre>
+      <tt>
+property                          value
+-----------------------------     --------------------------------------------
+Output Table                      Table Name Specified in OutputTable argument
+Algorithm Used                    Basic GMM
+
+Stopping Criterion                Algorithm converged with tolerance 0.001
+Delta Log Likelihood              0.000306
+Number of Iterations              9
+Number of Clusters                3
+Covariance Type                   diagonal
+
+Number of Data Points             120
+Global Mean                       [5.866, 3.055, 3.770, 1.205]
+Global Covariance                 [[0.7197, -0.04204, 1.326, 0.5265], [-0.04204, 0.1916, -0.3241, -0.1213], [1.326, -0.3241, 3.167, 1.298], [0.5265, -0.1213, 1.298, 0.5708]]
+
+Log Likelihood                    -299.463
+Akaike Information Criterion      650.927 on 26 parameters
+Bayesian Information Criterion    723.402 on 26 parameters</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM gmm_output_ex2;</tt>
+   </pre>
+   <pre>
+      <tt>
+ cluster_id points_assigned covariance_type                 weight           sepal_length            sepal_width           petal_length            petal_width                  cov_1                  cov_2                  cov_3                  cov_4        log_determinant prec
+----------- --------------- --------------- ---------------------- ---------------------- ---------------------- ---------------------- ---------------------- ---------------------- ---------------------- ---------------------- ---------------------- ----------------------
+          0              80 diagonal         6.66666671404995E-001  6.29999999264475E 000  2.87375000423673E 000  4.93374997654975E 000  1.68124999091003E 000  4.48250005108612E-001  1.12435939872283E-001  6.75236010159825E-001  1.69773448042198E-001 -5.15375919180448E 000 [2.2308979109943294, 8.893953313646076, 1.4809636704110392, 5.890202570141868]
+          1              34 diagonal         2.81449285506468E-001  4.96420190082733E 000  3.39489108307423E 000  1.41310305651851E 000  2.18678116022252E-001  1.42644399487320E-001  1.69911879262500E-001  2.20773079340602E-002  5.21182552945754E-003 -1.27899058795552E 001 [7.010439972365617, 5.885403683017837, 45.295377633304305, 191.87134994215393]
+          2               6 diagonal         5.18840430885372E-002  5.17812827017366E 000  3.54014393613176E 000  1.60196613519743E 000  4.35969594955617E-001  3.39711206117030E-002  4.30843522590134E-002  7.16344281172976E-003  8.91647791209674E-003 -1.61854587507255E 001 [29.436768113428094, 23.210282795670814, 139.5976803727047, 112.15190682447918]</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="dau1507667271202"> </a>
+   <h3>GMM Example: DP-GMM, Full Covariance, Unpacked Output</h3>
+   <a name="section_ntk_fpx_xhb"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">See GMM Examples Input.</p>
+
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">Dirichlet Process GMM (DP-GMM) estimates the number of clusters in the data using an algorithm based on variational Bayesian methods.</p>
+
+   <a name="section_fm1_2bt_rdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE dpgmm_output_ex3;
+
+SELECT * FROM GMM (
+  ON (SELECT 1) AS InitialValues PARTITION BY 1
+  ON gmm_iris_train AS InputTable
+  OUT TABLE OutputTable (dpgmm_output_ex3)
+  USING
+  MaxClusterNum (3)
+  CovarianceType ('full')
+  MaxIterNum (10)
+  PackOutput (0)
+) AS dt ;</tt>
+   </pre>
+   <a name="section_vpp_2bt_rdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+property                                 value
+
+Output Table                             Table Name Specified in OutputTable argument
+Algorithm Used                           Dirichlet Process GMM
+
+Stopping Criterion                       Algorithm converged with tolerance 0.001
+Delta Log Likelihood                     0.000494
+Number of Iterations                     9
+Number of Clusters Found                 1
+Covariance Type                          full
+
+Number of Data Points                    120
+Global Mean                              [5.866, 3.055, 3.770, 1.205]
+Global Covariance                        [[0.7197, -0.04204, 1.326, 0.5265], [-0.04204, 0.1916, -0.3241, -0.1213], [1.326, -0.3241, 3.167, 1.298], [0.5265, -0.1213, 1.298, 0.5708]]
+
+Log Likelihood                           1550.435
+Akaike Information Criterion             -3012.870 on 44 parameters
+Bayesian Information Criterion           -2890.220 on 44 parameters</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM dpgmm_output_ex3;</tt>
+   </pre>
+   <pre>
+      <tt>
+ cluster_id points_assigned covariance_type                 weight           sepal_length            sepal_width           petal_length            petal_width                 cov_11                 cov_12                 cov_13                 cov_14                 cov_22                 cov_23                 cov_24                 cov_33                 cov_34                 cov_44        log_determinant prec
+----------- --------------- --------------- ---------------------- ---------------------- ---------------------- ---------------------- ---------------------- ---------------------- ---------------------- ---------------------- ---------------------- ---------------------- ---------------------- ---------------------- ---------------------- ---------------------- ---------------------- ---------------------- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+          0             120 full             9.99991735613739E-001  5.73419321840163E 000  3.01843398222490E 000  3.61166171552218E 000  1.14486231793446E 000  1.66229691309346E 000 -2.14185076572784E-001  1.69427437178447E 000  6.93859028192593E-001  1.14410673681517E 000  2.62470215164859E-002  1.96024408024593E-002  4.00032159904576E 000  1.27929542158923E 000  1.50738876901989E 000  1.88394523840622E 000 [[0.7824065708713632, -0.04166720450521028, -0.2990852151033951, -0.10577545815433718], [-0.09328115290486803, 0.875436053888177, 0.03258314726425615, 0.0039006629777845513], [-0.169999622325278, 0.13304206449205377, 0.40094413849390415, -0.26375291186527555], [-0.04690499623137513, 0.04519483374938999, -0.25244627156275695, 0.898648652091002]]
+          1               0 full             8.25613837088043E-006  0.00000000000000E 000  0.00000000000000E 000  0.00000000000000E 000  0.00000000000000E 000  1.66666666666667E-001  0.00000000000000E 000  0.00000000000000E 000  0.00000000000000E 000  1.66666666666667E-001  0.00000000000000E 000  0.00000000000000E 000  1.66666666666667E-001  0.00000000000000E 000  1.66666666666667E-001 -7.16703787691222E 000 [[6.0, 0.0, 0.0, 0.0], [0.0, 6.0, 0.0, 0.0], [0.0, 0.0, 6.0, 0.0], [0.0, 0.0, 0.0, 6.0]]
+          2               0 full             8.24789043818501E-009  0.00000000000000E 000  0.00000000000000E 000  0.00000000000000E 000  0.00000000000000E 000  1.66666666666667E-001  0.00000000000000E 000  0.00000000000000E 000  0.00000000000000E 000  1.66666666666667E-001  0.00000000000000E 000  0.00000000000000E 000  1.66666666666667E-001  0.00000000000000E 000  1.66666666666667E-001 -7.16703787691222E 000 [[6.0, 0.0, 0.0, 0.0], [0.0, 6.0, 0.0, 0.0], [0.0, 0.0, 6.0, 0.0], [0.0, 0.0, 0.0, 6.0]]</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

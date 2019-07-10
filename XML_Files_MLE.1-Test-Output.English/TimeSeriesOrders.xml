@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="fwf1507221810968"> </a>
+	  <h1>TimeSeriesOrders</h1>
+
+	
+		<p style="line-height: 1em;">The TimeSeriesOrders function automatically determines the following for nonseasonal,
+			univariate time series:<ul>
+				     <li>The orders (<i>p</i>, <i>d</i>, <i>q</i>)<p style="line-height: 1em;">For descriptions of these orders, see the information about nonseasonal ARIMA models in https://www.otexts.org/fpp/8.</p>
+         </li>
+
+				     <li>Whether to include a nonzero constant term (mean) and an explicit dependence on
+					time (a drift term)</li>
+
+			   </ul>
+   </p>
+
+		<p style="line-height: 1em;">If a time series has a seasonal component, the function reports <i>p</i>, <i>d</i>, and <i>q</i>, but does not calculate or report seasonal orders <i>sp</i>, <i>sd</i>, and <i>sq</i>. (For descriptions of the seasonal orders, see the information about seasonal ARIMA models in https://www.otexts.org/fpp/8.) </p>
+   <p style="line-height: 1em;">You can use the TimeSeriesOrders output as the orders table of the ARIMA or VARMAX function.</p>
+
+	
+   <a name="tmg1507221974506"> </a>
+	  <h2>TimeSeriesOrders Syntax</h2>
+
+	
+		<a name="section_N10014_N10011_N10001"> </a>
+   <h3>Version 1.1</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TimeSeriesOrders (   
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+    PARTITION BY { 1 | <i>partition_column</i> [,...] } ORDER BY <i>time_column</i> ASC [,...]
+  USING      
+  ResponseColumn ('<i>response_column</i>')
+  [ PartitionColumns ('<i>partition_column</i>' [,...]) ]
+  TimeColumns ('<i>time_column</i>' [,...])
+) AS <i>alias</i>;</tt>
+   </pre>
+   <p>
+      <b>Note:</b>  In the ORDER BY clause, put ASC after each <i>time_column</i>.</p>
+
+	
+   <a name="beo1507222823837"> </a>
+	  <h2>TimeSeriesOrders Syntax Elements</h2>
+
+	
+		<a name="section_N10014_N10011_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>ResponseColumn</dt>
+      <dd>Specify the name of the <i>input_table</i> column that contains the response variable.</dd>
+      <dt>PartitionColumns</dt>
+      <dd>[Required if you partition by columns, disallowed otherwise.] Specify the partition columns to pass to the output, which must be the same as those in the PARTITION BY clause.</dd>
+      <dt>TimeColumns</dt>
+      <dd>
+         <p style="line-height: 1em;">Specify the names of the <i>input_table</i> columns that contain the time stamps of the points in the time sequence.</p>
+      </dd>
+   </div>
+
+		
+
+	
+   <a name="ozz1507222895047"> </a>
+	  <h2>TimeSeriesOrders Input</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+			<p style="line-height: 1em;">The input table has the same schema as the VARMAX Input table.</p>
+
+			<p style="line-height: 1em;">Each input time series must:<ul>
+					    <li>Be an ordered sequence in a partition with uniform time intervals</li>
+
+					    <li>Fit into memory</li>
+
+					    <li>Not include NULL or numeric values</li>
+
+				  </ul>
+   </p>
+
+		
+
+	
+   <a name="qex1507227073634"> </a>
+	  <h2>TimeSeriesOrders Output</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_lpp_2bt_n1b"> </a>
+   <table class="introtable">
+      <a name="table_lpp_2bt_n1b"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>partition_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>partition_column</i>.] Column by which input data is partitioned.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">p</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Order of autoregressive part.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">d</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Degree of differencing.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">q</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Order of  moving average part.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">include_drift</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1 if time series model includes drift item, 0 otherwise.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">include_mean</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1 if time series model includes mean vector of response series, 0 otherwise.</div>
+         </td>
+      </tr>
+   </table>
+
+
+		
+
+	
+   <a name="iyt1507221866713"> </a>
+	  <h2>TimeSeriesOrders Examples</h2>
+
+   <a name="xim1507227146218"> </a>
+	  <h3>TimeSeriesOrders Example: PartitionColumns</h3>
+
+	  <a name="section_N10014_N10011_N10001"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>milk_3, as in VARMAX Example: Orders Table, Two Time Series</li>
+   </ul>
+
+   <a name="section_ulv_44j_mdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TimeSeriesOrders (   
+  ON milk_3 AS InputTable <b>PARTITION BY id_partition</b> ORDER BY period ASC
+  USING
+  <b>PartitionColumns ('id_partition')</b>
+  TimeColumns ('period')
+  ResponseColumn ('milkpound')
+) AS dt ORDER BY id_partition;</tt>
+   </pre>
+   <a name="section_swc_p4j_mdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The specified partition column, id_partition, appears in the output table.</p>
+   <pre>
+      <tt>
+ id_partition p d q include_drift include_mean 
+ ------------ - - - ------------- ------------ 
+            1 1 1 1             0            0
+            2 0 1 2             0            0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="vmn1507230430280"> </a>
+	  <h3>TimeSeriesOrders Example: No PartitionColumns</h3>
+
+	
+		<a name="section_N10014_N10011_N10001"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>milk_timeseries, as in VARMAX Example: Orders Table, One Time Series</li>
+   </ul>
+
+		
+   <a name="section_ulv_44j_mdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TimeSeriesOrders (   
+  ON milk_timeseries AS InputTable PARTITION BY 1 ORDER BY period ASC
+  USING
+  TimeColumns ('period')
+  ResponseColumn ('milkpound')
+) AS dt;</tt>
+   </pre>
+   <a name="section_swc_p4j_mdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">No partition column appears in the output table.</p>
+   <pre>
+      <tt>
+ p d q include_drift include_mean 
+ - - - ------------- ------------ 
+ 0 1 2             1            0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

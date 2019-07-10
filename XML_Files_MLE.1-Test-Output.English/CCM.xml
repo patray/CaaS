@@ -1,0 +1,826 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="glu1506436467167"> </a>
+	  <h1>CCM</h1>
+
+	  <p style="line-height: 1em;">The CCM function takes two or more time series as input and evaluates potential cause-effect relationships between them. Each time series column can be a single, long time series or a set of shorter subsequences that represent the same process. The function returns an effect size for each cause-effect pair.</p>
+   <p style="line-height: 1em;">The CCM function can be used to determine the optimal value for one of its parameters, EmbeddingDimensions. In this special case, the cause and effect columns must be identical, and only a single cause and a single effect column are permitted. For more information, see CCM Syntax Elements.</p>
+
+   <a name="bcc1506436571609"> </a>
+   <h2>CCM Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.6</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM CCM
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  USING
+  SequenceIDColumn ('<i>sequence_column</i>')
+  TimeColumn ('<i>time_column</i>')
+  CauseColumns ('<i>cause_column</i>' [,...])
+  EffectColumns ('<i>effect_column</i>' [,...])
+  [ LibrarySize ('<i>library_size</i>' [,...]) ]
+  [ EmbeddingDimensions (<i>dimension</i> [,...]) ]
+  [ PredictStep ('<i>predict_step</i>') ]
+  [ TimeStep ('<i>time_step</i>') ]
+  [ BootstrapIterations ('<i>iterations</i>') ]
+  [ PointSelectRule ({ 'DistanceOnly' | 'DistanceAndTime' })]
+  [ SelfPredict ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ ExecutionMode ('single' | 'distribute') ]
+  [ Seed ('<i>seed</i>') ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="iop1506436636801"> </a>
+	  <h2>CCM Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <p>
+      <b>Tip:</b>  Read the description of the EmbeddingDimensions syntax element first.</p>
+			<div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>SequenceIDColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the time sequence identifiers. A time sequence is a sample of the time series.</dd>
+      <dt>TimeColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the time stamps.</dd>
+      <dt>CauseColumns</dt>
+      <dd>Specify the names of the InputTable columns that contain values to evaluate as potential causes.<p style="line-height: 1em;">To select best embedding dimension, CauseColumns and EffectColumns must specify the same single column.</p>
+      </dd>
+      <dt>EffectColumns</dt>
+      <dd>Specify the names of the InputTable columns that contain values to evaluate as potential effects.<p style="line-height: 1em;">To select best embedding dimension, CauseColumn and EffectColumn must specify the same single column.</p>
+      </dd>
+      <dt>LibrarySize</dt>
+      <dd>[Optional] If the function selects the best embedding dimension, you must omit this syntax element.<p style="line-height: 1em;">Specify the sizes of the libraries that the function uses. Each library contains randomly selected points along the potential effect time series. The function uses the libraries to predict values of the cause time series. If the correlation between the predicted values of the cause time series and the actual values increases as the size of the library increases, a causal relationship is said to exist.</p>
+         <p style="line-height: 1em;">Each <i>library_size</i> must be a positive INTEGER.</p>
+         <p style="line-height: 1em;">If the function does not select the best embedding dimension, and you omit this syntax element, the function uses two library sizes: 100 and <i>dimension</i> * <i>time_step</i> + 1 (<i>dimension</i> and <i>time_step</i> are specified by the syntax elements EmbeddingDimensions and TimeStep, respectively).</p>
+         <p style="line-height: 1em;">If you specify a single <i>library_size</i>, the function uses two library sizes: <i>library_size</i> and <i>dimension</i> * <i>time_step</i> + 1.</p>
+      </dd>
+      <dt>EmbeddingDimensions</dt>
+      <dd>[Optional] Specify the number of past values to use when predicting a given value of the time series. If you specify only one dimension, the function uses it. If you specify multiple dimensions, the function selects the best one.</dd>
+      <dd>Each <i>dimension</i> must be a positive INTEGER. Default: 2</dd>
+      <dt>PredictStep</dt>
+      <dd>[Optional] Specify the number of time steps into the future to make predictions from past observations, if the function selects the best embedding dimension.</dd>
+      <dd>The <i>predict_step</i> must be a positive INTEGER. Default: 1</dd>
+      <dt>TimeStep</dt>
+      <dd>[Optional] Specify the number of time steps between past values to use when predicting a given value of the time series. <p style="line-height: 1em;">The <i>time_step</i> must be a positive INTEGER. Default: 1</p>
+      </dd>
+      <dt>BootstrapIterations</dt>
+      <dd>[Optional] Specify the number of bootstrap iterations to use when predicting a given value of the time series. The function uses the bootstrap process to estimate the uncertainty associated with the predicted values. If the function selects the best embedding dimension, <i>iterations</i> has the value 1, and the function ignores this syntax element if it is specified.</dd>
+      <dd>The <i>iterations</i> must be a positive INTEGER. Default: 100</dd>
+      <dt>PointSelectRule</dt>
+      <dd>[Optional] Specify the rule for selecting the nearest points if the function is to select the best embedding dimension:<a name="table_ff4_c2y_fdb"> </a>
+         <table class="introtable">
+            <a name="table_ff4_c2y_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'DistanceOnly'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Function determines nearest points based only on computed distance.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'DistanceAndTime'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Function determines nearest points based on both computed distance and time, which matches  procedure described in documentation for R package multispatialCCM (version 1.0).</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>ExecutionMode</dt>
+      <dd>[Optional] Specify the execution mode:<a name="table_sqk_32y_fdb"> </a>
+         <table class="introtable">
+            <a name="table_sqk_32y_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'single'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Function runs on single node and outputs results similar to those produced by R package multispatialCCM (version 1.0).<p style="line-height: 1em; margin: 0px;">
+                        <br/>Use <tt style="font-family: monospace;">'single'</tt> unless InputTable is large or <tt style="font-family: monospace;">'single'</tt> is slow.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'distribute'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Function distributes data and runs across multiple vworkers. To parallelize run, function uses an algorithm different from that of R, and its results can be different from those of R.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>SelfPredict</dt>
+      <dd>[Optional] Specify whether the function tries to predict each attribute using the attribute itself. If an attribute can predict its own time series well, the signal-to-noise ratio is too low for the CCM algorithm to work effectively.</dd>
+      <dd>Default: 'false'<p>
+            <b>Note:</b>  If the function selects the best embedding dimension, this syntax element must specify 'true'.</p>
+      </dd>
+      <dt>Seed</dt>
+      <dd>[Optional] Specify the random seed the algorithm uses for repeatable results (for more information, see Nondeterministic Results and UniqueID Syntax Element). The <i>seed</i> must be a LONG value.</dd>
+   </div>
+
+		
+
+	
+   <a name="edg1506464244971"> </a>
+   <h2>CCM Input</h2>
+   <a name="section_g5z_wpm_wcb"> </a>
+   <h3>InputTable Schema</h3>
+   <a name="table_N1001B_N10017_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1001B_N10017_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ccm_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Partition column that function uses internally.<p style="line-height: 1em; margin: 0px;">
+                  <br/>If the table has this column, the CCM function assumes that the table was output by the CCMPrepare function, which ensures that the CCM function partitions input data across workers consistently over multiple function calls.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>If InputTable omits this column, the CCM function creates it, and partitioning of data across workers might vary over multiple function calls.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>sequence_id</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any except DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Time sequence identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>period_id</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Identifier of time period within time sequence.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>timeseries_value</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears one or more times.] Time series value to test for potential causal relationships.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="mkw1506465785090"> </a>
+   <h2>CCM Output</h2>
+   <a name="section_ijm_zpm_wcb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cause</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Input attribute (column) being evaluated as potential causal variable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">effect</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Input attribute (column) being evaluated as potential effect variable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">library_size</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Size of library evaluated.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">correlation</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">For numerical cause variables: correlation between values predicted by effect attribute and true value of cause attribute.<p style="line-height: 1em; margin: 0px;">
+                  <br/>For categorical cause variables: NULL</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">jaccard_index</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">For categorical cause variables: Jaccard similarity index between values predicted by effect attribute and true value of cause attribute.<p style="line-height: 1em; margin: 0px;">
+                  <br/>For numerical cause variables: NULL</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">lower_bound</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Lower bound of 95% confidence interval of prediction contained in correlation or jaccard_index column (whichever is not NULL).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">upper_bound</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Upper bound of the 95% confidence interval of prediction contained in correlation or jaccard_index column (whichever is not NULL).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">effect_size</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Depends on library_size:<p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <a name="table_cwb_ppx_fdb"> </a>
+                  <table class="introtable">
+                     <a name="table_cwb_ppx_fdb"> </a>
+                     <tr>
+                        <th align="left">
+                           <div style="line-height: 1em;">library_size</div>
+                        </th>
+                        <th align="left">
+                           <div style="line-height: 1em;">effect_size</div>
+                        </th>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">Smallest library size used with each cause/effect pair</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Estimated effect size of increasing library size from smallest to largest value.<p style="line-height: 1em; margin: 0px;">
+                                 <br/>For a numerical effect: Cohen's q statistic.</p>
+                              <p style="line-height: 1em; margin: 0px;">
+                                 <br/>For a categorical effect: difference between two similarity measures.</p>
+                           </div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">Other library sizes</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">NULL</div>
+                        </td>
+                     </tr>
+                  </table>
+
+               </p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>An effect_size greater than approximately 0.25 indicates a causal relationship.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">effect_size_sd</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Standard deviation of effect size.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">embedding_dimension</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with multiple dimensions.] Number of past values to use when predicting given value of time series. </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="brw1506465843978"> </a>
+	  <h2>CCM Example: Simulated Data</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+			<p style="line-height: 1em;">This example uses a simulated data set to show how to use the CCM function to:<ol>
+         <li>Identify the optimal value for EmbeddingDimensions.</li>
+         <li>Check for a causal relationship between two time series.</li>
+      </ol>
+   </p>
+
+		
+   <a name="section_rzh_pxl_kdb"> </a>
+   <h3>Input</h3>
+   <a name="table_pbs_5xl_kdb"> </a>
+   <table class="introtable">
+      <a name="table_pbs_5xl_kdb"> </a>
+      <h4 style="text-align: center;">InputTable: ccmexample</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">seqid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">t</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">a</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">b</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.439016523</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.844698604</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.79590473</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.416313404</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.457454911</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.80120226</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.83460391</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.462840003</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.453855618</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.866674285</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.847111468</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.420195438</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.464311363</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.840110673</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.854059164</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.474302962</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.440280147</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.863834294</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.809889391</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.425037187</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.773946283</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.63958518</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.508680994</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.850617675</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.766623465</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.940756652</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.813294227</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.789552227</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.247789031</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.549992501</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.793969139</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.608697646</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.503156674</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.794651776</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.823104545</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.580508316</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.812508422</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.406036663</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_wlq_pxl_kdb"> </a>
+   <h3>Step 1 SQL Call: Identify Optimal Value for EmbeddingDimensions</h3>
+   <p style="line-height: 1em;">The CauseColumns and EffectColumns syntax elements must have the same value, the SelfPredict syntax element must have the value 'true', and the LibrarySize syntax element must be omitted.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * from CCM (
+  ON ccmexample AS InputTable
+  USING
+  SequenceIDColumn ('seqid')
+  TimeColumn ('t')
+  <b>CauseColumns ('b')</b>
+         <b>EffectColumns ('b')</b>
+  EmbeddingDimensions (2,3,4,5,6,7,8,9,10)
+  <b>SelfPredict ('t')</b>
+) AS dt;</tt>
+   </pre>
+   <a name="section_dfm_qxl_kdb"> </a>
+   <h3>Step 1 Output</h3>
+   <pre>
+      <tt>
+ cause effect library_size correlation       jaccard_index lower_bound       upper_bound       effect_size effect_size_sd embedding_dimension 
+ ----- ------ ------------ ----------------- ------------- ----------------- ----------------- ----------- -------------- ------------------- 
+ b     b                60 0.663700687953145          NULL 0.663700687953145 0.663700687953145         0.0            0.0                   4</tt>
+   </pre>
+   <a name="section_y4g_rxl_kdb"> </a>
+   <h3>Step 2 SQL Call: Check for Causal Relationship Between Two Time Series</h3>
+   <p style="line-height: 1em;">The EmbeddingDimensions syntax element has the optimal value identified in Step 1.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * from CCM (
+  ON ccmexample AS InputTable
+  USING
+  SequenceIDColumn ('seqid')
+  TimeColumn ('t')
+  <b>CauseColumns ('a','b')</b>
+         <b>EffectColumns ('a','b')</b>
+         <b>EmbeddingDimensions ('2')</b>
+) AS dt;</tt>
+   </pre>
+   <a name="section_z4g_rxl_kdb"> </a>
+   <h3>Step 2 Output</h3>
+   <pre>
+      <tt>
+ cause effect library_size correlation       jaccard_index lower_bound        upper_bound       effect_size       effect_size_sd     
+ ----- ------ ------------ ----------------- ------------- ------------------ ----------------- ----------------- ------------------ 
+ b     a                 3 0.199821148005778          NULL  0.154320762926768 0.244475768800156 0.411670632601633 0.0258400884667059
+ b     a               100 0.547088662768567          NULL    0.5336993960053 0.560203717679341              NULL               NULL
+ a     b                 3 0.133354380025576          NULL 0.0884539033592824 0.177714016526658 0.157908314401436 0.0250404016758242
+ a     b               100 0.284031327946218          NULL   0.26695597109749 0.300928402624589              NULL               NULL</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

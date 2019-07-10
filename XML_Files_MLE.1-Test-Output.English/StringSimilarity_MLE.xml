@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="euk1507823541050"> </a>
+	  <h1>StringSimilarity_MLE</h1>
+
+	
+		<p style="line-height: 1em;">The StringSimilarity_MLE function calculates the similarity between two strings, using either the Jaro, Jaro-Winkler, N-Gram, or Levenshtein distance. The similarity is a value in the range [0, 1].</p>
+
+		<p>
+      <b>Note:</b>  You can use the output of the StringSimilarity_MLE function as input to the function FellegiSunter.</p>
+	
+   <a name="dzg1507823993600"> </a>
+   <h2>StringSimilarity_MLE Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.2</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM StringSimilarity_MLE (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY ANY
+  USING
+  ComparisonColumnPairs ('<i>comparison_type</i> (<i>column1</i>,<i>column2</i>[,<i>constant</i>])[ AS <i>output_column</i>]')[,...]
+  [ CaseSensitive ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}[,...]) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="fvs1507823999172"> </a>
+	  <h2>StringSimilarity_MLE Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>ComparisonColumnPairs</dt>
+      <dd>Specify pairs of input table columns that contain strings to compare (<i>column1</i> and <i>column2</i>), how to compare them (<i>comparison_type</i>), and (optionally) a constant and the name of the output column for their similarity (<i>output_column</i>). The similarity is a value in the range [0, 1].</dd>
+      <dd>For <i>comparison_type</i>, use one of these values:<a name="table_pcf_gw2_gdb"> </a>
+         <table class="introtable">
+            <a name="table_pcf_gw2_gdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">
+                     <i>comparison_type</i>
+                  </div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'jaro'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Jaro distance.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'jaro_winkler'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Jaro-Winkler distance: 1 for an exact match, 0 otherwise.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'n-gram'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <i>N</i>-gram similarity. If you specify this comparison type, you can specify the value of <i>N</i> with <i>constant</i>. Default: <i>N</i> = 2</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'LD'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Levenshtein distance: Number of edits needed to transform one string into the other. Edits are insertions, deletions, or substitutions of individual characters.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dd>You can specify a different <i>comparison_type</i> for every pair of columns.</dd>
+      <dd>Default: <i>output_column</i> is 'sim_<i>i</i>', where <i>i</i> is the sequence number of the column pair.</dd>
+      <dt>CaseSensitive</dt>
+      <dd>[Optional] Specify whether string comparison is case-sensitive. You can specify either one value for all pairs or one value for each pair. If you specify one value for each pair, the <i>i</i>th value applies to the <i>i</i>th pair.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of input table columns to copy to the output table.</dd>
+   </div>
+
+
+	
+   <a name="gzc1507824003490"> </a>
+   <h2>StringSimilarity_MLE Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Input Table Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>column1</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>column1</i>.] String to compare to string in <i>column2</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>column2</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>column2</i>.] String to compare to string in <i>column1</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="tql1507824007397"> </a>
+   <h2>StringSimilarity_MLE Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>output_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each column pair.] Similarity between strings in column pair.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="hel1510712586352"> </a>
+   <h2>StringSimilarity_MLE Examples</h2>
+   <a name="bww1527089901952"> </a>
+	  <h3>StringSimilarity_MLE Example: Compare src_text1 to tar_text</h3>
+
+	  <a name="section_rzb_pwr_t2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, strsimilarity_input, has two source columns (src_text1 and src_text2) to which the function compares the target column (tar_text). The function calculates the similarity scores by the methods specified by the ComparisonColumnPairs syntax element (jaro, jaro-winkler, NGramSplitter_MLE, Levenshtein Distance). For clarity, separate examples show the comparison of each source column with the target column. With some modifications, you can use the output of this function as input to the FellegiSunter functions.</p>
+   <pre>
+      <tt>
+ id |   src_text1    |   src_text2    |    tar_text    
+----+----------------+----------------+----------------
+  2 | hone           | fone           | phone
+  5 | alice          | allen          | allies
+  7 | senter         | center         | centre
+ 10 | debt           | debut          | debris
+  3 | acqiese        | acquire        | acquiesce
+  6 | angela         | angle          | angels
+  8 | chef           | cheap          | chief
+ 11 | deal           | dell           | lead
+  4 | AAAACCCCCGGGGA | CCCGGGAACCAACC | CCAGGGAAACCCAC
+  9 | circus         | circle         | circuit
+ 12 | bare           | bear           | bear
+(11 rows)
+</tt>
+   </pre>
+
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM StringSimilarity_MLE (
+  ON strsimilarity_input PARTITION BY ANY
+  USING
+  ComparisonColumnPairs ('jaro (src_text1 , tar_text ) AS jaro1_sim',
+                         'LD (src_text1 , tar_text, 2) AS ld1_sim',
+                         'n_gram (src_text1 , tar_text, 2) AS ngram1_sim',
+                         'jaro_winkler (src_text1 , tar_text, 2) AS jw1_sim'
+  )
+  CaseSensitive ('true')
+  Accumulate ('id', 'src_text1', 'tar_text')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_isf_v34_xdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id src_text1      tar_text       jaro1_sim          ld1_sim             ngram1_sim          jw1_sim            
+ -- -------------- -------------- ------------------ ------------------- ------------------- ------------------ 
+  2 hone           phone          0.9333333333333332                 0.8                0.75 0.9333333333333332
+  3 acqiese        acquiesce      0.9259259259259259  0.7777777777777778                 0.5 0.9481481481481482
+  4 aaaacccccgggga ccagggaaacccac 0.8241758241758242 0.21428571428571427 0.38461538461538464 0.8241758241758242
+  5 alice          allies         0.8222222222222223                 0.5                 0.4 0.8577777777777779
+  6 angela         angels          0.888888888888889  0.8333333333333334                 0.8 0.9333333333333333
+  7 senter         centre         0.8222222222222223                 0.5                 0.4 0.8222222222222223
+  8 chef           chief          0.9333333333333332                 0.8                 0.5 0.9466666666666665
+  9 circus         circuit        0.8492063492063492  0.7142857142857143  0.6666666666666666 0.9095238095238095
+ 10 debt           debris                       0.75                 0.5                 0.4              0.825
+ 11 deal           lead           0.6666666666666666                 0.5  0.3333333333333333 0.6666666666666666
+ 12 bare           bear           0.8333333333333334                 0.5  0.3333333333333333 0.8500000000000001</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="ubc1527089978290"> </a>
+	  <h3>StringSimilarity_MLE Example: Compare src_text2 to tar_text</h3>
+   <a name="section_wdc_xwr_t2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: strsimilarity_input, as in StringSimilarity_MLE Example: Compare src_text1 to tar_text</li>
+   </ul>
+
+   <a name="section_ncv_z34_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM StringSimilarity_MLE (
+  ON strsimilarity_input PARTITION BY ANY
+  USING
+  ComparisonColumnPairs ('jaro (src_text2, tar_text) AS jaro2_sim',
+                         'LD (src_text2, tar_text, 2) AS ld2_sim',
+                         'n_gram (src_text2, tar_text, 2) AS ngram2_sim',
+                         'jaro_winkler (src_text2, tar_text, 2) AS jw2_sim'
+  )
+  CaseSensitive ('true')
+  Accumulate ('id', 'src_text2', 'tar_text')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_isf_v34_xdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id src_text2      tar_text       jaro2_sim          ld2_sim            ngram2_sim         jw2_sim            
+ -- -------------- -------------- ------------------ ------------------ ------------------ ------------------ 
+  2 fone           phone          0.7833333333333333                0.6                0.5 0.7833333333333333
+  3 acquire        acquiesce      0.8412698412698413 0.6666666666666666                0.5 0.9047619047619048
+  4 cccgggaaccaacc ccagggaaacccac 0.8754578754578755 0.7142857142857143 0.6923076923076923 0.9003663003663004
+  5 allen          allies         0.8222222222222223 0.6666666666666666                0.4 0.8755555555555556
+  6 angle          angels         0.8777777777777779 0.6666666666666666                0.4 0.9144444444444445
+  7 center         centre         0.9444444444444445 0.6666666666666666                0.6 0.9666666666666667
+  8 cheap          chief          0.7333333333333334                0.4               0.25 0.7866666666666667
+  9 circle         circuit         0.746031746031746 0.5714285714285714                0.5 0.8476190476190476
+ 10 debut          debris         0.7000000000000001                0.5                0.4               0.79
+ 11 dell           lead                          0.5               0.25                0.0                0.5
+ 12 bear           bear                          1.0                1.0                1.0                1.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+</t:intro>

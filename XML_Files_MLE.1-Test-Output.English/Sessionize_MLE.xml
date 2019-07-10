@@ -1,0 +1,604 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="opv1506617942042"> </a>
+	  <h1>Sessionize_MLE</h1>
+
+	  <p style="line-height: 1em;">The Sessionize_MLE function maps each click in a session to a unique session identifier. A session is defined as a sequence of clicks by one user that are separated by at most <i>n</i> seconds.</p>
+   <p style="line-height: 1em;">The function is useful both for sessionization and for detecting web crawler (bot) activity. It is typically used to understand user browsing behavior on a web site.</p>
+   <p style="line-height: 1em;">Sessionize_MLE is a SQL function. Sample code is included with the Teradata SQLMapReduce Java API.</p>
+
+   <a name="qcd1506618001059"> </a>
+   <h2>Sessionize_MLE Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.5</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Sessionize_MLE (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY <i>expression</i> [,...] ORDER BY <i>order_column</i> [,...]
+  USING
+  TimeColumn ('<i>timestamp_column</i>')
+  TimeOut (<i>session_timeout</i>)
+  [ ClickLag (<i>min_human_click_lag</i>) ]
+  [ EmitNull ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'})]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="pwm1506618071875"> </a>
+	  <h2>Sessionize_MLE Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TimeColumn</dt>
+      <dd>Specify the name of the input column that contains the click times.<p>
+            <b>Note:</b>  The <i>timestamp_column</i> must also be an <i>order_column</i>.</p>
+      </dd>
+      <dt>TimeOut</dt>
+      <dd>Specify the number of seconds at which the session times out. If session_timeout seconds elapse after a click, the next click starts a new session. The data type of session_timeout is DOUBLE PRECISION.</dd>
+      <dt>ClickLag</dt>
+      <dd>[Optional] Specify the minimum number of seconds between clicks for the session user to be considered human. If clicks are more frequent, indicating that the user is a bot, the function ignores the session. The <i>min_human_click_lag</i> must be less than <i>session_timout</i>. The data type of <i>min_human_click_lag</i> is DOUBLE PRECISION.</dd>
+      <dd>Default behavior: The function ignores no session, regardless of click frequency.</dd>
+      <dt>EmitNull</dt>
+      <dd>[Optional] Specify whether to output rows that have NULL values in their session id and rapid fire columns, even if their <i>timestamp_column</i> has a NULL value.</dd>
+      <dd>Default: 'false'</dd>
+   </div>
+
+
+	
+   <a name="nsz1506618143310"> </a>
+   <h2>Sessionize_MLE Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>timestamp_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">TIME, TIMESTAMP, INTEGER, BIGINT, or SMALLINT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Click times (in milliseconds if data type is INTEGER, BIGINT, or SMALLINT).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>partition_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>partition_column</i>.] Column by which input data is partitioned. Input data must be partitioned such that each partition contains all rows of an entity.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>order_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>order_column</i>.] Column by which input data is ordered.</div>
+         </td>
+      </tr>
+   </table>
+
+   <p>
+      <b>Note:</b>  No input table column can have the name 'sessionid' or 'clicklag', because these are output table column names.</p>
+   <a name="ame1506618215304"> </a>
+   <h2>Sessionize_MLE Output</h2>
+   <a name="section_ks4_s5s_wcb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>input_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column copied from input table. Function copies every <i>input_column</i> to output table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">sessionid</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Identifier that function assigned to session.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">clicklag</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BYTEINT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">'1' if the session exceeded <i>min_human_click_lag</i>, '0' otherwise.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="kxi1510767223438"> </a>
+   <h2>Sessionize_MLE Example</h2>
+   <a name="section_jfk_d1j_mdb"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">The input table, adweb_clickstream, contains web clickstream data recorded as a user navigates through a web site. Events—view, click, and so on—are recorded with a timestamp.</p>
+   <a name="table_prl_k1j_mdb"> </a>
+   <table class="introtable">
+      <a name="table_prl_k1j_mdb"> </a>
+      <h4 style="text-align: center;">adweb_clickstream</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">userid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">adid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">productid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">event</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">clicktime</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1039</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1001</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">view</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2009-04-21 13:17:59</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1039</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1001</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">view</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2009-04-21 13:17:59</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1039</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1001</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">view</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2009-04-21 13:17:59</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1039</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1001</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">view</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2009-05-23 13:17:59</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1039</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1001</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">view</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2009-05-23 13:17:59</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1039</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1001</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">view</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2009-05-23 13:17:59</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1039</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1001</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">view</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2009-07-16 11:17:59</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1039</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1001</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">view</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2009-07-16 11:17:59</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1039</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1001</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">view</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2009-07-16 11:17:59</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1039</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1001</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">click</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2009-07-16 11:18:16</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1039</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1001</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">click</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2009-07-16 11:18:16</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1039</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1001</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">click</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2009-07-16 11:18:16</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1039</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1001</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">landing_page</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2009-07-16 11:18:18</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1039</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1001</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">landing_page</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2009-07-16 11:18:18</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1039</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1001</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">landing_page</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2009-07-16 11:18:18</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ozx_d1j_mdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Sessionize_MLE (
+  ON adweb_clickstream PARTITION BY userid
+  ORDER BY clicktime
+  USING
+  TimeColumn ('clicktime')
+  TimeOut (60)
+  Clicklag (0.2)
+) AS dt;</tt>
+   </pre>
+   <a name="section_ll3_21j_mdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ userid adid productid event      clicktime                  sessionid clicklag 
+ ------ ---- --------- ---------- -------------------------- --------- -------- 
+   1039    2      1001 view       2009-04-21 13:17:59.000000         0        0
+   1039    2      1001 view       2009-04-21 13:17:59.000000         0        1
+   1039    2      1001 view       2009-04-21 13:17:59.000000         0        1
+   1039    3      1001 view       2009-05-23 13:17:59.000000         1        0
+   1039    3      1001 view       2009-05-23 13:17:59.000000         1        1
+   1039    3      1001 view       2009-05-23 13:17:59.000000         1        1
+   1039    4      1001 view       2009-07-16 11:17:59.000000         2        0
+   1039    4      1001 view       2009-07-16 11:17:59.000000         2        1
+   1039    4      1001 view       2009-07-16 11:17:59.000000         2        1
+   1039    4      1001 click      2009-07-16 11:18:16.000000         2        0
+   1039    4      1001 click      2009-07-16 11:18:16.000000         2        1
+   1039    4      1001 click      2009-07-16 11:18:16.000000         2        1
+   1039    4      1001 landing_pa 2009-07-16 11:18:18.000000         2        0
+   1039    4      1001 landing_pa 2009-07-16 11:18:18.000000         2        1
+   1039    4      1001 landing_pa 2009-07-16 11:18:18.000000         2        1
+   1039    1      1001 view       2009-07-29 20:17:59.000000         3        0
+   1039    1      1001 view       2009-07-29 20:17:59.000000         3        1
+   1039    1      1001 view       2009-07-29 20:17:59.000000         3        1
+   1039    5      1001 view       2009-08-19 22:17:59.000000         4        0
+   1039    5      1001 view       2009-08-19 22:17:59.000000         4        1
+   1039    5      1001 view       2009-08-19 22:17:59.000000         4        1
+   1039    5      1001 click      2009-08-19 22:18:02.000000         4        0
+   1039    5      1001 click      2009-08-19 22:18:02.000000         4        1
+   1039    5      1001 click      2009-08-19 22:18:02.000000         4        1
+   1039    5      1001 landing_pa 2009-08-19 22:18:05.000000         4        0
+   1039    5      1001 landing_pa 2009-08-19 22:18:05.000000         4        1
+   1039    5      1001 landing_pa 2009-08-19 22:18:05.000000         4        1
+   1039    5      1001 page_02    2009-08-22 04:20:05.000000         5        0
+   1039    5      1001 page_02    2009-08-22 04:20:05.000000         5        1
+   1039    5      1001 page_02    2009-08-22 04:20:05.000000         5        1
+   1039    5      1001 page_03    2009-08-24 14:30:05.000000         6        0
+   1039    5      1001 page_03    2009-08-24 14:30:05.000000         6        1
+   1039    5      1001 page_03    2009-08-24 14:30:05.000000         6        1
+   1039    5      1001 page_02    2009-08-27 23:03:05.000000         7        0
+   1039    5      1001 page_02    2009-08-27 23:03:05.000000         7        1
+   1039    5      1001 page_02    2009-08-27 23:03:05.000000         7        1
+   1071    4      1001 view       2009-03-13 17:17:59.000000         0        0
+   1071    4      1001 view       2009-03-13 17:17:59.000000         0        1
+   1071    3      1001 view       2009-04-28 01:17:59.000000         1        0
+   1071    3      1001 view       2009-04-28 01:17:59.000000         1        1
+   1071    2      1001 view       2009-05-25 00:17:59.000000         2        0
+   1071    2      1001 view       2009-05-25 00:17:59.000000         2        1
+   1071    2      1001 view       2009-05-25 00:17:59.000000         2        1
+   1071    1      1001 view       2009-06-15 18:17:59.000000         3        0
+   1071    1      1001 view       2009-06-15 18:17:59.000000         3        1
+   1071    1      1001 view       2009-06-15 18:17:59.000000         3        1
+   1103    1      1001 view       2009-05-11 22:17:59.000000         0        0
+   1103    1      1001 view       2009-05-11 22:17:59.000000         0        1
+   1103    2      1001 view       2009-08-03 01:17:59.000000         1        0
+   1103    2      1001 view       2009-08-03 01:17:59.000000         1        1
+   1135    2      1001 view       2009-04-23 20:17:59.000000         0        0
+   1135    2      1001 view       2009-04-23 20:17:59.000000         0        1
+   1135    3      1001 view       2009-05-11 01:17:59.000000         1        0
+   1135    3      1001 view       2009-05-11 01:17:59.000000         1        1
+   1135    4      1001 view       2009-06-26 12:17:59.000000         2        0
+   1135    4      1001 view       2009-06-26 12:17:59.000000         2        1
+   1135    1      1001 view       2009-08-23 08:17:59.000000         3        0
+   1135    1      1001 view       2009-08-23 08:17:59.000000         3        1
+   1167    3      1001 view       2009-05-21 08:17:59.000000         0        0
+   1167    3      1001 view       2009-05-21 08:17:59.000000         0        1
+   1167    1      1001 view       2009-07-16 14:17:59.000000         1        0
+   1167    1      1001 view       2009-07-16 14:17:59.000000         1        1
+   1167    2      1001 view       2009-07-24 04:17:59.000000         2        0
+   1167    2      1001 view       2009-07-24 04:17:59.000000         2        1
+   1167    2      1001 click      2009-07-24 04:18:10.000000         2        0
+   1167    2      1001 click      2009-07-24 04:18:10.000000         2        1
+   1167    2      1001 landing_pa 2009-07-24 04:18:12.000000         2        0
+   1167    2      1001 landing_pa 2009-07-24 04:18:12.000000         2        1
+   1167    2      1001 page_03    2009-07-27 06:10:12.000000         3        0
+   1167    2      1001 page_03    2009-07-27 06:10:12.000000         3        1
+   1167    2      1001 page_03    2009-07-30 02:20:12.000000         4        0
+   1167    2      1001 page_03    2009-07-30 02:20:12.000000         4        1
+   1199    2      1001 view       2009-03-09 21:17:59.000000         0        0
+   1199    2      1001 view       2009-03-09 21:17:59.000000         0        1
+   1199    1      1001 view       2009-03-19 01:17:59.000000         1        0
+   1199    1      1001 view       2009-03-19 01:17:59.000000         1        1
+   1199    1      1001 click      2009-03-19 01:18:08.000000         1        0
+   1199    1      1001 click      2009-03-19 01:18:08.000000         1        1
+   1199    1      1001 landing_pa 2009-03-19 01:18:09.000000         1        0
+   1199    1      1001 landing_pa 2009-03-19 01:18:09.000000         1        1
+   1199    1      1001 view       2009-03-19 16:43:09.000000         2        0
+   1199    1      1001 view       2009-03-19 16:43:09.000000         2        1
+   1199    1      1001 click      2009-03-19 16:43:26.000000         2        0
+   1199    1      1001 click      2009-03-19 16:43:26.000000         2        1
+   1199    1      1001 landing_pa 2009-03-19 16:43:27.000000         2        0
+   1199    1      1001 landing_pa 2009-03-19 16:43:27.000000         2        1
+   1199    3      1001 view       2009-08-15 12:17:59.000000         3        0
+   1199    3      1001 view       2009-08-15 12:17:59.000000         3        1
+   1231    2      1001 view       2009-04-27 01:17:59.000000         0        0
+   1231    2      1001 view       2009-04-27 01:17:59.000000         0        1
+   1231    1      1001 view       2009-07-04 09:17:59.000000         1        0
+   1231    1      1001 view       2009-07-04 09:17:59.000000         1        1
+   1231    1      1001 click      2009-07-04 09:18:17.000000         1        0
+   1231    1      1001 click      2009-07-04 09:18:17.000000         1        1
+   1231    1      1001 landing_pa 2009-07-04 09:18:20.000000         1        0
+   1231    1      1001 landing_pa 2009-07-04 09:18:20.000000         1        1
+   1231    1      1001 page_03    2009-07-06 13:00:20.000000         2        0
+   1231    1      1001 page_03    2009-07-06 13:00:20.000000         2        1
+   1231    1      1001 view       2009-07-06 19:20:20.000000         3        0
+   1231    1      1001 view       2009-07-06 19:20:20.000000         3        1
+   1231    1      1001 view       2009-07-08 18:14:20.000000         4        0
+   1231    1      1001 view       2009-07-08 18:14:20.000000         4        1
+   1263    4      1001 view       2009-02-09 15:17:59.000000         0        0
+   1263    3      1001 view       2009-03-24 01:17:59.000000         1        0
+   1263    5      1001 view       2009-07-30 11:17:59.000000         2        0
+   1263    2      1001 view       2009-08-13 13:17:59.000000         3        0
+   1263    1      1001 view       2009-08-14 02:17:59.000000         4        0
+   9231    2      1001 view       2009-05-31 05:17:59.000000         0        0
+   9231    1      1001 view       2009-08-01 17:17:59.000000         1        0
+   9231    3      1001 view       2009-08-08 02:17:59.000000         2        0
+   9231    3      1001 click      2009-08-08 02:18:12.000000         2        0
+   9231    3      1001 landing_pa 2009-08-08 02:18:15.000000         2        0
+   9231    3      1001 view       2009-08-11 00:01:15.000000         3        0
+   9231    3      1001 click      2009-08-11 00:01:24.000000         3        0
+   9231    3      1001 landing_pa 2009-08-11 00:01:27.000000         3        0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

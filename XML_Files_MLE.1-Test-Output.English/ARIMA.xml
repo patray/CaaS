@@ -1,0 +1,1233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="zsj1506019075317"> </a>
+	  <h1>ARIMA</h1>
+
+	  <p style="line-height: 1em;">The ARIMA function calculates the coefficients for a sequence of parameters, producing an ARIMA model that is typically input to the function ARIMAPredict.</p>
+   <p style="line-height: 1em;">For general information about ARIMA models, see https://www.otexts.org/fpp/8.</p>
+
+   <a name="iyg1506019909506"> </a>
+   <h2>ARIMA Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.8</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ARIMA ( 
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  [ ON { <i>table</i> | <i>view</i> } AS OrdersTable ]
+  OUT TABLE ModelTable (<i>model_table</i>)
+  [ OUT TABLE ResidualTable (<i>residual_table</i>) ]
+  USING
+  TimeColumns ({ '<i>time_column</i>' | <i>time_column_range</i> }[,...])
+  TargetColumn ('<i>target_column</i>')
+  [ PartitionColumns ('<i>partition_column</i>' [,...]) ]
+  [ Orders ('<i>p</i>, <i>d</i>, <i>q</i>') |
+    OrderP (<i>p</i>)
+    OrderD (<i>d</i>)
+    OrderQ (<i>q</i>)
+  ]
+  [ SeasonalOrders ('<i>sp</i>, <i>sd</i>, <i>sq</i>') |
+    SeasonalOrderP (<i>sp</i>)
+    SeasonalOrderD (<i>sd</i>)
+    SeasonalOrderQ (<i>sq</i>)
+  ]
+  [ Period (<i>period</i>)]
+  [ IncludeMean ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ IncludeDrift ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ MaxIterNum (<i>max_iteration_number</i>) ]
+  [ FitMethod ({ 'SSE' | 'ML' }) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="xsk1506019990214"> </a>
+	  <h2>ARIMA Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>ModelTable</dt>
+      <dd>Specify the name of the table where the function outputs the coefficients of the input parameters; that is, the model.</dd>
+      <dt>ResidualTable</dt>
+      <dd>[Optional] Specify this syntax element if you intend to input the model to the ARIMAPredict function.<p style="line-height: 1em;">Specify the name of the table where the function outputs the residuals of the input parameters.</p>
+      </dd>
+      <dt>TimeColumns</dt>
+      <dd>Specify the names of the InputTable columns that specify the sequence (time points) of the input parameters. The sequence must have uniform intervals.</dd>
+      <dt>TargetColumn</dt>
+      <dd>Specify the name of the column that contains the time series data in InputTable.</dd>
+      <dt>PartitionColumns</dt>
+      <dd>[Optional] Specify the columns by which the InputTable is partitioned.</dd>
+      <dt>Orders</dt>
+      <dd>[Required if you omit OrdersTable, OrderP, OrderD, and OrderQ; disallowed otherwise.] Specify the values of the nonseasonal parameters for the ARIMA model—<i>p</i>, <i>d</i>, and <i>q</i>. <i>p</i> and <i>q</i> must be INTEGER values in the range [0, 10]. <i>d</i> must be the INTEGER 0 or 1.<p>
+            <b>Note:</b>  If you do not specify the values of nonseasonal parameters <i>p</i>, <i>d</i>, and <i>q</i>, the function determines and uses their optimal values.</p>
+      </dd>
+      <dt>OrderP</dt>
+      <dd>[Required if you omit OrdersTable and Orders; disallowed otherwise.] Specify the value of the nonseasonal parameter <i>p</i> for the ARIMA model, an INTEGER in the range [0, 10].</dd>
+      <dt>OrderD</dt>
+      <dd>[Required if you omit OrdersTable and Orders; disallowed otherwise.] Specify the value of the nonseasonal parameter <i>d</i> for the ARIMA model, the INTEGER 0 or 1.</dd>
+      <dt>OrderQ</dt>
+      <dd>[Required if you omit OrdersTable and Orders; disallowed otherwise.] Specify the value of the nonseasonal parameter <i>q</i> for the ARIMA model, an INTEGER in the range [0, 10].</dd>
+      <dt>SeasonalOrders</dt>
+      <dd>[Optional. Disallowed with SeasonalOrderP, SeasonalOrderD, and SeasonalOrderQ.] Specify the values of the seasonal parameters for the ARIMA model—<i>sp</i>, <i>sd</i>, and <i>sq</i>. <i>sp</i> and <i>sq</i> must be INTEGER values in the range [0, 10]. <i>sd</i> must be an INTEGER in the range [0, 3].<p>
+            <b>Note:</b>  If you specify SeasonalOrders, you must also specify Period.</p>
+         <p>
+            <b>Note:</b>  If you do not specify the values of seasonal parameters <i>sp</i>, <i>sd</i>, and <i>sq</i>, the function does not include seasonal variation in its calculations.</p>
+      </dd>
+      <dt>SeasonalOrderP</dt>
+      <dd>[Optional if you omit OrdersTable and SeasonalOrders, disallowed otherwise.] Specify the value of the seasonal parameter <i>sp</i> for the ARIMA model, an INTEGER in the range [0, 10].</dd>
+      <dd>
+         <p>
+            <b>Note:</b>  If you specify SeasonalOrderP, you must also specify SeasonalOrderD, SeasonalOrderQ, and Period.</p>
+      </dd>
+      <dt>SeasonalOrderD</dt>
+      <dd>[Optional if you omit OrdersTable and SeasonalOrders, disallowed otherwise.] Specify the value of the seasonal parameter <i>sd</i> for the ARIMA model, an INTEGER in the range [0, 3].<p>
+            <b>Note:</b>  If you specify SeasonalOrderD, you must also specify SeasonalOrderP, SeasonalOrderQ, and Period.</p>
+      </dd>
+      <dt>SeasonalOrderQ</dt>
+      <dd>[Optional if you omit OrdersTable and SeasonalOrders, disallowed otherwise.] Specify the value of the seasonal parameter <i>sq</i> for the ARIMA model, an INTEGER in the range [0, 10].<p>
+            <b>Note:</b>  If you specify SeasonalOrderQ, you must also specify SeasonalOrderP, SeasonalOrderD, and Period.</p>
+      </dd>
+      <dt>Period</dt>
+      <dd>[Optional] Specify the period of a season (<i>m</i> in the formula). The <i>period</i> must be a positive integer value.</dd>
+      <dt>IncludeMean</dt>
+      <dd>[Optional. Allowed only with either Orders or all of OrderP, OrderD, and OrderQ.] Specify whether the function adds a mean term to the ARIMA model.<p>
+            <b>Note:</b>  If IncludeMean is 'true', <i>d</i> must be 0 in Orders or OrderD and <i>sd</i> must be 0 in SeasonalOrders or SeasonalOrderD.</p>
+      </dd>
+      <dd>Default:  'false'</dd>
+      <dt>IncludeDrift</dt>
+      <dd>[Optional. Allowed only with either Orders or all of OrderP, OrderD, and OrderQ.] Specify whether the function adds a drift term to the ARIMA model.<p>
+            <b>Note:</b>  If IncludeDrift is 'true', <i>d</i> must be 1 in Orders or OrderD.</p>
+      </dd>
+      <dd>Default: 'false'</dd>
+      <dt>MaxIterNum</dt>
+      <dd>[Optional] Specify the maximum iteration number for estimating the parameters. This value must be a positive integer.</dd>
+      <dd>Default: 10000</dd>
+      <dt>FitMethod</dt>
+      <dd>[Optional] Specify the method for fitting the model parameters:<a name="table_jwp_kly_fdb"> </a>
+         <table class="introtable">
+            <a name="table_jwp_kly_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'SSE'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Sum of squared error.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'ML'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Maximum likelihood. This method is more accurate, but slower to calculate.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+   </div>
+
+		
+
+	
+   <a name="ziq1506020050053"> </a>
+   <h2>ARIMA Input</h2>
+   <a name="section_ct1_mvv_l2b"> </a>
+   <a name="table_kxh_4vv_l2b"> </a>
+   <table class="introtable">
+      <a name="table_kxh_4vv_l2b"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains input data.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">OrdersTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Has same schema as TimeSeriesOrders Output table. Contains values of nonseasonal parameters <i>p</i>, <i>d</i>, and <i>q</i> for ARIMA model.<p style="line-height: 1em; margin: 0px;">
+                  <br/>If you omit this table, you must specify either the Orders syntax element or the OrderP, OrderD, and OrderQ syntax elements.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>InputTable Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>time_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sequence (time points) of input parameters.<p>
+                  <b>Note:</b>  If time points do not have uniform intervals, run the Interpolator function on them before running the ARIMA function on the InputTable. Otherwise, intervals of predictions of the ARIMAPredict function might not be as expected.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SMALLINT, INT, BIGINT, NUMERIC, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Time series data in InputTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>partition_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each <i>partition_column</i> specified in PartitionColumns.] Column by which input data is partitioned.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ubn1506020116571"> </a>
+   <h2>ARIMA Output</h2>
+   <a name="section_ots_hhm_wcb"> </a>
+   <a name="table_p32_rrm_wcb"> </a>
+   <table class="introtable">
+      <a name="table_p32_rrm_wcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ModelTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains coefficients of model. Function outputs coefficients to both ModelTable and screen.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] ResidualTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains value and residual for each time point.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_qwn_tfm_wcb"> </a>
+   <h3>ModelTable Schema</h3>
+   <a name="table_N1001A_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1001A_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>partition_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each <i>partition_column</i> specified in PartitionColumns.] Partition identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">td_arima_partition_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only if you omit PartitionColumns.] Random partition identifier value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">coef</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CHARACTER(128)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Coefficient name from following table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">value_col</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CHARACTER(300)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Values from following table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ibq_zgm_wcb"> </a>
+   <h3>Model Coefficients</h3>
+   <a name="table_N1005D_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1005D_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Coefficient Name</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Value</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">coef</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Vector of coefficients <i>p</i>, <i>d</i>, <i>q</i>, <i>sp</i>, <i>sd</i>, and <i>sq.</i>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ar_params</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Vector of auto regression parameters that correspond to coefficients.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ma_params</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Vector of moving average parameters that correspond to coefficients.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">seasonal_ar_params</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Vector of seasonal auto regressive parameters that correspond to coefficients.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">seasonal_ma_params</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Vector of seasonal moving average parameters that correspond to coefficients.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">mean_param</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with IncludeMean ('true').] Mean value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">drift_params</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with IncludeDrift ('true').] Drift value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">period</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Seasonal model: Cycle period.<p style="line-height: 1em; margin: 0px;">
+                  <br/>Nonseasonal model: 0</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">sigma2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Variance.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">aic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Akaike information criterion.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">bic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Bayesian information criterion.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">converged</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Whether algorithm converged ('true' or 'false').</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_hgy_cgm_wcb"> </a>
+   <h3>ResidualTable Schema</h3>
+   <a name="table_N10136_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10136_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>partition_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each <i>partition_column</i> specified in PartitionColumns.] Partition identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">td_arima_partition_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only if you omit PartitionColumns.] Random partition identifier value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>time_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>time_column</i>.] Sequence (time points) of input parameter.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same type as <i>target_column</i> in InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Time point value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">residual</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Time point residual.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="peo1531511700701"> </a>
+	  <h2>ARIMA Examples</h2>
+
+   <a name="btp1531511955069"> </a>
+	  <h3>ARIMA Example: OrdersTable, PartitionColumns, No Seasonality</h3>
+
+	  <a name="section_bkz_yrw_l2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, milk_3, is partitioned into two time series.</p>
+   <a name="table_zsc_xzx_42b"> </a>
+   <table class="introtable">
+      <a name="table_zsc_xzx_42b"> </a>
+      <h4 style="text-align: center;">InputTable: milk_3</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id_partition</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">period</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">milkpound</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1962-01</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">578.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1962-02</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">609.8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1962-03</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">628.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1962-04</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">665.6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1962-05</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">713.8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1962-06</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">707.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">46</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1965-10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">609.7</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">47</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1965-11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">610.8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">48</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1965-12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">623.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">49</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1966-01</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">664.7</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1966-02</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">690.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">51</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1966-03</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">722.6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">52</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1966-04</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">766</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">53</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1966-05</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">796.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">54</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1966-06</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">809.6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">153</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1974-09</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">826.9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">154</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1974-10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">797.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">155</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1974-11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">784.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">156</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1974-12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">798.2</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_gng_rgr_m2b"> </a>
+   <table class="introtable">
+      <a name="table_gng_rgr_m2b"> </a>
+      <h4 style="text-align: center;">OrdersTable: arimaex1_orders</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id_partition</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">p</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">d</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">q</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">include_drift</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">include_mean</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_dsf_vrw_l2b"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ARIMA (
+  ON milk_3 AS InputTable
+  ON arimaex1_orders AS OrdersTable
+  OUT TABLE ModelTable (arimaex1_model) 
+  OUT TABLE ResidualTable (arimaex1_resid)
+  USING
+  TimeColumns ('period')
+  TargetColumn ('milkpound')
+  PartitionColumns ('id_partition')
+) AS dt;
+</tt>
+   </pre>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id_partition coef               value_col                               
+ ------------ ------------------ --------------------------------------- 
+            2 coef               0, 1, 2, 0, 0, 0                       
+            2 ar_params          NULL                                   
+            2 ma_params          0.8306295578094496 ,0.3998570673162409 
+            2 seasonal_ar_params NULL                                   
+            2 seasonal_ma_params NULL                                   
+            2 period             0                                      
+            2 sigma2             643.230614797225                       
+            2 aic                6.50388649193462                       
+            2 bic                6.553845909401198                      
+            2 iterations         33                                     
+            2 converged          true                                   
+            1 coef               1, 1, 1, 0, 0, 0                       
+            1 ar_params          0.34347347277005386                    
+            1 ma_params          0.5815242132319824                     
+            1 seasonal_ar_params NULL                                   
+            1 seasonal_ma_params NULL                                   
+            1 period             0                                      
+            1 sigma2             591.665550628751                       
+            1 aic                6.468047909957085                      
+            1 bic                6.546777595136237                      
+            1 iterations         33                                     
+            1 converged          true</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM arimaex1_resid ORDER BY 1, 2;</tt>
+   </pre>
+   <pre>
+      <tt>
+ id_partition period  value_col residual            
+ ------------ ------- --------- ------------------- 
+            1 1962-01     578.3                 0.0
+            1 1962-02     609.8                 0.0
+            1 1962-03     628.4 -10.537427109064122
+            1 1962-04     665.6  36.939162415564915
+            1 1962-05     713.8  13.941769451794109
+            1 1962-06     707.2 -31.262897899032737
+            1 1962-07     628.4  -58.35294297563094
+            1 1962-08     588.1   20.69935890795483
+            1 1962-09     576.3  -9.995197450721776
+            1 1962-10     566.5 0.06543631231600244
+            1 1962-11     561.1 -2.0720127668898307
+            1 1962-12     571.4   13.35968234703047
+            1 1963-01     589.1   6.393244464582409
+            1 1963-02     615.3   16.40269307470395
+            1 1963-03     641.2   7.362431828271802
+            1 1963-04     682.8  28.422604678845616
+            1 1963-05     728.5  14.883070708896476
+            1 1963-06     726.4 -26.451603690058487
+            1 1963-07     648.0  -62.29645768259739
+            1 1963-08     605.8  20.955218806184106
+            1 1963-09     591.5 -11.991386578473922
+            1 1963-10     576.3 -3.3150476937806896
+            1 1963-11     573.2   4.048577288057238
+            1 1963-12     587.1  12.610422043440755
+            1 1964-01     616.6  17.392452971161127
+            1 1964-02     648.6  11.753400023054681
+            1 1964-03     675.5   9.073962170150615
+            1 1964-04     715.3  25.283834870591907
+            1 1964-05     756.0  12.326593603143596
+            1 1964-06     746.7  -30.44758298863963
+            1 1964-07     665.7 -60.099689960954365
+            1 1964-08     627.4  24.470776214404353
+            1 1964-09     612.8 -15.675314878164338
+            1 1964-10     599.9  1.2302878541309212
+            1 1964-11     602.7   6.515365622311407
+            1 1964-12     622.5  15.049431408810435
+            1 1965-01     646.1     8.0476164795558
+            1 1965-02     676.1    17.2141422009603
+            1 1965-03     696.1 -0.3146446829785212
+            1 1965-04     732.5  29.713504046315613
+            1 1965-05     767.8   5.518443528270989
+            1 1965-06     767.0  -16.13372211982575
+            1 1965-07     689.3  -68.04307115954892
+            1 1965-08     641.2   18.15658225617777
+            1 1965-09     624.0 -11.237418171266038
+            1 1965-10     609.7 -1.8574255075507473
+            1 1965-11     610.8   7.091808567527128
+            1 1965-12     623.5   8.198120782329973
+            2 1966-01     664.7                 0.0
+            2 1966-02     690.3                 0.0
+            2 1966-03     722.6                 0.0
+            2 1966-04     766.0   50.82626291175626
+            2 1966-05     796.3   -3.41518895279507
+            2 1966-06     809.6  -4.186483540843128
+            2 1966-07     721.7  -83.05699558869745
+            2 1966-08     684.4  33.363590549830334
+            2 1966-09     670.6  -8.301857789146538
+            2 1966-10     654.9 -22.144899007999328
+            2 1966-11     654.4  21.213764179594026
+            2 1966-12     675.5  12.334014813382838
+            2 1967-01     700.1   5.872529197953845
+            2 1967-02     725.1  15.190260677566183
+            2 1967-03     748.2   8.134348187560134
+            2 1967-04     795.4  34.369436875597934
+            2 1967-05     821.8  -5.400846764944703
+            2 1967-06     828.9 -2.1567592742246173
+            2 1967-07     753.1  -71.84896524929414
+            2 1967-08     708.9  16.342269672386216
+            2 1967-09     690.9  -2.845055697287684
+            2 1967-10     674.5  -20.57138466871015
+            2 1967-11     669.6   13.32481577836764
+            2 1967-12     685.3  12.857627706386761
+            2 1968-01     704.0   2.692052624098224
+            2 1968-02     730.5   19.12268821192567
+            2 1968-03     760.9  13.439693679067279
+            2 1968-04     807.6  27.890251154638488
+            2 1968-05     842.4   6.259576516087634
+            2 1968-06     838.0  -20.75150330703941
+            2 1968-07     768.8  -54.46612389255698
+            2 1968-08     726.6  11.338807659225424
+            2 1968-09     711.2  -3.039684224307921
+            2 1968-10     693.2 -20.009050814363558
+            2 1968-11     686.9  11.535548249620746
+            2 1968-12     698.1   9.618993036741049
+            2 1969-01     720.7   9.997609574341283
+            2 1969-02     750.1   17.24946763390674
+            2 1969-03     770.8  2.3744674822306884
+            2 1969-04     816.7  37.030375584341535
+            2 1969-05     855.2   6.792027898978013
+            2 1969-06     857.3  -18.34851651313138
+            2 1969-07     786.5  -58.27502019905369
+            2 1969-08     750.1   19.34173826182107
+            2 1969-09     735.6  -7.264140825094238
+            2 1969-10     709.9  -27.40012065675655
+            2 1969-11     700.1  15.863968151941663
+            2 1969-12     720.7  18.379051038771355
+            2 1970-01     736.4  -5.909502818525663
+            2 1970-02     768.5  29.659614264607065
+            2 1970-03     792.4  1.6268041849032997
+            2 1970-04     836.0  30.389121981674506
+            2 1970-05     869.9   8.007407895671037
+            2 1970-06     871.5 -17.202494873488984
+            2 1970-07     804.1  -56.31291792798243
+            2 1970-08     768.8  18.353713268115776
+            2 1970-09     750.8 -10.728018521353214
+            2 1970-10     733.4 -15.827852681188727
+            2 1970-11     721.4   5.436756297711515
+            2 1970-12     737.4   17.81294827552777
+            2 1971-01     789.4   35.03011322169974
+            2 1971-02     821.8 -3.8196807130638604
+            2 1971-03     844.4  11.765701361080806
+            2 1971-04     890.8   38.15438700913751
+            2 1971-05     924.9 -2.2967604510509503
+            2 1971-06     926.3 -11.948544176871943
+            2 1971-07     853.2  -62.25681013561294
+            2 1971-08     818.9   22.19005650683353
+            2 1971-09     801.5 -10.937891302747598
+            2 1971-10     785.5  -15.78751510223506
+            2 1971-11     774.1   6.087169827220009
+            2 1971-12     785.5  12.656566307095773
+            2 1972-01     811.0  12.553084049582958
+            2 1972-02     838.6  12.112219860901213
+            2 1972-03     873.9  20.219792799008225
+            2 1972-04     913.1  17.561685736091665
+            2 1972-05     943.6   7.827717692288189
+            2 1972-06     948.6  -8.524097840965617
+            2 1972-07     877.8  -66.84960061985213
+            2 1972-08     839.5  20.635674966811337
+            2 1972-09     820.8  -9.110316317666044
+            2 1972-10     795.3  -26.18402245987319
+            2 1972-11     777.2   7.292047362622494
+            2 1972-12     790.4  17.612876355006726
+            2 1973-01     806.1 -1.8455523716610607
+            2 1973-02     840.3  28.690337264070386
+            2 1973-03     867.0  3.6069150038522118
+            2 1973-04     911.1  29.631955666568945
+            2 1973-05     939.6  2.4445713121493284
+            2 1973-06     937.5  -15.97908007972341
+            2 1973-07     865.0 -60.204782894899004
+            2 1973-08     821.8  13.197220293093395
+            2 1973-09     795.4  -13.28869332960074
+            2 1973-10     776.6 -13.039020338891014
+            2 1973-11     771.1  10.644173641600506
+            2 1973-12     787.4  12.672379188216105
+            2 1974-01     813.0  10.817799222163195
+            2 1974-02     845.7  18.647275837503766
+            2 1974-03     872.9   7.385448044953257
+            2 1974-04     915.2  28.709183526374623
+            2 1974-05     951.4    9.40017998634557
+            2 1974-06     960.8  -9.887637275287375
+            2 1974-07     891.5  -64.84576462383274
+            2 1974-08     851.3   17.61645043889294
+            2 1974-09     826.9 -13.103707167864707
+            2 1974-10     797.3  -25.75973571850968
+            2 1974-11     784.3  13.636407808267165
+            2 1974-12     798.2   12.87340899135451</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="rda1531512044616"> </a>
+	  <h3>ARIMA Example: Orders, No PartitionColumns, No Seasonality</h3>
+
+	  <a name="section_N10013_N10010_N10001"> </a>
+   <ul>
+      <li>InputTable: milk_3, as in ARIMA Example: OrdersTable, PartitionColumns, No Seasonality</li>
+   </ul>
+
+   <a name="section_dsf_vrw_l2b"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ARIMA (
+ON milk_3 AS InputTable 
+OUT TABLE ModelTable (arimaex2_model)
+OUT TABLE ResidualTable (arimaex2_resid)
+USING
+TimeColumns ('period')
+TargetColumn ('milkpound')
+Orders ('0,1,2')
+IncludeDrift ('true')
+) AS dt ;
+</tt>
+   </pre>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ td_arima_partition_id coef               value_col                                
+ --------------------- ------------------ ---------------------------------------- 
+                     1 coef               0, 1, 2, 0, 0, 0                        
+                     1 ar_params          NULL                                    
+                     1 ma_params          0.8568283140139287 ,0.35796607522513024 
+                     1 seasonal_ar_params NULL                                    
+                     1 seasonal_ma_params NULL                                    
+                     1 drift_params       0.8314523388938775                      
+                     1 period             0                                       
+                     1 sigma2             633.9156052156023                       
+                     1 aic                6.490625508194131                       
+                     1 bic                6.549530510457084                       
+                     1 iterations         37                                      
+                     1 converged          true</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="rey1531512103143"> </a>
+	  <h3>ARIMA Example: No PartitionColumns, Seasonality</h3>
+
+	  <a name="section_hzp_mzx_42b"> </a>
+   <ul>
+      <li>InputTable: milk_3, as in ARIMA Example: OrdersTable, PartitionColumns, No Seasonality</li>
+   </ul>
+
+   <a name="section_dsf_vrw_l2b"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ARIMA (
+ON milk_3 AS InputTable 
+OUT TABLE ModelTable (arimaex3_model)
+OUT TABLE ResidualTable (arimaex3_resid)
+USING
+TimeColumns ('period')
+TargetColumn ('milkpound')
+Orders ('0,1,2')
+SeasonalOrderP (0)
+SeasonalOrderD (1)
+SeasonalOrderQ (1)
+Period (12)
+) AS dt;</tt>
+   </pre>
+
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ td_arima_partition_id coef               value_col                                   
+ --------------------- ------------------ ------------------------------------------- 
+                     1 coef               0, 1, 2, 0, 1, 1                           
+                     1 ar_params          NULL                                       
+                     1 ma_params          -0.05439399769440293 ,0.025430672925134692 
+                     1 seasonal_ar_params NULL                                       
+                     1 seasonal_ma_params -0.6921575970967139                        
+                     1 period             12                                         
+                     1 sigma2             36.18300572628356                          
+                     1 aic                3.6305475954861945                         
+                     1 bic                3.6927051751419966                         
+                     1 iterations         18                                         
+                     1 converged          true</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+		
+
+	
+</t:intro>

@@ -1,0 +1,752 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="lec1507842442019"> </a>
+	  <h1>ApacheLogParser</h1>
+
+	
+		<p style="line-height: 1em;">The ApacheLogParser function parses Apache log file content from a given server access log and outputs specified columns of information, which can include search engines and search terms.</p>
+   <p style="line-height: 1em;">The function parses Apache log files with these constraints:<ul>
+         <li>Log files are loaded into a table</li>
+         <li>One line of the Apache log file is loaded to one row in the table</li>
+         <li>If you specify a custom log format, the input must conform to that format.</li>
+         <li>If you do not specify a custom format string with the Log_Format syntax element, the function parses the logs with the NCSA extended/combined format, which is defined as:<pre style="margin-left: 2em; font-family: monospace;">
+               <tt style="font-family: monospace; font-size: larger;">
+  "%h %l %u %t \"%r\" %&gt;s %b \"%{Referer}i\" \"%{User-agent}i\""</tt>
+            </pre>
+         </li>
+      </ul>
+   </p>
+
+	
+   <a name="lty1507842525953"> </a>
+   <h2>ApacheLogParser Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 2.5</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ApacheLogParser (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+  USING
+  TargetColumn ('<i>target_column</i>')
+  [ LogFormat ('<i>format_string</i>') ]
+  [ ExcludeFiles ('<i>.file_suffix</i>' [,...]) ]
+  [ SearchInfoFlag ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="cmt1507843085457"> </a>
+	  <h2>ApacheLogParser Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumn</dt>
+      <dd>Specify the name of the input column that contains the information to parse.</dd>
+      <dt>LogFormat</dt>
+      <dd>[Optional] String that specifies the format used to create the server access logs, which you can find in the Apache server configuration file. For each log item in the format string, the function builds an output table column built from the input table columns.</dd>
+      <dd>Default: NCSA extended/combined format:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+"%h %l %u %t \"%r\" %&gt;s %b \"%{Referer}i\" \"%{User-agent}i\""</tt>
+         </pre>
+      </dd>
+      <dt>ExcludeFiles</dt>
+      <dd>[Optional] Specify the types of files to exclude, by suffix. If an input row contains a file of an excluded type, the function does not create an output file row for that input row.</dd>
+      <dd>Default: '.png', '.xml', '.js'</dd>
+      <dt>SearchInfoFlag</dt>
+      <dd>[Optional] Specify whether to return search information. If you specify 'true', the function extracts the search engine and search terms (if they exist) into two output columns. The supported search engines are Google, Bing, and Yahoo. The function provides more complete parsing capabilities for Google.</dd>
+      <dd>Default: 'false'</dd>
+   </div>
+
+
+	
+   <a name="zxe1507843163487"> </a>
+   <h2>ApacheLogParser Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Input Table Schema</h3>
+   <p style="line-height: 1em;">The input table has one row for each line of the Apache log file. The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Information to parse, in specified log format.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="dbb1507843252752"> </a>
+   <h2>ApacheLogParser Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Table Schema</h3>
+   <p style="line-height: 1em;">The table has one row for each input row that the function parses, except those that contain requested files of excluded types. Its schema depends on the log format and function syntax elements. The following table is a possible output table schema.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">remote_host</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Remote host that made HTTP request.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">remote_log_name</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Log name on remote host.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">remote_user</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">User logged into remote host.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">request_time</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">TIMESTAMP</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Timestamp when HTTP request was made.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">requested_page</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Requested landing page.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">final_status</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Status for request that was internally redirected. Applies to final request, not original request.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">bytes_sent_including_header</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Response size in bytes in Custom Log Format (CLF).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">referrer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">URL from which request was initiated.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">request:User-Agent</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Information about system from which request was initiated.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_lk4_14r_ycb"> </a>
+   <h3>Possible Output Columns</h3>
+   <p style="line-height: 1em;">The following two tables list the possible output column names.</p>
+   <p style="line-height: 1em;">The first table shows the mapping between request characteristics in the format string (log items) and table column names, and gives output examples.</p>
+   <p style="line-height: 1em;">The second table describes the output table columns that appear only if the SearchInfoFlag syntax element is true and the log file contains referrer information.</p>
+   <a name="table_N1001D_N10017_N10015_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1001D_N10017_N10015_N10001"> </a>
+      <h4 style="text-align: center;">ApacheLogParser Item-Name Mapping</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Log Item</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Output Example</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%h</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">remote_host</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">153.65.52.112</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%a</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">remote_IP</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">153.65.52.112</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%A</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">local_IP</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">153.65.52.112</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%t</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">request_time</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[22/Jun/2012:17:27:02 -0700]</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%b</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">bytes_sent_CLF</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">512</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%B</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">bytes_sent</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">455</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%O</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">bytes_sent_including_header</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">512</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%I</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">bytes_received_including_header</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">512</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%p</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">canonical_server_port</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">80</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%{canonical}p</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">canonical_server_port</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">80</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%{local}p</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">actual_server_port</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">80</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%{remote}p</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">actual_client_port</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7777</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%P</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">process_ID</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8311</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%k</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">live_connections</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%D</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">request_duration_microseconds</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">312</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%T</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">request_duration_seconds</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%U</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">requested_URL</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">/index.html</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%l</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">remote_log_name</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%u</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">remote_user</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%f</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">requested_file</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%{VARNAME}i</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">request:VARNAME</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%{Referer}i</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Referer</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%{VARNAME}o</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">reply:VARNAME</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%{VARNAME}n</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">note:VARNAME</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%{VARNAME}e</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">env:VARNAME</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%{VARNAME}C</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">cookie:VARNAME</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%V</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">server_name</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%v</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">canonical_server_name</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%L</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">log_ID</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%H</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">protocol</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">HTTP/1.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%m</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">method</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">GET</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%q</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">query</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%X</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">connection_status</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">X = Connection aborted before the response completed.<p style="line-height: 1em; margin: 0px;">
+                  <br/>+ = Connection may be kept alive after the response is sent.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>- = Connection closes after the response is sent.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%r</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">request_line</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%&gt;s</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">final_status</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">404</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%&lt;s</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">original_request_status</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%s</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">original_request_status</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">%R</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">handler</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+   </table>
+
+   <a name="table_N100CE_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100CE_N1000E_N1000C_N10001"> </a>
+      <h4 style="text-align: center;">ApacheLogParser Output Columns Extracted, RETURN_SEARCH_INFO ('true')</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">search_engine</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Name of search engine referrer (Google, Bing, or Yahoo) if log file contains that information; otherwise blank.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">search_terms</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Search terms that led to landing on page.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ola1526928899945"> </a>
+	  <h2>ApacheLogParser Examples</h2>
+
+   <a name="ouv1507905889185"> </a>
+   <h3>ApacheLogParser Example: Default LogFormat</h3>
+   <a name="section_xtc_l2y_42b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, apache_logs, contains a sample of five records of apache web user logs.</p>
+   <pre>
+      <tt>
+ id |                                                                                                                                                                                                                       logdata                                                                                                                                                                                                                       
+----+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  1 | 69.236.77.51 - Frank [26/Mar/2011:09:17:31 -0700] "GET /about/careers.php HTTP/1.1" 200 5976 "http://www.bing.com/search?q=abc+data&amp;src=ie9tr" "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)"
+  2 | 168.187.7.114 - Lewis [27/Mar/2011:00:16:49 -0700] "GET / HTTP/1.0" 200 7203 "http://search.yahoo.com/search;_ylt=AtMGk4Fg.FlhWyX_ro.u0VybvZx4?p=abc&amp;toggle=1&amp;cop=mss&amp;ei=UTF-8&amp;fr=yfp-t-383-1" "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; SLCC2;.NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0;InfoPath.2)"
+  3 | 75.36.209.106 - Patrick [20/May/2008:15:43:57 -0400] "GET / HTTP/1.1" 200 15251 "http://www.google.com/search?hl=en&amp;q=%22abc+Data+Systems%22" "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; YPC 3.2.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727; MS-RTC LM 8)"
+  4 | 159.41.1.23 - - [06/Jul/2010:07:19:45 -0400] "GET /public/js/common.js HTTP/1.1" 200 16711 "http://www.baidu.com/s?ie=utf-8&amp;f=8&amp;rsv_bp=0&amp;rsv_idx=1&amp;tn=baidu&amp;wd=abc%20data&amp;rsv_pq=d31bd31c000dd71c&amp;rsv_t=982dONZ4XBYXizw4wA%2BQD411WcEyn1YoJu4QSpNTQwwoTE7hgPFD9OBTObk&amp;rsv_enter=1&amp;rsv_sug3=11&amp;rsv_sug1=1&amp;rsv_sug2=0&amp;rsv_sug7=100&amp;inputT=3572&amp;rsv_sug4=6596" "Mozilla/5.0 (Windows; U; Windows NT 5.1; it; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3"
+  5 | 127.0.0.1 - -  [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326 "http://www.example.com/start.html" "Mozilla/4.08 [en] (Win98; I ;Nav)"
+(5 rows)</tt>
+   </pre>
+   <a name="section_b51_hv1_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ApacheLogParser (
+  ON apache_logs
+  USING
+  TargetColumn ('logdata')
+  LogFormat ('%h %l %u %t \"%r\" %&gt;s %O \"%{Referer}i\" \"%{User-Agent}i\"')
+  SearchInfoFlag ('true')
+) AS dt;</tt>
+   </pre>
+   <a name="section_v1p_hv1_xdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">There is no output corresponding to input id=4, because .js pages are omitted by default (see ExcludeFiles in ApacheLogParser Syntax Elements).</p>
+   <p style="line-height: 1em;">The first row, which corresponds to input id=5, is empty in the search_engine and search_term columns because the referrer for that input row, http://www.example.com/start.html, is not a search engine. The supported search engines are Google, Bing, and Yahoo.</p>
+   <pre>
+      <tt>
+ remote_host   remote_log_name remote_user request_time               requested_page     final_status bytes_sent_including_header referrer                                                                                                          search_engine search_terms         request:User-Agent                                                                                                                                                
+ ------------- --------------- ----------- -------------------------- ------------------ ------------ --------------------------- ----------------------------------------------------------------------------------------------------------------- ------------- -------------------- ----------------------------------------------------------------------------------------------------------------------------------------------------------------- 
+ 127.0.0.1     -               -           2000-10-10 13:55:36.000000 /apache_pb.gif     200          2326                        http://www.example.com/start.html                                                                                 NULL          NULL                 Mozilla/4.08 [en] (Win98; I ;Nav)                                                                                                                                
+ 75.36.209.106 -               Patrick     2008-05-20 15:43:57.000000 /                  200          15251                       http://www.google.com/search?hl=en&amp;q=%22Aster+Data+Systems%22                                                     google        "Aster Data Systems" Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; YPC 3.2.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727; MS-RTC LM 8)                                           
+ 69.236.77.51  -               Frank       2011-03-26 09:17:31.000000 /about/careers.php 200          5976                        http://www.bing.com/search?q=Aster+data&amp;src=ie9tr                                                                 bing          Aster data           Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)                                                                                                  
+ 168.187.7.114 -               Lewis       2011-03-27 00:16:49.000000 /                  200          7203                        http://search.yahoo.com/search;_ylt=AtMGk4Fg.FlhWyX_ro.u0VybvZx4?p=ASTER&amp;toggle=1&amp;cop=mss&amp;ei=UTF-8&amp;fr=yfp-t-383-1 yahoo         ASTER                Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; SLCC2;.NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0;InfoPath.2)</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="nqa1507906406473"> </a>
+   <h3>ApacheLogParser Example: Common LogFormat</h3>
+   <a name="section_rt2_v2y_42b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>apache_logs, as in ApacheLogParser Example: Default LogFormat</li>
+   </ul>
+
+   <a name="section_b51_hv1_xdb"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">The common log format excludes some columns from the default extended format.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ApacheLogParser (
+  ON apache_logs
+  USING
+  TargetColumn ('logdata')
+  LogFormat ('%h %l %u %t \"%r\" %&gt;s %O')
+  SearchInfoFlag ('true')
+) AS dt;</tt>
+   </pre>
+   <a name="section_v1p_hv1_xdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The Referer, User-Agent name, search engine and search terms are absent in the common log format output.</p>
+   <pre>
+      <tt>
+ remote_host   remote_log_name remote_user request_time               requested_page     final_status bytes_sent_including_header 
+ ------------- --------------- ----------- -------------------------- ------------------ ------------ --------------------------- 
+ 127.0.0.1     -               -           2000-10-10 13:55:36.000000 /apache_pb.gif     200          2326                       
+ 75.36.209.106 -               Patrick     2008-05-20 15:43:57.000000 /                  200          15251                      
+ 69.236.77.51  -               Frank       2011-03-26 09:17:31.000000 /about/careers.php 200          5976                       
+ 168.187.7.114 -               Lewis       2011-03-27 00:16:49.000000 /                  200          7203</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

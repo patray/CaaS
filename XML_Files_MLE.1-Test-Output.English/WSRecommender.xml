@@ -1,0 +1,749 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="kgn1507909000942"> </a>
+	  <h1>WSRecommender</h1>
+
+	
+		<p style="line-height: 1em;">The WSRecommender function is an item-based, collaborative filtering
+			function that uses a weighted-sum algorithm to make recommendations (for example, items
+			or products for users to consider purchasing).</p>
+
+		<a name="fig_uvq_1rd_pw"> </a>
+			<div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+		
+	
+   <a name="grt1507909037108"> </a>
+   <h2>WSRecommender Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>WSRecommender version 1.2, WSRecommenderReduce version 1.2</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM WSRecommender
+  ON (
+    SELECT * FROM WSRecommenderReduce (
+      ON <i>item_table</i> AS ItemTable PARTITION BY <i>item1_column</i> 
+      ON <i>user_table</i> AS UserTable PARTITION BY <i>item_column</i>
+      [ USING
+        [ Item1 ('<i>item1_column</i>') ]
+        [ Item2 ('<i>item2_column</i>') ]
+        [ ItemSimilarityScore ('<i>similarity_column</i>') ]
+        [ UserItemColumn ('<i>item_column</i>') ]
+        [ UserIDColumn ('<i>user_column</i>') ]
+        [ UserPrefColumn ('<i>preference_column</i>') ]
+        [ AccumulateItem ({ '<i>accumulate_item_column</i>' | <i>accumulate_item_column_range</i> }[,...]) ]
+        [ AccumulateUser ({ '<i>accumulate_user_column</i>' | <i>accumulate_user_column_range</i> }[,...]) ]
+      ]
+    ) AS <i>alias_1</i>
+  ) AS <i>temporary_table</i> PARTITION BY <i>usr</i>, <i>col1_item2</i> 
+) AS <i>alias_2</i>;</tt>
+   </pre>
+   <a name="wuh1507909040989"> </a>
+	  <h2>WSRecommender Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>Item1</dt>
+      <dd>[Optional] Specify the name of the ItemTable column that contains the first item (item1).</dd>
+      <dd>Default: 'col1_item1'</dd>
+      <dt>Item2</dt>
+      <dd>[Optional] Specify the name of the ItemTable column that contains the second item (item2).</dd>
+      <dd>Default: 'col1_item2'</dd>
+      <dt>ItemSimilarityScore</dt>
+      <dd>[Optional] Specify the name of the ItemTable column that contains the similarity score for item1 and item2.</dd>
+      <dd>Default: 'cntb'</dd>
+      <dt>UserItemColumn</dt>
+      <dd>[Optional] Specify the name of the UserTable column that contains the names of the items that the user viewed or purchased.</dd>
+      <dd>Default: 'item'</dd>
+      <dt>UserIDColumn</dt>
+      <dd>Specify the name of the UserTable column that contains the unique user identifiers.</dd>
+      <dd>Default: 'usr'</dd>
+      <dt>UserPrefColumn</dt>
+      <dd>[Optional] Specify the name of the UserTable column that contains user preferences for an item, expressed as numeric values. The value 0 indicates no preference.</dd>
+      <dd>Default: 'preference'</dd>
+      <dt>AccumulateItem</dt>
+      <dd>[Optional] Specify the names of ItemTable columns to copy to the output table.</dd>
+      <dt>AccumulateUser</dt>
+      <dd>[Optional] Specify the names of UserTable columns to copy to the output table.</dd>
+   </div>
+
+
+	
+   <a name="dob1507909044481"> </a>
+   <h2>WSRecommender Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>ItemTable Schema</h3>
+   <a name="table_N10033_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10033_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>item1_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">First item (item1). Column by which table is partitioned.<p>
+                  <b>Note:</b>  The database handles NULL values in partitioning columns. You need not exclude them with a WHERE clause.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>item2_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Second item (item2).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>similarity_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Similarity score for item1 and item2 (number of times <i>item1_column</i> co-occurs with <i>item2_column</i>). To compute this score, use CFilter function.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_item_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_item_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">This table must be symmetric with respect to <i>item1_column</i> and <i>item2_column</i>. That is, if a row has 'apple' in <i>item1_column</i> and 'bread' in <i>item2_column</i>, then another row must have 'bread' in <i>item1_column</i> and 'apple' in <i>item2_column</i>, and these two rows must have the same value in <i>similarity_column</i>.</p>
+   <p style="line-height: 1em;">The function gives the best results when the items in item1_column and item2_column satisfy triangular inequality; that is: if a row has 'apple' in item1_column and 'bread' in item2_column, then another row must have 'bread' in item1_column and 'apple' in item2_column, and these two rows must have the same value in similarity_column.</p>
+
+   <a name="section_svf_bxk_ycb"> </a>
+   <h3>UserTable Schema</h3>
+   <a name="table_N100AF_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100AF_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>item_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Name of item that user viewed or bought. Column by which table is partitioned.<p>
+                  <b>Note:</b>  The database handles NULL values in partitioning columns. You need not exclude them with a WHERE clause.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>user_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">User identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>preference_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">User preference score for item.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_user_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_user_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="eko1507909049714"> </a>
+   <h2>WSRecommender Output</h2>
+   <a name="section_dxp_wwk_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">item</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Name of item that user viewed or bought. Corresponds to UserTable column <i>item_column</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">usr</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Unique user identifier. Corresponds to UserTable column <i>user_column</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">recommendation</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Recommendation score. If user viewed or bought item, this value is user preference score for item (in UserTable column <i>preference_column</i>; otherwise, it is calculated by function.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">new_reco_flag</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">New recommendation flag. Indicates whether to recommend item to user: 1 (yes) if user never viewed or bought item and recommendation score is greater than 0; otherwise, 0 (no).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_item_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in ItemTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_item_column</i>.] Column copied from ItemTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_user_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in UserTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_user_column</i>.] Column copied from UserTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="gfe1510706605987"> </a>
+   <h2>WSRecommender Example</h2>
+   <a name="section_ozv_mjr_tdb"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">The item table, recommender_product, contains product categories and their similarity scores. The similarity scores are from column cntb in CFilter Example: Filter by Customer Segment Output Table cfilter_output1, which contains the number of co-occurrences of the items in product_category_a and product_category_b2.</p>
+   <a name="table_cfn_vjr_tdb"> </a>
+   <table class="introtable">
+      <a name="table_cfn_vjr_tdb"> </a>
+      <h4 style="text-align: center;">recommender_product</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">region</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">product_category_a</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">product_category_b</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">product_similarity</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Northern California</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Consumer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Corporate</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Northern California</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Consumer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Home Office</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Northern California</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Consumer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Small Business</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Northern California</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Corporate</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Corporate</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Northern California</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Corporate</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Home Office</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Northern California</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Corporate</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Small Business</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">17</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Northern California</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Home Office</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Corporate</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Northern California</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Home Office</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Home Office</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Northern California</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Home Office</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Small Business</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Northern California</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Small Business</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Corporate</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Northern California</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Small Business</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Home Office</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">17</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Northern California</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Small Business</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Small Business</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">The user table, recommender_user, contains the product preference (business presence) of four companies in four product categories, on a scale of 0 to 10 (10 is highest). For example, the table shows that in the Consumer product category, Company4 has a high business presence, while Company2 has none. The prod_preference 0 means that the company has never viewed or bought a product in that category.</p>
+   <a name="table_p1z_q4r_tdb"> </a>
+   <table class="introtable">
+      <a name="table_p1z_q4r_tdb"> </a>
+      <h4 style="text-align: center;">recommender_user</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">product_category</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">companyname</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">prod_preference</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">month</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Consumer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">December</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Consumer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">December</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Consumer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">December</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Consumer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">December</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Corporate</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">December</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Corporate</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">December</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Corporate</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">December</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Corporate</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">December</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Home Office</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">December</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Home Office</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">December</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Home Office</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">December</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Home Office</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">December</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ykf_njr_tdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM WSRecommender(
+	ON ( SELECT * FROM WSRecommenderReduce(
+			ON recommender_product AS ItemTable PARTITION BY product_category_a
+			ON recommender_user AS UserTable PARTITION BY product_category
+			USING
+			ITEM1('product_category_a')
+			ITEM2('product_category_b')
+			ITEMSIMILARITYSCORE('product_similarity ')
+			USERIDCOLUMN('companyname')
+			USERITEMCOLUMN('product_category')
+			USERPREFCOLUMN('prod_preference')
+		) as dt1 ) PARTITION BY usr, col1_item2
+) as dt ORDER BY recommendation desc,item;</tt>
+   </pre>
+   <a name="section_rcq_njr_tdb"> </a>
+   <h3>Output</h3>
+   <p style="line-height: 1em;">If the company (usr) has ever viewed or bought items in the product category (item), then the recommendation column contains the value in the prod_preference column of the user table; otherwise, the column contains the recommendation score calculated by the function.</p>
+   <p style="line-height: 1em;">If the recommendation value is greater than 0 and the company has never viewed or bought items in the product category (that is, the value in the prod_preference column of the user table is 0), then the new_reco_flag is 1, meaning that the product category is to be recommended to the company.</p>
+   <pre>
+      <tt>
+ item           usr     recommendation     new_reco_flag 
+ -------------- ------- ------------------ ------------- 
+ consumer       costco                 8.5             0
+ corporate      staples  7.515151500701904             0
+ home office    costco   7.488888740539551             1
+ corporate      costco   7.266666889190674             0
+ consumer       ikea                   7.0             0
+ small business costco   6.699999809265137             0
+ corporate      ikea     6.310344696044922             0
+ small business ikea      5.82608699798584             1
+ consumer       staples  5.333333492279053             1
+ home office    walmart  5.137930870056152             0
+ small business walmart  5.137930870056152             0
+ home office    staples                4.5             0
+ home office    ikea     4.103448390960693             0
+ corporate      walmart 3.9782607555389404             1
+ small business staples  3.909090995788574             0
+ consumer       walmart                2.0             0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

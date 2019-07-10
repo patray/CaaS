@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="kdy1507736654973"> </a>
+	  <h1>KModesPredict</h1>
+
+	
+		<p style="line-height: 1em;">KModesPredict is the prediction function corresponding to KModes.</p>
+
+	
+   <a name="hcc1507736710398"> </a>
+   <h2>KModesPredict Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.3</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM KModesPredict (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable PARTITION BY ANY
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS Model DIMENSION ORDER BY distance_metric
+  USING
+  [ Models (<i>'model_id'</i> [,...] ) ]
+  [ OutputDistance ({ 'true'|'yes'|'t'|'y'|'1'|'FALSE'|'no'|'f'|'n'|'0' }) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="mhw1507736717831"> </a>
+	  <h2>KModesPredict Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>Models</dt>
+      <dd>[Optional] Specify the model IDs to use for prediction.</dd>
+      <dd>Default: All models</dd>
+      <dt>OutputDistance</dt>
+      <dd>[Optional] Specify whether to output the distance from each observation to its closest centroid.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the InputTable columns to copy to the output table.</dd>
+   </div>
+
+
+	
+   <a name="wxe1507736722036"> </a>
+	  <h2>KModesPredict Input</h2>
+
+	  <a name="section_N10061_N1000C_N10001"> </a>
+   <a name="table_f1l_412_ycb"> </a>
+   <table class="introtable">
+      <a name="table_f1l_412_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Must have column for every attribute in Model table. The table can have additional columns, but the function ignores them.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Model</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KModes Output OutputTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+   <a name="pqo1507736726077"> </a>
+   <h2>KModesPredict Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">set_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only if multiple models are trained.] Model identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cluster_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Cluster identifier assigned by function.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">distance</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with OutputDistance ('true').] Distance from observation to closest centroid.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>numerical_attribute</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each numerical attribute.] Name of numerical attribute.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>categorical_attribute</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each categorical attribute and for each numerical attribute specified by NumericAsCategorical in KModes call that created model.] Name of attribute.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from InputTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="uya1510704306447"> </a>
+  <h2>KModesPredict Example</h2>
+
+  
+    <a name="section_svd_ggj_tdb"> </a>
+   <h3>Input</h3>
+   <ul>
+        <li>InputTable: kmodes_input, found in KModes Example: InitialSeedTable</li>
+
+        <li>Model: kmodes_clusters, output by KModes Example: InitialSeedTable</li>
+
+      </ul>
+
+
+    <a name="section_urq_ggj_tdb"> </a>
+   <h3>SQL
+      Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM KModesPredict (
+  ON kmodes_clusters AS model dimension ORDER BY distance_metric
+  ON kmodes_input AS InputTable PARTITION BY ANY
+  USING
+  accumulate ('model')
+) AS dt ;</tt>
+   </pre>
+
+    <a name="section_vs1_hgj_tdb"> </a>
+   <h3>Output</h3>
+   <p style="line-height: 1em;">Each InputTable row is assigned one of the three clusters.</p>
+   <pre>
+      <tt>
+ cluster_id mpg          disp         hp           drat         wt           qsec         cyl vs am        gear carb model               
+ ---------- ------------ ------------ ------------ ------------ ------------ ------------ --- -- --------- ---- ---- ------------------- 
+ 2           0.449543447 -0.990182091 -0.783040459  0.473999587 -0.917004624  0.426006817 4   v  manual    4    1    datsun 710         
+ 2           1.710546517  -1.25079481 -1.381031775  2.493904115 -1.637526508  0.375641479 4   v  manual    4    2    honda civic        
+ 1           0.150884825 -0.570619819  -0.53509284  0.567513685 -0.610399567 -0.777165145 6   s  manual    4    4    mazda rx4          
+ 1           -0.71190675  0.970464681  1.711020886  1.166003916 -0.048290296 -1.874010283 8   s  manual    5    4    ford pantera l     
+ 2           0.449543447 -0.725535119 -0.753870151  0.604919325 -0.068730634  2.826754593 4   v  automatic 4    2    merc 230           
+ 2          -0.380063837 -0.509299179 -0.345485837  0.604919325  0.227654255  0.588295128 6   v  automatic 4    4    merc 280c          
+ 2          -0.147773797 -0.509299179 -0.345485837  0.604919325  0.227654255  0.252526208 6   v  automatic 4    4    merc 280           
+ 0          -0.761683187  0.704204008  0.048313323 -1.564607761  0.309415603  -0.54772305 8   s  automatic 3    2    dodge challenger   
+ 2           1.196190002 -1.224168743 -1.176839619   0.90416444 -1.310481114  0.588295128 4   v  manual    4    1    fiat x1-9          
+ 0          -1.126710392  0.962396176  1.433902959   0.24956575  0.636460997 -1.364760755 8   s  automatic 3    4    camaro z28         
+ 2           0.715017777 -0.677930938 -1.235180235  0.174754472 -0.027849959  1.203871481 4   v  automatic 4    2    merc 240d          
+ 0           0.217253407  0.220093694  -0.53509284  -0.96611753 -0.002299538  0.890487156 6   v  automatic 3    1    hornet 4 drive     
+ 0          -0.811459624  0.591244935  0.048313323 -0.835197792   0.22254417 -0.307088658 8   s  automatic 3    2    amc javelin        
+ 1          -0.064813069 -0.691647397  0.412942174  0.043834734 -0.457097039 -1.314395417 6   s  manual    5    6    ferrari dino       
+ 0          -0.811459624  0.363713088  0.485867945  -0.98482035  0.575139986  0.084641749 8   s  automatic 3    3    merc 450slc        
+ 2           0.217253407 -0.885291523 -0.549677994  0.960272899  -0.44687687  0.420410668 4   v  manual    4    2    volvo 142e         
+ 0          -0.894420352  1.688561647  1.215125648 -0.685575235  2.174596366 -0.239934874 8   s  automatic 3    4    chrysler imperial  
+ 2           1.710546517 -1.094265808 -0.491337378  0.324377029 -1.741772228 -0.530934604 4   v  manual    5    2    lotus europa       
+ 1           0.150884825 -0.570619819  -0.53509284  0.567513685 -0.349785269  -0.46378082 6   s  manual    4    4    mazda rx4 wag      
+ 0            -0.3302874 -0.046166978  -0.60801861 -1.564607761  0.248094592  1.326986752 6   v  automatic 3    1    valiant            
+ 0          -0.230734526  1.043081228  0.412942174 -0.835197792  0.227654255  -0.46378082 8   s  automatic 3    2    hornet sportabout  
+ 1          -0.844643915  0.567039419  2.746566825 -0.105787824  0.360516446 -1.818048797 8   s  manual    5    8    maserati bora      
+ 0          -0.463024565  0.363713088  0.485867945  -0.98482035  0.524039143 -0.139204198 8   s  automatic 3    3    merc 450sl         
+ 2           0.980492108 -0.890939476 -0.812210767   1.55876313 -1.100967659 -0.642857578 4   s  manual    5    2    porsche 914-2      
+ 0          -0.960788935  1.043081228  1.433902959 -0.722980874  0.360516446 -1.124126363 8   s  automatic 3    4    duster 360         
+ 0          -1.607882616  1.849931752  0.996348337 -1.115740088  2.255335698 -0.016088927 8   s  automatic 3    4    lincoln continental
+ 2           0.233845553 -0.892553178 -0.724699843  0.193457291  -0.76881218   1.20946763 4   v  automatic 3    1    toyota corona      
+ 2           2.291271616 -1.287909934 -1.191424773  1.166003916   -1.4126828  1.147909994 4   v  manual    4    1    toyota corolla     
+ 0          -0.147773797  1.365821438  0.412942174  -0.96611753  0.641571082 -0.446992374 8   s  automatic 3    2    pontiac firebird   
+ 2           2.042389431 -1.226589294 -1.176839619   0.90416444 -1.039646647  0.907275602 4   v  manual    4    1    fiat 128           
+ 0          -1.607882616  1.946753815  0.850496796 -1.246659826  2.077504765  0.073449451 8   s  automatic 3    4    cadillac fleetwood 
+ 0          -0.612353876  0.363713088  0.485867945  -0.98482035  0.871524874 -0.251127171 8   s  automatic 3    3    merc 450se</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+  
+</t:intro>

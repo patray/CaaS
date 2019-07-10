@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="euz1507663208785"> </a>
+	  <h1>DecisionTreePredict_MLE</h1>
+
+	
+		<p style="line-height: 1em;">The DecisionTreePredict_MLE function applies a tree model to a data input, outputting predicted labels for each data point.</p>
+
+	
+   <a name="ewm1507663267812"> </a>
+   <h2>DecisionTreePredict_MLE Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.11</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM DecisionTreePredict_MLE (
+  ON <i>attribute_table</i> AS AttributeTable
+    PARTITION BY <i>pid_col</i> [,...]
+    ORDER BY <i>attribute</i>
+  ON <i>model_table</i> AS Model DIMENSION
+  USING
+  AttrTableGroupByColumns ({ '<i>gcol</i>' | <i>gcol_range</i> } [,...])
+  AttrTablePIDColumns ({ '<i>pid_col</i>' | <i>pid_col_range</i> } [,...])
+  AttrTableValColumn ('<i>value_column</i>')
+  [ OutputProb {'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}
+    Responses (<i>'response</i>' [,...]) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="ute1507663329577"> </a>
+	  <h2>DecisionTreePredict_MLE Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>AttrTableGroupByColumns</dt>
+      <dd>Specify the names of the columns on which AttributeTable is partitioned. Each partition contains one attribute of the input data.</dd>
+      <dt>AttrTablePIDColumns</dt>
+      <dd>Specify the names of the AttributeTable columns that define the data point identifiers.</dd>
+      <dt>AttrTableValColumn</dt>
+      <dd>Specify the name of the AttributeTable column that contains the input values.</dd>
+      <dt>OutputProb</dt>
+      <dd>[Required with Responses, disallowed otherwise] Specify whether to output a column for each <i>response</i>, showing the probability that the label is correct.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>Responses</dt>
+      <dd>[Required with OutputProb, disallowed otherwise] Specify the labels for which to output probabilities.</dd>
+      <dd>To see all labels, use either of the following queries. ResponseTable, <i>response_column</i>, and <i>output_table</i> are from the DecisionTree function call that output the model_table for this function. ResponseTable is an input table, <i>response_column</i> is the ResponseColumn syntax element value, and <i>output_table</i> is the OutputTable syntax element value.<ul>
+            <li>
+               <pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+SELECT <i>response_column</i> FROM ResponseTable;</tt>
+               </pre>
+            </li>
+            <li>
+               <pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+SELECT prob_label_order FROM <i>output_table</i> SAMPLE 1;</tt>
+               </pre>
+            </li>
+         </ul>
+      </dd>
+      <dd>Default behavior: The function outputs probabilities for all labels.</dd>
+      <dt>Accumulate</dt>
+
+					<dd>[Optional] Specify the names of the AttributeTable columns to copy to the output table.<p>
+            <b>Note:</b>  If you are using this function to create input for ROC, this syntax element must specify <i>actual_label</i>.</p>
+      </dd>
+   </div>
+
+
+	
+   <a name="mxj1507663408814"> </a>
+   <h2>DecisionTreePredict_MLE Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_drl_m3k_ycb"> </a>
+   <table class="introtable">
+      <a name="table_drl_m3k_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">AttributeTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DecisionTree Input InputTable</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ModelTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DecisionTree Output OutputTable</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="wpv1507663473929"> </a>
+   <h2>DecisionTreePredict_MLE Output</h2>
+   <a name="section_zj2_x3k_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Data point identifier from AttributeTable (DecisionTree InputTable).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">pred_label</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Predicted response value for data point.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">prob_for_<i>label_n</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with OutputProb ('true').] <p style="line-height: 1em; margin: 0px;">
+                  <br/>[Column appears once for each <i>response</i> specified in Response.]</p>
+ Probability that data point has <i>label_n</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>actual_label</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Copied from AttributeTable (DecisionTree InputTable).</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="zpk1510351040882"> </a>
+   <h2>DecisionTreePredict_MLE Examples</h2>
+   <a name="jzt1507663528115"> </a>
+	  <h3>DecisionTreePredict_MLE Example: Apply Model to Test Data</h3>
+   <a name="section_zf3_1tj_tdb"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">Input tables are from DecisionTree Example: Create Model:<ul>
+         <li>AttributeTable: iris_attribute_test</li>
+         <li>ModelTable: iris_attribute_output</li>
+      </ul>
+   </p>
+
+   <a name="section_zkt_1tj_tdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE singletree_predict AS (
+  SELECT * FROM DecisionTreePredict_MLE (
+    ON iris_attribute_test AS AttributeTable PARTITION BY pid
+      ORDER BY attribute
+    ON iris_attribute_output as Model DIMENSION
+    USING
+    AttrTable_GroupbyColumns ('attribute')
+    AttrTable_pidColumns ('pid')
+    AttrTable_valColumn ('attrvalue')
+  ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_krj_btj_tdb"> </a>
+   <h4>Output</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM singletree_predict ORDER BY pid;</tt>
+   </pre>
+   <pre>
+      <tt>
+ pid pred_label 
+ --- ---------- 
+   5 1         
+  10 1         
+  15 1         
+  20 1         
+  25 1         
+  30 1         
+  35 1         
+  40 1         
+  45 1         
+  50 1         
+  55 2         
+  60 2         
+  65 2         
+  70 2         
+  75 2         
+  80 2         
+  85 2         
+  90 2         
+  95 2         
+ 100 2         
+ 105 3         
+ 110 3         
+ 115 3         
+ 120 2         
+ 125 3         
+ 130 2         
+ 135 2         
+ 140 3         
+ 145 3         
+ 150 3</tt>
+   </pre>
+   <a name="section_vhs_btj_tdb"> </a>
+   <h4>Prediction Accuracy</h4>
+   <p style="line-height: 1em;">The following SQL code calculates and displays the prediction accuracy.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE st_predict_accuracy;</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE st_predict_accuracy AS (
+  SELECT pid, CAST(pred_label AS INTEGER) AS pred_label, species
+  FROM singletree_predict, iris_test WHERE id = pid
+  ) WITH DATA;</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT (
+  SELECT COUNT(pid) FROM st_predict_accuracy
+  WHERE pred_label = species)/( 1.00 * (SELECT COUNT(pid)
+  FROM st_predict_accuracy ) 
+  ) AS prediction_accuracy;</tt>
+   </pre>
+   <pre>
+      <tt>
+ prediction_accuracy 
+ ------------------- 
+                0.90</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="zqt1532715158394"> </a>
+	  <h3>DecisionTreePredict_MLE Example: OutputProb, Responses</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>AttributeTable: iris_attribute_test, is from DecisionTree Example: Create Model</li>
+      <li>ModelTable: iris_attribute_output, is from DecisionTree Example: OutputProb</li>
+   </ul>
+
+		
+   <a name="section_dtf_45t_p2b"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE singletree_predict AS (
+  SELECT * FROM DecisionTreePredict_MLE (
+    ON iris_attribute_test AS AttributeTable PARTITION BY pid
+      ORDER BY attribute
+    ON iris_attribute_output AS Model DIMENSION
+  USING
+  AttrTableGroupbyColumns ('attribute')
+  AttrTablePidColumns ('pid')
+  AttrTableValColumn ('attrvalue')
+  OutputProb ('true')
+  Responses('1','2','3')
+  ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_fhm_45t_p2b"> </a>
+   <h4>Output</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM singletree_predict ORDER BY pid;</tt>
+   </pre>
+   <pre>
+      <tt>
+ pid pred_label prob_for_label_1 prob_for_label_2 prob_for_label_3 
+ --- ---------- ---------------- ---------------- ---------------- 
+   5 1                   0.95348          0.02326          0.02326
+  10 1                   0.95348          0.02326          0.02326
+  15 1                   0.95348          0.02326          0.02326
+  20 1                   0.95348          0.02326          0.02326
+  25 1                   0.95348          0.02326          0.02326
+  30 1                   0.95348          0.02326          0.02326
+  35 1                   0.95348          0.02326          0.02326
+  40 1                   0.95348          0.02326          0.02326
+  45 1                   0.95348          0.02326          0.02326
+  50 1                   0.95348          0.02326          0.02326
+  55 2                   0.02632          0.94736          0.02632
+  60 2                   0.02632          0.94736          0.02632
+  65 2                   0.02632          0.94736          0.02632
+  70 2                   0.02632          0.94736          0.02632
+  75 2                   0.02632          0.94736          0.02632
+  80 2                   0.02632          0.94736          0.02632
+  85 2                   0.02632          0.94736          0.02632
+  90 2                   0.02632          0.94736          0.02632
+  95 2                   0.02632          0.94736          0.02632
+ 100 2                   0.02632          0.94736          0.02632
+ 105 3                      0.25              0.5             0.25
+ 110 3                   0.33333          0.33333          0.33333
+ 115 3                   0.33333          0.33333          0.33333
+ 120 2                   0.16667          0.66666          0.16667
+ 125 3                   0.33333          0.33333          0.33333
+ 130 2                   0.16667          0.66666          0.16667
+ 135 2                   0.16667          0.66666          0.16667
+ 140 3                      0.25              0.5             0.25
+ 145 3                   0.33333          0.33333          0.33333
+ 150 3                   0.33333          0.33333          0.33333</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

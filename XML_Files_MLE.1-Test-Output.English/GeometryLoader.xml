@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="stw1507902267618"> </a>
+	  <h1>GeometryLoader</h1>
+
+	
+		<p style="line-height: 1em;">The GeometryLoader function fetches file-based geospatial files from AFS, parses them, and stores them in Teradata Database. The function only loads input formats from AFS and converts them to WKT or other formats in the database.</p>
+
+	
+   <a name="fvk1507902537136"> </a>
+   <h2>GeometryLoader Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.3</h3>
+   <p style="line-height: 1em;">For the ON clause, create a table mr_driver once, with no rows. For example:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GeometryLoader (
+  ON mr_driver
+  USING
+  Path ('<i>input_path</i>' [,...])
+  [ Host ('<i>afs_server_ip_address</i>') ]
+  [ Port ('<i>afs_server_port_number</i>') ]
+  [ InputFormat ({ 'kml' | 'geojson' | 'shp' | 'mapinfo' }) ]
+  [ OutputFormat ({ 'wkt' | 'json' | 'kml' | 'gml' }) ]
+  [ OutputAttributes ('<i>colname</i> [ <i>coltype</i> ]' [,...]) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="hro1507902541985"> </a>
+	  <h2>GeometryLoader Arguments</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>Path</dt>
+      <dd>Specify the AFS directory or file name from which to fetch the geometry file. For example:<ul>
+            <li>/test</li>
+            <li>/test/testfile.xml</li>
+            <li>/test/*.xml</li>
+         </ul>
+      </dd>
+      <dd>The <i>input_path</i> can include regular expressions.<p>
+            <b>Note:</b>  
+            <ul>
+               <li>Before calling this function, verify that the directories and files that you want to specify are available on the AFS system.</li>
+               <li>A zip file is treated as a directory.</li>
+            </ul>
+         </p>
+      </dd>
+      <dt>Host</dt>
+      <dd>[Optional] Specify the namemode/IP Address of the AFS (cluster) server.</dd>
+      <dd>Default: IP address of queen node</dd>
+      <dt>Port</dt>
+      <dd>[Optional] Specify the port on the AFS server to which to connect.</dd>
+      <dd>Default: 2601</dd>
+      <dt>InputFormat</dt>
+      <dd>[Optional] Specify the format of the geospatial data in the specified files.</dd>
+      <dd>Default behavior: The function determines the format.</dd>
+      <dt>OutputFormat</dt>
+      <dd>[Optional] Specify the representation format of geospatial output data.<p>
+            <b>Note:</b>  The PointInPolygon and GeometryOverlay functions support only WKT.</p>
+      </dd>
+      <dd>Default: 'wkt' (WKT)</dd>
+      <dt>OutputAttributes</dt>
+      <dd>[Optional] Specify the output column names and types. The <i>column_type</i> must be VARCHAR, INT, or DOUBLE PRECISION.</dd>
+      <dd>Default: VARCHAR</dd>
+   </div>
+   <p>
+      <b>Tip:</b>  This function can process the output of the GeometryLoader function, which is expressed in WKT. For example, you can use the GeometryLoader function to convert GIS data formats (for example, shapefile (.shp), MapInfo TAB (.tab), Keyhole Markup Language (KML), and GeoJSON) to WKT and use the PointInPolygon function to process the resulting WKT data.</p>
+
+	
+   <a name="how1507902546121"> </a>
+   <h2>GeometryLoader Input</h2>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <h4 style="text-align: center;">Geospatial File Formats That GeometryLoader Accepts</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Provider</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Format</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">URL</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">MapInfo (Pitney Bowes) (Multiple types of boundary data files)<p style="line-height: 1em; margin: 0px;">
+                  <br/>International data sets</p>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">MAP/MIF/TAB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">http://www.mapinfo.com/products/data/</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ESRI (Multiple types of boundary data files)<p style="line-height: 1em; margin: 0px;">
+                  <br/>International data sets</p>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SHP</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">http://www.esri.com/data/esri_data</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">TIGER files (US Census Tracts boundary files)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SHP, KML</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">https://www.census.gov/geo/maps-data/data/tiger.html</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Other providers for USPS 2000 ZIP Codes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SHP, MAP, KML</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">http://www.zipboundary.com/index.html</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="cbt1507902550337"> </a>
+   <h2>GeometryLoader Output</h2>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <h4 style="text-align: center;">GeometryLoader Output Table Schema</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">path</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">The directory that contains the geospatial files. The directory is because some formats use multiple files to represent geospatial objects. For shp and mapinfo formats, <i>directory</i> is adopted as a basic path element, as they use multiple files to represent geospatial objects. For kmnl and geojson, <i>file</i> is adopted as a basic path element.<p>
+                  <b>Note:</b>  Zip files are treated as directories.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">OUTPUTATTRIBUTESn</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR, INTEGER, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Geospatial object attribute n.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">{ wkt | json | kml | gml }</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR, INTEGER, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Geospatial objects in output format.</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="lix1510710312326"> </a>
+   <h2>GeometryLoader Example</h2>
+   <a name="ekz1507902554647"> </a>
+   <h3>GeometryLoader Example Input</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The input files, stored in AFS, are sample ArcGIS shapefiles. You can get these files from http://www.arcgis.com/home/item.html?id=b07a9393ecbd430795a6f6218443dccc.</p>
+   <ul>
+      <li>states.dbf</li>
+      <li>states.prj</li>
+      <li>states.sbn</li>
+      <li>states.sbx</li>
+      <li>states.shp</li>
+      <li>states.shp.xml</li>
+      <li>states.shx</li>
+   </ul>
+   <p style="line-height: 1em;">Install these files into AFS (Aster File Server) as follows. From the <tt style="font-family: monospace;">beehive=&gt;</tt> prompt:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+beehive=&gt; \afs -mkdir /data</tt>
+   </pre>
+   <p style="line-height: 1em;">The following command moves the files from your local directory to the AFS. This example assumes that the files have been unzipped into a local directory /home/states.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+\afs -put /home/states /data/</tt>
+   </pre>
+   <p style="line-height: 1em;">Confirm that all files have been uploaded. The correct list of files is:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+beehive=&gt; \afs -ls /data/states
+Found 7 items
+-rwxrwxrwx 2 db_superuser db_superuser 2846   2015-12-30 11:06 /data/states/states.dbf
+-rwxrwxrwx 2 db_superuser db_superuser 167    2015-12-30 11:06 /data/states/states.prj
+-rwxrwxrwx 2 db_superuser db_superuser 596    2015-12-30 11:06 /data/states/states.sbn
+-rwxrwxrwx 2 db_superuser db_superuser 148    2015-12-30 11:06 /data/states/states.sbx
+-rwxrwxrwx 2 db_superuser db_superuser 222392 2015-12-30 11:06 /data/states/states.shp
+-rwxrwxrwx 2 db_superuser db_superuser 2842   2015-12-30 11:06 /data/states/states.shp.xml
+-rwxrwxrwx 2 db_superuser db_superuser 508    2015-12-30 11:06 /data/states/states.shx</tt>
+   </pre>
+   <p style="line-height: 1em;">You must also create an empty table, mr_driver, as follows:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE mr_driver;
+CREATE MULTISET TABLE mr_driver (id int, partition key (id));</tt>
+   </pre>
+   <a name="jut1507902558469"> </a>
+   <h3>GeometryLoader Example SQL Call</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GeometryLoader (
+  ON mr_driver
+  USING
+  PATH ('/data/states/')
+  OUTPUTATTRIBUTES ('STATE_NAME varchar', 'SUB_REGION varchar',
+                    'STATE_ABBR varchar')
+) AS dt;</tt>
+   </pre>
+   <p>
+      <b>Note:</b>  The STATE_NAME, SUB_REGION, and STATE_ABBR columns represent attributes defined in the shapefiles.</p>
+   <a name="rfd1507902563476"> </a>
+   <h3>GeometryLoader Example Output</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <h4 style="text-align: center;">GeometryLoader Example Output Table</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">path</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">STATE_NAME</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">SUB_REGION</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">STATE_ABBR</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">wkt</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">/data/states/</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Hawaii</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Pacific</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">HI</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">MULTIPOLYGON (((-160.07380334546815 22.004177347957729,-160.049709345445706 21.988164347942817,-160.089858345483094 21.915870347875487,...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">/data/states/</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Washington</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Pacific</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">WA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">MULTIPOLYGON (((-122.402015310383547 48.225216372377972,-122.462855310440204 48.228363372380912,-122.454419310432343 48.128492372287894,...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">/data/states/</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Montana</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Mountain</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">MT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POLYGON ((-111.475425300207363 44.702162369096875,-111.48080430021237 44.691416369086866,-111.460692300193642 44.670023369066939,...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+</t:intro>

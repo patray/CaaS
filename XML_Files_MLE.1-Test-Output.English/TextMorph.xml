@@ -1,0 +1,1338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="wcx1507567311365"> </a>
+	  <h1>TextMorph</h1>
+
+	  <p style="line-height: 1em;">Lemmatization is a basic text analysis tool that determines the lemmas (standard forms) of words, so that all forms of a word can be grouped together, improving the accuracy of text analysis.</p>
+   <p style="line-height: 1em;">The TextMorph function implements a lemmatization algorithm based on the WordNet 3.0 dictionary, which is packaged with the function. If an input word is in the dictionary, the function outputs its morphs with their parts of speech; otherwise, the function outputs the input word itself and sets its part of speech to NULL.</p>
+   <p style="line-height: 1em;">When an input word has multiple morphs, the function outputs them in order of the precedence of their parts of speech: noun, verb, adj, and adv. That is, if an input word has a noun form, it is listed first. If the same word has a verb form, it is listed next, and so on.</p>
+
+		<a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+			   <h4 style="text-align: center;">Examples of Words and Their Standard Forms</h4>
+			
+				
+				
+				
+					<tr>
+						   <th align="left">
+            <div style="line-height: 1em;">Input Word</div>
+         </th>
+						   <th align="left">
+            <div style="line-height: 1em;">Standard Forms</div>
+         </th>
+					</tr>
+				
+				
+					<tr>
+						   <td align="left">
+            <div style="line-height: 1em;">books</div>
+         </td>
+						   <td align="left">
+            <div style="line-height: 1em;">book</div>
+         </td>
+					</tr>
+					<tr>
+						   <td align="left">
+            <div style="line-height: 1em;">ran</div>
+         </td>
+						   <td align="left">
+            <div style="line-height: 1em;">run</div>
+         </td>
+					</tr>
+					<tr>
+						   <td align="left">
+            <div style="line-height: 1em;">better</div>
+         </td>
+						   <td align="left">
+            <div style="line-height: 1em;">good, well</div>
+         </td>
+					</tr>
+				
+			
+		</table>
+
+
+	
+   <a name="olf1507567475435"> </a>
+   <h2>TextMorph Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.4</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TextMorph (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+  USING
+  WordColumn ('<i>word_column</i>')
+  [ POSTagColumn ('<i>pos_tag_column</i>') ]
+  [ SingleOutput ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ POS ('<i>pos</i>' [,...]) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="bxz1507567493779"> </a>
+	  <h2>TextMorph Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>WordColumn</dt>
+      <dd>Specify the name of the input table column that contains the words.</dd>
+      <dt>POSTagColumn</dt>
+      <dd>[Optional] Specify the name of the input table column that contains the part-of-speech (POS) tags of the words, output by the function POSTagger.<p style="line-height: 1em;">If you specify this syntax element, the function outputs each morph according to its POS tag.</p>
+      </dd>
+      <dt>SingleOutput</dt>
+      <dd>[Optional] Specify whether to output only one morph for each word. If you specify 'false', the function outputs all morphs for each word.</dd>
+      <dd>Default: 'true'</dd>
+      <dt>POS</dt>
+      <dd>[Optional] Specify the parts of speech to output. A <i>pos</i> can be 'noun', 'verb', 'adj', or 'adv'. Specification order is irrelevant; this is the order of precedence: 'noun', 'verb', 'adj', 'adv'. If you specify this syntax element and SingleOutput ('true'), then the function outputs only the first pos.<p>
+            <b>Note:</b>  The function does not determine the part of speech of the word from its context, it uses all possible parts of speech for the word in the dictionary.</p>
+      </dd>
+      <dd>Default: All parts of speech</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the input columns to copy to the output table.</dd>
+   </div>
+
+
+	
+   <a name="tgt1507567520644"> </a>
+   <h2>TextMorph Input</h2>
+   <a name="section_f5y_2cd_ycb"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>word_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR, VARBYTE, BYTE, or BLOB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Word.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>pos_tag_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POS tag of word, output by POSTagger function. <p style="line-height: 1em; margin: 0px;">
+                  <br/>The following table summarizes the English POSTagger tags and gives their corresponding TextMorph parts of speech.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_dd1_gcd_ycb"> </a>
+   <h3>English POSTagger Tags and Corresponding TextMorph Tags</h3>
+   <a name="table_N1006B_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1006B_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Tag Number</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">POSTagger Tag</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Examples</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">TextMorph POS</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CC</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Coordinating conjunction</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">and</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CD</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Cardinal number</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1, third</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Determiner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">the</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">EX</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Existential <i>there</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>there</i> is</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">FW</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Foreign word</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">hors d’oeuvre</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">IN</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Preposition or coordinating conjunction</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">in, of, like</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">JJ</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Adjective</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">green</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">adj</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">JJR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Adjective, comparative</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">greener</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">adj</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">JJB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Adjective, superlative</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">greenest</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">adj</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">LS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">List item marker</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1)</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">MD</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Modal</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">could, will</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NN</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Noun, singular or mass</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">noun</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NNS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Noun, plural</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">tables</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">noun</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NNP</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Noun, proper, singular</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">John</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">noun</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NNPS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Noun, proper, plural</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Vikings</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">noun</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">PDT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Predeterminer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>both</i> boys</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">17</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Possessive</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">friend’s</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">noun</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">18</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">PRP</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Pronoun, personal</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">I, he, it</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">19</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">PRPS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Pronoun, possessive</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">my, his</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">20</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">RB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Adverb</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">however, usually, naturally, here, good</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">adv</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">21</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">RBR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Adverb, comparative</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">better</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">adv</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">22</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">RBS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Adverb, superlative</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">best</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">adv</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">23</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">RP</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Particle</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">give <i>up</i>
+            </div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">24</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SYM</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Symbol</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">TO</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">to</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>to</i> go, <i>to</i> him</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">26</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">UH</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Interjection</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">uh, huh, hmm</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">27</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Verb, base form</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">take</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">verb</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">28</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VBD</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Verb, past tense</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">took</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">verb</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">29</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VBG</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Verb, gerund or present participle</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">taking</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">verb</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VBN</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Verb, past participle</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">taken</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">verb</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">31</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VBP</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Verb, non-third-person singular present tense</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">take</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">verb</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">32</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VBZ</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Verb, third-person singular present tense</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">takes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">verb</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">WDT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wh- determiner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">which</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">34</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">WP</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wh- pronoun</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">who, what</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">35</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">WP</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wh- pronoun, possessive</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">whose</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">36</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">WRB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wh- adverb</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">where, when</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+   </table>
+
+
+   <a name="inj1507567528605"> </a>
+   <h2>TextMorph Output</h2>
+   <a name="section_msv_ccd_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">morph</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Morph of input word.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">pos</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Part of speech of morph.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="vln1510349706589"> </a>
+   <h2>TextMorph Examples</h2>
+   <a name="zpe1524590764388"> </a>
+	  <h3>TextMorph Example: SingleOutput ('true')</h3>
+
+	  <a name="section_q5v_h1m_pdb"> </a>
+   <h4>Input</h4>
+   <a name="table_rxg_l1m_pdb"> </a>
+   <table class="introtable">
+      <a name="table_rxg_l1m_pdb"> </a>
+      <h4 style="text-align: center;">words_input</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">word</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">regression</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Roger</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">better</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">datum</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">quickly</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">proud</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">father</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">juniors</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">doing</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">being</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">negating</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yearly</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_lnc_f1m_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TextMorph (
+  ON words_input
+  USING
+  WordColumn ('word')
+  SingleOutput ('true')
+  Accumulate ('id', 'word')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_qgv_f1m_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id word       morph      pos  
+ -- ---------- ---------- ---- 
+  1 regression regression noun
+  2 roger      roger      NULL
+  3 better     good       adj 
+  4 datum      datum      noun
+  5 quickly    quickly    adv 
+  6 proud      proud      adj 
+  7 father     father     noun
+  8 juniors    junior     noun
+  9 doing      do         verb
+ 10 being      be         verb
+ 11 negating   negate     verb
+ 12 yearly     yearly     noun</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="knl1524590803088"> </a>
+	  <h3>TextMorph Example: SingleOutput ('false')</h3>
+
+	  <a name="section_njj_h1m_pdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: words_input, as in TextMorph Example: SingleOutput ('true')</li>
+   </ul>
+
+   <a name="section_lnc_f1m_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TextMorph (
+  ON words_input
+  USING
+  WordColumn ('word')
+  SingleOutput ('false')
+  Accumulate ('id', 'word')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_qgv_f1m_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id word       morph      pos  
+ -- ---------- ---------- ---- 
+  1 regression regression noun
+  2 roger      roger      NULL
+  3 better     well       adv 
+  3 better     well       adj 
+  3 better     good       adj 
+  4 datum      datum      noun
+  5 quickly    quickly    adv 
+  6 proud      proud      adj 
+  7 father     father     noun
+  7 father     father     verb
+  8 juniors    junior     noun
+  9 doing      do         verb
+ 10 being      be         verb
+ 11 negating   negate     verb
+ 12 yearly     yearly     noun
+ 12 yearly     yearly     adv 
+ 12 yearly     yearly     adj</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="ccf1524590842893"> </a>
+	  <h3>TextMorph Example: POS ('noun', 'verb'), SingleOutput ('false')</h3>
+
+	  <a name="section_dnx_g1m_pdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: words_input, as in TextMorph Example: SingleOutput ('true')</li>
+   </ul>
+
+   <a name="section_lnc_f1m_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TextMorph (
+  ON words_input
+  USING
+  WordColumn ('word')
+  SingleOutput ('false')
+  POS ('noun', 'verb')
+  Accumulate ('id', 'word')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_qgv_f1m_pdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">For the input word <i>better</i>, the function does not find noun and verb morphs. However, the function finds <i>better</i> in the dictionary as both a noun and a verb, so it outputs those.</p>
+   <p style="line-height: 1em;">With SingleOutput ('false'), the words <i>better</i> and <i>father</i> appear in the output table as both nouns and verbs.</p>
+   <pre>
+      <tt>
+ id word       morph      pos  
+ -- ---------- ---------- ---- 
+  1 regression regression noun
+  3 better     better     verb
+  3 better     better     noun
+  4 datum      datum      noun
+  7 father     father     noun
+  7 father     father     verb
+  8 juniors    junior     noun
+  9 doing      do         verb
+ 10 being      be         verb
+ 11 negating   negate     verb
+ 12 yearly     yearly     noun</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="ave1524590875543"> </a>
+	  <h3>TextMorph Example: POS ('noun', 'verb'), SingleOutput ('true')</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: words_input, as in TextMorph Example: SingleOutput ('true')</li>
+   </ul>
+
+		
+   <a name="section_lnc_f1m_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TextMorph (
+  ON words_input
+  USING
+  WordColumn ('word')
+  SingleOutput ('true')
+  POS ('noun', 'verb')
+  Accumulate ('id', 'word')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_qgv_f1m_pdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">With SingleOutput ('true'), the words <i>better</i> and <i>father</i> appear in the output table only as nouns.</p>
+   <pre>
+      <tt>
+ id word       morph      pos  
+ -- ---------- ---------- ---- 
+  1 regression regression noun
+  3 better     better     noun
+  4 datum      datum      noun
+  7 father     father     noun
+  8 juniors    junior     noun
+  9 doing      do         verb
+ 10 being      be         verb
+ 11 negating   negate     verb
+ 12 yearly     yearly     noun</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="dhw1507569971648"> </a>
+   <h3>TextMorph Example: TextMorph with POSTagger and TextTagger</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example uses the function POSTagger to create the input table for TextMorph, whose output table is input to the function TextTagger.</p>
+
+   <a name="section_ksz_b2h_n2b"> </a>
+   <h4>POSTagger Input: pos_input</h4>
+   <a name="table_ag1_wfh_n2b"> </a>
+   <table class="introtable">
+      <a name="table_ag1_wfh_n2b"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">txt</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">s1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Roger Federer born on 8 August 1981, is a greatest tennis player, who has been continuously ranked inside the top 10 since October 2002 and has won Wimbledon, USOpen, Australian and FrenchOpen titles mutiple times</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_hmw_c2h_n2b"> </a>
+   <h4>POSTagger SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE postagger_output AS (
+  SELECT * FROM POSTagger (
+    ON pos_input
+    USING
+    Accumulate ('id')
+    TextColumn ('txt')
+  ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_jdn_f2h_n2b"> </a>
+   <h4>POSTagger Output and TextMorph Input: postagger_output</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM postagger_output;</tt>
+   </pre>
+   <pre>
+      <tt>
+ id word_sn word         pos_tag 
+ -- ------- ------------ ------- 
+ s1       3 born         VBN    
+ s1       5 8            CD     
+ s1       6 august       NN     
+ s1       7 1981         CD     
+ s1       9 is           VBZ    
+ s1      10 a            DT     
+ s1      11 greatest     JJS    
+ s1      12 tennis       NN     
+ s1      13 player       NN     
+ s1      14 ,            O      
+ s1      15 who          WP     
+ s1      17 been         VBN    
+ s1      18 continuously RB     
+ s1      19 ranked       VBN    
+ s1      20 inside       IN     
+ s1      21 the          DT     
+ s1      22 top          JJ     
+ s1      23 10           CD     
+ s1      24 since        IN     
+ s1      25 october      JJ     
+ s1      26 2002         CD     
+ s1      27 and          CC     
+ s1      28 has          VBZ    
+ s1      29 won          VBN    
+ s1      30 wimbledon    NN     
+ s1      31 ,            O      
+ s1      33 ,            O      
+ s1      34 australian   JJ     
+ s1      35 and          CC     
+ s1      36 frenchopen   JJ     
+ s1      37 titles       NNS    
+ s1      38 mutiple      JJ     
+ s1      39 times        NNS    
+ s1      32 usopen       JJ     
+ s1      16 has          VBZ    
+ s1       8 ,            O      
+ s1       4 on           IN     
+ s1       2 federer      NN     
+ s1       1 roger        NN</tt>
+   </pre>
+   <a name="section_wtq_52h_n2b"> </a>
+   <h4>TextMorph SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE textmorph_output AS (
+  SELECT * FROM TextMorph (
+    ON postagger_output
+    USING
+    WordColumn ('word')
+    POSTagColumn ('pos_tag')
+    Accumulate ('id', 'word_sn', 'word', 'pos_tag')
+  ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_lph_w2h_n2b"> </a>
+   <h4>TextMorph  Output and TextTagger Input: textmorph_output</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM textmorph_output ORDER BY id, word_sn;
+</tt>
+   </pre>
+   <pre>
+      <tt>
+ id word_sn word         pos_tag morph        pos  
+ -- ------- ------------ ------- ------------ ---- 
+ s1       1 roger        NN      roger        noun
+ s1       2 federer      NN      federer      noun
+ s1       3 born         VBN     bear         verb
+ s1       4 on           IN      on           NULL
+ s1       5 8            CD      8            NULL
+ s1       6 august       NN      august       noun
+ s1       7 1981         CD      1981         NULL
+ s1       8 ,            O       ,            NULL
+ s1       9 is           VBZ     be           verb
+ s1      10 a            DT      a            NULL
+ s1      11 greatest     JJS     great        adj 
+ s1      12 tennis       NN      tennis       noun
+ s1      13 player       NN      player       noun
+ s1      14 ,            O       ,            NULL
+ s1      15 who          WP      who          NULL
+ s1      16 has          VBZ     have         verb
+ s1      17 been         VBN     be           verb
+ s1      18 continuously RB      continuously adv 
+ s1      19 ranked       VBN     rank         verb
+ s1      20 inside       IN      inside       NULL
+ s1      21 the          DT      the          NULL
+ s1      22 top          JJ      top          adj 
+ s1      23 10           CD      10           NULL
+ s1      24 since        IN      since        NULL
+ s1      25 october      JJ      october      adj 
+ s1      26 2002         CD      2002         NULL
+ s1      27 and          CC      and          NULL
+ s1      28 has          VBZ     have         verb
+ s1      29 won          VBN     win          verb
+ s1      30 wimbledon    NN      wimbledon    noun
+ s1      31 ,            O       ,            NULL
+ s1      32 usopen       JJ      usopen       adj 
+ s1      33 ,            O       ,            NULL
+ s1      34 australian   JJ      australian   adj 
+ s1      35 and          CC      and          NULL
+ s1      36 frenchopen   JJ      frenchopen   adj 
+ s1      37 titles       NNS     title        noun
+ s1      38 mutiple      JJ      mutiple      adj 
+ s1      39 times        NNS     time         noun</tt>
+   </pre>
+   <a name="section_wv3_z2h_n2b"> </a>
+   <h4>TextTagger SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TextTagger (
+  ON textmorph_output
+  USING
+  TaggingRules('equal(morph, "Australian") as grandslam',
+        'equal(morph, "wimbledon") as grandslam',
+        'equal(morph, "USOpen") as grandslam',
+        'equal(morph, "FrenchOpen") as grandslam')
+  Accumulate ('id', 'word_sn', 'morph')
+) AS dt ORDER BY id, word_sn;</tt>
+   </pre>
+   <a name="section_bc3_1fh_n2b"> </a>
+   <h4>TextTagger Output</h4>
+   <pre>
+      <tt>
+ id word_sn morph        tag       
+ -- ------- ------------ --------- 
+ s1       1 roger                 
+ s1       2 federer               
+ s1       3 bear                  
+ s1       4 on                    
+ s1       5 8                     
+ s1       6 august                
+ s1       7 1981                  
+ s1       8 ,                     
+ s1       9 be                    
+ s1      10 a                     
+ s1      11 great                 
+ s1      12 tennis                
+ s1      13 player                
+ s1      14 ,                     
+ s1      15 who                   
+ s1      16 have                  
+ s1      17 be                    
+ s1      18 continuously          
+ s1      19 rank                  
+ s1      20 inside                
+ s1      21 the                   
+ s1      22 top                   
+ s1      23 10                    
+ s1      24 since                 
+ s1      25 october               
+ s1      26 2002                  
+ s1      27 and                   
+ s1      28 have                  
+ s1      29 win                   
+ s1      30 wimbledon    grandslam
+ s1      31 ,                     
+ s1      32 usopen       grandslam
+ s1      33 ,                     
+ s1      34 australian   grandslam
+ s1      35 and                   
+ s1      36 frenchopen   grandslam
+ s1      37 title                 
+ s1      38 mutiple               
+ s1      39 time</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

@@ -1,0 +1,1675 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="wdh1506114950524"> </a>
+	  <h1>Naive Bayes Classifier</h1>
+
+	  <p style="line-height: 1em;">The Naive Bayes Classifier consists of the NaiveBayesMap and NaiveBayesReduce functions, which create a model from training data. You can input the model to the NaiveBayesPredict_MLE function, which uses the model to make predictions about testing data.</p>
+   <p>
+      <b>Note:</b>  For the Naive Bayes functions designed specifically for text classification, see Naive Bayes Text Classifier Functions.</p>
+   <a name="yde1506115061661"> </a>
+   <h2>Naive Bayes Classifier Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>NaiveBayesReduce version 1.7, NaiveBayesMap version 1.8</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE <i>model_table_name</i> AS (
+  SELECT * FROM NaiveBayesReduce (
+    ON (
+      SELECT * FROM NaiveBayesMap (
+        ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+        USING
+        ResponseColumn ('<i>response_column</i>')
+        [ NumericInputs ({ '<i>numeric_input_column</i>' | <i>numeric_input_column_range</i> }[,...] ) ]
+        [ CategoricalInputs ({ '<i>categorical_input_column</i>' | <i>categorical_input_column_range</i> }[,...] ) ]
+      ) AS <i>alias_1</i>
+    ) PARTITION BY <i>partition_column</i> [ ORDER BY cnt ]
+  ) AS <i>alias_2</i>
+) WITH DATA;</tt>
+   </pre>
+   <a name="iau1506115118970"> </a>
+	  <h2>Naive Bayes Classifier Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>ResponseColumn</dt>
+      <dd>Specify the name of the input table column that contains the response variable, passed as text.</dd>
+      <dt>NumericInputs</dt>
+      <dd>[Required if you omit CategoricalInputs.] Specify input table columns that contain numeric values to include in the model. This is the syntax of <i>numeric_input_columns</i>:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+{'<i>column_name</i> [,...]' | '[<i>start_column</i>:<i>end_column</i>]'}[,...]</tt>
+         </pre>
+         <p style="line-height: 1em;">For example:</p>
+'input1','[4:21]','[25:53]','input73, input80','[25:53]'<p style="line-height: 1em;">The first column index is 0.</p>
+      </dd>
+      <dt>CategoricalInputs</dt>
+      <dd>[Required if you omit NumericInputs.] Specify input table columns that contain categorical values to include in the model. The syntax of <i>categorical_input_columns</i> is the same as the syntax of <i>numeric_input_columns</i>.<p>
+            <b>Note:</b>  For information about columns that you must identify as categorical, see Identification of Categorical Columns.</p>
+      </dd>
+   </div>
+
+
+	
+   <a name="sep1506115202927"> </a>
+   <h2>Naive Bayes Classifier Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>NaiveBayesMap Input Table Schema</h3>
+   <p style="line-height: 1em;">The table has the training data. Each row represents one observation.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>response_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR, BYTEINT, or INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Response for observation.<p>
+                  <b>Note:</b>  Function ignores rows that have NULL in this column.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>numeric_input_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any numeric SQL data type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>numeric_input_column</i>.] Numeric value to include in model.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>categorical_input_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR or INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>categorical_input_column</i>.] Categorical value to include in model.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="wgb1506115275695"> </a>
+   <h2>Naive Bayes Classifier Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>NaiveBayesReduce Output Table Schema</h3>
+   <p style="line-height: 1em;">This is a model table.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">class_nb</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Response.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">variable_nb</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Input variable (name of input column).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">type_nb</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Input variable types ('NUMERIC' or 'CATEGORICAL').</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">category</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Depends on type_nb:<p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <a name="table_nvf_41t_ddb"> </a>
+                  <table class="introtable">
+                     <a name="table_nvf_41t_ddb"> </a>
+                     <tr>
+                        <th align="left">
+                           <div style="line-height: 1em;">type_nb</div>
+                        </th>
+                        <th align="left">
+                           <div style="line-height: 1em;">category</div>
+                        </th>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">'NUMERIC'</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">NULL</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">'CATEGORICAL'</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Category of categorical variable</div>
+                        </td>
+                     </tr>
+                  </table>
+
+               </p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cnt</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BIGINT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of observations with this class, variable, and category.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">sum_nb</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Depends on type_nb:<p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <a name="table_occ_dbt_ddb"> </a>
+                  <table class="introtable">
+                     <a name="table_occ_dbt_ddb"> </a>
+                     <tr>
+                        <th align="left">
+                           <div style="line-height: 1em;">type_nb</div>
+                        </th>
+                        <th align="left">
+                           <div style="line-height: 1em;">sum_nb</div>
+                        </th>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">'NUMERIC'</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Sum of variable values for observations with this class, variable, and category.</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">'CATEGORICAL'</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">NULL</div>
+                        </td>
+                     </tr>
+                  </table>
+
+               </p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">sum_sq</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Depends on type_nb:<p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <a name="table_xv1_lbt_ddb"> </a>
+                  <table class="introtable">
+                     <a name="table_xv1_lbt_ddb"> </a>
+                     <tr>
+                        <th align="left">
+                           <div style="line-height: 1em;">type_nb</div>
+                        </th>
+                        <th align="left">
+                           <div style="line-height: 1em;">sum_sq</div>
+                        </th>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">'NUMERIC'</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Sum of square variable values for observations with this class, variable, and category.</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">'CATEGORICAL'</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">NULL</div>
+                        </td>
+                     </tr>
+                  </table>
+
+               </p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">total_cnt</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BIGINT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Total count of observations.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="tpn1532017598261"> </a>
+	  <h2>Naive Bayes Classifier Example</h2>
+
+	  <a name="section_g5q_2cn_n2b"> </a>
+   <p style="line-height: 1em;">This example does the following:<ol>
+         <li>Takes raw data and creates training and test sets.</li>
+         <li>Inputs the training set to the Naive Bayes Classifier function to create a model.</li>
+         <li>Inputs the model and test set to the NaiveBayesPredict_MLE function to predict the output for the test set.</li>
+         <li>Determines prediction accuracy based on the original and predicted results.</li>
+      </ol>
+   </p>
+
+
+		<a name="section_N10026_N1000E_N10001"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">The input table of raw data, nb_input_iris, contains values for four attributes (sepal_length, sepal_width, petal_length and petal_width), grouped into three categories (setosa, versicolor and virginica).</p>
+   <a name="table_av2_ndn_n2b"> </a>
+   <table class="introtable">
+      <a name="table_av2_ndn_n2b"> </a>
+      <h4 style="text-align: center;">Raw Input: nb_input_iris</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">species</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">This code divides the 150 data rows into a training data set (80%) and a testing data set (20%):</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE nb_iris_input_train;
+DROP TABLE nb_iris_input_test;
+
+CREATE MULTISET TABLE nb_iris_input_train AS (
+  SELECT * FROM nb_input_iris WHERE id MOD 5 &lt;&gt; 0
+) WITH DATA;
+
+CREATE MULTISET TABLE nb_iris_input_test AS (
+  SELECT * FROM nb_input_iris WHERE id MOD 5 = 0
+) WITH DATA;</tt>
+   </pre>
+   <p>
+      <b>Note:</b>  Alternatively, you can do the preceding task with the Sampling or RandomSample function.</p>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM nb_iris_input_train ORDER BY id;</tt>
+   </pre>
+   <a name="table_whb_cgn_n2b"> </a>
+   <table class="introtable">
+      <a name="table_whb_cgn_n2b"> </a>
+      <h4 style="text-align: center;">nb_iris_input_train</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">species</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM nb_iris_input_test ORDER BY id;</tt>
+   </pre>
+   <a name="table_ukq_chn_n2b"> </a>
+   <table class="introtable">
+      <a name="table_ukq_chn_n2b"> </a>
+      <h4 style="text-align: center;">nb_iris_input_test</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">species</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">20</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">35</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">40</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">45</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">55</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">60</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">65</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">70</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">75</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">80</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">85</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">90</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">95</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">100</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">105</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">110</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">115</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">120</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">125</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">130</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">135</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">140</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">145</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">150</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+      </tr>
+   </table>
+
+
+		
+   <a name="section_mb1_ccn_n2b"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE nb_iris_model;</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE nb_iris_model AS (
+  SELECT * FROM NaiveBayesReduce (
+    ON NaiveBayesMap (
+      ON nb_iris_input_train
+      USING
+      ResponseColumn ('species')
+      NumericInputs ('[1:4]')
+    ) PARTITION BY class_nb
+  ) AS dt 
+) WITH DATA;
+</tt>
+   </pre>
+   <a name="section_irt_ccn_n2b"> </a>
+   <h3>Output</h3>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * SELECT nb_iris_model ORDER BY class_nb, cnt ASC;
+</tt>
+   </pre>
+   <pre>
+      <tt>
+ class_nb   variable_nb  type_nb category cnt sum_nb             sum_sq             total_cnt 
+ ---------- ------------ ------- -------- --- ------------------ ------------------ --------- 
+ setosa     petal_length NUMERIC NULL      40  57.69999999999999  84.21000000000001        40
+ setosa     sepal_length NUMERIC NULL      40 199.90000000000003 1004.2700000000001        40
+ setosa     petal_width  NUMERIC NULL      40 10.100000000000001  3.030000000000001        40
+ setosa     sepal_width  NUMERIC NULL      40              136.7             473.29        40
+ versicolor sepal_width  NUMERIC NULL      40              111.1             313.13        40
+ versicolor petal_width  NUMERIC NULL      40               53.3  72.71000000000001        40
+ versicolor sepal_length NUMERIC NULL      40              239.6            1446.14        40
+ versicolor petal_length NUMERIC NULL      40 172.40000000000003             752.22        40
+ virginica  petal_width  NUMERIC NULL      40  81.19999999999999 166.99999999999997        40
+ virginica  sepal_width  NUMERIC NULL      40 118.80000000000001  356.5400000000001        40
+ virginica  petal_length NUMERIC NULL      40              222.3            1249.15        40
+ virginica  sepal_length NUMERIC NULL      40 264.40000000000003            1764.92        40</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

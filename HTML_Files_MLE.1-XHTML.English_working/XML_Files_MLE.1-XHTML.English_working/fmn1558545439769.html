@@ -1,0 +1,649 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="copyright" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.rights.owner" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="CFilter" />
+<meta name="abstract" content="This ML Engine function is a general-purpose collaborative filter. It helps discover which items or events are frequently paired with other items or events." />
+<meta name="description" content="This ML Engine function is a general-purpose collaborative filter. It helps discover which items or events are frequently paired with other items or events." />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="diu1507746673334" />
+<meta name="DC.Language" content="en-us" />
+
+<link rel="stylesheet" type="text/css" href="css/normal_styles.css" />
+<title>CFilter</title>
+</head>
+<body>
+<div class="nested0" aria-labelledby="ariaid-title1" topicindex="1" topicid="diu1507746673334" id="diu1507746673334">
+	<h1 class="title topictitle1" id="ariaid-title1">CFilter</h1>
+
+	<div class="body conbody">
+		<p class="p">The CFilter function is a general-purpose collaborative filter.</p>
+
+	</div>
+
+<div class="topic reference nested1" aria-labelledby="ariaid-title2" topicindex="2" topicid="vva1507746596598" xml:lang="en-us" lang="en-us" id="vva1507746596598"><h2 class="title topictitle2" id="ariaid-title2">CFilter Syntax</h2>
+<div class="body refbody"><div class="section" id="vva1507746596598__section_N1000E_N1000C_N10001"><h3 class="title sectiontitle">Version 1.12</h3><pre class="pre codeblock"><code>SELECT * FROM CFilter (
+  <span class="ph">ON { <var class="keyword varname">table</var> | <var class="keyword varname">view</var> | (<var class="keyword varname">query</var>) }</span> AS InputTable
+  OUT TABLE OutputTable (<var class="keyword varname">output_table</var>)
+  USING
+  TargetColumns ({ '<var class="keyword varname">target_column</var>' | <var class="keyword varname">target_column_range</var> }[,...])
+  JoinColumns ({ '<var class="keyword varname">join_column</var>' | <var class="keyword varname">join_column_range</var> }[,...])
+  [ PartitionColumns ({ '<var class="keyword varname">partition_column</var>' | <var class="keyword varname">partition_column_range</var> }[,...]) ]
+  [ PartitionKey ('<var class="keyword varname">partition_key_column</var>') ]
+  [ MaxDistinctItems (<var class="keyword varname">max_distinct_items</var>) ]
+) AS <var class="keyword varname">alias</var>;</code></pre></div>
+</div>
+<div class="related-links">
+<div class="linklistheader">Related Information</div>
+<ul class="linklist linklist relinfo">
+<div class="linklistmember"><a class="link" href="ndv1557782188375.html" title="See the syntax details for Machine Learning Engine analytic functions with syntax elements that specify ( {'column' | column_range }[,...] ).">Column Specification Syntax Elements</a></div></ul>
+</div></div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title3" topicindex="3" topicid="xep1507746600435" xml:lang="en-us" lang="en-us" id="xep1507746600435">
+	<h2 class="title topictitle2" id="ariaid-title3">CFilter Syntax Elements</h2>
+
+	<div class="body refbody">
+		<div class="section" id="xep1507746600435__section_N10011_N1000E_N10001"><dl class="dl parml"><dt class="dt pt dlterm">OutputTable</dt>
+<dd class="dd pd">Specify the name of the output table that the function creates. The table must not exist.</dd>
+<dt class="dt pt dlterm">TargetColumns</dt>
+<dd class="dd pd">Specify the names of the InputTable columns that contain the data to filter.</dd>
+<dt class="dt pt dlterm">JoinColumns</dt>
+<dd class="dd pd">Specify the names of join columns, which the function uses as follows:<ol class="ol" id="xep1507746600435__ol_bmd_1x1_4z"><li class="li">The function uses the items in each join column to define groups of items listed in the input columns.</li>
+<li class="li">The function tries to identify items in each input column that often appear in the same group.</li>
+</ol>
+<p class="p">For example, a join column might contain a list of sales transactions from a store, and the input column might contain each individual item purchased at the store. A sales transaction can include multiple items. For each sales transaction, the function tries to identify items that often appear in the same sales transaction (that is, items that are often purchased together).</p>
+</dd>
+<dt class="dt pt dlterm">PartitionColumns</dt>
+<dd class="dd pd">[Optional] Specify the names of the input columns to copy to the output table. The function partitions the input data and the output table on these columns.<div class="note note" id="xep1507746600435__note_N10082_N1007E_N10072_N10030_N10011_N1000E_N1000C_N10001"><span class="notetitle">Note</span><div class="notebody"><ul class="ul" id="xep1507746600435__ul_wlw_24p_cdb"><li class="li">Specifying a column as both an <var class="keyword varname">partition_column</var> and a <var class="keyword varname">join_column</var> causes incorrect counts in partitions.</li>
+<li class="li">This syntax element makes the function output nondeterministic unless each <var class="keyword varname">partition_column</var> is unique in the group defined by JoinColumns (for more information, see <a class="xref" href="qym1549987102806.html" title="Learn why you can get different results from a Machine Learning Engine analytic function using the same input tables and syntax element values.">Nondeterministic Results and UniqueID Syntax Element</a>).</li>
+</ul>
+</div></div>
+</dd>
+<dd class="dd pd ddexpand">Default behavior: The function treats the input data as belonging to one partition.</dd>
+<dt class="dt pt dlterm">PartitionKey</dt>
+<dd class="dd pd">[Optional] Specify the name of the output column to use as the partition key.</dd>
+<dd class="dd pd ddexpand">Default: 'col1_item1'</dd>
+<dt class="dt pt dlterm">MaxDistinctItems</dt>
+<dd class="dd pd">[Optional] Specify the maximum size of the item set.</dd>
+<dd class="dd pd ddexpand">Default: 100 <div class="note note" id="xep1507746600435__note_N10087_N1007E_N10077_N10018_N10014_N10010_N10001"><span class="notetitle">Note</span><div class="notebody">The function uses <var class="keyword varname">max_item_set</var> to determine the size of the data structures it uses to accumulate intermediate results. If the number of distinct items in an <var class="keyword varname">target_column</var> is greater than <var class="keyword varname">max_item_set</var>, the function might report incorrect results without an error message.</div></div>
+</dd>
+</dl>
+</div>
+
+	</div>
+
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title4" topicindex="4" topicid="iys1507746604525" xml:lang="en-us" lang="en-us" id="iys1507746604525"><h2 class="title topictitle2" id="ariaid-title4">CFilter Input</h2>
+<div class="body refbody"><div class="section" id="iys1507746604525__section_N1000E_N1000C_N10001"><h3 class="title sectiontitle">InputTable Schema</h3><p class="p"><span class="ph">The table can have additional columns, but the function ignores them.</span></p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="iys1507746604525__table_N10014_N1000E_N1000C_N10001" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:17.24137931034483%" /><col style="width:13.793103448275861%" /><col style="width:68.96551724137932%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry nocellnorowborder" style="vertical-align:top;" id="d414327e239">Column</th>
+<th class="entry nocellnorowborder" style="vertical-align:top;" id="d414327e241">Data Type</th>
+<th class="entry cell-norowborder" style="vertical-align:top;" id="d414327e243">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e239 "><var class="keyword varname">target_column</var></td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e241 ">VARCHAR</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d414327e243 ">Data to filter.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e239 "><var class="keyword varname">join_column</var></td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e241 ">Any</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d414327e243 ">Column to join.</td>
+</tr>
+<tr class="row"><td class="entry row-nocellborder" style="vertical-align:top;" headers="d414327e239 "><var class="keyword varname">partition_column</var></td>
+<td class="entry row-nocellborder" style="vertical-align:top;" headers="d414327e241 ">Any</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e243 ">[Column appears once for each specified <var class="keyword varname">partition_column</var>.] <span class="ph">Column to copy to output table.</span> Used to partition input data and output table. Must not be a <var class="keyword varname">join_column</var>. Must be unique in the group defined by JoinColumns, or function output is nondeterministic (for more information, see <a class="xref" href="qym1549987102806.html" title="Learn why you can get different results from a Machine Learning Engine analytic function using the same input tables and syntax element values.">Nondeterministic Results and UniqueID Syntax Element</a>).</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title5" topicindex="5" topicid="ppu1507746609083" xml:lang="en-us" lang="en-us" id="ppu1507746609083"><h2 class="title topictitle2" id="ariaid-title5">CFilter Output</h2>
+<div class="body refbody"><div class="section" id="ppu1507746609083__section_c5f_sll_rgb"><h3 class="title sectiontitle">Output Message Schema</h3>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="ppu1507746609083__table_ysp_5ll_rgb" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d414327e308">Column</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d414327e310">Data Type</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d414327e312">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e308 ">message</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e310 ">VARCHAR</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e312 ">Reports that output table was created successfully.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="ppu1507746609083__section_chq_zsk_ycb"><h3 class="title sectiontitle">OutputTable Schema</h3><div class="note note" id="ppu1507746609083__note_N10019_N10011_N1000E_N10001"><span class="notetitle">Note</span><div class="notebody">Output is nondeterministic unless each <var class="keyword varname">add_column</var> is unique in the group defined by JoinColumns (for more information, see <a class="xref" href="qym1549987102806.html" title="Learn why you can get different results from a Machine Learning Engine analytic function using the same input tables and syntax element values.">Nondeterministic Results and UniqueID Syntax Element</a>).</div></div>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="ppu1507746609083__table_N1000E_N1000C_N10001" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:17.24137931034483%" /><col style="width:13.793103448275861%" /><col style="width:68.96551724137932%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry nocellnorowborder" style="vertical-align:top;" id="d414327e347">Column</th>
+<th class="entry nocellnorowborder" style="vertical-align:top;" id="d414327e349">Data Type</th>
+<th class="entry cell-norowborder" style="vertical-align:top;" id="d414327e351">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e347 ">col1_item1</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e349 ">VARCHAR</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d414327e351 ">Name of item1.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e347 ">col1_item2</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e349 ">VARCHAR</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d414327e351 ">Name of item2.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e347 ">cntb</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e349 ">INTEGER</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d414327e351 ">Count of co-occurrence of both items in partition.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e347 ">cnt1</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e349 ">INTEGER</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d414327e351 ">Count of occurrence of item1 in partition.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e347 ">cnt2</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e349 ">INTEGER</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d414327e351 ">Count of occurrence of item2 in partition.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e347 ">score</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e349 ">DOUBLE PRECISION</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d414327e351 ">Product of two conditional probabilities:<p class="p">P({ item2 | item1 }) * P({ item1 | item2 })</p>
+<p class="p">Preceding product equals following quotient:</p>
+<p class="p">(<var class="keyword varname">cntb</var> * <var class="keyword varname">cntb</var>)/(<var class="keyword varname">cnt1</var> * <var class="keyword varname">cnt2</var>)</p>
+</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e347 ">support</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e349 ">DOUBLE PRECISION</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d414327e351 ">Percentage of transactions in partition in which the two items co-occur, calculated with this formula:<p class="p"><var class="keyword varname">cntb</var>/<var class="keyword varname">tran_cnt</var></p>
+<p class="p">where <var class="keyword varname">tran_cnt</var> is the number of transactions in the partition.</p>
+<p class="p">For example, if eggs and milk were purchased together 3 times in 5 transactions in the same store, and the data is partitioned by store, then the support value in the partition is 3/5 = 0.6 = 60%.</p>
+</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e347 ">confidence</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e349 ">DOUBLE PRECISION</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d414327e351 ">Percentage of transactions in partition in which item1 occurs, in which item2 also occurs, calculated with this formula:<p class="p"><var class="keyword varname">cntb</var>/<var class="keyword varname">cnt1</var></p>
+<p class="p">For example, if, in the same store, the number of times that a customer buys both milk (item1) and butter (item2) is 3 (cntb) and the number of times that a customer buys milk is 4 (cnt1), then the confidence that a person who buys milk will also buy butter is 3/4 = 0.75 = 75%.</p>
+</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e347 ">lift</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e349 ">DOUBLE PRECISION</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d414327e351 ">Ratio of observed support value to expected support value if item1 and item2 were independent; that is:<p class="p">support(item1 and item2) / [support(item1) * support(item2)]</p>
+<p class="p">Value is calculated with this formula:</p>
+<p class="p">(<var class="keyword varname">cntb</var>/<var class="keyword varname">tran_cnt</var>) / [(<var class="keyword varname">cnt1</var>/<var class="keyword varname">tran_cnt</var>) * (<var class="keyword varname">cnt2</var>/<var class="keyword varname">tran_cnt</var>)]</p>
+<p class="p">If Lift &gt; 1, the occurrence of item1 or item2 has a positive effect on the occurrence of the other items.</p>
+<p class="p">If Lift = 1, the occurrence of item1 or item2 has a no effect on the occurrence of the other items.</p>
+<p class="p">If Lift &lt; 1, the occurrence of item1 or item2 has a negative effect on the occurrence of the other items.</p>
+</td>
+</tr>
+<tr class="row"><td class="entry row-nocellborder" style="vertical-align:top;" headers="d414327e347 ">z_score</td>
+<td class="entry row-nocellborder" style="vertical-align:top;" headers="d414327e349 ">DOUBLE PRECISION</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e351 ">Significance of co-occurrence, assuming that cntb follows a normal distribution, calculated with this formula:<p class="p">(<var class="keyword varname">cntb</var> - mean(<var class="keyword varname">cntb</var>)) / sd(<var class="keyword varname">cntb</var>)</p>
+<p class="p">If all <var class="keyword varname">cntb</var> values are equal, then sd(<var class="keyword varname">cntb</var>) is 0, and function does not calculate zscore.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="topic reference nested2" aria-labelledby="ariaid-title6" topicindex="6" topicid="xly1507746612839" xml:lang="en-us" lang="en-us" id="xly1507746612839"><h3 class="title topictitle3" id="ariaid-title6">Deleting Duplicate Output Table Rows</h3>
+<div class="body refbody"><div class="section" id="xly1507746612839__section_N1000E_N1000C_N10001"><p class="p">Duplicate output table rows appear because each pair of items appears in two rows—one row has item1 in col1_item1 and item2 in col1_item2, and the other row has item2 in col1_item1 and item1 in col1_item2. To delete duplicate output table rows, use this code (where <var class="keyword varname">output_table</var> is the output table name):</p>
+<pre class="pre codeblock"><code>DROP TABLE copy;
+
+CREATE MULTISET TABLE copy AS (
+  SELECT *, ROW_NUMBER() OVER(ORDER BY col1_item1, col1_item2) rn
+  FROM <var class="keyword varname">output_table</var>
+) WITH DATA;
+
+DROP TABLE DuplicatesRemoved;
+
+CREATE MULTISET TABLE DuplicatesRemoved AS (
+  SELECT * FROM copy
+) WITH DATA;
+
+DELETE FROM DuplicatesRemoved WHERE rn IN (
+  SELECT a.rn FROM DuplicatesRemoved a
+  JOIN copy b
+  ON a.col1_item1=b.col1_item2 AND a.col1_item2=b.col1_item1 AND a.rn &lt; b.rn
+);
+
+DROP TABLE copy;</code></pre>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="xly1507746612839__table_N1001C_N1000E_N1000C_N10001" class="table" frame="border" border="1" rules="all"><div class="caption"><span class="tablecap">CFilter DuplicatesRemoved Table Schema</span></div><colgroup><col style="width:17.24137931034483%" /><col style="width:13.793103448275861%" /><col style="width:68.96551724137932%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry nocellnorowborder" style="vertical-align:top;" id="d414327e542">Column</th>
+<th class="entry nocellnorowborder" style="vertical-align:top;" id="d414327e544">Data Type</th>
+<th class="entry cell-norowborder" style="vertical-align:top;" id="d414327e546">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e542 ">col1_item1</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e544 ">VARCHAR</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d414327e546 ">Name of item1.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e542 ">col1_item2</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d414327e544 ">VARCHAR</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d414327e546 ">Name of item2.</td>
+</tr>
+<tr class="row"><td class="entry row-nocellborder" style="vertical-align:top;" headers="d414327e542 ">rn</td>
+<td class="entry row-nocellborder" style="vertical-align:top;" headers="d414327e544 ">INTEGER</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e546 ">Row number in <var class="keyword varname">output_table</var> when ordered by col1_item1, col1_item2.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="topic concept nested1" aria-labelledby="ariaid-title7" topicindex="7" topicid="qmc1510706307192" xml:lang="en-us" lang="en-us" id="qmc1510706307192"><h2 class="title topictitle2" id="ariaid-title7">CFilter Examples</h2>
+<div class="topic reference nested2" aria-labelledby="ariaid-title8" topicindex="8" topicid="pmm1507746620724" xml:lang="en-us" lang="en-us" id="pmm1507746620724"><h3 class="title topictitle3" id="ariaid-title8">CFilter Example: Filter by Product</h3>
+<div class="body refbody"><div class="section" id="pmm1507746620724__section_N10011_N1000E_N10001"><p class="p">Collaborative filtering by product is also called item-based collaborative filtering. In this example, JoinColumns = 'orderid'. The function tries to identify products that are often bought in the same transaction (as identified by the order_id).</p>
+</div>
+<div class="section" id="pmm1507746620724__section_zsv_22r_t2b"><h4 class="title sectiontitle">Input</h4>The InputTable has sales transaction data from an office supply chain store, in these columns:
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="pmm1507746620724__table_a3y_32r_t2b" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:50%" /><col style="width:50%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d414327e614">Column</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d414327e616">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e614 ">orderid</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e616 ">Order (transaction) identifier</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e614 ">orderdate</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e616 ">Order date</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e614 ">orderqty</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e616 ">Quantity of product ordered</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e614 ">region</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e616 ">Geographic region of store where order was placed</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e614 ">customer_segment</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e616 ">Segment of customer who ordered product</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e614 ">prd_category</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e616 ">Category of product ordered</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e614 ">product</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e616 ">Product ordered</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="pmm1507746620724__table_jw1_p2r_t2b" class="table" frame="border" border="1" rules="all"><div class="caption"><span class="tablecap">InputTable: sales_transaction</span></div><colgroup><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d414327e667">orderid</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d414327e669">orderdate</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d414327e671">orderqty</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d414327e673">region</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d414327e675">customer_segment</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d414327e677">prd_category</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d414327e679">product</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e667 ">3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e669 ">2010-10-13 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e671 ">6</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e673 ">Nunavut</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e675 ">Small Business</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e677 ">Office Supplies</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e679 ">Storage &amp; Organization</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e667 ">293</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e669 ">2012-10-01 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e671 ">49</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e673 ">Nunavut</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e675 ">Consumer</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e677 ">Office Supplies</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e679 ">Appliances</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e667 ">293</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e669 ">2012-10-01 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e671 ">27</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e673 ">Nunavut</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e675 ">Consumer</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e677 ">Office Supplies</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e679 ">Binders and Binder Accessories</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e667 ">483</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e669 ">2011-07-10 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e671 ">30</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e673 ">Nunavut</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e675 ">Corporate</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e677 ">Technology</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e679 ">Telephones and Communication</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e667 ">515</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e669 ">2010-08-28 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e671 ">19</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e673 ">Nunavut</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e675 ">Consumer</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e677 ">Office Supplies</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e679 ">Appliances</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e667 ">515</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e669 ">2010-08-28 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e671 ">21</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e673 ">Nunavut</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e675 ">Consumer</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e677 ">Furniture</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e679 ">Office Furnishings</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e667 ">613</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e669 ">2011-06-17 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e671 ">12</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e673 ">Nunavut</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e675 ">Corporate</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e677 ">Office Supplies</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e679 ">Binders and Binder Accessories</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e667 ">613</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e669 ">2011-06-17 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e671 ">22</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e673 ">Nunavut</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e675 ">Corporate</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e677 ">Office Supplies</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e679 ">Storage &amp; Organization</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e667 ">643</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e669 ">2011-03-24 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e671 ">21</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e673 ">Nunavut</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e675 ">Corporate</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e677 ">Office Supplies</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e679 ">Storage &amp; Organization</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e667 ">678</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e669 ">2010-02-26 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e671 ">44</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e673 ">Nunavut</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e675 ">Home Office</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e677 ">Office Supplies</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e679 ">Paper</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e667 ">807</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e669 ">2010-11-23 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e671 ">45</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e673 ">Nunavut</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e675 ">Home Office</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e677 ">Office Supplies</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e679 ">Paper</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e667 ">807</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e669 ">2010-11-23 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e671 ">32</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e673 ">Nunavut</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e675 ">Home Office</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e677 ">Office Supplies</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e679 ">Rubber Bands</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e667 ">868</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e669 ">2012-06-08 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e671 ">32</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e673 ">Nunavut</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e675 ">Home Office</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e677 ">Office Supplies</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e679 ">Appliances</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e667 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e669 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e671 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e673 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e675 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e677 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d414327e679 ">...</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="pmm1507746620724__section_wmm_ryq_tdb"><h4 class="title sectiontitle">SQL Call</h4><pre class="pre codeblock"><code>SELECT * FROM CFilter (
+  ON sales_transaction AS InputTable
+  OUT TABLE OutputTable (cfilter_output)
+  USING
+  TargetColumns ('product')
+  JoinColumns ('orderid')
+  PartitionColumns ('region')
+) AS dt;</code></pre></div>
+<div class="section" id="pmm1507746620724__section_q1y_ryq_tdb"><h4 class="title sectiontitle">Output</h4><pre class="pre screen">              message              
+-----------------------------------
+ Output table created successfully
+(1 row)</pre>
+<pre class="pre codeblock"><code>SELECT * FROM cfilter_output;</code></pre><p class="p">Because all cntb values are equal, no z-scores appear.</p>
+<pre class="pre screen"> region                col1_item1                     col1_item2                     cntb cnt1 cnt2 score                 support               confidence           lift                z_score             
+ --------------------- ------------------------------ ------------------------------ ---- ---- ---- --------------------- --------------------- -------------------- ------------------- ------------------- 
+ northwest territories binders and binder accessories labels                            2   44   16  0.005681818181818182  0.007434944237918215 0.045454545454545456  0.7642045454545454 0.12784297268860556
+ northwest territories tables                         labels                            1   12   16  0.005208333333333333 0.0037174721189591076  0.08333333333333333  1.4010416666666667 -0.8522864845907044
+ northwest territories computer peripherals           labels                            1   30   16 0.0020833333333333333 0.0037174721189591076  0.03333333333333333  0.5604166666666667 -0.8522864845907044
+ nunavut               tables                         bookcases                         1    1    2                   0.5  0.017857142857142856                  1.0                28.0 -0.4588314677411239
+ northwest territories binders and binder accessories tables                            2   44   12  0.007575757575757576  0.007434944237918215 0.045454545454545456   1.018939393939394 0.12784297268860556
+ nunavut               labels                         rubber bands                      1    4    2                 0.125  0.017857142857142856                 0.25                 7.0 -0.4588314677411239
+ nunavut               binders and binder accessories computer peripherals              1   10    6  0.016666666666666666  0.017857142857142856                  0.1  0.9333333333333333 -0.4588314677411239
+ northwest territories labels                         binders and binder accessories    2   16   44  0.005681818181818182  0.007434944237918215                0.125  0.7642045454545454 0.12784297268860556
+ northwest territories binders and binder accessories rubber bands                      3   44   10  0.020454545454545454  0.011152416356877323  0.06818181818181818   1.834090909090909  1.1079724299679155
+ northwest territories labels                         paper                             2   16   40               0.00625  0.007434944237918215                0.125            0.840625 0.12784297268860556
+ northwest territories computer peripherals           binders and binder accessories    3   30   44  0.006818181818181818  0.011152416356877323                  0.1  0.6113636363636363  1.1079724299679155
+ atlantic              labels                         pens &amp; art supplies               1    3    2   0.16666666666666666   0.05555555555555555   0.3333333333333333                 3.0                NULL
+ nunavut               computer peripherals           bookcases                         1    6    2   0.08333333333333333  0.017857142857142856  0.16666666666666666   4.666666666666667 -0.4588314677411239
+ northwest territories tables                         storage &amp; organization            3   12   29   0.02586206896551724  0.011152416356877323                 0.25  2.3189655172413794  1.1079724299679155
+ northwest territories bookcases                      computer peripherals              1   11   30 0.0030303030303030303 0.0037174721189591076  0.09090909090909091  0.8151515151515152 -0.8522864845907044
+ nunavut               labels                         telephones and communication      2    4    7   0.14285714285714285   0.03571428571428571                  0.5                 4.0   2.179449471770337
+ northwest territories rubber bands                   binders and binder accessories    3   10   44  0.020454545454545454  0.011152416356877323                  0.3   1.834090909090909  1.1079724299679155
+ northwest territories tables                         office furnishings                1   12   38 0.0021929824561403508 0.0037174721189591076  0.08333333333333333  0.5899122807017544 -0.8522864845907044
+ northwest territories bookcases                      binders and binder accessories    2   11   44  0.008264462809917356  0.007434944237918215  0.18181818181818182  1.1115702479338843 0.12784297268860556
+ northwest territories tables                         chairs &amp; chairmats                2   12   22  0.015151515151515152  0.007434944237918215  0.16666666666666666   2.037878787878788 0.12784297268860556
+ northwest territories binders and binder accessories envelopes                         2   44    9  0.010101010101010102  0.007434944237918215 0.045454545454545456  1.3585858585858586 0.12784297268860556
+ northwest territories envelopes                      labels                            1    9   16  0.006944444444444444 0.0037174721189591076   0.1111111111111111  1.8680555555555556 -0.8522864845907044
+ nunavut               rubber bands                   paper                             2    2   12   0.16666666666666666   0.03571428571428571                  1.0   4.666666666666667   2.179449471770337
+ northwest territories envelopes                      binders and binder accessories    2    9   44  0.010101010101010102  0.007434944237918215   0.2222222222222222  1.3585858585858586 0.12784297268860556
+ northwest territories binders and binder accessories pens &amp; art supplies               1   44   23  9.881422924901185E-4 0.0037174721189591076 0.022727272727272728  0.2658102766798419 -0.8522864845907044
+ northwest territories envelopes                      office machines                   2    9   23   0.01932367149758454  0.007434944237918215   0.2222222222222222  2.5990338164251208 0.12784297268860556
+ northwest territories computer peripherals           telephones and communication      3   30   40                0.0075  0.011152416356877323                  0.1              0.6725  1.1079724299679155
+ northwest territories labels                         tables                            1   16   12  0.005208333333333333 0.0037174721189591076               0.0625  1.4010416666666667 -0.8522864845907044
+ northwest territories bookcases                      paper                             1   11   40 0.0022727272727272726 0.0037174721189591076  0.09090909090909091  0.6113636363636363 -0.8522864845907044
+ northwest territories copiers and fax                binders and binder accessories    1    3   44  0.007575757575757576 0.0037174721189591076   0.3333333333333333   2.037878787878788 -0.8522864845907044
+ nunavut               computer peripherals           appliances                        1    6    6  0.027777777777777776  0.017857142857142856  0.16666666666666666  1.5555555555555556 -0.4588314677411239
+ northwest territories tables                         binders and binder accessories    2   12   44  0.007575757575757576  0.007434944237918215  0.16666666666666666   1.018939393939394 0.12784297268860556
+ nunavut               computer peripherals           office furnishings                1    6    5   0.03333333333333333  0.017857142857142856  0.16666666666666666  1.8666666666666667 -0.4588314677411239
+ northwest territories labels                         computer peripherals              1   16   30 0.0020833333333333333 0.0037174721189591076               0.0625  0.5604166666666667 -0.8522864845907044
+ northwest territories computer peripherals           chairs &amp; chairmats                3   30   22  0.013636363636363636  0.011152416356877323                  0.1  1.2227272727272727  1.1079724299679155
+ northwest territories labels                         envelopes                         1   16    9  0.006944444444444444 0.0037174721189591076               0.0625  1.8680555555555556 -0.8522864845907044
+ nunavut               binders and binder accessories office furnishings                1   10    5                  0.02  0.017857142857142856                  0.1                1.12 -0.4588314677411239
+ nunavut               labels                         paper                             1    4   12  0.020833333333333332  0.017857142857142856                 0.25  1.1666666666666667 -0.4588314677411239
+ northwest territories binders and binder accessories chairs &amp; chairmats                2   44   22  0.004132231404958678  0.007434944237918215 0.045454545454545456  0.5557851239669421 0.12784297268860556
+ northwest territories tables                         paper                             1   12   40 0.0020833333333333333 0.0037174721189591076  0.08333333333333333  0.5604166666666667 -0.8522864845907044
+ northwest territories rubber bands                   office machines                   1   10   23  0.004347826086956522 0.0037174721189591076                  0.1  1.1695652173913043 -0.8522864845907044
+ northwest territories labels                         telephones and communication      1   16   40             0.0015625 0.0037174721189591076               0.0625           0.4203125 -0.8522864845907044
+ northwest territories bookcases                      appliances                        1   11   17    0.0053475935828877 0.0037174721189591076  0.09090909090909091  1.4385026737967914 -0.8522864845907044
+ northwest territories labels                         pens &amp; art supplies               3   16   23  0.024456521739130436  0.011152416356877323               0.1875   2.192934782608696  1.1079724299679155
+ nunavut               binders and binder accessories storage &amp; organization            1   10    6  0.016666666666666666  0.017857142857142856                  0.1  0.9333333333333333 -0.4588314677411239
+ northwest territories copiers and fax                storage &amp; organization            2    3   29   0.04597701149425287  0.007434944237918215   0.6666666666666666   6.183908045977011 0.12784297268860556
+ northwest territories computer peripherals           paper                             5   30   40  0.020833333333333332   0.01858736059479554  0.16666666666666666  1.1208333333333333  3.0682313445265352
+ northwest territories tables                         pens &amp; art supplies               1   12   23 0.0036231884057971015 0.0037174721189591076  0.08333333333333333  0.9746376811594203 -0.8522864845907044
+ northwest territories computer peripherals           storage &amp; organization            3   30   29  0.010344827586206896  0.011152416356877323                  0.1  0.9275862068965517  1.1079724299679155
+ northwest territories envelopes                      computer peripherals              2    9   30  0.014814814814814815  0.007434944237918215   0.2222222222222222  1.9925925925925927 0.12784297268860556
+ nunavut               bookcases                      office furnishings                1    2    5                   0.1  0.017857142857142856                  0.5                 5.6 -0.4588314677411239
+ northwest territories envelopes                      appliances                        1    9   17  0.006535947712418301 0.0037174721189591076   0.1111111111111111  1.7581699346405228 -0.8522864845907044
+ atlantic              binders and binder accessories office furnishings                1    3    5   0.06666666666666667   0.05555555555555555   0.3333333333333333                 1.2                NULL
+ atlantic              computer peripherals           chairs &amp; chairmats                1    2    2                  0.25   0.05555555555555555                  0.5                 4.5                NULL
+ atlantic              computer peripherals           office furnishings                1    2    5                   0.1   0.05555555555555555                  0.5                 1.8                NULL
+ northwest territories paper                          tables                            1   40   12 0.0020833333333333333 0.0037174721189591076                0.025  0.5604166666666667 -0.8522864845907044
+ northwest territories pens &amp; art supplies            labels                            3   23   16  0.024456521739130436  0.011152416356877323  0.13043478260869565   2.192934782608696  1.1079724299679155
+ northwest territories storage &amp; organization         tables                            3   29   12   0.02586206896551724  0.011152416356877323  0.10344827586206896  2.3189655172413794  1.1079724299679155
+ northwest territories paper                          labels                            2   40   16               0.00625  0.007434944237918215                 0.05            0.840625 0.12784297268860556
+ northwest territories telephones and communication   labels                            1   40   16             0.0015625 0.0037174721189591076                0.025           0.4203125 -0.8522864845907044
+ atlantic              pens &amp; art supplies            labels                            1    2    3   0.16666666666666666   0.05555555555555555                  0.5                 3.0                NULL
+ northwest territories chairs &amp; chairmats             computer peripherals              3   22   30  0.013636363636363636  0.011152416356877323  0.13636363636363635  1.2227272727272727  1.1079724299679155
+ atlantic              office furnishings             computer peripherals              1    5    2                   0.1   0.05555555555555555                  0.2                 1.8                NULL
+ northwest territories chairs &amp; chairmats             rubber bands                      1   22   10  0.004545454545454545 0.0037174721189591076 0.045454545454545456  1.2227272727272727 -0.8522864845907044
+ nunavut               appliances                     computer peripherals              1    6    6  0.027777777777777776  0.017857142857142856  0.16666666666666666  1.5555555555555556 -0.4588314677411239
+ northwest territories office machines                rubber bands                      1   23   10  0.004347826086956522 0.0037174721189591076 0.043478260869565216  1.1695652173913043 -0.8522864845907044
+ northwest territories appliances                     bookcases                         1   17   11    0.0053475935828877 0.0037174721189591076 0.058823529411764705  1.4385026737967914 -0.8522864845907044
+ northwest territories storage &amp; organization         computer peripherals              3   29   30  0.010344827586206896  0.011152416356877323  0.10344827586206896  0.9275862068965517  1.1079724299679155
+ nunavut               chairs &amp; chairmats             binders and binder accessories    1    5   10                  0.02  0.017857142857142856                  0.2                1.12 -0.4588314677411239
+ northwest territories chairs &amp; chairmats             bookcases                         1   22   11  0.004132231404958678 0.0037174721189591076 0.045454545454545456  1.1115702479338843 -0.8522864845907044
+ northwest territories office furnishings             rubber bands                      1   38   10  0.002631578947368421 0.0037174721189591076  0.02631578947368421  0.7078947368421052 -0.8522864845907044
+ nunavut               office furnishings             computer peripherals              1    5    6   0.03333333333333333  0.017857142857142856                  0.2  1.8666666666666667 -0.4588314677411239
+ northwest territories scissors, rulers and trimmers  computer peripherals              1    9   30  0.003703703703703704 0.0037174721189591076   0.1111111111111111  0.9962962962962963 -0.8522864845907044
+ northwest territories paper                          bookcases                         1   40   11 0.0022727272727272726 0.0037174721189591076                0.025  0.6113636363636363 -0.8522864845907044
+ nunavut               paper                          binders and binder accessories    2   12   10   0.03333333333333333   0.03571428571428571  0.16666666666666666  0.9333333333333333   2.179449471770337
+ northwest territories office furnishings             bookcases                         1   38   11 0.0023923444976076554 0.0037174721189591076  0.02631578947368421  0.6435406698564593 -0.8522864845907044
+ nunavut               office furnishings             binders and binder accessories    1    5   10                  0.02  0.017857142857142856                  0.2                1.12 -0.4588314677411239
+ northwest territories telephones and communication   binders and binder accessories    4   40   44   0.00909090909090909   0.01486988847583643                  0.1  0.6113636363636363  2.0881018872472255
+ northwest territories paper                          computer peripherals              5   40   30  0.020833333333333332   0.01858736059479554                0.125  1.1208333333333333  3.0682313445265352
+ nunavut               paper                          rubber bands                      2   12    2   0.16666666666666666   0.03571428571428571  0.16666666666666666   4.666666666666667   2.179449471770337
+ northwest territories office machines                envelopes                         2   23    9   0.01932367149758454  0.007434944237918215  0.08695652173913043  2.5990338164251208 0.12784297268860556
+ nunavut               telephones and communication   paper                             1    7   12  0.011904761904761904  0.017857142857142856  0.14285714285714285  0.6666666666666666 -0.4588314677411239
+ northwest territories pens &amp; art supplies            telephones and communication      2   23   40  0.004347826086956522  0.007434944237918215  0.08695652173913043  0.5847826086956521 0.12784297268860556
+ northwest territories office machines                pens &amp; art supplies               3   23   23  0.017013232514177693  0.011152416356877323  0.13043478260869565  1.5255198487712665  1.1079724299679155
+ northwest territories office furnishings             storage &amp; organization            2   38   29  0.003629764065335753  0.007434944237918215  0.05263157894736842  0.4882032667876588 0.12784297268860556
+ northwest territories scissors, rulers and trimmers  paper                             2    9   40  0.011111111111111112  0.007434944237918215   0.2222222222222222  1.4944444444444445 0.12784297268860556
+ atlantic              paper                          office furnishings                1    4    5                  0.05   0.05555555555555555                 0.25                 0.9                NULL
+ northwest territories pens &amp; art supplies            scissors, rulers and trimmers     1   23    9  0.004830917874396135 0.0037174721189591076 0.043478260869565216  1.2995169082125604 -0.8522864845907044
+ northwest territories chairs &amp; chairmats             appliances                        1   22   17   0.00267379679144385 0.0037174721189591076 0.045454545454545456  0.7192513368983957 -0.8522864845907044
+ northwest territories chairs &amp; chairmats             office furnishings                2   22   38  0.004784688995215311  0.007434944237918215  0.09090909090909091  0.6435406698564593 0.12784297268860556
+ northwest territories storage &amp; organization         pens &amp; art supplies               1   29   23 0.0014992503748125937 0.0037174721189591076 0.034482758620689655  0.4032983508245877 -0.8522864845907044
+ atlantic              storage &amp; organization         paper                             1    1    4                  0.25   0.05555555555555555                  1.0                 4.5                NULL
+ northwest territories pens &amp; art supplies            office furnishings                3   23   38  0.010297482837528604  0.011152416356877323  0.13043478260869565  0.9233409610983981  1.1079724299679155
+ northwest territories appliances                     chairs &amp; chairmats                1   17   22   0.00267379679144385 0.0037174721189591076 0.058823529411764705  0.7192513368983957 -0.8522864845907044
+ northwest territories storage &amp; organization         telephones and communication      5   29   40  0.021551724137931036   0.01858736059479554   0.1724137931034483  1.1594827586206897  3.0682313445265352
+ northwest territories appliances                     storage &amp; organization            1   17   29  0.002028397565922921 0.0037174721189591076 0.058823529411764705  0.5456389452332657 -0.8522864845907044
+ northwest territories appliances                     paper                             1   17   40 0.0014705882352941176 0.0037174721189591076 0.058823529411764705 0.39558823529411763 -0.8522864845907044
+ northwest territories paper                          chairs &amp; chairmats                2   40   22  0.004545454545454545  0.007434944237918215                 0.05  0.6113636363636363 0.12784297268860556
+ northwest territories pens &amp; art supplies            storage &amp; organization            1   23   29 0.0014992503748125937 0.0037174721189591076 0.043478260869565216  0.4032983508245877 -0.8522864845907044
+ nunavut               paper                          office furnishings                1   12    5  0.016666666666666666  0.017857142857142856  0.08333333333333333  0.9333333333333333 -0.4588314677411239
+ northwest territories pens &amp; art supplies            paper                             1   23   40 0.0010869565217391304 0.0037174721189591076 0.043478260869565216 0.29239130434782606 -0.8522864845907044
+ atlantic              storage &amp; organization         office furnishings                1    1    5                   0.2   0.05555555555555555                  1.0                 3.6                NULL
+ northwest territories telephones and communication   pens &amp; art supplies               2   40   23  0.004347826086956522  0.007434944237918215                 0.05  0.5847826086956521 0.12784297268860556
+ nunavut               chairs &amp; chairmats             paper                             1    5   12  0.016666666666666666  0.017857142857142856                  0.2  0.9333333333333333 -0.4588314677411239
+ northwest territories office machines                storage &amp; organization            1   23   29 0.0014992503748125937 0.0037174721189591076 0.043478260869565216  0.4032983508245877 -0.8522864845907044
+ northwest territories office furnishings             pens &amp; art supplies               3   38   23  0.010297482837528604  0.011152416356877323  0.07894736842105263  0.9233409610983981  1.1079724299679155
+ northwest territories office furnishings             scissors, rulers and trimmers     1   38    9 0.0029239766081871343 0.0037174721189591076  0.02631578947368421  0.7865497076023392 -0.8522864845907044
+ northwest territories paper                          scissors, rulers and trimmers     2   40    9  0.011111111111111112  0.007434944237918215                 0.05  1.4944444444444445 0.12784297268860556
+ atlantic              paper                          storage &amp; organization            1    4    1                  0.25   0.05555555555555555                 0.25                 4.5                NULL
+ northwest territories paper                          appliances                        1   40   17 0.0014705882352941176 0.0037174721189591076                0.025 0.39558823529411763 -0.8522864845907044
+ northwest territories storage &amp; organization         paper                             4   29   40  0.013793103448275862   0.01486988847583643  0.13793103448275862  0.9275862068965517  2.0881018872472255
+ northwest territories telephones and communication   office furnishings                3   40   38 0.0059210526315789476  0.011152416356877323                0.075   0.530921052631579  1.1079724299679155
+ nunavut               paper                          telephones and communication      1   12    7  0.011904761904761904  0.017857142857142856  0.08333333333333333  0.6666666666666666 -0.4588314677411239
+ nunavut               bookcases                      tables                            1    2    1                   0.5  0.017857142857142856                  0.5                28.0 -0.4588314677411239
+ northwest territories binders and binder accessories copiers and fax                   1   44    3  0.007575757575757576 0.0037174721189591076 0.022727272727272728   2.037878787878788 -0.8522864845907044
+ nunavut               rubber bands                   labels                            1    2    4                 0.125  0.017857142857142856                  0.5                 7.0 -0.4588314677411239
+ northwest territories binders and binder accessories computer peripherals              3   44   30  0.006818181818181818  0.011152416356877323  0.06818181818181818  0.6113636363636363  1.1079724299679155
+ nunavut               binders and binder accessories rubber bands                      1   10    2                  0.05  0.017857142857142856                  0.1                 2.8 -0.4588314677411239
+ northwest territories computer peripherals           bookcases                         1   30   11 0.0030303030303030303 0.0037174721189591076  0.03333333333333333  0.8151515151515152 -0.8522864845907044
+ nunavut               computer peripherals           binders and binder accessories    1    6   10  0.016666666666666666  0.017857142857142856  0.16666666666666666  0.9333333333333333 -0.4588314677411239
+ northwest territories binders and binder accessories bookcases                         2   44   11  0.008264462809917356  0.007434944237918215 0.045454545454545456  1.1115702479338843 0.12784297268860556
+ nunavut               bookcases                      computer peripherals              1    2    6   0.08333333333333333  0.017857142857142856                  0.5   4.666666666666667 -0.4588314677411239
+ nunavut               rubber bands                   binders and binder accessories    1    2   10                  0.05  0.017857142857142856                  0.5                 2.8 -0.4588314677411239
+ northwest territories computer peripherals           envelopes                         2   30    9  0.014814814814814815  0.007434944237918215  0.06666666666666667  1.9925925925925927 0.12784297268860556
+ northwest territories rubber bands                   paper                             2   10   40                  0.01  0.007434944237918215                  0.2               1.345 0.12784297268860556
+ northwest territories binders and binder accessories office machines                   3   44   23  0.008893280632411068  0.011152416356877323  0.06818181818181818  0.7974308300395256  1.1079724299679155
+ northwest territories computer peripherals           scissors, rulers and trimmers     1   30    9  0.003703703703703704 0.0037174721189591076  0.03333333333333333  0.9962962962962963 -0.8522864845907044
+ nunavut               binders and binder accessories appliances                        2   10    6   0.06666666666666667   0.03571428571428571                  0.2  1.8666666666666667   2.179449471770337
+ northwest territories computer peripherals           appliances                        1   30   17   0.00196078431372549 0.0037174721189591076  0.03333333333333333  0.5274509803921569 -0.8522864845907044
+ northwest territories binders and binder accessories telephones and communication      4   44   40   0.00909090909090909   0.01486988847583643  0.09090909090909091  0.6113636363636363  2.0881018872472255
+ northwest territories computer peripherals           office furnishings                2   30   38 0.0035087719298245615  0.007434944237918215  0.06666666666666667 0.47192982456140353 0.12784297268860556
+ northwest territories binders and binder accessories office furnishings                4   44   38  0.009569377990430622   0.01486988847583643  0.09090909090909091  0.6435406698564593  2.0881018872472255
+ nunavut               binders and binder accessories chairs &amp; chairmats                1   10    5                  0.02  0.017857142857142856                  0.1                1.12 -0.4588314677411239
+ nunavut               binders and binder accessories paper                             2   10   12   0.03333333333333333   0.03571428571428571                  0.2  0.9333333333333333   2.179449471770337
+ northwest territories rubber bands                   pens &amp; art supplies               2   10   23  0.017391304347826087  0.007434944237918215                  0.2  2.3391304347826085 0.12784297268860556
+ northwest territories binders and binder accessories paper                             2   44   40 0.0022727272727272726  0.007434944237918215 0.045454545454545456 0.30568181818181817 0.12784297268860556
+ northwest territories binders and binder accessories storage &amp; organization            1   44   29  7.836990595611285E-4 0.0037174721189591076 0.022727272727272728 0.21081504702194356 -0.8522864845907044
+ nunavut               computer peripherals           paper                             1    6   12  0.013888888888888888  0.017857142857142856  0.16666666666666666  0.7777777777777778 -0.4588314677411239
+ northwest territories bookcases                      office furnishings                1   11   38 0.0023923444976076554 0.0037174721189591076  0.09090909090909091  0.6435406698564593 -0.8522864845907044
+ northwest territories bookcases                      chairs &amp; chairmats                1   11   22  0.004132231404958678 0.0037174721189591076  0.09090909090909091  1.1115702479338843 -0.8522864845907044
+ northwest territories rubber bands                   chairs &amp; chairmats                1   10   22  0.004545454545454545 0.0037174721189591076                  0.1  1.2227272727272727 -0.8522864845907044
+ nunavut               rubber bands                   office furnishings                1    2    5                   0.1  0.017857142857142856                  0.5                 5.6 -0.4588314677411239
+ northwest territories rubber bands                   office furnishings                1   10   38  0.002631578947368421 0.0037174721189591076                  0.1  0.7078947368421052 -0.8522864845907044
+ northwest territories storage &amp; organization         copiers and fax                   2   29    3   0.04597701149425287  0.007434944237918215  0.06896551724137931   6.183908045977011 0.12784297268860556
+ northwest territories office furnishings             tables                            1   38   12 0.0021929824561403508 0.0037174721189591076  0.02631578947368421  0.5899122807017544 -0.8522864845907044
+ nunavut               paper                          labels                            1   12    4  0.020833333333333332  0.017857142857142856  0.08333333333333333  1.1666666666666667 -0.4588314677411239
+ nunavut               telephones and communication   labels                            2    7    4   0.14285714285714285   0.03571428571428571   0.2857142857142857                 4.0   2.179449471770337
+ northwest territories chairs &amp; chairmats             tables                            2   22   12  0.015151515151515152  0.007434944237918215  0.09090909090909091   2.037878787878788 0.12784297268860556
+ northwest territories pens &amp; art supplies            tables                            1   23   12 0.0036231884057971015 0.0037174721189591076 0.043478260869565216  0.9746376811594203 -0.8522864845907044
+ northwest territories pens &amp; art supplies            rubber bands                      2   23   10  0.017391304347826087  0.007434944237918215  0.08695652173913043  2.3391304347826085 0.12784297268860556
+ nunavut               storage &amp; organization         binders and binder accessories    1    6   10  0.016666666666666666  0.017857142857142856  0.16666666666666666  0.9333333333333333 -0.4588314677411239
+ northwest territories storage &amp; organization         binders and binder accessories    1   29   44  7.836990595611285E-4 0.0037174721189591076 0.034482758620689655 0.21081504702194356 -0.8522864845907044
+ northwest territories appliances                     computer peripherals              1   17   30   0.00196078431372549 0.0037174721189591076 0.058823529411764705  0.5274509803921569 -0.8522864845907044
+ northwest territories pens &amp; art supplies            binders and binder accessories    1   23   44  9.881422924901185E-4 0.0037174721189591076 0.043478260869565216  0.2658102766798419 -0.8522864845907044
+ nunavut               appliances                     binders and binder accessories    2    6   10   0.06666666666666667   0.03571428571428571   0.3333333333333333  1.8666666666666667   2.179449471770337
+ northwest territories office machines                binders and binder accessories    3   23   44  0.008893280632411068  0.011152416356877323  0.13043478260869565  0.7974308300395256  1.1079724299679155
+ northwest territories chairs &amp; chairmats             binders and binder accessories    2   22   44  0.004132231404958678  0.007434944237918215  0.09090909090909091  0.5557851239669421 0.12784297268860556
+ atlantic              office furnishings             binders and binder accessories    1    5    3   0.06666666666666667   0.05555555555555555                  0.2                 1.2                NULL
+ nunavut               office furnishings             rubber bands                      1    5    2                   0.1  0.017857142857142856                  0.2                 5.6 -0.4588314677411239
+ northwest territories office furnishings             computer peripherals              2   38   30 0.0035087719298245615  0.007434944237918215  0.05263157894736842 0.47192982456140353 0.12784297268860556
+ northwest territories paper                          binders and binder accessories    2   40   44 0.0022727272727272726  0.007434944237918215                 0.05 0.30568181818181817 0.12784297268860556
+ northwest territories telephones and communication   computer peripherals              3   40   30                0.0075  0.011152416356877323                0.075              0.6725  1.1079724299679155
+ atlantic              chairs &amp; chairmats             computer peripherals              1    2    2                  0.25   0.05555555555555555                  0.5                 4.5                NULL
+ northwest territories office furnishings             binders and binder accessories    4   38   44  0.009569377990430622   0.01486988847583643  0.10526315789473684  0.6435406698564593  2.0881018872472255
+ nunavut               office furnishings             bookcases                         1    5    2                   0.1  0.017857142857142856                  0.2                 5.6 -0.4588314677411239
+ nunavut               paper                          computer peripherals              1   12    6  0.013888888888888888  0.017857142857142856  0.08333333333333333  0.7777777777777778 -0.4588314677411239
+ northwest territories paper                          rubber bands                      2   40   10                  0.01  0.007434944237918215                 0.05               1.345 0.12784297268860556
+ northwest territories appliances                     envelopes                         1   17    9  0.006535947712418301 0.0037174721189591076 0.058823529411764705  1.7581699346405228 -0.8522864845907044
+ northwest territories telephones and communication   paper                             2   40   40                0.0025  0.007434944237918215                 0.05             0.33625 0.12784297268860556
+ northwest territories telephones and communication   storage &amp; organization            5   40   29  0.021551724137931036   0.01858736059479554                0.125  1.1594827586206897  3.0682313445265352
+ northwest territories office furnishings             paper                             1   38   40  6.578947368421052E-4 0.0037174721189591076  0.02631578947368421  0.1769736842105263 -0.8522864845907044
+ nunavut               office furnishings             paper                             1    5   12  0.016666666666666666  0.017857142857142856                  0.2  0.9333333333333333 -0.4588314677411239
+ northwest territories storage &amp; organization         office furnishings                2   29   38  0.003629764065335753  0.007434944237918215  0.06896551724137931  0.4882032667876588 0.12784297268860556
+ northwest territories appliances                     office machines                   1   17   23 0.0025575447570332483 0.0037174721189591076 0.058823529411764705  0.6879795396419437 -0.8522864845907044
+ northwest territories appliances                     scissors, rulers and trimmers     1   17    9  0.006535947712418301 0.0037174721189591076 0.058823529411764705  1.7581699346405228 -0.8522864845907044
+ northwest territories pens &amp; art supplies            office machines                   3   23   23  0.017013232514177693  0.011152416356877323  0.13043478260869565  1.5255198487712665  1.1079724299679155
+ northwest territories office machines                appliances                        1   23   17 0.0025575447570332483 0.0037174721189591076 0.043478260869565216  0.6879795396419437 -0.8522864845907044
+ northwest territories storage &amp; organization         office machines                   1   29   23 0.0014992503748125937 0.0037174721189591076 0.034482758620689655  0.4032983508245877 -0.8522864845907044
+ northwest territories office machines                office furnishings                2   23   38  0.004576659038901602  0.007434944237918215  0.08695652173913043  0.6155606407322655 0.12784297268860556
+ northwest territories paper                          storage &amp; organization            4   40   29  0.013793103448275862   0.01486988847583643                  0.1  0.9275862068965517  2.0881018872472255
+ northwest territories storage &amp; organization         appliances                        1   29   17  0.002028397565922921 0.0037174721189591076 0.034482758620689655  0.5456389452332657 -0.8522864845907044
+ nunavut               appliances                     office furnishings                1    6    5   0.03333333333333333  0.017857142857142856  0.16666666666666666  1.8666666666666667 -0.4588314677411239
+ northwest territories office furnishings             telephones and communication      3   38   40 0.0059210526315789476  0.011152416356877323  0.07894736842105263   0.530921052631579  1.1079724299679155
+ nunavut               office furnishings             telephones and communication      1    5    7   0.02857142857142857  0.017857142857142856                  0.2                 1.6 -0.4588314677411239
+ atlantic              chairs &amp; chairmats             appliances                        1    2    2                  0.25   0.05555555555555555                  0.5                 4.5                NULL
+ nunavut               paper                          chairs &amp; chairmats                1   12    5  0.016666666666666666  0.017857142857142856  0.08333333333333333  0.9333333333333333 -0.4588314677411239
+ nunavut               office furnishings             appliances                        1    5    6   0.03333333333333333  0.017857142857142856                  0.2  1.8666666666666667 -0.4588314677411239
+ northwest territories scissors, rulers and trimmers  appliances                        1    9   17  0.006535947712418301 0.0037174721189591076   0.1111111111111111  1.7581699346405228 -0.8522864845907044
+ northwest territories paper                          office furnishings                1   40   38  6.578947368421052E-4 0.0037174721189591076                0.025  0.1769736842105263 -0.8522864845907044
+ atlantic              office furnishings             storage &amp; organization            1    5    1                   0.2   0.05555555555555555                  0.2                 3.6                NULL
+ atlantic              office furnishings             paper                             1    5    4                  0.05   0.05555555555555555                  0.2                 0.9                NULL
+ northwest territories scissors, rulers and trimmers  pens &amp; art supplies               1    9   23  0.004830917874396135 0.0037174721189591076   0.1111111111111111  1.2995169082125604 -0.8522864845907044
+ northwest territories chairs &amp; chairmats             paper                             2   22   40  0.004545454545454545  0.007434944237918215  0.09090909090909091  0.6113636363636363 0.12784297268860556
+ northwest territories office furnishings             office machines                   2   38   23  0.004576659038901602  0.007434944237918215  0.05263157894736842  0.6155606407322655 0.12784297268860556
+ northwest territories paper                          pens &amp; art supplies               1   40   23 0.0010869565217391304 0.0037174721189591076                0.025 0.29239130434782606 -0.8522864845907044
+ atlantic              appliances                     chairs &amp; chairmats                1    2    2                  0.25   0.05555555555555555                  0.5                 4.5                NULL
+ northwest territories scissors, rulers and trimmers  office furnishings                1    9   38 0.0029239766081871343 0.0037174721189591076   0.1111111111111111  0.7865497076023392 -0.8522864845907044
+ northwest territories office furnishings             chairs &amp; chairmats                2   38   22  0.004784688995215311  0.007434944237918215  0.05263157894736842  0.6435406698564593 0.12784297268860556
+ nunavut               telephones and communication   office furnishings                1    7    5   0.02857142857142857  0.017857142857142856  0.14285714285714285                 1.6 -0.4588314677411239
+ northwest territories paper                          telephones and communication      2   40   40                0.0025  0.007434944237918215                 0.05             0.33625 0.12784297268860556</pre>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="pmm1507746620724__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+</div>
+</div>
+<div class="topic reference nested2" aria-labelledby="ariaid-title9" topicindex="9" topicid="lzz1507746632895" xml:lang="en-us" lang="en-us" id="lzz1507746632895"><h3 class="title topictitle3" id="ariaid-title9">CFilter Example: Filter by Customer Segment</h3>
+<div class="body refbody"><div class="section" id="lzz1507746632895__section_N10011_N1000E_N10001"><p class="p">In this example, JoinColumns = 'product'. The function tries to identify segments of customers that often purchase the same products.</p>
+</div>
+<div class="section" id="lzz1507746632895__section_fvl_z2r_t2b"><h4 class="title sectiontitle">Input</h4><ul class="ul" id="lzz1507746632895__ul_c2b_1fr_t2b"><li class="li">InputTable: sales_transaction, as in <a class="xref" href="fmn1558545439769.html#pmm1507746620724" title="See example of Machine Learning Engine function CFilter that tries to identify products that are often bought in the same transaction.">CFilter Example: Filter by Product</a></li>
+</ul>
+</div>
+<div class="section" id="lzz1507746632895__section_wmm_ryq_tdb"><h4 class="title sectiontitle">SQL Call</h4><pre class="pre codeblock"><code>SELECT * FROM CFilter (
+  ON sales_transaction AS InputTable
+  OUT TABLE OutputTable (cfilter_output1)
+  USING
+  TargetColumns ('customer_segment')
+  JoinColumns ('product')
+) AS dt;</code></pre></div>
+<div class="section" id="lzz1507746632895__section_q1y_ryq_tdb"><h4 class="title sectiontitle">Output</h4><pre class="pre codeblock"><code>              message              
+-----------------------------------
+ Output table created successfully
+(1 row)</code></pre><pre class="pre codeblock"><code>SELECT * FROM cfilter_output1;</code></pre><pre class="pre screen"> col1_item1     col1_item2     cntb cnt1 cnt2 score              support            confidence         lift   z_score             
+ -------------- -------------- ---- ---- ---- ------------------ ------------------ ------------------ ------ ------------------- 
+ corporate      small business   17   17   17                1.0                1.0                1.0    1.0  1.3728129459672886
+ home office    small business   16   16   17 0.9411764705882353 0.9411764705882353                1.0    1.0  0.7844645405527365
+ consumer       small business   13   13   17 0.7647058823529411 0.7647058823529411                1.0    1.0 -0.9805806756909198
+ home office    consumer         13   16   13             0.8125 0.7647058823529411             0.8125 1.0625 -0.9805806756909198
+ consumer       corporate        13   13   17 0.7647058823529411 0.7647058823529411                1.0    1.0 -0.9805806756909198
+ small business corporate        17   17   17                1.0                1.0                1.0    1.0  1.3728129459672886
+ corporate      home office      16   17   16 0.9411764705882353 0.9411764705882353 0.9411764705882353    1.0  0.7844645405527365
+ small business home office      16   17   16 0.9411764705882353 0.9411764705882353 0.9411764705882353    1.0  0.7844645405527365
+ corporate      consumer         13   17   13 0.7647058823529411 0.7647058823529411 0.7647058823529411    1.0 -0.9805806756909198
+ small business consumer         13   17   13 0.7647058823529411 0.7647058823529411 0.7647058823529411    1.0 -0.9805806756909198
+ consumer       home office      13   13   16             0.8125 0.7647058823529411                1.0 1.0625 -0.9805806756909198
+ home office    corporate        16   16   17 0.9411764705882353 0.9411764705882353                1.0    1.0  0.7844645405527365</pre>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="lzz1507746632895__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

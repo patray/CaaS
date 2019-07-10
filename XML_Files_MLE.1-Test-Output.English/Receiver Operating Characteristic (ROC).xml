@@ -1,0 +1,1919 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="gbr1507740693525"> </a>
+	  <h1>Receiver Operating Characteristic (ROC)</h1>
+
+	  <p style="line-height: 1em;">A receiver operating characteristic (ROC) curve shows the performance of a binary classification model as its discrimination threshold varies. For a range of thresholds, the curve plots the true positive rate against the false positive rate.</p>
+   <p style="line-height: 1em;">The Receiver Operating Characteristic (ROC) function takes a set of prediction-actual pairs for a binary classification model and calculates the following values for a range of discrimination thresholds:<ul>
+         <li>True positive rate (TPR)</li>
+         <li>False positive rate (FPR)</li>
+         <li>Area under the ROC curve (AUC)</li>
+         <li>Gini coefficient</li>
+      </ul>
+   </p>
+   <p style="line-height: 1em;">A prediction-actual pair for a binary classifier consists of:<ul>
+         <li>Predicted probability that an observation is in the positive class</li>
+         <li>Actual class of the observation</li>
+      </ul>
+   </p>
+   <p style="line-height: 1em;">A discrimination threshold determines whether an observation is classified as positive (1) or negative (0). For example, suppose that a model predicts that an observation will be classified as positive with 0.55 probability. If the threshold above which an observation is classified as positive is 0.5, then the observation is classified as positive. If the threshold is 0.6, the observation is classified as negative.</p>
+   <p style="line-height: 1em;">You can create prediction-actual pairs for ROC with these functions:<ul>
+         <li>AdaBoostPredict</li>
+         <li>DecisionForestPredict_MLE</li>
+         <li>DecisionTreePredict_MLE</li>
+         <li>GLMPredict_MLE</li>
+         <li>XGBoostPredict</li>
+      </ul>
+   </p>
+
+   <a name="prm1507740880518"> </a>
+	  <h2>ROC Syntax</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Version 1.6</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ROC (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  { OUT TABLE OutputTable (<i>output_table</i>) |
+    OUT TABLE ROCTable (<i>ROC_table</i>) }
+  USING
+  [ ModelIDColumn ('<i>model_id_column</i>')]
+  ProbabilityColumn ('<i>probability_column</i>')
+  ObservationColumn ('<i>observation_column</i>')
+  PositiveClass ('<i>positive_class_label</i>')
+  [ NumThresholds (<i>num_thresholds</i>)]
+  [ ROCValues ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ AUC ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ Gini ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+
+	
+   <a name="axf1507740884605"> </a>
+	  <h2>ROC Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputTable</dt>
+      <dd>[Required if you omit ROCTable, disallowed otherwise.] Specify the name for the output table that the function creates. The <i>output_table</i> must not already exist.</dd>
+      <dt>ROCTable</dt>
+      <dd>[Required if you omit OutputTable, disallowed otherwise.] Specify the name for the ROC table that the function creates. The <i>ROC_table</i> must not already exist.</dd>
+      <dt>ModelIDColumn</dt>
+      <dd>[Optional] Specify the name of the InputTable column that contains the model or partition identifiers for the ROC curves.<p>
+            <b>Note:</b>  Use this syntax element only when InputTable contains information for more than one model. The function creates a separate ROC curve for each model identifier in this column. Each model must include exactly two classes in ObservationColumn.</p>
+      </dd>
+      <dt>ProbabilityColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the predictions.</dd>
+      <dt>ObservationColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the actual classes.</dd>
+      <dt>PositiveClass</dt>
+      <dd>Specify the label of the positive class.</dd>
+      <dt>NumThresholds</dt>
+      <dd>[Optional] Specify the number of thresholds for the function to use. The <i>num_thresholds</i> must be a NUMERIC value in the range [1, 10000].</dd>
+      <dd>Default: 50 (The function uniformly distributes the thresholds between 0 and 1.)</dd>
+      <dt>ROCValues</dt>
+      <dd>[Optional with OutputTable, disallowed with ROCTable.] Specify whether the function displays ROC values (thresholds, false positive rates, and true positive rates).</dd>
+      <dd>Default: 'true'. See the following note.</dd>
+      <dt>AUC</dt>
+      <dd>[Optional with OutputTable, disallowed with ROCTable.] Specify whether the function displays the AUC calculated from the ROC values.</dd>
+      <dd>Default: 'false'. See the following note.</dd>
+      <dt>Gini</dt>
+      <dd>[Optional with OutputTable, disallowed with ROCTable.] Specify whether the function displays the Gini coefficient calculated from the ROC values. The Gini coefficient is a measure of inequality among values of a frequency distribution. A Gini coefficient of 0 indicates that all values are the same. The closer the Gini coefficient is to 1, the more unequal are the values in the distribution.</dd>
+      <dd>Default: 'false'. See the following note.</dd>
+   </div>
+   <p style="line-height: 1em;">
+      <p>
+         <b>Note:</b>  If you specify OutputTable, the valid combinations of ROCValues, AUC, and Gini syntax elements are those that specify one of the following:<p style="line-height: 1em;">
+            <ul>
+               <li>ROCValues only</li>
+               <li>AUC only</li>
+               <li>Gini only</li>
+               <li>AUC and Gini</li>
+            </ul>
+         </p>
+         <p style="line-height: 1em;">The function issues an error message if you do any of the following:<ul>
+               <li>Specify AUC only, Gini only, or AUC and Gini only, and ROCValues ('true').<p style="line-height: 1em;">(When specifying AUC only, Gini only, or AUC and Gini only, ROCValues is false by default.)</p>
+               </li>
+               <li>Specify an invalid combination (such as ROCValues ('true') and AUC ('true'), or all three 'false').</li>
+               <li>Specify ROCTable and also specify any of AUC, Gini, or ROCValues.</li>
+            </ul>
+         </p>
+      </p>
+   </p>
+
+
+	
+   <a name="fsq1507740896002"> </a>
+	  <h2>ROC Input</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Input Table Schema</h3>
+
+			<p style="line-height: 1em;">The table has one row for each observation.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>model_id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with ModelIDColumn syntax element.] Model identifier or partition for ROC curve associated with observation.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>probability_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Predicted probability that observation is in positive class.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>observation_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Actual class of observation.</div>
+         </td>
+      </tr>
+   </table>
+
+
+		
+
+	
+   <a name="dxf1507740912242"> </a>
+	  <h2>ROC Output</h2>
+
+	  <a name="section_htz_g3q_1db"> </a>
+   <p style="line-height: 1em;">The output depends on whether you specify OutputTable or ROCTable.</p>
+
+
+	
+   <a name="qhj1543355941424"> </a>
+	  <h3>ROC Output with OutputTable</h3>
+
+	  <a name="section_krr_zjf_yfb"> </a>
+   <p style="line-height: 1em;">If you specify OutputTable, the function outputs a message and creates OutputTable. The OutputTable schema depends on the ROCValues syntax element.</p>
+
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Output Message Schema</h4>
+   <a name="table_fb2_d1b_tx"> </a>
+   <table class="introtable">
+      <a name="table_fb2_d1b_tx"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">info</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Reports whether function completed.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_x2f_2rw_xcb"> </a>
+   <h4>OutputTable Schema, ROCValues ('true') (Default)</h4>
+   <p style="line-height: 1em;">The table has one row for each threshold for each model, and contains only ROC values.</p>
+   <a name="table_trq_jwk_wx"> </a>
+   <table class="introtable">
+      <a name="table_trq_jwk_wx"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">model</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as <i>model_id_column</i> in input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with ModelIDColumn syntax element.] Model identifier or partition for ROC curve associated with observation, taken from <i>model_id_column</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">threshold</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Threshold at which function classifies an observation as positive.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">tpr</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">True positive rate for threshold (number of observations correctly predicted as positive based on threshold, divided by number of observations known to be positive).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">fpr</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">False positive rate for threshold (number of observations incorrectly predicted as positive based on threshold, divided by number of observations known to be negative).</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_cqs_krw_xcb"> </a>
+   <h4>OutputTable Schema, ROCValues ('false')</h4>
+   <p>
+      <b>Note:</b>  This is the default output table if you specify AUC only, Gini only, or AUC and Gini only.</p>
+   <p style="line-height: 1em;">The table has the following:<ul>
+         <li>One row for each model</li>
+         <li>No ROC values</li>
+         <li>AUC values, Gini values, or both (depending on AUC and Gini syntax elements)</li>
+      </ul>
+   </p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">model</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as <i>model_id_column</i> in input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with ModelIDColumn syntax element.] Model identifier or partition for ROC curve associated with observation, taken from <i>model_id_column</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">AUC</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Area under ROC curve for data in partition. With AUC ( 'false'), this value is NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Gini</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Gini coefficient for ROC curve for data in partition. With Gini ('false'), this value is NULL.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+   <a name="vgq1543355973352"> </a>
+	  <h3>ROC Output with ROCTable</h3>
+
+	  <a name="section_krr_zjf_yfb"> </a>
+   <p style="line-height: 1em;">If you specify ROCTable, the function outputs a table to the screen and creates ROCTable.</p>
+
+
+		<a name="section_N10019_N1000E_N10001"> </a>
+   <h4>Onscreen Output Table Schema</h4>
+   <a name="table_cdr_nkf_yfb"> </a>
+   <table class="introtable">
+      <a name="table_cdr_nkf_yfb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">model</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as <i>model_id_column</i> in input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with ModelIDColumn syntax element.] Model identifier or partition for ROC curve associated with observation, taken from <i>model_id_column</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">auc</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Area under ROC curve for data in partition.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">gini</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Gini coefficient for ROC curve for data in partition.</div>
+         </td>
+      </tr>
+   </table>
+
+
+		
+   <a name="section_hwy_ykf_yfb"> </a>
+   <h4>ROCTable Schema</h4>
+   <p style="line-height: 1em;">Same as default OutputTable Schema in ROC Output with OutputTable.</p>
+
+
+	
+   <a name="jlp1510788227863"> </a>
+   <h2>ROC Examples</h2>
+   <a name="hsa1524491152292"> </a>
+	  <h3>ROC Example: OutputTable, Default Values</h3>
+
+	  <a name="section_ft1_2qd_pdb"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table has data from four different models, each of which outputs the same probability for each observation.</p>
+   <a name="table_esm_5qd_pdb"> </a>
+   <table class="introtable">
+      <a name="table_esm_5qd_pdb"> </a>
+      <h4 style="text-align: center;">roctable</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">model</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">probability</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">obs</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.324</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">p</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.534</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">p</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.831</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">n</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.429</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">n</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.488</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">p</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.598</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">p</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.666</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">n</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.493</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">p</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.723</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">p</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.512</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">n</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;"> 0.324</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">p</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;"> 0.534</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">p</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.512</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">n</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.324</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">p</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.534</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">p</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.512 </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">n</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.324</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">p</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;"> 0.534</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">p</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.512 </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">n</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_v1g_cqd_pdb"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">In this call, the ROCValues, AUC, and Gini syntax elements default to the values 'true', 'false', and 'false', respectively.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ROC(
+  ON roctable AS InputTable
+  OUT TABLE OutputTable(rocoutput20)
+  USING
+  ModelIdColumn('model')
+  ProbabilityColumn('probability')
+  ObservationColumn('obs')
+  PositiveClass('p')
+  NumThresholds(100)
+) AS dt;</tt>
+   </pre>
+   <a name="section_n5b_dqd_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ info          
+ ------------- 
+ ROC complete.</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM rocoutput20;</tt>
+   </pre>
+   <pre>
+      <tt>
+ model threshold          tpr               fpr  
+ ----- ------------------ ----------------- ---- 
+ 1                    1.0               0.0  0.0
+ 1       0.98989898989899               0.0  0.0
+ 1       0.97979797979798               0.0  0.0
+ 1       0.96969696969697               0.0  0.0
+ 1       0.95959595959596               0.0  0.0
+ 1       0.94949494949495               0.0  0.0
+ 1      0.939393939393939               0.0  0.0
+ 1      0.929292929292929               0.0  0.0
+ 1      0.919191919191919               0.0  0.0
+ 1      0.909090909090909               0.0  0.0
+ 1      0.898989898989899               0.0  0.0
+ 1      0.888888888888889               0.0  0.0
+ 1      0.878787878787879               0.0  0.0
+ 1      0.868686868686869               0.0  0.0
+ 1      0.858585858585859               0.0  0.0
+ 1      0.848484848484849               0.0  0.0
+ 1      0.838383838383838               0.0  0.0
+ 1      0.828282828282828               0.0 0.25
+ 1      0.818181818181818               0.0 0.25
+ 1      0.808080808080808               0.0 0.25
+ 1      0.797979797979798               0.0 0.25
+ 1      0.787878787878788               0.0 0.25
+ 1      0.777777777777778               0.0 0.25
+ 1      0.767676767676768               0.0 0.25
+ 1      0.757575757575758               0.0 0.25
+ 1      0.747474747474748               0.0 0.25
+ 1      0.737373737373737               0.0 0.25
+ 1      0.727272727272727               0.0 0.25
+ 1      0.717171717171717 0.166666666666667 0.25
+ 1      0.707070707070707 0.166666666666667 0.25
+ 1      0.696969696969697 0.166666666666667 0.25
+ 1      0.686868686868687 0.166666666666667 0.25
+ 1      0.676767676767677 0.166666666666667 0.25
+ 1      0.666666666666667 0.166666666666667 0.25
+ 1      0.656565656565657 0.166666666666667  0.5
+ 1      0.646464646464647 0.166666666666667  0.5
+ 1      0.636363636363636 0.166666666666667  0.5
+ 1      0.626262626262626 0.166666666666667  0.5
+ 1      0.616161616161616 0.166666666666667  0.5
+ 1      0.606060606060606 0.166666666666667  0.5
+ 1      0.595959595959596 0.333333333333333  0.5
+ 1      0.585858585858586 0.333333333333333  0.5
+ 1      0.575757575757576 0.333333333333333  0.5
+ 1      0.565656565656566 0.333333333333333  0.5
+ 1      0.555555555555556 0.333333333333333  0.5
+ 1      0.545454545454546 0.333333333333333  0.5
+ 1      0.535353535353535 0.333333333333333  0.5
+ 1      0.525252525252525               0.5  0.5
+ 1      0.515151515151515               0.5  0.5
+ 1      0.505050505050505               0.5 0.75
+ 1      0.494949494949495               0.5 0.75
+ 1      0.484848484848485 0.833333333333333 0.75
+ 1      0.474747474747475 0.833333333333333 0.75
+ 1      0.464646464646465 0.833333333333333 0.75
+ 1      0.454545454545455 0.833333333333333 0.75
+ 1      0.444444444444444 0.833333333333333 0.75
+ 1      0.434343434343434 0.833333333333333 0.75
+ 1      0.424242424242424 0.833333333333333  1.0
+ 1      0.414141414141414 0.833333333333333  1.0
+ 1      0.404040404040404 0.833333333333333  1.0
+ 1      0.393939393939394 0.833333333333333  1.0
+ 1      0.383838383838384 0.833333333333333  1.0
+ 1      0.373737373737374 0.833333333333333  1.0
+ 1      0.363636363636364 0.833333333333333  1.0
+ 1      0.353535353535354 0.833333333333333  1.0
+ 1      0.343434343434343 0.833333333333333  1.0
+ 1      0.333333333333333 0.833333333333333  1.0
+ 1      0.323232323232323               1.0  1.0
+ 1      0.313131313131313               1.0  1.0
+ 1      0.303030303030303               1.0  1.0
+ 1      0.292929292929293               1.0  1.0
+ 1      0.282828282828283               1.0  1.0
+ 1      0.272727272727273               1.0  1.0
+ 1      0.262626262626263               1.0  1.0
+ 1      0.252525252525253               1.0  1.0
+ 1      0.242424242424242               1.0  1.0
+ 1      0.232323232323232               1.0  1.0
+ 1      0.222222222222222               1.0  1.0
+ 1      0.212121212121212               1.0  1.0
+ 1      0.202020202020202               1.0  1.0
+ 1      0.191919191919192               1.0  1.0
+ 1      0.181818181818182               1.0  1.0
+ 1      0.171717171717172               1.0  1.0
+ 1      0.161616161616162               1.0  1.0
+ 1      0.151515151515152               1.0  1.0
+ 1      0.141414141414141               1.0  1.0
+ 1      0.131313131313131               1.0  1.0
+ 1      0.121212121212121               1.0  1.0
+ 1      0.111111111111111               1.0  1.0
+ 1      0.101010101010101               1.0  1.0
+ 1     0.0909090909090909               1.0  1.0
+ 1     0.0808080808080808               1.0  1.0
+ 1     0.0707070707070707               1.0  1.0
+ 1     0.0606060606060606               1.0  1.0
+ 1     0.0505050505050505               1.0  1.0
+ 1     0.0404040404040404               1.0  1.0
+ 1     0.0303030303030303               1.0  1.0
+ 1     0.0202020202020202               1.0  1.0
+ 1     0.0101010101010101               1.0  1.0
+ 1                    0.0               1.0  1.0
+ 2                    1.0               0.0  0.0
+ 2       0.98989898989899               0.0  0.0
+ 2       0.97979797979798               0.0  0.0
+ 2       0.96969696969697               0.0  0.0
+ 2       0.95959595959596               0.0  0.0
+ 2       0.94949494949495               0.0  0.0
+ 2      0.939393939393939               0.0  0.0
+ 2      0.929292929292929               0.0  0.0
+ 2      0.919191919191919               0.0  0.0
+ 2      0.909090909090909               0.0  0.0
+ 2      0.898989898989899               0.0  0.0
+ 2      0.888888888888889               0.0  0.0
+ 2      0.878787878787879               0.0  0.0
+ 2      0.868686868686869               0.0  0.0
+ 2      0.858585858585859               0.0  0.0
+ 2      0.848484848484849               0.0  0.0
+ 2      0.838383838383838               0.0  0.0
+ 2      0.828282828282828               0.0 0.25
+ 2      0.818181818181818               0.0 0.25
+ 2      0.808080808080808               0.0 0.25
+ 2      0.797979797979798               0.0 0.25
+ 2      0.787878787878788               0.0 0.25
+ 2      0.777777777777778               0.0 0.25
+ 2      0.767676767676768               0.0 0.25
+ 2      0.757575757575758               0.0 0.25
+ 2      0.747474747474748               0.0 0.25
+ 2      0.737373737373737               0.0 0.25
+ 2      0.727272727272727               0.0 0.25
+ 2      0.717171717171717 0.166666666666667 0.25
+ 2      0.707070707070707 0.166666666666667 0.25
+ 2      0.696969696969697 0.166666666666667 0.25
+ 2      0.686868686868687 0.166666666666667 0.25
+ 2      0.676767676767677 0.166666666666667 0.25
+ 2      0.666666666666667 0.166666666666667 0.25
+ 2      0.656565656565657 0.166666666666667  0.5
+ 2      0.646464646464647 0.166666666666667  0.5
+ 2      0.636363636363636 0.166666666666667  0.5
+ 2      0.626262626262626 0.166666666666667  0.5
+ 2      0.616161616161616 0.166666666666667  0.5
+ 2      0.606060606060606 0.166666666666667  0.5
+ 2      0.595959595959596 0.333333333333333  0.5
+ 2      0.585858585858586 0.333333333333333  0.5
+ 2      0.575757575757576 0.333333333333333  0.5
+ 2      0.565656565656566 0.333333333333333  0.5
+ 2      0.555555555555556 0.333333333333333  0.5
+ 2      0.545454545454546 0.333333333333333  0.5
+ 2      0.535353535353535 0.333333333333333  0.5
+ 2      0.525252525252525               0.5  0.5
+ 2      0.515151515151515               0.5  0.5
+ 2      0.505050505050505               0.5 0.75
+ 2      0.494949494949495               0.5 0.75
+ 2      0.484848484848485 0.833333333333333 0.75
+ 2      0.474747474747475 0.833333333333333 0.75
+ 2      0.464646464646465 0.833333333333333 0.75
+ 2      0.454545454545455 0.833333333333333 0.75
+ 2      0.444444444444444 0.833333333333333 0.75
+ 2      0.434343434343434 0.833333333333333 0.75
+ 2      0.424242424242424 0.833333333333333  1.0
+ 2      0.414141414141414 0.833333333333333  1.0
+ 2      0.404040404040404 0.833333333333333  1.0
+ 2      0.393939393939394 0.833333333333333  1.0
+ 2      0.383838383838384 0.833333333333333  1.0
+ 2      0.373737373737374 0.833333333333333  1.0
+ 2      0.363636363636364 0.833333333333333  1.0
+ 2      0.353535353535354 0.833333333333333  1.0
+ 2      0.343434343434343 0.833333333333333  1.0
+ 2      0.333333333333333 0.833333333333333  1.0
+ 2      0.323232323232323               1.0  1.0
+ 2      0.313131313131313               1.0  1.0
+ 2      0.303030303030303               1.0  1.0
+ 2      0.292929292929293               1.0  1.0
+ 2      0.282828282828283               1.0  1.0
+ 2      0.272727272727273               1.0  1.0
+ 2      0.262626262626263               1.0  1.0
+ 2      0.252525252525253               1.0  1.0
+ 2      0.242424242424242               1.0  1.0
+ 2      0.232323232323232               1.0  1.0
+ 2      0.222222222222222               1.0  1.0
+ 2      0.212121212121212               1.0  1.0
+ 2      0.202020202020202               1.0  1.0
+ 2      0.191919191919192               1.0  1.0
+ 2      0.181818181818182               1.0  1.0
+ 2      0.171717171717172               1.0  1.0
+ 2      0.161616161616162               1.0  1.0
+ 2      0.151515151515152               1.0  1.0
+ 2      0.141414141414141               1.0  1.0
+ 2      0.131313131313131               1.0  1.0
+ 2      0.121212121212121               1.0  1.0
+ 2      0.111111111111111               1.0  1.0
+ 2      0.101010101010101               1.0  1.0
+ 2     0.0909090909090909               1.0  1.0
+ 2     0.0808080808080808               1.0  1.0
+ 2     0.0707070707070707               1.0  1.0
+ 2     0.0606060606060606               1.0  1.0
+ 2     0.0505050505050505               1.0  1.0
+ 2     0.0404040404040404               1.0  1.0
+ 2     0.0303030303030303               1.0  1.0
+ 2     0.0202020202020202               1.0  1.0
+ 2     0.0101010101010101               1.0  1.0
+ 2                    0.0               1.0  1.0
+ 3                    1.0               0.0  0.0
+ 3       0.98989898989899               0.0  0.0
+ 3       0.97979797979798               0.0  0.0
+ 3       0.96969696969697               0.0  0.0
+ 3       0.95959595959596               0.0  0.0
+ 3       0.94949494949495               0.0  0.0
+ 3      0.939393939393939               0.0  0.0
+ 3      0.929292929292929               0.0  0.0
+ 3      0.919191919191919               0.0  0.0
+ 3      0.909090909090909               0.0  0.0
+ 3      0.898989898989899               0.0  0.0
+ 3      0.888888888888889               0.0  0.0
+ 3      0.878787878787879               0.0  0.0
+ 3      0.868686868686869               0.0  0.0
+ 3      0.858585858585859               0.0  0.0
+ 3      0.848484848484849               0.0  0.0
+ 3      0.838383838383838               0.0  0.0
+ 3      0.828282828282828               0.0 0.25
+ 3      0.818181818181818               0.0 0.25
+ 3      0.808080808080808               0.0 0.25
+ 3      0.797979797979798               0.0 0.25
+ 3      0.787878787878788               0.0 0.25
+ 3      0.777777777777778               0.0 0.25
+ 3      0.767676767676768               0.0 0.25
+ 3      0.757575757575758               0.0 0.25
+ 3      0.747474747474748               0.0 0.25
+ 3      0.737373737373737               0.0 0.25
+ 3      0.727272727272727               0.0 0.25
+ 3      0.717171717171717 0.166666666666667 0.25
+ 3      0.707070707070707 0.166666666666667 0.25
+ 3      0.696969696969697 0.166666666666667 0.25
+ 3      0.686868686868687 0.166666666666667 0.25
+ 3      0.676767676767677 0.166666666666667 0.25
+ 3      0.666666666666667 0.166666666666667 0.25
+ 3      0.656565656565657 0.166666666666667  0.5
+ 3      0.646464646464647 0.166666666666667  0.5
+ 3      0.636363636363636 0.166666666666667  0.5
+ 3      0.626262626262626 0.166666666666667  0.5
+ 3      0.616161616161616 0.166666666666667  0.5
+ 3      0.606060606060606 0.166666666666667  0.5
+ 3      0.595959595959596 0.333333333333333  0.5
+ 3      0.585858585858586 0.333333333333333  0.5
+ 3      0.575757575757576 0.333333333333333  0.5
+ 3      0.565656565656566 0.333333333333333  0.5
+ 3      0.555555555555556 0.333333333333333  0.5
+ 3      0.545454545454546 0.333333333333333  0.5
+ 3      0.535353535353535 0.333333333333333  0.5
+ 3      0.525252525252525               0.5  0.5
+ 3      0.515151515151515               0.5  0.5
+ 3      0.505050505050505               0.5 0.75
+ 3      0.494949494949495               0.5 0.75
+ 3      0.484848484848485 0.833333333333333 0.75
+ 3      0.474747474747475 0.833333333333333 0.75
+ 3      0.464646464646465 0.833333333333333 0.75
+ 3      0.454545454545455 0.833333333333333 0.75
+ 3      0.444444444444444 0.833333333333333 0.75
+ 3      0.434343434343434 0.833333333333333 0.75
+ 3      0.424242424242424 0.833333333333333  1.0
+ 3      0.414141414141414 0.833333333333333  1.0
+ 3      0.404040404040404 0.833333333333333  1.0
+ 3      0.393939393939394 0.833333333333333  1.0
+ 3      0.383838383838384 0.833333333333333  1.0
+ 3      0.373737373737374 0.833333333333333  1.0
+ 3      0.363636363636364 0.833333333333333  1.0
+ 3      0.353535353535354 0.833333333333333  1.0
+ 3      0.343434343434343 0.833333333333333  1.0
+ 3      0.333333333333333 0.833333333333333  1.0
+ 3      0.323232323232323               1.0  1.0
+ 3      0.313131313131313               1.0  1.0
+ 3      0.303030303030303               1.0  1.0
+ 3      0.292929292929293               1.0  1.0
+ 3      0.282828282828283               1.0  1.0
+ 3      0.272727272727273               1.0  1.0
+ 3      0.262626262626263               1.0  1.0
+ 3      0.252525252525253               1.0  1.0
+ 3      0.242424242424242               1.0  1.0
+ 3      0.232323232323232               1.0  1.0
+ 3      0.222222222222222               1.0  1.0
+ 3      0.212121212121212               1.0  1.0
+ 3      0.202020202020202               1.0  1.0
+ 3      0.191919191919192               1.0  1.0
+ 3      0.181818181818182               1.0  1.0
+ 3      0.171717171717172               1.0  1.0
+ 3      0.161616161616162               1.0  1.0
+ 3      0.151515151515152               1.0  1.0
+ 3      0.141414141414141               1.0  1.0
+ 3      0.131313131313131               1.0  1.0
+ 3      0.121212121212121               1.0  1.0
+ 3      0.111111111111111               1.0  1.0
+ 3      0.101010101010101               1.0  1.0
+ 3     0.0909090909090909               1.0  1.0
+ 3     0.0808080808080808               1.0  1.0
+ 3     0.0707070707070707               1.0  1.0
+ 3     0.0606060606060606               1.0  1.0
+ 3     0.0505050505050505               1.0  1.0
+ 3     0.0404040404040404               1.0  1.0
+ 3     0.0303030303030303               1.0  1.0
+ 3     0.0202020202020202               1.0  1.0
+ 3     0.0101010101010101               1.0  1.0
+ 3                    0.0               1.0  1.0
+ 4                    1.0               0.0  0.0
+ 4       0.98989898989899               0.0  0.0
+ 4       0.97979797979798               0.0  0.0
+ 4       0.96969696969697               0.0  0.0
+ 4       0.95959595959596               0.0  0.0
+ 4       0.94949494949495               0.0  0.0
+ 4      0.939393939393939               0.0  0.0
+ 4      0.929292929292929               0.0  0.0
+ 4      0.919191919191919               0.0  0.0
+ 4      0.909090909090909               0.0  0.0
+ 4      0.898989898989899               0.0  0.0
+ 4      0.888888888888889               0.0  0.0
+ 4      0.878787878787879               0.0  0.0
+ 4      0.868686868686869               0.0  0.0
+ 4      0.858585858585859               0.0  0.0
+ 4      0.848484848484849               0.0  0.0
+ 4      0.838383838383838               0.0  0.0
+ 4      0.828282828282828               0.0 0.25
+ 4      0.818181818181818               0.0 0.25
+ 4      0.808080808080808               0.0 0.25
+ 4      0.797979797979798               0.0 0.25
+ 4      0.787878787878788               0.0 0.25
+ 4      0.777777777777778               0.0 0.25
+ 4      0.767676767676768               0.0 0.25
+ 4      0.757575757575758               0.0 0.25
+ 4      0.747474747474748               0.0 0.25
+ 4      0.737373737373737               0.0 0.25
+ 4      0.727272727272727               0.0 0.25
+ 4      0.717171717171717 0.166666666666667 0.25
+ 4      0.707070707070707 0.166666666666667 0.25
+ 4      0.696969696969697 0.166666666666667 0.25
+ 4      0.686868686868687 0.166666666666667 0.25
+ 4      0.676767676767677 0.166666666666667 0.25
+ 4      0.666666666666667 0.166666666666667 0.25
+ 4      0.656565656565657 0.166666666666667  0.5
+ 4      0.646464646464647 0.166666666666667  0.5
+ 4      0.636363636363636 0.166666666666667  0.5
+ 4      0.626262626262626 0.166666666666667  0.5
+ 4      0.616161616161616 0.166666666666667  0.5
+ 4      0.606060606060606 0.166666666666667  0.5
+ 4      0.595959595959596 0.333333333333333  0.5
+ 4      0.585858585858586 0.333333333333333  0.5
+ 4      0.575757575757576 0.333333333333333  0.5
+ 4      0.565656565656566 0.333333333333333  0.5
+ 4      0.555555555555556 0.333333333333333  0.5
+ 4      0.545454545454546 0.333333333333333  0.5
+ 4      0.535353535353535 0.333333333333333  0.5
+ 4      0.525252525252525               0.5  0.5
+ 4      0.515151515151515               0.5  0.5
+ 4      0.505050505050505               0.5 0.75
+ 4      0.494949494949495               0.5 0.75
+ 4      0.484848484848485 0.833333333333333 0.75
+ 4      0.474747474747475 0.833333333333333 0.75
+ 4      0.464646464646465 0.833333333333333 0.75
+ 4      0.454545454545455 0.833333333333333 0.75
+ 4      0.444444444444444 0.833333333333333 0.75
+ 4      0.434343434343434 0.833333333333333 0.75
+ 4      0.424242424242424 0.833333333333333  1.0
+ 4      0.414141414141414 0.833333333333333  1.0
+ 4      0.404040404040404 0.833333333333333  1.0
+ 4      0.393939393939394 0.833333333333333  1.0
+ 4      0.383838383838384 0.833333333333333  1.0
+ 4      0.373737373737374 0.833333333333333  1.0
+ 4      0.363636363636364 0.833333333333333  1.0
+ 4      0.353535353535354 0.833333333333333  1.0
+ 4      0.343434343434343 0.833333333333333  1.0
+ 4      0.333333333333333 0.833333333333333  1.0
+ 4      0.323232323232323               1.0  1.0
+ 4      0.313131313131313               1.0  1.0
+ 4      0.303030303030303               1.0  1.0
+ 4      0.292929292929293               1.0  1.0
+ 4      0.282828282828283               1.0  1.0
+ 4      0.272727272727273               1.0  1.0
+ 4      0.262626262626263               1.0  1.0
+ 4      0.252525252525253               1.0  1.0
+ 4      0.242424242424242               1.0  1.0
+ 4      0.232323232323232               1.0  1.0
+ 4      0.222222222222222               1.0  1.0
+ 4      0.212121212121212               1.0  1.0
+ 4      0.202020202020202               1.0  1.0
+ 4      0.191919191919192               1.0  1.0
+ 4      0.181818181818182               1.0  1.0
+ 4      0.171717171717172               1.0  1.0
+ 4      0.161616161616162               1.0  1.0
+ 4      0.151515151515152               1.0  1.0
+ 4      0.141414141414141               1.0  1.0
+ 4      0.131313131313131               1.0  1.0
+ 4      0.121212121212121               1.0  1.0
+ 4      0.111111111111111               1.0  1.0
+ 4      0.101010101010101               1.0  1.0
+ 4     0.0909090909090909               1.0  1.0
+ 4     0.0808080808080808               1.0  1.0
+ 4     0.0707070707070707               1.0  1.0
+ 4     0.0606060606060606               1.0  1.0
+ 4     0.0505050505050505               1.0  1.0
+ 4     0.0404040404040404               1.0  1.0
+ 4     0.0303030303030303               1.0  1.0
+ 4     0.0202020202020202               1.0  1.0
+ 4     0.0101010101010101               1.0  1.0
+ 4                    0.0               1.0  1.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="gze1507741286509"> </a>
+	  <h3>ROC Example: OutputTable, AUC ('true')</h3>
+
+	
+		<a name="section_N10014_N10010_N10001"> </a>
+			<p style="line-height: 1em;">This example uses AUC values to check the performance of the model used in ROC Example: OutputTable, Default Values.</p>
+
+		
+   <a name="section_gl2_mck_4db"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table is roctable, as in ROC Example: OutputTable, Default Values.</p>
+
+   <a name="section_cyp_mck_4db"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">Because this call specifies AUC ('true') and omits the ROCValues syntax element, the ROCValues syntax element has the value 'false'.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ROC(
+  ON roctable AS InputTable
+  OUT TABLE OutputTable(rocoutput21)
+  USING
+  ModelIdColumn('model')
+  ProbabilityColumn('probability')
+  ObservationColumn('obs')
+  PositiveClass('p')
+  NumThresholds(100)
+  AUC('true')
+) AS dt;</tt>
+   </pre>
+   <a name="section_m4z_mck_4db"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ info          
+ ------------- 
+ ROC complete.</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM rocoutput21;</tt>
+   </pre>
+   <pre>
+      <tt>
+ model auc   gini 
+ ----- ----- ---- 
+     1 0.375 NULL
+     2 0.375 NULL
+     3 0.375 NULL
+     4 0.375 NULL</tt>
+   </pre>
+   <p style="line-height: 1em;">The AUC values are less than 0.5, which means that the model performs worse than random guessing, and you must change it before you use it for prediction. Compare these AUC values to the AUC value in the ROC Example: OutputTable, AUC ('true'), Gini ('true') output.</p>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="xjv1524491199366"> </a>
+	  <h3>ROC Example: OutputTable, AUC ('true'), Gini ('true')</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <a name="table_q2r_vsd_pdb"> </a>
+   <table class="introtable">
+      <a name="table_q2r_vsd_pdb"> </a>
+      <h4 style="text-align: center;">iris</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">pid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">prob1</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">prob2</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">obs</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.66667</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.33333</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.66667</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.33333</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.66667</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.33333</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.66667</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.33333</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.66667</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.33333</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.66667</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.33333</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.66667</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.33333</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.66667</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.33333</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">18</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.66667</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.33333</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">20</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.66667</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.33333</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+		
+   <a name="section_v1g_cqd_pdb"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">Because this call specifies AUC ('true') and Gini ('true') and omits the ROCValues syntax element, the ROCValues syntax element has the value 'false'.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ROC(
+  ON iris AS InputTable
+  OUT TABLE OutputTable(irisout18)
+  USING
+  ProbabilityColumn('prob2')
+  ObservationColumn('obs')
+  NumThresholds(100)
+  PositiveClass('2')
+  AUC('true')
+  Gini('true')
+) AS dt;</tt>
+   </pre>
+   <a name="section_n5b_dqd_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ info          
+ ------------- 
+ ROC complete.</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM irisout18;</tt>
+   </pre>
+   <pre>
+      <tt>
+ auc    gini   
+ ------ ------ 
+ 0.9464 0.8928</tt>
+   </pre>
+   <p style="line-height: 1em;">The AUC value is much greater than 0.5, which means the model performs well and you can use it for prediction.</p>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="ljl1543417694186"> </a>
+	  <h3>ROC Example: ROCTable, Default Values</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table is roctable, as in ROC Example: OutputTable, Default Values.</p>
+
+		
+   <a name="section_fgb_y4k_yfb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ROC(
+  ON roctable AS InputTable
+  OUT TABLE ROCTable(rocoutput20)
+  USING
+  ModelIdColumn('model')
+  ProbabilityColumn('probability')
+  ObservationColumn('obs')
+  PositiveClass('p')
+  NumThresholds(100)
+) AS dt;</tt>
+   </pre>
+   <a name="section_pxh_y4k_yfb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">Onscreen:</p>
+   <pre>
+      <tt>
+ model auc   gini  
+ ----- ----- ----- 
+     1 0.375 -0.25
+     2 0.375 -0.25
+     3 0.375 -0.25
+     4 0.375 -0.25</tt>
+   </pre>
+   <p style="line-height: 1em;">The ROCTable, rocoutput20, is the same as the OutputTable in ROC Example: OutputTable, Default Values.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM rocoutput20;</tt>
+   </pre>
+   <pre>
+      <tt>
+ model threshold          tpr               fpr  
+ ----- ------------------ ----------------- ---- 
+     1                0.0               1.0  1.0
+     1 0.0101010101010101               1.0  1.0
+     1 0.0202020202020202               1.0  1.0
+     1 0.0303030303030303               1.0  1.0
+     1 0.0404040404040404               1.0  1.0
+     1 0.0505050505050505               1.0  1.0
+     1 0.0606060606060606               1.0  1.0
+     1 0.0707070707070707               1.0  1.0
+     1 0.0808080808080808               1.0  1.0
+     1 0.0909090909090909               1.0  1.0
+     1  0.101010101010101               1.0  1.0
+     1  0.111111111111111               1.0  1.0
+     1  0.121212121212121               1.0  1.0
+     1  0.131313131313131               1.0  1.0
+     1  0.141414141414141               1.0  1.0
+     1  0.151515151515152               1.0  1.0
+     1  0.161616161616162               1.0  1.0
+     1  0.171717171717172               1.0  1.0
+     1  0.181818181818182               1.0  1.0
+     1  0.191919191919192               1.0  1.0
+     1  0.202020202020202               1.0  1.0
+     1  0.212121212121212               1.0  1.0
+     1  0.222222222222222               1.0  1.0
+     1  0.232323232323232               1.0  1.0
+     1  0.242424242424242               1.0  1.0
+     1  0.252525252525253               1.0  1.0
+     1  0.262626262626263               1.0  1.0
+     1  0.272727272727273               1.0  1.0
+     1  0.282828282828283               1.0  1.0
+     1  0.292929292929293               1.0  1.0
+     1  0.303030303030303               1.0  1.0
+     1  0.313131313131313               1.0  1.0
+     1  0.323232323232323               1.0  1.0
+     1  0.333333333333333 0.833333333333333  1.0
+     1  0.343434343434343 0.833333333333333  1.0
+     1  0.353535353535354 0.833333333333333  1.0
+     1  0.363636363636364 0.833333333333333  1.0
+     1  0.373737373737374 0.833333333333333  1.0
+     1  0.383838383838384 0.833333333333333  1.0
+     1  0.393939393939394 0.833333333333333  1.0
+     1  0.404040404040404 0.833333333333333  1.0
+     1  0.414141414141414 0.833333333333333  1.0
+     1  0.424242424242424 0.833333333333333  1.0
+     1  0.434343434343434 0.833333333333333 0.75
+     1  0.444444444444444 0.833333333333333 0.75
+     1  0.454545454545455 0.833333333333333 0.75
+     1  0.464646464646465 0.833333333333333 0.75
+     1  0.474747474747475 0.833333333333333 0.75
+     1  0.484848484848485 0.833333333333333 0.75
+     1  0.494949494949495               0.5 0.75
+     1  0.505050505050505               0.5 0.75
+     1  0.515151515151515               0.5  0.5
+     1  0.525252525252525               0.5  0.5
+     1  0.535353535353535 0.333333333333333  0.5
+     1  0.545454545454546 0.333333333333333  0.5
+     1  0.555555555555556 0.333333333333333  0.5
+     1  0.565656565656566 0.333333333333333  0.5
+     1  0.575757575757576 0.333333333333333  0.5
+     1  0.585858585858586 0.333333333333333  0.5
+     1  0.595959595959596 0.333333333333333  0.5
+     1  0.606060606060606 0.166666666666667  0.5
+     1  0.616161616161616 0.166666666666667  0.5
+     1  0.626262626262626 0.166666666666667  0.5
+     1  0.636363636363636 0.166666666666667  0.5
+     1  0.646464646464647 0.166666666666667  0.5
+     1  0.656565656565657 0.166666666666667  0.5
+     1  0.666666666666667 0.166666666666667 0.25
+     1  0.676767676767677 0.166666666666667 0.25
+     1  0.686868686868687 0.166666666666667 0.25
+     1  0.696969696969697 0.166666666666667 0.25
+     1  0.707070707070707 0.166666666666667 0.25
+     1  0.717171717171717 0.166666666666667 0.25
+     1  0.727272727272727               0.0 0.25
+     1  0.737373737373737               0.0 0.25
+     1  0.747474747474748               0.0 0.25
+     1  0.757575757575758               0.0 0.25
+     1  0.767676767676768               0.0 0.25
+     1  0.777777777777778               0.0 0.25
+     1  0.787878787878788               0.0 0.25
+     1  0.797979797979798               0.0 0.25
+     1  0.808080808080808               0.0 0.25
+     1  0.818181818181818               0.0 0.25
+     1  0.828282828282828               0.0 0.25
+     1  0.838383838383838               0.0  0.0
+     1  0.848484848484849               0.0  0.0
+     1  0.858585858585859               0.0  0.0
+     1  0.868686868686869               0.0  0.0
+     1  0.878787878787879               0.0  0.0
+     1  0.888888888888889               0.0  0.0
+     1  0.898989898989899               0.0  0.0
+     1  0.909090909090909               0.0  0.0
+     1  0.919191919191919               0.0  0.0
+     1  0.929292929292929               0.0  0.0
+     1  0.939393939393939               0.0  0.0
+     1   0.94949494949495               0.0  0.0
+     1   0.95959595959596               0.0  0.0
+     1   0.96969696969697               0.0  0.0
+     1   0.97979797979798               0.0  0.0
+     1   0.98989898989899               0.0  0.0
+     1                1.0               0.0  0.0
+     2                0.0               1.0  1.0
+     2 0.0101010101010101               1.0  1.0
+     2 0.0202020202020202               1.0  1.0
+     2 0.0303030303030303               1.0  1.0
+     2 0.0404040404040404               1.0  1.0
+     2 0.0505050505050505               1.0  1.0
+     2 0.0606060606060606               1.0  1.0
+     2 0.0707070707070707               1.0  1.0
+     2 0.0808080808080808               1.0  1.0
+     2 0.0909090909090909               1.0  1.0
+     2  0.101010101010101               1.0  1.0
+     2  0.111111111111111               1.0  1.0
+     2  0.121212121212121               1.0  1.0
+     2  0.131313131313131               1.0  1.0
+     2  0.141414141414141               1.0  1.0
+     2  0.151515151515152               1.0  1.0
+     2  0.161616161616162               1.0  1.0
+     2  0.171717171717172               1.0  1.0
+     2  0.181818181818182               1.0  1.0
+     2  0.191919191919192               1.0  1.0
+     2  0.202020202020202               1.0  1.0
+     2  0.212121212121212               1.0  1.0
+     2  0.222222222222222               1.0  1.0
+     2  0.232323232323232               1.0  1.0
+     2  0.242424242424242               1.0  1.0
+     2  0.252525252525253               1.0  1.0
+     2  0.262626262626263               1.0  1.0
+     2  0.272727272727273               1.0  1.0
+     2  0.282828282828283               1.0  1.0
+     2  0.292929292929293               1.0  1.0
+     2  0.303030303030303               1.0  1.0
+     2  0.313131313131313               1.0  1.0
+     2  0.323232323232323               1.0  1.0
+     2  0.333333333333333 0.833333333333333  1.0
+     2  0.343434343434343 0.833333333333333  1.0
+     2  0.353535353535354 0.833333333333333  1.0
+     2  0.363636363636364 0.833333333333333  1.0
+     2  0.373737373737374 0.833333333333333  1.0
+     2  0.383838383838384 0.833333333333333  1.0
+     2  0.393939393939394 0.833333333333333  1.0
+     2  0.404040404040404 0.833333333333333  1.0
+     2  0.414141414141414 0.833333333333333  1.0
+     2  0.424242424242424 0.833333333333333  1.0
+     2  0.434343434343434 0.833333333333333 0.75
+     2  0.444444444444444 0.833333333333333 0.75
+     2  0.454545454545455 0.833333333333333 0.75
+     2  0.464646464646465 0.833333333333333 0.75
+     2  0.474747474747475 0.833333333333333 0.75
+     2  0.484848484848485 0.833333333333333 0.75
+     2  0.494949494949495               0.5 0.75
+     2  0.505050505050505               0.5 0.75
+     2  0.515151515151515               0.5  0.5
+     2  0.525252525252525               0.5  0.5
+     2  0.535353535353535 0.333333333333333  0.5
+     2  0.545454545454546 0.333333333333333  0.5
+     2  0.555555555555556 0.333333333333333  0.5
+     2  0.565656565656566 0.333333333333333  0.5
+     2  0.575757575757576 0.333333333333333  0.5
+     2  0.585858585858586 0.333333333333333  0.5
+     2  0.595959595959596 0.333333333333333  0.5
+     2  0.606060606060606 0.166666666666667  0.5
+     2  0.616161616161616 0.166666666666667  0.5
+     2  0.626262626262626 0.166666666666667  0.5
+     2  0.636363636363636 0.166666666666667  0.5
+     2  0.646464646464647 0.166666666666667  0.5
+     2  0.656565656565657 0.166666666666667  0.5
+     2  0.666666666666667 0.166666666666667 0.25
+     2  0.676767676767677 0.166666666666667 0.25
+     2  0.686868686868687 0.166666666666667 0.25
+     2  0.696969696969697 0.166666666666667 0.25
+     2  0.707070707070707 0.166666666666667 0.25
+     2  0.717171717171717 0.166666666666667 0.25
+     2  0.727272727272727               0.0 0.25
+     2  0.737373737373737               0.0 0.25
+     2  0.747474747474748               0.0 0.25
+     2  0.757575757575758               0.0 0.25
+     2  0.767676767676768               0.0 0.25
+     2  0.777777777777778               0.0 0.25
+     2  0.787878787878788               0.0 0.25
+     2  0.797979797979798               0.0 0.25
+     2  0.808080808080808               0.0 0.25
+     2  0.818181818181818               0.0 0.25
+     2  0.828282828282828               0.0 0.25
+     2  0.838383838383838               0.0  0.0
+     2  0.848484848484849               0.0  0.0
+     2  0.858585858585859               0.0  0.0
+     2  0.868686868686869               0.0  0.0
+     2  0.878787878787879               0.0  0.0
+     2  0.888888888888889               0.0  0.0
+     2  0.898989898989899               0.0  0.0
+     2  0.909090909090909               0.0  0.0
+     2  0.919191919191919               0.0  0.0
+     2  0.929292929292929               0.0  0.0
+     2  0.939393939393939               0.0  0.0
+     2   0.94949494949495               0.0  0.0
+     2   0.95959595959596               0.0  0.0
+     2   0.96969696969697               0.0  0.0
+     2   0.97979797979798               0.0  0.0
+     2   0.98989898989899               0.0  0.0
+     2                1.0               0.0  0.0
+     3                0.0               1.0  1.0
+     3 0.0101010101010101               1.0  1.0
+     3 0.0202020202020202               1.0  1.0
+     3 0.0303030303030303               1.0  1.0
+     3 0.0404040404040404               1.0  1.0
+     3 0.0505050505050505               1.0  1.0
+     3 0.0606060606060606               1.0  1.0
+     3 0.0707070707070707               1.0  1.0
+     3 0.0808080808080808               1.0  1.0
+     3 0.0909090909090909               1.0  1.0
+     3  0.101010101010101               1.0  1.0
+     3  0.111111111111111               1.0  1.0
+     3  0.121212121212121               1.0  1.0
+     3  0.131313131313131               1.0  1.0
+     3  0.141414141414141               1.0  1.0
+     3  0.151515151515152               1.0  1.0
+     3  0.161616161616162               1.0  1.0
+     3  0.171717171717172               1.0  1.0
+     3  0.181818181818182               1.0  1.0
+     3  0.191919191919192               1.0  1.0
+     3  0.202020202020202               1.0  1.0
+     3  0.212121212121212               1.0  1.0
+     3  0.222222222222222               1.0  1.0
+     3  0.232323232323232               1.0  1.0
+     3  0.242424242424242               1.0  1.0
+     3  0.252525252525253               1.0  1.0
+     3  0.262626262626263               1.0  1.0
+     3  0.272727272727273               1.0  1.0
+     3  0.282828282828283               1.0  1.0
+     3  0.292929292929293               1.0  1.0
+     3  0.303030303030303               1.0  1.0
+     3  0.313131313131313               1.0  1.0
+     3  0.323232323232323               1.0  1.0
+     3  0.333333333333333 0.833333333333333  1.0
+     3  0.343434343434343 0.833333333333333  1.0
+     3  0.353535353535354 0.833333333333333  1.0
+     3  0.363636363636364 0.833333333333333  1.0
+     3  0.373737373737374 0.833333333333333  1.0
+     3  0.383838383838384 0.833333333333333  1.0
+     3  0.393939393939394 0.833333333333333  1.0
+     3  0.404040404040404 0.833333333333333  1.0
+     3  0.414141414141414 0.833333333333333  1.0
+     3  0.424242424242424 0.833333333333333  1.0
+     3  0.434343434343434 0.833333333333333 0.75
+     3  0.444444444444444 0.833333333333333 0.75
+     3  0.454545454545455 0.833333333333333 0.75
+     3  0.464646464646465 0.833333333333333 0.75
+     3  0.474747474747475 0.833333333333333 0.75
+     3  0.484848484848485 0.833333333333333 0.75
+     3  0.494949494949495               0.5 0.75
+     3  0.505050505050505               0.5 0.75
+     3  0.515151515151515               0.5  0.5
+     3  0.525252525252525               0.5  0.5
+     3  0.535353535353535 0.333333333333333  0.5
+     3  0.545454545454546 0.333333333333333  0.5
+     3  0.555555555555556 0.333333333333333  0.5
+     3  0.565656565656566 0.333333333333333  0.5
+     3  0.575757575757576 0.333333333333333  0.5
+     3  0.585858585858586 0.333333333333333  0.5
+     3  0.595959595959596 0.333333333333333  0.5
+     3  0.606060606060606 0.166666666666667  0.5
+     3  0.616161616161616 0.166666666666667  0.5
+     3  0.626262626262626 0.166666666666667  0.5
+     3  0.636363636363636 0.166666666666667  0.5
+     3  0.646464646464647 0.166666666666667  0.5
+     3  0.656565656565657 0.166666666666667  0.5
+     3  0.666666666666667 0.166666666666667 0.25
+     3  0.676767676767677 0.166666666666667 0.25
+     3  0.686868686868687 0.166666666666667 0.25
+     3  0.696969696969697 0.166666666666667 0.25
+     3  0.707070707070707 0.166666666666667 0.25
+     3  0.717171717171717 0.166666666666667 0.25
+     3  0.727272727272727               0.0 0.25
+     3  0.737373737373737               0.0 0.25
+     3  0.747474747474748               0.0 0.25
+     3  0.757575757575758               0.0 0.25
+     3  0.767676767676768               0.0 0.25
+     3  0.777777777777778               0.0 0.25
+     3  0.787878787878788               0.0 0.25
+     3  0.797979797979798               0.0 0.25
+     3  0.808080808080808               0.0 0.25
+     3  0.818181818181818               0.0 0.25
+     3  0.828282828282828               0.0 0.25
+     3  0.838383838383838               0.0  0.0
+     3  0.848484848484849               0.0  0.0
+     3  0.858585858585859               0.0  0.0
+     3  0.868686868686869               0.0  0.0
+     3  0.878787878787879               0.0  0.0
+     3  0.888888888888889               0.0  0.0
+     3  0.898989898989899               0.0  0.0
+     3  0.909090909090909               0.0  0.0
+     3  0.919191919191919               0.0  0.0
+     3  0.929292929292929               0.0  0.0
+     3  0.939393939393939               0.0  0.0
+     3   0.94949494949495               0.0  0.0
+     3   0.95959595959596               0.0  0.0
+     3   0.96969696969697               0.0  0.0
+     3   0.97979797979798               0.0  0.0
+     3   0.98989898989899               0.0  0.0
+     3                1.0               0.0  0.0
+     4                0.0               1.0  1.0
+     4 0.0101010101010101               1.0  1.0
+     4 0.0202020202020202               1.0  1.0
+     4 0.0303030303030303               1.0  1.0
+     4 0.0404040404040404               1.0  1.0
+     4 0.0505050505050505               1.0  1.0
+     4 0.0606060606060606               1.0  1.0
+     4 0.0707070707070707               1.0  1.0
+     4 0.0808080808080808               1.0  1.0
+     4 0.0909090909090909               1.0  1.0
+     4  0.101010101010101               1.0  1.0
+     4  0.111111111111111               1.0  1.0
+     4  0.121212121212121               1.0  1.0
+     4  0.131313131313131               1.0  1.0
+     4  0.141414141414141               1.0  1.0
+     4  0.151515151515152               1.0  1.0
+     4  0.161616161616162               1.0  1.0
+     4  0.171717171717172               1.0  1.0
+     4  0.181818181818182               1.0  1.0
+     4  0.191919191919192               1.0  1.0
+     4  0.202020202020202               1.0  1.0
+     4  0.212121212121212               1.0  1.0
+     4  0.222222222222222               1.0  1.0
+     4  0.232323232323232               1.0  1.0
+     4  0.242424242424242               1.0  1.0
+     4  0.252525252525253               1.0  1.0
+     4  0.262626262626263               1.0  1.0
+     4  0.272727272727273               1.0  1.0
+     4  0.282828282828283               1.0  1.0
+     4  0.292929292929293               1.0  1.0
+     4  0.303030303030303               1.0  1.0
+     4  0.313131313131313               1.0  1.0
+     4  0.323232323232323               1.0  1.0
+     4  0.333333333333333 0.833333333333333  1.0
+     4  0.343434343434343 0.833333333333333  1.0
+     4  0.353535353535354 0.833333333333333  1.0
+     4  0.363636363636364 0.833333333333333  1.0
+     4  0.373737373737374 0.833333333333333  1.0
+     4  0.383838383838384 0.833333333333333  1.0
+     4  0.393939393939394 0.833333333333333  1.0
+     4  0.404040404040404 0.833333333333333  1.0
+     4  0.414141414141414 0.833333333333333  1.0
+     4  0.424242424242424 0.833333333333333  1.0
+     4  0.434343434343434 0.833333333333333 0.75
+     4  0.444444444444444 0.833333333333333 0.75
+     4  0.454545454545455 0.833333333333333 0.75
+     4  0.464646464646465 0.833333333333333 0.75
+     4  0.474747474747475 0.833333333333333 0.75
+     4  0.484848484848485 0.833333333333333 0.75
+     4  0.494949494949495               0.5 0.75
+     4  0.505050505050505               0.5 0.75
+     4  0.515151515151515               0.5  0.5
+     4  0.525252525252525               0.5  0.5
+     4  0.535353535353535 0.333333333333333  0.5
+     4  0.545454545454546 0.333333333333333  0.5
+     4  0.555555555555556 0.333333333333333  0.5
+     4  0.565656565656566 0.333333333333333  0.5
+     4  0.575757575757576 0.333333333333333  0.5
+     4  0.585858585858586 0.333333333333333  0.5
+     4  0.595959595959596 0.333333333333333  0.5
+     4  0.606060606060606 0.166666666666667  0.5
+     4  0.616161616161616 0.166666666666667  0.5
+     4  0.626262626262626 0.166666666666667  0.5
+     4  0.636363636363636 0.166666666666667  0.5
+     4  0.646464646464647 0.166666666666667  0.5
+     4  0.656565656565657 0.166666666666667  0.5
+     4  0.666666666666667 0.166666666666667 0.25
+     4  0.676767676767677 0.166666666666667 0.25
+     4  0.686868686868687 0.166666666666667 0.25
+     4  0.696969696969697 0.166666666666667 0.25
+     4  0.707070707070707 0.166666666666667 0.25
+     4  0.717171717171717 0.166666666666667 0.25
+     4  0.727272727272727               0.0 0.25
+     4  0.737373737373737               0.0 0.25
+     4  0.747474747474748               0.0 0.25
+     4  0.757575757575758               0.0 0.25
+     4  0.767676767676768               0.0 0.25
+     4  0.777777777777778               0.0 0.25
+     4  0.787878787878788               0.0 0.25
+     4  0.797979797979798               0.0 0.25
+     4  0.808080808080808               0.0 0.25
+     4  0.818181818181818               0.0 0.25
+     4  0.828282828282828               0.0 0.25
+     4  0.838383838383838               0.0  0.0
+     4  0.848484848484849               0.0  0.0
+     4  0.858585858585859               0.0  0.0
+     4  0.868686868686869               0.0  0.0
+     4  0.878787878787879               0.0  0.0
+     4  0.888888888888889               0.0  0.0
+     4  0.898989898989899               0.0  0.0
+     4  0.909090909090909               0.0  0.0
+     4  0.919191919191919               0.0  0.0
+     4  0.929292929292929               0.0  0.0
+     4  0.939393939393939               0.0  0.0
+     4   0.94949494949495               0.0  0.0
+     4   0.95959595959596               0.0  0.0
+     4   0.96969696969697               0.0  0.0
+     4   0.97979797979798               0.0  0.0
+     4   0.98989898989899               0.0  0.0
+     4                1.0               0.0  0.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

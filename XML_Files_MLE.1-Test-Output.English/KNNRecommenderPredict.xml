@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="llb1507907767463"> </a>
+	  <h1>KNNRecommenderPredict</h1>
+
+	
+	
+   <a name="mhw1507907859579"> </a>
+   <h2>KNNRecommenderPredict Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.3</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM KNNRecommenderPredict (
+  ON <i>rating_table</i> AS Ratings { PARTITION BY ANY | PARTITION BY <i>userid_column</i> }
+  ON <i>weight_model_table</i> AS Weights DIMENSION
+  ON <i>bias_model_table</i> AS Bias DIMENSION
+  [ USING
+    [ UserIDColumn ('<i>userid_column</i>')
+      ItemIDColumn ('<i>itemid_column</i>')
+      RatingColumn ('<i>rating_column</i>')
+    ]
+    [ TopK (<i>top_k_recommendations</i>) ]
+  ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="nwt1507907864364"> </a>
+	  <h2>KNNRecommenderPredict Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>UserIDColumn</dt>
+      <dd>[Optional] Specify the Ratings column that contains the user IDs.</dd>
+      <dd>Default: First Ratings column<p>
+            <b>Note:</b>  Specify either all or none of UserIDColumn, ItemIDColumn, and RatingColumn. If you specified them in the KNNRecommender call that created the weights and bias tables that the KNNRecommenderPredict call uses, specify them in the KNNRecommenderPredict call, with the same values.</p>
+      </dd>
+      <dt>ItemIDColumn</dt>
+      <dd>[Optional] Specify the Ratings column that contains the item IDs.</dd>
+      <dd>Default: Second Ratings column</dd>
+      <dt>RatingColumn</dt>
+      <dd>[Optional] Specify the Ratings column that contains the ratings.</dd>
+      <dd>Default: Third Ratings column</dd>
+      <dt>TopK</dt>
+      <dd>[Optional] Specify the number of items to recommend for each user. The function recommends the <i>top_k_recommendations</i> highest-rated items.</dd>
+      <dd>Default: 3</dd>
+   </div>
+
+
+	
+   <a name="euz1507907868076"> </a>
+   <h2>KNNRecommenderPredict Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_bdv_wvk_ycb"> </a>
+   <table class="introtable">
+      <a name="table_bdv_wvk_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Ratings</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KNNRecommender Input RatingTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Weights</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KNNRecommender Output WeightModelTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Bias</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KNNRecommender Output BiasModelTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="slm1507907871462"> </a>
+   <h2>KNNRecommenderPredict Output</h2>
+   <a name="section_eqg_mwk_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <p style="line-height: 1em;">The table has <i>top_k_recommendations</i> rows for each userid-itemid-prediction set.</p>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">userid</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Userid of user for whom items are recommended.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">itemid</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Itemid of item recommended for user.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">prediction</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Predicted rating of item for user.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="fwy1510706951489"> </a>
+   <h2>KNNRecommenderPredict Example</h2>
+   <a name="section_jyf_2cr_tdb"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">From the KNNRecommender Example:<ul>
+         <li>Ratings: ml_ratings</li>
+         <li>Weights: ml_weights</li>
+         <li>Bias: ml_bias</li>
+      </ul>
+   </p>
+
+   <a name="section_zhp_2cr_tdb"> </a>
+   <h3>SQL Call</h3>
+   <p style="line-height: 1em;">The call recommends five movies for ten users.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM KnnRecommenderPredict (
+  ON (SELECT * FROM ml_ratings WHERE <b>userid &lt;= 10</b>) AS Ratings
+    PARTITION BY userid
+  ON ml_bias AS Bias DIMENSION
+  ON ml_weights AS Weights DIMENSION
+  USING
+  <b>TopK (5)</b>
+) AS dt ORDER BY 1 DESC;</tt>
+   </pre>
+   <a name="section_dpd_fcr_tdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ userid itemid prediction         
+ ------ ------ ------------------ 
+      5    454   4.43944806005997
+      5   2890  4.353130720557537
+      5     34   4.43944806005997
+      5    420 4.5586737193706535
+      5    357 4.5150229309770635
+      4   2023  4.472692557514834
+      4   1258  4.472692557514834
+      4    300  4.622911229674568
+      4   1704  4.472692557514834
+      4   2571  4.722330311219902
+      3   1258  4.396245483590272
+      3   1704  4.396245483590272
+      3   2023  4.396245483590272
+      3   2571  4.645740472524265
+      3   1136  4.146753684279514
+      3   1711  4.146753684279514
+      3   1267  4.146753684279514
+      2    515  4.540419986677616
+      2    480  4.540419986677616
+      2    296  4.463307355858737
+      2    265  4.540419986677616
+      2    648  4.540419986677616
+      1   1278  4.228140795465176
+      1    553  3.973010311922945
+      1     21   4.02887733802919
+      1    420  4.466978626573491
+      1   1639  4.479795437756031</tt>
+   </pre>
+   <p>
+      <b>Note:</b>  Some predicted ratings are higher than 5, even though the maximum rating is 5. The weighted KNN recommendation algorithm does not limit its results to the range of the input data. The outcome of interest are the items with the highest recommendation score; if the resulting ratings must be limited to a specific range, normalize the output data.</p>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

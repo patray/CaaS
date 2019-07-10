@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="bst1507214236247"> </a>
+	  <h1>NERTrainer</h1>
+
+	
+		<p style="line-height: 1em;">The NERTrainer function takes training data and outputs a CRF model (a binary file) that can be specified in the function NERExtractor and NEREvaluator.</p>
+   <p>
+      <b>Note:</b>  NERTrainer uses files that are preinstalled on ML Engine. For details, see Preinstalled Files That Functions Use.</p>
+	
+   <a name="pxo1507214282224"> </a>
+   <h2>NERTrainer Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.6</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NERTrainer (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY 1
+  USING
+  ModelFileName (<i>model_file</i>)
+  TextColumn ('<i>text_column</i>')
+  [ ExtractorJAR ('<i>jar_file</i>') ]
+  FeatureTemplate ('<i>template_file</i>')
+  [ InputLanguage ({ 'en' | 'zh_CN' | 'zh_TW' }) ]
+  [ MaxIterNum (<i>max_iteration_times</i>) ]
+  [ Eta (<i>eta_threshhold_value</i>) ]
+  [ MinOccurNum (<i>threshhold_value</i>) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="wac1507214352966"> </a>
+	  <h2>NERTrainer Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>ModelFileName</dt>
+      <dd>Specify the name of the model file that the function creates and installs on ML Engine.</dd>
+      <dt>TextColumn</dt>
+      <dd>Specify the name of the input table column that contains the text to analyze.</dd>
+      <dt>ExtractorJAR</dt>
+      <dd>[Optional] Specify the name of the JAR file that contains the Java classes that extract features. You must install this JAR file on ML Engine before calling the function.<p>
+            <b>Note:</b>  The name <i>jar_file</i> is case-sensitive.</p>
+         <p>
+            <b>Note:</b>  ML Engine does not support the creation of new extractor classes. However, it does support existing JAR files—for installation instructions, see <i>Teradata Vantage<sup>™</sup> User Guide</i>, B700-4002.</p>
+      </dd>
+      <dd>Default behavior: The function uses only the predefined extractor classes.</dd>
+      <dt>FeatureTemplate</dt>
+      <dd>Specify the name of the file that specifies how to create features when training the model.</dd>
+      <dt>InputLanguage</dt>
+      <dd>[Optional] Specify the language of the input text:<a name="d59e19"> </a>
+         <table class="introtable">
+            <a name="d59e19"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'en'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">English</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'zh_CN'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Simplified Chinese</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'zh_TW'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Traditional Chinese</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>MaxIterNum</dt>
+      <dd>[Optional] Specify the maximum number of iterations.</dd>
+      <dd>Default: 1000</dd>
+      <dt>Eta</dt>
+      <dd>[Optional] Specify the tolerance of the termination criterion. Defines the differences of the values of the loss function between two sequential epochs.</dd>
+      <dd>When training a model, the function performs <i>n</i>-times iterations. At the end of each epoch, the function calculates the loss or cost function on the training samples. If the loss function value change is very small between two sequential epochs, the function considers the training process to have converged.</dd>
+      <dd>The function defines Eta as:<p style="line-height: 1em;">
+            <tt style="font-family: monospace;">Eta=(f(<i>n</i>)-f(<i>n</i>-1))/f(<i>n</i>-1)</tt>
+         </p>
+         <p style="line-height: 1em;">where f(<i>n</i>) is the loss function value of the <i>n</i>th epoch.</p>
+      </dd>
+      <dd>Default: 0.0001</dd>
+      <dt>MinOccurNum</dt>
+      <dd>[Optional] Specify the minimum number times that a feature must occur in the input text before the function uses the feature to construct the model.</dd>
+      <dd>Default: 0</dd>
+   </div>
+
+
+	
+   <a name="uze1507214602664"> </a>
+   <h2>NERTrainer Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Input Table Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">text_column</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Text to analyze. Within text, each entity must be identified with this syntax:<pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+&lt;START:<i>entity_type</i>&gt;<i>entity</i>&lt;END&gt;</tt>
+               </pre>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>For example:</p>
+               <pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+&lt;START:location&gt;Country1&lt;END&gt; has arrived</tt>
+               </pre>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="apn1507769384462"> </a>
+   <h2>NERTrainer Output</h2>
+   <a name="section_i3m_nmc_ycb"> </a>
+   <p style="line-height: 1em;">The function outputs a message and a CRF model (a binary file installed on ML Engine).</p>
+
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Message Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">train_result</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Reports training time and file size of model.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="xgt1507214754300"> </a>
+   <h2>NERTrainer Example</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Input</h3>
+   <ul>
+      <li>Input table: ner_sports_train, a collection of sports news items (500 rows)</li>
+      <li>Feature template file: template_1.txt, which is preinstalled on ML Engine.</li>
+   </ul>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <h4 style="text-align: center;">ner_sports_train</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">content</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CRICKET - &lt;START:ORG&gt; LEICESTERSHIRE &lt;END&gt; TAKE OVER AT TOP AFTER INNINGS VICTORY .</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">&lt;START:LOC&gt; LONDON &lt;END&gt; 1996-08-30</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">West Indian all-rounder &lt;START:PER&gt; Phil Simmons &lt;END&gt; took four for 38 on Friday as &lt;START:ORG&gt; Leicestershire &lt;END&gt; beat &lt;START:ORG&gt; Somerset &lt;END&gt; by an innings and 39 runs in two days to take over at the head of the county championship .</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Their stay on top</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">After bowling &lt;START:ORG&gt; Somerset &lt;END&gt; out for 83 on the opening morning at &lt;START:LOC&gt; Grace Road &lt;END&gt;</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Trailing by 213</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">&lt;START:ORG&gt; Essex &lt;END&gt;</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">&lt;START:PER&gt; Hussain &lt;END&gt;</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">By the close &lt;START:ORG&gt; Yorkshire &lt;END&gt; had turned that into a 37-run advantage but off-spinner &lt;START:PER&gt; Such &lt;END&gt; had scuttled their hopes</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_z3b_t1b_cdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NERTrainer (
+  ON ner_sports_train PARTITION BY 1
+  USING
+  TextColumn ('content')
+  FeatureTemplate ('template_1.txt')
+  OutputModelFile ('ner_model.bin')
+) AS dt;</tt>
+   </pre>
+   <a name="section_dpq_t1b_cdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ train_result                  
+ ----------------------------- 
+ Model generated.             
+ Training time(s): 3.129      
+ File size(KB): 374           
+ Model successfully installed.</tt>
+   </pre>
+   <p style="line-height: 1em;">The model file, ner_model.bin, is in binary format.</p>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

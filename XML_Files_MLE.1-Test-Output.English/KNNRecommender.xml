@@ -1,0 +1,768 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="usr1507908466553"> </a>
+	  <h1>KNNRecommender</h1>
+
+	
+		
+	
+   <a name="wme1507908548436"> </a>
+   <h2>KNNRecommender Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.4</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM KNNRecommender (
+  ON <i>input_table</i> AS InputTable
+  OUT TABLE WeightModelTable (<i>weight_model_table</i>)
+  OUT TABLE BiasModelTable (<i>bias_model_table</i>)
+  [ OUT TABLE NearestItemsTable (<i>item_neighbors_table</i>) ]
+  USING
+  [ UserIDColumn ('<i>userid_column</i>')
+    ItemIDColumn ('<i>itemid_column</i>')
+    RatingColumn ('<i>rating_column</i>')
+  ]
+  [ K (<i>number_of_item_neighbors</i>) ]
+  [ LearningRate (<i>learning_rate</i>) ]
+  [ MaxIterNum (<i>max_iteration_number</i>) ]
+  [ StopThreshold (<i>threshold</i>) ]
+  [ SimilarityMethod ({ 'pearson' | 'adjustedcosine' }) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="ztk1507908552372"> </a>
+	  <h2>KNNRecommender Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>WeightModelTable</dt>
+      <dd>Specify the name for the output table of interpolation weights.</dd>
+      <dt>BiasModelTable</dt>
+      <dd>Specify the name for the output table of global, user, and item bias statistics.</dd>
+      <dt>NearestItemsTable</dt>
+      <dd>[Optional] Specify the name for the output table of nearest neighbors for each item.<p style="line-height: 1em;">If you omit this syntax element, the function does not output this table.</p>
+         <p style="line-height: 1em;">If you specify this syntax element, and a table named <i>item_neighbors_table</i> exists, the function uses the existing table to train the model.</p>
+         <p style="line-height: 1em;">If you specify this syntax element, and no table named <i>item_neighbors_table</i> exists, the function creates a table with that name.</p>
+      </dd>
+      <dt>UserIDColumn</dt>
+      <dd>[Optional] Specify the InputTable column that contains the user IDs.</dd>
+      <dd>Default: First InputTable column<p>
+            <b>Note:</b>  You must specify either all or none of UserIDColumn, ItemIDColumn, and RatingColumn.</p>
+      </dd>
+      <dt>ItemIDColumn</dt>
+      <dd>[Optional] Specify the InputTable column that contains the item IDs.</dd>
+      <dd>Default: Second InputTable column</dd>
+      <dt>RatingColumn</dt>
+      <dd>[Optional] Specify the InputTable column that contains the ratings.</dd>
+      <dd>Default: Third InputTable column</dd>
+      <dt>K</dt>
+      <dd>[Optional] Specify the number of nearest neighbors with which to calculate the interpolation weights.</dd>
+      <dd>Default: 20</dd>
+      <dt>LearningRate</dt>
+      <dd>[Optional] Specify the initial learning rate. The learning rate adjusts automatically during training based on changes in the root-mean-square error (RMSE).</dd>
+      <dd>Default: 0.001</dd>
+      <dt>MaxIterNum</dt>
+      <dd>[Optional] Specify the maximum number of iterations.</dd>
+      <dd>Default: 10</dd>
+      <dt>StopThreshold</dt>
+      <dd>[Optional] Specify the RMSE below which the function stops.</dd>
+      <dd>Default: 0.0002</dd>
+      <dt>SimilarityMethod</dt>
+      <dd>[Optional] Specify the method for calculating item similarity:<a name="table_dn2_jrz_fdb"> </a>
+         <table class="introtable">
+            <a name="table_dn2_jrz_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'pearson'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Pearson correlation coefficient:<a name="fig_krc_mrz_fdb"> </a>
+                     <div style="text-align: center;">
+                        <div style="margin: auto; display: inline-block">
+                           <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAdcAAAByCAYAAAABIpsoAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAABKeSURBVHhe7Z2Ltey0skVJgRhIgRwIgRhIgQzIgAyIgAhIgATIgBzOG5N31qWurmzL3epuf+YcQ+PsdkuyPqVaKtl7n2++iIiIyFQUVxERkckoriIiIpNRXEVERCajuIqIiExGcRUREZmM4ioiIjIZxVVERGQyiquIiMhkFFcREZHJKK4iIiKTUVxFREQmo7iKiIhMRnEVERGZjOIqIiIyGcVVRERkMoqriIjIZBRXERGRySiuIiIik1FcReQlfPPNN6vpl19++ZpTXkFvzGty/F+L4iqH47fffus6g6X0ww8/fC0pInIMFFc5JAjmmnD+/fffX3766adDiutff/31T9t+/PHHr1dkL3/++eeX77///p+N1h7IT7k//vjj6xV5FMaR6Ja1JvtRXOWQIFDffvvtP+K5dnxFniOJK879u++++/Lrr79+vfIv2TC0ifxXc2L0p9dX5ouNB/O7BXnYoODkt8aG7xlfUls3QttrC4n6ryjEM/rMmDKPzBmbHdmH4iqH5ffff/+PQ1ha3D///PNhxDUObclx4awQCvJELPiXPnCNf69EThaYx5Ajf8ZhlAjsGhHWJXLfOsbMExsbxGNE7M/GrD6zUbzqGL0SxVUODY41zjiCdERoG04LQVmDPD2hoI84sCsRcW3nDRHk+mg0RHnGZukEA+dPfWvOP0JThR4SYfdOGs7OzD5vbV7kf1Fc5dDEseIMjhzZxZGtOXj6stQPriO8V4JNRG8jEXHdEwkxZthBK9QwsqmhPPdsy0domL+rMbPPOUUaOU6W/0dxlcNTj4ePuriXhKSSfrSRRIR5KTI7I0sbCQSV63ujIOa9N3ZLY9qyND85Iu2J9tmZ3efefMoyiqucghwPH9UR0ra90RNCk+dZ9O9KtKJHn/k5x+J7otbQc+6JwvaeGCDWCDxjf8Vo7BV9pmxPrKWP4iqnAGeBU8BhHO3NxURVW5Enjol8NeGwrnwkWRPCymYim4u9ZLwqfOb6GhH6mrAl2viIyJ+BV/R5ZKzlXxwpOQUR163o8BOMiGsiibSfzzm2e1RsHiVOcjQ9EuXQL8Q00G/m75mNEW15RFwj9BGVHMN/alOTaHs0PfK44BV9Vlz34UjJKWBhv1uIqghFYGpElmsj4ppIojq3vOU6y8nnHp+OxtqNBCCq7bXKSNv5/hFxbYUeEPr22gyo91OiXXmkz1ttV1z34UjJ4clOf+ZxMHXlOW5NNUqLSLS/ssC1KqQj4tpGEpByfHclehsJ4BpO/1Eov1dce0IPKffuU4N38Ko+K677cKTk0CTiGfmdPJxGHAAOPiB61amTjx38Vp0RvyqIcVxthMW1pagMuD95WrjWCg59pn1EEvU+9G1JiNPvNYF/F9lI1I0KLDn3kbZn3Nv+U4brSxFvhL6tO+WqnUDaXu8TO2jbXUl9z2weZrG3z6Nt5/sj9O8sKK5yWCKCa2/SxvEBYokw4ayrY2lFiYiKa1tQR+tMKNs7WltzPGkj5VoHTRm+q+JAWyMmVaD43DrG0Mv/CWgHmwLa0p40RLjaiHak7RGMtmyuL41LhLvdSKVc3RBxf+pn3qt99OygB2XWNljvYk+fw1bbM0dH6N9ZUFzlsCCqPUGqxGFXKFOdcPssKTv1XqoOHodTRRlwLj0HQ/2UbyMoPtf6W2FO+7lexSjlUl8i+Lb+kPxrY/UO6AftSKrtjXNv52Ok7Yw55Xp5uGdvTrhW21LvGbEgbc0xdtirvwUBHjlheSWP9nmr7bHvT2/ezoTiKoeEhb61mPkOh1ujjDjqOPWeKLWRyRLU3UZEOPKeE8JxLTn5R8CZUV/gnvVzC/lHoqsjstV2xpa5YN56xFbqHD8D41xFqd0M9IhwnVF8RtrOehlZM/IvlxNXFhgO7tW/lM+C5h7u5OaDIOLQWPAjqS76VpQS/VYQTOpfIyJd5zfXlpw4efm+FeRHwIYj1CPCXfOfja22M4dbGwdsYMbmop3jUeFOVH5GttrOGLBetsZA/ptLiWscK8bwDnCmLOizOrWjgjNlsY+mKq71+Vh+5nscQ6KPKlb83CO7+dgS5VPXGtwDR/SsDXIfju5oB+2kvfQHm4vgkyf34We+5/51Q3AGltrOmPMd4740T4Hvk/cZEeD+zDv1ITrUmc8Za/K0mzPaT94zstR2+owN0tf2+bls81ZxzQ4pTm4mWRRrjiXPtx5ZfEttxwBxfO0zDPkMcXykOGvmDefBXAWcRU/Eq/1Qnnq4zr9rYlzBvsj7zKYLR859sS3aigPkc7UzhCTtjW2f0Q57bafP9G+vryA/5R4Vg6zntIfPzH3mASK6FT6fcexhqe2MI3Y3YvPyv7xVXLOIHjX8JbIgtpwZxsJCeYS1tseBV8cs8kqwtWejY3kMfEHdoON/WP97NwJH4MxtPzqXOBbGMDCQZ46DngXh7h2tiMi1Ibpj037GCO/MbT86lxBXhI30SXJsp5GK3IOcWOF7Zp/GvZozt/0sTBFXJqc+v2InxOdEkoksSYhQ4NlFnm/wM2QnVfPWfL3okOtrR8J8Rx7S3qPbPPsi1ba3xFjTDxERuS9TxDVimqgtUVzdEeWZZcSNfyOIXKc8efI9OyquI8wRtbYOiKitCR+kvkfo3bdltB1Avj1JRETOxdOeO6LSvlzRikIEtwfXiUyreBGhcr1GpKmj5hsVNep79JnoWtvDHnEVEZFr87S4Eq0SuRIZrr1QhLCRp4XothVRIC+CW59hJoKsjIoaeSj/CEttrxxFXGmDyWQymdbTq5lyB45uEVjSkrjQmZ645ZlmjUYR1F5+xLaNPkdELXkefR661PbKUcRVREQ+zzT5zi/OIzBLAtgTt7wIVSFfm5/6l8SL623kW6EMeR55kzdt3/o9sF6blyDfniQiIufiKc+N4LQRHZ9bQYi49Y6NiXZbMU4dVQzzxjFi18KR7dqxLfUT9T7CWtsrafNWPhERuT5PiSuCgjhG8BCWPCut1MiRY+BEgUvRaE8MUwf3onwtE+FdEjbqo13cnwi35qNcK+4VvqOPW/SOrEVE5J48HbkiKAgUCRHimLf9pWSOSvmO1BPF9iiVa9RToc5eHYBoIm5LR8MRZvL07rUmir22tOTouBdVH50cZ5tMs9OzaJumV6dX8tra30gErhXPLSizJMpZ3Gt/wzXC3h6PnwU2HkbcckS0TTkzlxFXIBImsl0TwwqCTP6l4+S8oLX0PeXXIuYzgAPbisxFPoG2KWfmUuIKCCFiNyJ4vSPskEh4KSJFwCl/xqPgCn3AiYkcDW1TzszlxPVZ8nu3RKR3WNgcu+nA5Ihom3JmFNebgwPb+5xa5B1om3JmFNebQ5R+9qNtuSbappwZxfXm4MCWnjuLfBJtU86M4npjePkLByZyNLRNOTta743JG9Eij8DvePM2PS//YUf8O+sYV9uUZ3mlfY6g9d4YDG3rv9ITWYI3efmVN5wYqfenTx9F25RneaV9jqC43hiMz7+AI7PAnvijLDPQNmU2M+1zBMX1xmBs/gUcmQViOOvPgGqbMpuZ9jmC4npjODLBiYk8C396NP/z1Ay0TZnJbPscQXG9MezkrubA+KMDLKJ3vrhwNfK8c/QPOLzCcWmbssQR7HMExfXG4MCu9BdwiHbe/UbgUeHtyLW0JVyMIWPJmK7xKselbV6bnk3WdHT7HEFxvTEY8VUWO89SeFnhE4voqjCWjOnScyr+wAMOrv6vUYjiDLRN2eKT9jmC4npjcGD1L+Cwy8vOcSS901DXwAnTnitFOkchNtETOl44qvaQNAPq0TZli0/Z5wiK601h19czNJwS15ecE+U4ilnL825oBzvUNThmyuKqiZ0v/am727MTh95LOJyeI1qDsX3nXN/JNmfP1Rk4u32OorjelBh4CyKD4PDd2nMP8hzBoIluaOvIf5Afx1ujiOx8eS5zJdKvemTGnOOImLs9m4n8N4w1knwld7PNmXN1Fs5sn6MorjclhtwD8cFY1wyWRXEEB0Y7RhdWxJUIp0I/jrg4nyHOqz2OTAQ/shkJEYmtl0xmcTfbnDlXZ+HM9jmK4npTMN41B5TnFZ96026UCOMI9KUXoaaOK0UIcezt3MV54dz2QJl3CdbdbHP2XJ2BM9vnKIrrTcGI14wRo88RHAvhqIwuKvrT6wuCesSF+SxLG4kcu+0VpVGhmMHdbHP2XJ2BM9vnKIrrTcEp4cTWqEdwHNUdjT3CmL7kGIrFy88sZhb5laJW+kZfq/Awf4wTjuuRuYzzesc43ck2XzFXR+fs9jmK4npTMMYtBwY5gjviDppFSNtG+sFCJm9NCCtHkEfr17NU4Uli/hiDR50PY0w973D2d7LNV8zV0Tm7fY6iuN4UHNjIcw2cFoaP4R7thZ894kp0ipgGXm6iX+/uU3bYo+kRZ5GNRBxVXh555tndu8X1Lrb5irl6hszzaBpZey1nt89RFNebglMaMcQ4MMToXdQFnsVbd7u5NurA6AP5ah/yhuGsfuUen3KKlXYjAcxhey1kbNeihnc6ryPbJmOQFBjv9tqobe6dq2eg3jPaZ9bqUexzFMX1powaIlEEiwFHNgsWAguJNiRxnwr35NivQp6ab9SBRTxax8I17nMlehsJYNy4/ug8vtN5jd5ntm1iJ9TH/WuqxJZqpBw7rG0esc1XzdWRuYJ9jqK43pAY+BYx2JEjN4SL3WcrVpTHIQWecZJnbRcKlGvFkHL1GnWQrwpujxxDtQuvt6DpK8JPX2obyUs9PTJOW+14B3H+rVNPG+tcQMagzd+SfFvz9iyzbXN0PslHni3nzH3bCIsxba+N2ObeuYod13ZHxNdEKfW1a/MTPGqfS2svvMs+96C43pAsyDVwNuQZ+WVuFjbG39bbW/g4oS0H1isXZ9UuHq6tOTDqwGmSr3XEcVZVsLlGGa7XdvK5XfgVHFfrMD5BnEw7b3FqbcTQ62uP1PtqMvdr7LHN0flkXEbmj3FoHT1l23EF7rFmm3vmirZjp7Sx1snnEdGkTK+N72ZPnwPX2412S+o9EsdqjbwFFmq7067gjPi+PZat9JwgC6DWywJq70OZXtpyGG3dYWtRUabep4pzFjTiWxdvK+Rx5q2wV7hPddafAMeUfpJqnyIwpCoO6Svfr0GeOkev4hW2OTKfsaNeqvC5nWfa03P+a7b5yFwB5aoAMQ49QWphPY1sRl7JI33O9XZj3EKed9jnHpa9klwWjHrNEFmwOIw1h8sCwKArIwufMji/NSjXcyo9h5p2bC2+PTA+1cH3NgmVUYE6IvR1K/KJGL0jMn+FbY7MJ/fc6l/God47c9+zv1fYJu2mP6HdGPaIQG2tuyOSDfAa77TPPSiuFyVOs+eEMMIlB4bj2VqIfMeibuuoCz8G3y78kR009bQLpXUqIfeZuSuvmwTGj3u3m4QK7SLPGal9XSI2MUsk3m2bI/OJEPY2bxXazf0ra3M/2zbbCDzjUSPwHiMCdVSYlyV7CLPtcxaK68XAwHBcGCQG19vNca13nbJ5PjmSWqPnGguZenBefMbZYfxxpPzMPdYcJO2Po6McdVGm54yBdswUN+pjUefe1M140ea0mzxxmhEE+p1rZ4F2035EYmlO6D/5nuVTtsnPW/NJ/ZRbm7+IFHmBsrSp197AvWfZJvfj/vSDtmQc+Vxtsd0kcK2Ox5mg3WvjC7PsczaK68Vg4bOTZcGx8HuitGSwLEoW62hqDTrluc49+Zf747gr3JsFsVQXfajfU28cWo84HRzODHBU1EcbuC/t5TMOOiASccxxuun3maBPbd8qidbS12f4lG2OzCcwj8xrrYdUyXiRqK/X1spM22Sssi5oR8Yx/QKut21iLJbm9+hsjd1M+5yN4nph4kR6i60VvLOD8+g561fAQj5bhPoIcd6vcMza5nyon3vV+/Az43zGMc2mdenY+5X2OQPF9cJgfNnpVgPl2hF3es+SI78r9u3dMIaMJWP6CrTN98Dm5V2bzpnQXk4r6glE5dX2OQPF9eLk2KQaIZ+vKkA52rtq/94BY8cYzjjKXEPbfB3cg7HkfmuPVI5ITjUQ196m4F32+SyK6w1oIwR+FjkC2qZcFS35BtQIITtakSOgbcpV0ZJvQiIEnBk/ixwFbVOuiOJ6ExIV4LyWXhIQ+QTaplwRxfVG4LhwYjowORraplwNxfVGJEJof7dQ5NNom3I1FNebQWSgA5Mjom3KlVBcRUREJqO4ioiITEZxFRERmYziKiIiMhnFVUREZDKKq4iIyGQUVxERkckoriIiIpNRXEVERCajuIqIiExGcRUREZmM4ioiIjIZxVVERGQyiquIiMhkFFcREZHJKK4iIiKTUVxFREQmo7iKiIhMRnEVERGZypcv/wdzi3wl40f3/gAAAABJRU5ErkJggg=="
+                                width=""
+                                height=""/>
+                        </div>
+                     </div>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'adjustedcosine'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Adjusted cosine similarity:<a name="fig_rlx_mrz_fdb"> </a>
+                     <div style="text-align: center;">
+                        <div style="margin: auto; display: inline-block">
+                           <img src="data:image/png;base64,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"
+                                width=""
+                                height=""/>
+                        </div>
+                     </div>
+                  </div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+   </div>
+
+
+	
+   <a name="cps1507908555984"> </a>
+	  <h2>KNNRecommender Input</h2>
+
+	  <a name="section_N100FD_N1000C_N10001"> </a>
+   <h3>RatingTable Schema</h3>
+   <p style="line-height: 1em;">The table has user ratings of items.</p>
+   <a name="table_N10107_N100FE_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10107_N100FE_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>userid_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">User identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>itemid_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Item identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>rating_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any numeric type.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Rating user gave item.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+   <a name="ecq1507908560611"> </a>
+   <h2>KNNRecommender Output</h2>
+   <a name="section_mk5_35k_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">iternum</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Iteration number. NULL for baseline rmse.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">rmse</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Root mean square error after iteration.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_fgx_l5k_ycb"> </a>
+   <h3>WeightModelTable Schema</h3>
+   <a name="table_N1005A_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1005A_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">itemid</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Item identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">weights</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BLOB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Interpolation weights for item, in compressed binary format.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_pyh_p5k_ycb"> </a>
+   <h3>BiasModelTable Schema</h3>
+   <a name="table_N1009D_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1009D_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">label</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CHARACTER(1)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">One of the following values:<p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <a name="table_uht_dvk_ycb"> </a>
+                  <table class="introtable">
+                     <a name="table_uht_dvk_ycb"> </a>
+                     <tr>
+                        <th align="left">
+                           <div style="line-height: 1em;">label</div>
+                        </th>
+                        <th align="left">
+                           <div style="line-height: 1em;">Meaning</div>
+                        </th>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">U</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">User statistics</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">I</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Item statistics</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">G</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Global statistics</div>
+                        </td>
+                     </tr>
+                  </table>
+
+               </p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Item identifier or user identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">One of the following values:<p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <a name="table_ym2_kvk_ycb"> </a>
+                  <table class="introtable">
+                     <a name="table_ym2_kvk_ycb"> </a>
+                     <tr>
+                        <th align="left">
+                           <div style="line-height: 1em;">label</div>
+                        </th>
+                        <th align="left">
+                           <div style="line-height: 1em;">value</div>
+                        </th>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">U</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Average rating across all users for item.</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">I</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Average rating across all items from user.</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">G</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Global average rating across all users and all items.</div>
+                        </td>
+                     </tr>
+                  </table>
+
+               </p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_uwn_r5k_ycb"> </a>
+   <h3>NearestItemsTable Schema</h3>
+   <p style="line-height: 1em;">This table appears only with the NearestItemsTable syntax element.</p>
+   <a name="table_N100FA_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100FA_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">itemi</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Item identifier of item i.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">itemj</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Item identifier of item j.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">sij</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Calculated similarity between item i and item j.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="hez1510706776796"> </a>
+   <h2>KNNRecommender Example</h2>
+   <a name="section_ol1_4zw_42b"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">The InputTable has movie ratings from 50 users on approximately 2900 movies, with an average of about 150 ratings for each user. The 10 possible ratings range from 0.5 to 5 in steps of 0.5. A higher number indicates a better rating.</p>
+   <a name="table_bw2_d1x_42b"> </a>
+   <table class="introtable">
+      <a name="table_bw2_d1x_42b"> </a>
+      <h4 style="text-align: center;">InputTable: ml_ratings</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">userid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">itemid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">rating</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">34</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">47</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">62</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">150</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">153</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">160</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">161</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">165</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">185</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_uqj_4zw_42b"> </a>
+   <h3>SQL Call</h3>
+   <p style="line-height: 1em;">KNNRecommender uses the input data to create three model tables: the weights model ('ml_weights'), the bias model table ('ml_bias') and the optional nearest items or neighbors table ('ml_itemngbrs').</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE ml_weights;
+DROP TABLE ml_bias;
+DROP TABLE ml_itemngbrs;</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM KNNRecommender (
+  ON ml_ratings AS InputTable
+  OUT TABLE WeightModelTable (ml_weights)
+  OUT TABLE BiasModelTable (ml_bias)
+  OUT TABLE NearestItemsTable (ml_itemngbrs)
+  USING
+  UserIDColumn ('userid')
+  ItemIDColumn ('itemid')
+  RatingColumn ('rating')
+  K (15)
+  MaxIterNum (20)
+  StopThreshold (0.0002)
+  LearningRate (0.001)
+) AS dt;</tt>
+   </pre>
+   <a name="section_kf5_4zw_42b"> </a>
+   <h3>Output</h3>
+   <p style="line-height: 1em;">The rmse value is output for each of the 20 iterations. The null iteration or first row of the table shows the rmse of the default initialized model.</p>
+   <p>
+      <b>Note:</b>  The ml_weights table is not shown because it is in compressed binary format.</p>
+   <pre>
+      <tt>
+ iternum rmse              
+ ------- ----------------- 
+    NULL 0.201160929445398
+       0 0.200122952666973
+       1 0.199094556858257
+       2 0.198024742312269
+       3 0.196912337420418
+       4 0.195756186274468
+       5  0.19455515462393
+       6 0.193308136349661
+       7  0.19201406046623
+       8 0.190671898661581
+       9 0.189280673377762
+      10 0.187839466430794
+      11 0.186347428161151
+      12 0.184803787098705
+      13 0.183207860117312
+      14 0.181559063044462
+      15 0.179856921680543
+      16 0.178101083170261
+      17 0.176291327655719
+      18 0.174427580126542
+      19 0.172509922367382</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ml_itemngbrs ORDER BY 1;</tt>
+   </pre>
+   <p style="line-height: 1em;">The sij value (similarity between itemi and itemj) in ml_itemngbrs is the default Pearson correlation coefficient.</p>
+   <pre>
+      <tt>
+ itemi itemj sij                    
+ ----- ----- ---------------------- 
+     1   329      0.948683298050514
+     1    39     0.4472135954999582
+     1   648     0.7071067811865475
+     1   225     0.7071067811865475
+     1   597     0.7071067811865475
+     1   296     0.7071067811865475
+     1   300     0.8660254037844385
+     1    21     0.7071067811865475
+     1   480     0.7071067811865475
+     1   265     0.7071067811865475
+     1    11     0.7071067811865475
+     1   288     0.9999999999999998
+     1   165     0.9999999999999998
+     1   380     0.4472135954999582
+     1   515     0.7071067811865475
+    10   161     0.8944271909999159
+    10   356                    0.0
+    10   160      0.948683298050514
+    10   380                    0.0
+    10   592                    0.0
+    10   357     0.9999999999999998
+    10   434                    0.0
+   ...    ...                 ...</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ml_bias ORDER BY 1, 2;</tt>
+   </pre>
+   <pre>
+      <tt>
+ label id    value              
+ ----- ----- ------------------ 
+ G      NULL  3.840092699884125
+ I         1                4.0
+ I         2                3.0
+ I         5                3.0
+ I         6                4.0
+ I        10                3.5
+ I        11                3.5
+ I        14                4.0
+ I        16                5.0
+ I        17                5.0
+ I        19                3.0
+ I        21                4.0
+ I        32                4.5
+ I        34                4.5
+ I        36                3.0
+ I        39 3.3333333333333335
+ I        44                2.0
+ I        45                4.0
+ I        47 3.3333333333333335
+ I        50                4.5
+...      ...                ...</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

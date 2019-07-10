@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="yko1507648429576"> </a>
+	  <h1>Path Analysis Functions</h1>
+
+	  <a name="section_dxx_4c4_zdb"> </a>
+   <p style="line-height: 1em;">The path analysis functions automate path analysis. They are useful for clickstream analysis of web site traffic and other sequence/path analysis tasks, such as advertisement or referral attribution.</p>
+
+   <a name="section_yrr_pc4_zdb"> </a>
+   <h2>Terms Function Descriptions Use</h2>
+   <a name="table_sn5_yc4_zdb"> </a>
+   <table class="introtable">
+      <a name="table_sn5_yc4_zdb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Term</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Definition</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Path</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Ordered, start-to-finish series of actions, such as the page views of a user from the start to the end of a session. For example, if the user visits page a, page b, and page c, in that order, the path is: a,b,c</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Sequence</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Path in this format:<pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+                     <tt style="font-family: monospace;">^,</tt>
+                     <i>path</i>
+                  </tt>
+               </pre>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>The carat (^) indicates that a path follows. For example: ^,a,b,c</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Subsequence or prefix</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">For a given sequence, a possible subset of steps that start with the initial step. For example, for the path a,b,c these are the subsequences:<pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+^,a
+^,a,b
+^,a,b,c</tt>
+               </pre>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Exit subsequence or prefix</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Subsequence or prefix that is the same as its sequence, indicated by a final dollar sign ($). For example: ^,a,b,c$</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Depth</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of steps in a sequence or subsequence. For example, the immediately preceding subsequences have depths 1, 2, and 3, respectively.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Node</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Single step on a path. For example, one web page that the user visits during the session.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Parent</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Path the user traveled to a given node. For example, the parent of c is: ^,a,b</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Child</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Path the user traveled from a given node. For example, these are the children of ^,a:<pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+^,a,b
+^,a,b,c</tt>
+               </pre>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_pjr_sc4_zdb"> </a>
+   <h2>Path Analysis Functions</h2>
+   <a name="table_zyv_b24_zdb"> </a>
+   <table class="introtable">
+      <a name="table_zyv_b24_zdb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Function</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">PathGenerator</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Takes a set of paths and outputs the sequence and all possible subsequences.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">PathSummarizer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Takes PathGenerator output and returns, for each prefix in the input table, the parent and children, and number of times each of its subsequences was traveled.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">PathStart</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Takes PathGenerator output and returns, for each parent in the input table, the parent and children and the number of times that each of its subsequences was traveled.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">PathAnalyzer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Runs the preceding path analysis functions in the order shown, using the output of PathGenerator as input to PathSummarizer and the output of PathSummarizer as the input to PathStart.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+</t:intro>

@@ -1,0 +1,1295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="aui1506614984669"> </a>
+	  <h1>SeriesSplitter</h1>
+
+	  <p style="line-height: 1em;">The SeriesSplitter function splits partitions into subpartitions (called splits) to balance the partitions for time series manipulation. The function creates an additional column that contains split identifiers. Each row contains the identifier of the split to which the row belongs. Optionally, the function also copies a specified number of boundary rows to each split.</p>
+
+   <a name="qcj1506616699719"> </a>
+   <h2>SeriesSplitter Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.8</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SeriesSplitter (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  [ OUT TABLE OutputTable (<i>output_table</i>) ]
+  [ OUT TABLE StatsTable (<i>stats_table</i>) ]
+  USING
+  PartitionByColumns ('<i>partition_column</i>' [,...])
+  [ DuplicateRowsCount (<i>value</i> [,...]) ]
+  [ OrderByColumns ('<i>order_column</i>' [,...]) ]
+  [ SplitCount (<i>split_count</i>) ]
+  [ RowsPerSplit (<i>rows_per_split</i>) ]
+  [ Accumulate ('<i>accumulate_column</i>') ]
+  [ SplitIDColumn ('<i>split_id_column</i>') ]
+  [ ReturnStatsTable ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ ValuesBeforeFirst ('<i>value</i>' [,...]) ]
+  [ ValuesAfterLast (<i>value</i> [,...]) ]
+  [ DuplicateColumn ('<i>duplicate_column</i>') ]
+  [ PartialSplitID ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="pxh1506616826881"> </a>
+	  <h2>SeriesSplitter Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputTable</dt>
+      <dd>[Optional] Specify the name for the function output table.</dd>
+      <dd>Default: partitioned_output in the current schema</dd>
+      <dt>StatsTable</dt>
+      <dd>[Optional] Specify the name for the statistics table that the function outputs.</dd>
+      <dd>Default: stats_output in the current schema</dd>
+      <dt>PartitionByColumns</dt>
+      <dd>Specify the partition columns of the InputTable. These columns determine the identity of a partition. For data type restrictions of these columns, see the Teradata Database documentation.</dd>
+      <dt>DuplicateRowsCount</dt>
+      <dd>[Optional] Specify the number of rows to duplicate across split boundaries. If you specify only <i>value1</i>, the function duplicates <i>value1</i> rows from the previous partition and <i>value1</i> rows from the next partition. If you specify both <i>value1</i> and <i>value2</i>, the function duplicates <i>value1</i> rows from the previous partition and <i>value2</i> rows from the next partition. Each syntax element value must be nonnegative integer less than or equal to 1000.</dd>
+      <dd>Default: One row from the previous partition and one row from the next partition</dd>
+      <dt>OrderByColumns</dt>
+      <dd>[Optional] Specify the order columns of the InputTable. These columns establish the order of the rows and splits. Without this syntax element, the function can split the rows in any order.</dd>
+      <dt>SplitCount</dt>
+      <dd>[Optional] If the InputTable has multiple partitions, you cannot specify SplitCount. Instead, specify RowsPerSplit. Specify the desired number of splits in a partition of the OutputTable.</dd>
+      <dd>The value of <i>split_count</i> must be a positive BIGINT, and its upper bound is the number of rows in the partition. Base the value of <i>split_count</i> on the desired amount of parallelism. For example, for a cluster with 10 vworkers, make <i>split_count</i> a multiple of 10.</dd>
+      <dd>If the number of rows in the InputTable (<i>n</i>) is not exactly divisible by <i>split_count</i>, the function estimates the number of splits in the partition, using this formula:<p style="line-height: 1em;">
+            <tt style="font-family: monospace;">ceiling (</tt>
+            <i>n</i>
+            <tt style="font-family: monospace;"> / ceiling (</tt>
+            <i>n</i>
+            <tt style="font-family: monospace;"> / </tt>
+            <i>split_count</i>
+            <tt style="font-family: monospace;">))</tt>
+         </p>
+      </dd>
+      <dd>Default: 4</dd>
+      <dt>RowsPerSplit</dt>
+      <dd>[Optional] If the InputTable has multiple partitions, specify RowsPerSplit instead of SplitCount.<p style="line-height: 1em;">Specify the desired maximum number of rows in each split in the OutputTable. If the number of rows in the InputTable is not exactly divisible by <i>rows_per_split</i>, the last split contains fewer than <i>rows_per_split</i> rows, but no row contains more than <i>rows_per_split</i> rows.</p>
+         <p style="line-height: 1em;">The value of <i>rows_per_split</i> must be a positive BIGINT.</p>
+         <p style="line-height: 1em;">If the InputTable has multiple partitions and you do not specify RowsPerSplit, the function uses the value 1000.</p>
+      </dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the InputTable columns (other than those specified by PartitionByColumns and OrderByColumns) to copy to the OutputTable.</dd>
+      <dd>Default: Columns specified by PartitionByColumns and OrderByColumns</dd>
+      <dt>SplitIDColumn</dt>
+      <dd>[Optional] Specify the name for the OutputTable column to contain the split identifiers. If the OutputTable has another column named <i>split_id_column</i>, the function returns an error. Therefore, if the OutputTable has a column named 'split_id' (specified by Accumulate, PartitionByColumns, or Order_By_Columns), you must use SplitIDColumn to specify a different <i>split_id_column</i>.</dd>
+      <dd>Default: 'split_id'</dd>
+      <dt>ReturnStatsTable</dt>
+      <dd>[Optional] Specify whether the function returns the data in the StatsTable in response to the command <tt style="font-family: monospace;">SELECT * FROM SeriesSplitter</tt>. When this value is 'false', the function returns only the data in the OutputTable.</dd>
+      <dd>Default: 'true'</dd>
+      <dt>ValuesBeforeFirst</dt>
+      <dd>[Optional] If DuplicateRowsCount is nonzero and OrderByColumns is specified, ValuesBeforeFirst specifies the values to store in the order columns that precede the first row of the first split in a partition as a result of duplicating rows across split boundaries.<p style="line-height: 1em;">If ValuesBeforeFirst specifies only one value and OrderByColumns specifies multiple order columns, the specified value is stored in every order column.</p>
+         <p style="line-height: 1em;">If ValuesBeforeFirst specifies multiple values, it must specify a value for each order column. The value and the order column must have the same data type. For the data type VARCHAR, the values are case-insensitive.</p>
+         <a name="table_jsf_5yf_bcb"> </a>
+         <table class="introtable">
+            <a name="table_jsf_5yf_bcb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Data Type</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Default</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">Numeric</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">-1</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">CHARACTER(<i>n</i>) or VARCHAR</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">'-1'</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">Date- or time-based</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">1900-01-01 0:00:00</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">CHARACTER</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">'0'</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>ValuesAfterLast</dt>
+      <dd>[Optional] If DuplicateRowsCount is nonzero and OrderByColumns is specified, ValuesAfterLast specifies the values to store in the order columns that follow the last row of the last split in a partition as a result of duplicating rows across split boundaries.</dd>
+      <dd>If ValuesAfterLast specifies only one value and OrderByColumns specifies multiple order columns, the specified value is stored in every order column.</dd>
+      <dd>If ValuesAfterLast specifies multiple values, it must specify a value for each order column. The value and the order column must have the same data type. For the data type VARCHAR, the values are case-insensitive.</dd>
+      <dd>Default: NULL</dd>
+      <dt>DuplicateColumn</dt>
+      <dd>[Optional] Specify the name of the OutputTable column that indicates whether a row is duplicated from the neighboring split. If the row is duplicated, the column contains 1; otherwise it contains 0. If you omit this syntax element, the OutputTable does not have this column.</dd>
+      <dt>PartialSplitID</dt>
+      <dd>[Optional] Specify whether <i>split_id_column</i> contains only the numeric split identifier.</dd>
+      <dd>If the value is 'true', <i>split_id_column</i> contains a numeric representation of the split identifier that is unique for each partition. To distribute the OutputTable by split, use a combination of all partition columns and <i>split_id_column</i>.</dd>
+      <dd>If the value is 'false', <i>split_id_column</i> contains a string representation of the split that is unique across all partitions. The function creates the string representation by concatenating the partition columns with the order of the split inside the partition (the numeric representation). In the string representation, hyphens separate partition column names from each other and from the order. For example, 'pcol1-pcol2-3'.</dd>
+      <dd>Default: 'false'</dd>
+   </div>
+
+
+	
+   <a name="ftt1506616978305"> </a>
+   <h2>SeriesSplitter Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>InputTable Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>partition_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">See Teradata Database documentation.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>partition_column</i>.] Column by which input data is partitioned.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>order_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>order_column</i>.] Column by which input data is ordered.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to OutputTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ygw1506617115655"> </a>
+   <h2>SeriesSplitter Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>OutputTable Schema</h3>
+   <p style="line-height: 1em;">The function saves this table to <i>output_table</i>, whose default value is partitioned_output in the current schema.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>partition_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>partition_column</i>.] Column by which input data is partitioned.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>split_id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Split identifier, in form specified by PartialSplitID syntax element.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>order_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>order_column</i>.] Column by which input data is ordered.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from InputTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>duplicate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SMALLINT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with DuplicateColumn syntax element.] 1 if row is duplicated from neighboring split, 0 otherwise.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_yw3_vts_wcb"> </a>
+   <h3>StatsTable Schema</h3>
+   <p style="line-height: 1em;">The function saves this table to <i>stats_table</i>, whose default value is stats_output in the current schema.</p>
+   <a name="table_N1007B_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1007B_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">stats</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Statistics for splitting operation:<ul>
+                  <li>input_table_row_count</li>
+                  <li>input_partition_count</li>
+                  <li>output_split_count</li>
+                  <li>inserted_row_count</li>
+                  <li>output_table_row_count</li>
+                  <li>processing_time_in_seconds</li>
+               </ul>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BIGINT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Statistics values.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ubx1523626460465"> </a>
+	  <h2>SeriesSplitter Example: Partition Splitter</h2>
+
+	  <a name="section_d1b_pq2_p2b"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">The input table has the daily stock prices from 1961 to 1962.</p>
+   <a name="table_wcx_sq2_p2b"> </a>
+   <table class="introtable">
+      <a name="table_wcx_sq2_p2b"> </a>
+      <h4 style="text-align: center;">InputTable: company1_stock1</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">name</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">period</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">stockprice</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-1700:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">460</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-1800:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">457</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-1900:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">452</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-2200:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">459</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-2300:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">462</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-2400:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">459</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-2500:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">463</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-2600:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">479</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-2900:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">493</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-3100:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">490</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-0100:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">492</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-0200:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">498</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-0500:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">499</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-0600:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">497</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-0700:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">496</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-0800:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">490</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-0900:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">489</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-1200:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">478</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-1300:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">487</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-1400:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">491</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_anw_tv3_mdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SeriesSplitter(
+  ON ibm_stock1 AS InputTable
+  OUT TABLE OutputTable(ibm_stock1_split)
+  USING
+  PartitionColumns('id')
+  OrderByColumns('period')
+  SplitCount(50)
+  Accumulate('stockprice')
+) AS dt ;</tt>
+   </pre>
+   <a name="section_hmd_5v3_mdb"> </a>
+   <h3>Output</h3>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ibm_stock1_split ORDER BY id, split_id, period;</tt>
+   </pre>
+   <pre>
+      <tt>
+ split_id id period                     stockprice 
+ -------- -- -------------------------- ---------- 
+ 1-0       1 1900-01-01 00:00:00.000000       NULL
+ 1-0       1 1961-05-17 00:00:00.000000      460.0
+ 1-0       1 1961-05-18 00:00:00.000000      457.0
+ 1-0       1 1961-05-19 00:00:00.000000      452.0
+ 1-0       1 1961-05-22 00:00:00.000000      459.0
+ 1-0       1 1961-05-23 00:00:00.000000      462.0
+ 1-0       1 1961-05-24 00:00:00.000000      459.0
+ 1-0       1 1961-05-25 00:00:00.000000      463.0
+ 1-0       1 1961-05-26 00:00:00.000000      479.0
+ 1-0       1 1961-05-29 00:00:00.000000      493.0
+ 1-1       1 1961-05-26 00:00:00.000000      479.0
+ 1-1       1 1961-05-29 00:00:00.000000      493.0
+ 1-1       1 1961-05-31 00:00:00.000000      490.0
+ 1-1       1 1961-06-01 00:00:00.000000      492.0
+ 1-1       1 1961-06-02 00:00:00.000000      498.0
+ 1-1       1 1961-06-05 00:00:00.000000      499.0
+ 1-1       1 1961-06-06 00:00:00.000000      497.0
+ 1-1       1 1961-06-07 00:00:00.000000      496.0
+ 1-1       1 1961-06-08 00:00:00.000000      490.0
+ 1-1       1 1961-06-09 00:00:00.000000      489.0
+ 1-10      1 1961-09-08 00:00:00.000000      541.0
+ 1-10      1 1961-09-11 00:00:00.000000      545.0
+ 1-10      1 1961-09-12 00:00:00.000000      549.0
+ 1-10      1 1961-09-13 00:00:00.000000      545.0
+ 1-10      1 1961-09-14 00:00:00.000000      549.0
+ 1-10      1 1961-09-15 00:00:00.000000      547.0
+ 1-10      1 1961-09-18 00:00:00.000000      543.0
+ 1-10      1 1961-09-19 00:00:00.000000      540.0
+ 1-10      1 1961-09-20 00:00:00.000000      539.0
+ 1-10      1 1961-09-21 00:00:00.000000      532.0
+ 1-11      1 1961-09-20 00:00:00.000000      539.0
+ 1-11      1 1961-09-21 00:00:00.000000      532.0
+ 1-11      1 1961-09-22 00:00:00.000000      517.0
+ 1-11      1 1961-09-25 00:00:00.000000      527.0
+ 1-11      1 1961-09-26 00:00:00.000000      540.0
+ 1-11      1 1961-09-27 00:00:00.000000      542.0
+ 1-11      1 1961-09-28 00:00:00.000000      538.0
+ 1-11      1 1961-09-29 00:00:00.000000      541.0
+ 1-11      1 1961-10-02 00:00:00.000000      541.0
+ 1-11      1 1961-10-03 00:00:00.000000      547.0
+ 1-12      1 1961-10-02 00:00:00.000000      541.0
+ 1-12      1 1961-10-03 00:00:00.000000      547.0
+ 1-12      1 1961-10-04 00:00:00.000000      553.0
+ 1-12      1 1961-10-05 00:00:00.000000      559.0
+ 1-12      1 1961-10-06 00:00:00.000000      557.0
+ 1-12      1 1961-10-10 00:00:00.000000      557.0
+ 1-12      1 1961-10-11 00:00:00.000000      560.0
+ 1-12      1 1961-10-12 00:00:00.000000      571.0
+ 1-12      1 1961-10-13 00:00:00.000000      571.0
+ 1-12      1 1961-10-16 00:00:00.000000      569.0
+ 1-13      1 1961-10-13 00:00:00.000000      571.0
+ 1-13      1 1961-10-16 00:00:00.000000      569.0
+ 1-13      1 1961-10-17 00:00:00.000000      575.0
+ 1-13      1 1961-10-18 00:00:00.000000      580.0
+ 1-13      1 1961-10-19 00:00:00.000000      584.0
+ 1-13      1 1961-10-20 00:00:00.000000      585.0
+ 1-13      1 1961-10-23 00:00:00.000000      590.0
+ 1-13      1 1961-10-24 00:00:00.000000      599.0
+ 1-13      1 1961-10-25 00:00:00.000000      603.0
+ 1-13      1 1961-10-26 00:00:00.000000      599.0
+ 1-14      1 1961-10-25 00:00:00.000000      603.0
+ 1-14      1 1961-10-26 00:00:00.000000      599.0
+ 1-14      1 1961-10-27 00:00:00.000000      596.0
+ 1-14      1 1961-10-30 00:00:00.000000      585.0
+ 1-14      1 1961-10-31 00:00:00.000000      587.0
+ 1-14      1 1961-11-01 00:00:00.000000      585.0
+ 1-14      1 1961-11-02 00:00:00.000000      581.0
+ 1-14      1 1961-11-03 00:00:00.000000      583.0
+ 1-14      1 1961-11-06 00:00:00.000000      592.0
+ 1-14      1 1961-11-07 00:00:00.000000      592.0
+ 1-15      1 1961-11-06 00:00:00.000000      592.0
+ 1-15      1 1961-11-07 00:00:00.000000      592.0
+ 1-15      1 1961-11-08 00:00:00.000000      596.0
+ 1-15      1 1961-11-09 00:00:00.000000      596.0
+ 1-15      1 1961-11-13 00:00:00.000000      595.0
+ 1-15      1 1961-11-14 00:00:00.000000      598.0
+ 1-15      1 1961-11-15 00:00:00.000000      598.0
+ 1-15      1 1961-11-16 00:00:00.000000      595.0
+ 1-15      1 1961-11-17 00:00:00.000000      595.0
+ 1-15      1 1961-11-20 00:00:00.000000      592.0
+ 1-16      1 1961-11-17 00:00:00.000000      595.0
+ 1-16      1 1961-11-20 00:00:00.000000      592.0
+ 1-16      1 1961-11-21 00:00:00.000000      588.0
+ 1-16      1 1961-11-22 00:00:00.000000      582.0
+ 1-16      1 1961-11-24 00:00:00.000000      576.0
+ 1-16      1 1961-11-27 00:00:00.000000      578.0
+ 1-16      1 1961-11-28 00:00:00.000000      589.0
+ 1-16      1 1961-11-29 00:00:00.000000      585.0
+ 1-16      1 1961-11-30 00:00:00.000000      580.0
+ 1-16      1 1961-12-01 00:00:00.000000      579.0
+ 1-17      1 1961-11-30 00:00:00.000000      580.0
+ 1-17      1 1961-12-01 00:00:00.000000      579.0
+ 1-17      1 1961-12-04 00:00:00.000000      584.0
+ 1-17      1 1961-12-05 00:00:00.000000      581.0
+ 1-17      1 1961-12-06 00:00:00.000000      581.0
+ 1-17      1 1961-12-07 00:00:00.000000      577.0
+ 1-17      1 1961-12-08 00:00:00.000000      577.0
+ 1-17      1 1961-12-11 00:00:00.000000      578.0
+ 1-17      1 1961-12-12 00:00:00.000000      580.0
+ 1-17      1 1961-12-13 00:00:00.000000      586.0
+ 1-18      1 1961-12-12 00:00:00.000000      580.0
+ 1-18      1 1961-12-13 00:00:00.000000      586.0
+ 1-18      1 1961-12-14 00:00:00.000000      583.0
+ 1-18      1 1961-12-15 00:00:00.000000      581.0
+ 1-18      1 1961-12-18 00:00:00.000000      576.0
+ 1-18      1 1961-12-19 00:00:00.000000      571.0
+ 1-18      1 1961-12-20 00:00:00.000000      575.0
+ 1-18      1 1961-12-21 00:00:00.000000      575.0
+ 1-18      1 1961-12-22 00:00:00.000000      573.0
+ 1-18      1 1961-12-26 00:00:00.000000      577.0
+ 1-19      1 1961-12-22 00:00:00.000000      573.0
+ 1-19      1 1961-12-26 00:00:00.000000      577.0
+ 1-19      1 1961-12-27 00:00:00.000000      582.0
+ 1-19      1 1961-12-28 00:00:00.000000      584.0
+ 1-19      1 1961-12-29 00:00:00.000000      579.0
+ 1-19      1 1962-01-02 00:00:00.000000      572.0
+ 1-19      1 1962-01-03 00:00:00.000000      577.0
+ 1-19      1 1962-01-04 00:00:00.000000      571.0
+ 1-19      1 1962-01-05 00:00:00.000000      560.0
+ 1-19      1 1962-01-08 00:00:00.000000      549.0
+ 1-2       1 1961-06-08 00:00:00.000000      490.0
+ 1-2       1 1961-06-09 00:00:00.000000      489.0
+ 1-2       1 1961-06-12 00:00:00.000000      478.0
+ 1-2       1 1961-06-13 00:00:00.000000      487.0
+ 1-2       1 1961-06-14 00:00:00.000000      491.0
+ 1-2       1 1961-06-15 00:00:00.000000      487.0
+ 1-2       1 1961-06-16 00:00:00.000000      482.0
+ 1-2       1 1961-06-19 00:00:00.000000      479.0
+ 1-2       1 1961-06-20 00:00:00.000000      478.0
+ 1-2       1 1961-06-21 00:00:00.000000      479.0
+ 1-20      1 1962-01-05 00:00:00.000000      560.0
+ 1-20      1 1962-01-08 00:00:00.000000      549.0
+ 1-20      1 1962-01-09 00:00:00.000000      556.0
+ 1-20      1 1962-01-10 00:00:00.000000      557.0
+ 1-20      1 1962-01-11 00:00:00.000000      563.0
+ 1-20      1 1962-01-12 00:00:00.000000      564.0
+ 1-20      1 1962-01-15 00:00:00.000000      567.0
+ 1-20      1 1962-01-16 00:00:00.000000      561.0
+ 1-20      1 1962-01-17 00:00:00.000000      559.0
+ 1-20      1 1962-01-18 00:00:00.000000      553.0
+ 1-21      1 1962-01-17 00:00:00.000000      559.0
+ 1-21      1 1962-01-18 00:00:00.000000      553.0
+ 1-21      1 1962-01-19 00:00:00.000000      553.0
+ 1-21      1 1962-01-22 00:00:00.000000      553.0
+ 1-21      1 1962-01-23 00:00:00.000000      547.0
+ 1-21      1 1962-01-24 00:00:00.000000      550.0
+ 1-21      1 1962-01-25 00:00:00.000000      544.0
+ 1-21      1 1962-01-26 00:00:00.000000      541.0
+ 1-21      1 1962-01-29 00:00:00.000000      532.0
+ 1-21      1 1962-01-30 00:00:00.000000      525.0
+ 1-22      1 1962-01-29 00:00:00.000000      532.0
+ 1-22      1 1962-01-30 00:00:00.000000      525.0
+ 1-22      1 1962-01-31 00:00:00.000000      542.0
+ 1-22      1 1962-02-01 00:00:00.000000      555.0
+ 1-22      1 1962-02-02 00:00:00.000000      558.0
+ 1-22      1 1962-02-05 00:00:00.000000      551.0
+ 1-22      1 1962-02-06 00:00:00.000000      551.0
+ 1-22      1 1962-02-07 00:00:00.000000      552.0
+ 1-22      1 1962-02-08 00:00:00.000000      553.0
+ 1-22      1 1962-02-09 00:00:00.000000      557.0
+ 1-23      1 1962-02-08 00:00:00.000000      553.0
+ 1-23      1 1962-02-09 00:00:00.000000      557.0
+ 1-23      1 1962-02-12 00:00:00.000000      557.0
+ 1-23      1 1962-02-13 00:00:00.000000      548.0
+ 1-23      1 1962-02-14 00:00:00.000000      547.0
+ 1-23      1 1962-02-15 00:00:00.000000      545.0
+ 1-23      1 1962-02-16 00:00:00.000000      545.0
+ 1-23      1 1962-02-19 00:00:00.000000      539.0
+ 1-23      1 1962-02-20 00:00:00.000000      539.0
+ 1-23      1 1962-02-21 00:00:00.000000      535.0
+ 1-24      1 1962-02-20 00:00:00.000000      539.0
+ 1-24      1 1962-02-21 00:00:00.000000      535.0
+ 1-24      1 1962-02-23 00:00:00.000000      537.0
+ 1-24      1 1962-02-26 00:00:00.000000      535.0
+ 1-24      1 1962-02-27 00:00:00.000000      536.0
+ 1-24      1 1962-02-28 00:00:00.000000      537.0
+ 1-24      1 1962-03-01 00:00:00.000000      543.0
+ 1-24      1 1962-03-02 00:00:00.000000      548.0
+ 1-24      1 1962-03-05 00:00:00.000000      546.0
+ 1-24      1 1962-03-06 00:00:00.000000      547.0
+ 1-25      1 1962-03-05 00:00:00.000000      546.0
+ 1-25      1 1962-03-06 00:00:00.000000      547.0
+ 1-25      1 1962-03-07 00:00:00.000000      548.0
+ 1-25      1 1962-03-08 00:00:00.000000      549.0
+ 1-25      1 1962-03-09 00:00:00.000000      553.0
+ 1-25      1 1962-03-12 00:00:00.000000      553.0
+ 1-25      1 1962-03-13 00:00:00.000000      552.0
+ 1-25      1 1962-03-14 00:00:00.000000      551.0
+ 1-25      1 1962-03-15 00:00:00.000000      550.0
+ 1-25      1 1962-03-16 00:00:00.000000      553.0
+ 1-26      1 1962-03-15 00:00:00.000000      550.0
+ 1-26      1 1962-03-16 00:00:00.000000      553.0
+ 1-26      1 1962-03-19 00:00:00.000000      554.0
+ 1-26      1 1962-03-20 00:00:00.000000      551.0
+ 1-26      1 1962-03-21 00:00:00.000000      551.0
+ 1-26      1 1962-03-22 00:00:00.000000      545.0
+ 1-26      1 1962-03-23 00:00:00.000000      547.0
+ 1-26      1 1962-03-26 00:00:00.000000      547.0
+ 1-26      1 1962-03-27 00:00:00.000000      537.0
+ 1-26      1 1962-03-28 00:00:00.000000      539.0
+ 1-27      1 1962-03-27 00:00:00.000000      537.0
+ 1-27      1 1962-03-28 00:00:00.000000      539.0
+ 1-27      1 1962-03-29 00:00:00.000000      538.0
+ 1-27      1 1962-03-30 00:00:00.000000      533.0
+ 1-27      1 1962-04-02 00:00:00.000000      525.0
+ 1-27      1 1962-04-03 00:00:00.000000      513.0
+ 1-27      1 1962-04-04 00:00:00.000000      510.0
+ 1-27      1 1962-04-05 00:00:00.000000      521.0
+ 1-27      1 1962-04-06 00:00:00.000000      521.0
+ 1-27      1 1962-04-09 00:00:00.000000      521.0
+ 1-28      1 1962-04-06 00:00:00.000000      521.0
+ 1-28      1 1962-04-09 00:00:00.000000      521.0
+ 1-28      1 1962-04-10 00:00:00.000000      523.0
+ 1-28      1 1962-04-11 00:00:00.000000      516.0
+ 1-28      1 1962-04-12 00:00:00.000000      511.0
+ 1-28      1 1962-04-13 00:00:00.000000      518.0
+ 1-28      1 1962-04-16 00:00:00.000000      517.0
+ 1-28      1 1962-04-17 00:00:00.000000      520.0
+ 1-28      1 1962-04-18 00:00:00.000000      519.0
+ 1-28      1 1962-04-19 00:00:00.000000      519.0
+ 1-29      1 1962-04-18 00:00:00.000000      519.0
+ 1-29      1 1962-04-19 00:00:00.000000      519.0
+ 1-29      1 1962-04-20 00:00:00.000000      519.0
+ 1-29      1 1962-04-23 00:00:00.000000      518.0
+ 1-29      1 1962-04-24 00:00:00.000000      513.0
+ 1-29      1 1962-04-25 00:00:00.000000      499.0
+ 1-29      1 1962-04-26 00:00:00.000000      485.0
+ 1-29      1 1962-04-27 00:00:00.000000      454.0
+ 1-29      1 1962-04-30 00:00:00.000000      462.0
+ 1-29      1 1962-05-01 00:00:00.000000      473.0
+ 1-3       1 1961-06-20 00:00:00.000000      478.0
+ 1-3       1 1961-06-21 00:00:00.000000      479.0
+ 1-3       1 1961-06-22 00:00:00.000000      477.0
+ 1-3       1 1961-06-23 00:00:00.000000      479.0
+ 1-3       1 1961-06-26 00:00:00.000000      475.0
+ 1-3       1 1961-06-27 00:00:00.000000      479.0
+ 1-3       1 1961-06-28 00:00:00.000000      476.0
+ 1-3       1 1961-06-29 00:00:00.000000      476.0
+ 1-3       1 1961-06-30 00:00:00.000000      478.0
+ 1-3       1 1961-07-03 00:00:00.000000      479.0
+ 1-30      1 1962-04-30 00:00:00.000000      462.0
+ 1-30      1 1962-05-01 00:00:00.000000      473.0
+ 1-30      1 1962-05-02 00:00:00.000000      482.0
+ 1-30      1 1962-05-03 00:00:00.000000      486.0
+ 1-30      1 1962-05-04 00:00:00.000000      475.0
+ 1-30      1 1962-05-07 00:00:00.000000      459.0
+ 1-30      1 1962-05-08 00:00:00.000000      451.0
+ 1-30      1 1962-05-09 00:00:00.000000      453.0
+ 1-30      1 1962-05-10 00:00:00.000000      446.0
+ 1-30      1 1962-05-11 00:00:00.000000      455.0
+ 1-31      1 1962-05-10 00:00:00.000000      446.0
+ 1-31      1 1962-05-11 00:00:00.000000      455.0
+ 1-31      1 1962-05-14 00:00:00.000000      452.0
+ 1-31      1 1962-05-15 00:00:00.000000      457.0
+ 1-31      1 1962-05-16 00:00:00.000000      449.0
+ 1-31      1 1962-05-17 00:00:00.000000      450.0
+ 1-31      1 1962-05-18 00:00:00.000000      435.0
+ 1-31      1 1962-05-21 00:00:00.000000      415.0
+ 1-31      1 1962-05-22 00:00:00.000000      398.0
+ 1-31      1 1962-05-23 00:00:00.000000      399.0
+ 1-32      1 1962-05-22 00:00:00.000000      398.0
+ 1-32      1 1962-05-23 00:00:00.000000      399.0
+ 1-32      1 1962-05-24 00:00:00.000000      361.0
+ 1-32      1 1962-05-25 00:00:00.000000      383.0
+ 1-32      1 1962-05-28 00:00:00.000000      393.0
+ 1-32      1 1962-05-29 00:00:00.000000      385.0
+ 1-32      1 1962-05-31 00:00:00.000000      360.0
+ 1-32      1 1962-06-01 00:00:00.000000      364.0
+ 1-32      1 1962-06-04 00:00:00.000000      365.0
+ 1-32      1 1962-06-05 00:00:00.000000      370.0
+ 1-33      1 1962-06-04 00:00:00.000000      365.0
+ 1-33      1 1962-06-05 00:00:00.000000      370.0
+ 1-33      1 1962-06-06 00:00:00.000000      374.0
+ 1-33      1 1962-06-07 00:00:00.000000      359.0
+ 1-33      1 1962-06-08 00:00:00.000000      335.0
+ 1-33      1 1962-06-11 00:00:00.000000      323.0
+ 1-33      1 1962-06-12 00:00:00.000000      306.0
+ 1-33      1 1962-06-13 00:00:00.000000      333.0
+ 1-33      1 1962-06-14 00:00:00.000000      330.0
+ 1-33      1 1962-06-15 00:00:00.000000      336.0
+ 1-34      1 1962-06-14 00:00:00.000000      330.0
+ 1-34      1 1962-06-15 00:00:00.000000      336.0
+ 1-34      1 1962-06-18 00:00:00.000000      328.0
+ 1-34      1 1962-06-19 00:00:00.000000      316.0
+ 1-34      1 1962-06-20 00:00:00.000000      320.0
+ 1-34      1 1962-06-21 00:00:00.000000      332.0
+ 1-34      1 1962-06-22 00:00:00.000000      320.0
+ 1-34      1 1962-06-25 00:00:00.000000      333.0
+ 1-34      1 1962-06-26 00:00:00.000000      344.0
+ 1-34      1 1962-06-27 00:00:00.000000      339.0
+ 1-35      1 1962-06-26 00:00:00.000000      344.0
+ 1-35      1 1962-06-27 00:00:00.000000      339.0
+ 1-35      1 1962-06-28 00:00:00.000000      350.0
+ 1-35      1 1962-06-29 00:00:00.000000      351.0
+ 1-35      1 1962-07-02 00:00:00.000000      350.0
+ 1-35      1 1962-07-03 00:00:00.000000      345.0
+ 1-35      1 1962-07-05 00:00:00.000000      350.0
+ 1-35      1 1962-07-06 00:00:00.000000      359.0
+ 1-35      1 1962-07-09 00:00:00.000000      375.0
+ 1-35      1 1962-07-10 00:00:00.000000      379.0
+ 1-36      1 1962-07-09 00:00:00.000000      375.0
+ 1-36      1 1962-07-10 00:00:00.000000      379.0
+ 1-36      1 1962-07-11 00:00:00.000000      376.0
+ 1-36      1 1962-07-12 00:00:00.000000      382.0
+ 1-36      1 1962-07-13 00:00:00.000000      370.0
+ 1-36      1 1962-07-16 00:00:00.000000      365.0
+ 1-36      1 1962-07-17 00:00:00.000000      367.0
+ 1-36      1 1962-07-18 00:00:00.000000      372.0
+ 1-36      1 1962-07-19 00:00:00.000000      373.0
+ 1-36      1 1962-07-20 00:00:00.000000      363.0
+ 1-37      1 1962-07-19 00:00:00.000000      373.0
+ 1-37      1 1962-07-20 00:00:00.000000      363.0
+ 1-37      1 1962-07-23 00:00:00.000000      371.0
+ 1-37      1 1962-07-24 00:00:00.000000      369.0
+ 1-37      1 1962-07-25 00:00:00.000000      376.0
+ 1-37      1 1962-07-26 00:00:00.000000      387.0
+ 1-37      1 1962-07-27 00:00:00.000000      387.0
+ 1-37      1 1962-07-30 00:00:00.000000      376.0
+ 1-37      1 1962-07-31 00:00:00.000000      385.0
+ 1-37      1 1962-08-01 00:00:00.000000      385.0
+ 1-38      1 1962-07-31 00:00:00.000000      385.0
+ 1-38      1 1962-08-01 00:00:00.000000      385.0
+ 1-38      1 1962-08-02 00:00:00.000000      380.0
+ 1-38      1 1962-08-03 00:00:00.000000      373.0
+ 1-38      1 1962-08-06 00:00:00.000000      382.0
+ 1-38      1 1962-08-07 00:00:00.000000      377.0
+ 1-38      1 1962-08-08 00:00:00.000000      376.0
+ 1-38      1 1962-08-09 00:00:00.000000      379.0
+ 1-38      1 1962-08-10 00:00:00.000000      386.0
+ 1-38      1 1962-08-13 00:00:00.000000      387.0
+ 1-39      1 1962-08-10 00:00:00.000000      386.0
+ 1-39      1 1962-08-13 00:00:00.000000      387.0
+ 1-39      1 1962-08-14 00:00:00.000000      386.0
+ 1-39      1 1962-08-15 00:00:00.000000      389.0
+ 1-39      1 1962-08-16 00:00:00.000000      394.0
+ 1-39      1 1962-08-17 00:00:00.000000      393.0
+ 1-39      1 1962-08-20 00:00:00.000000      409.0
+ 1-39      1 1962-08-21 00:00:00.000000      411.0
+ 1-39      1 1962-08-22 00:00:00.000000      409.0
+ 1-39      1 1962-08-23 00:00:00.000000      408.0
+ 1-4       1 1961-06-30 00:00:00.000000      478.0
+ 1-4       1 1961-07-03 00:00:00.000000      479.0
+ 1-4       1 1961-07-05 00:00:00.000000      477.0
+ 1-4       1 1961-07-06 00:00:00.000000      476.0
+ 1-4       1 1961-07-07 00:00:00.000000      475.0
+ 1-4       1 1961-07-10 00:00:00.000000      475.0
+ 1-4       1 1961-07-11 00:00:00.000000      473.0
+ 1-4       1 1961-07-12 00:00:00.000000      474.0
+ 1-4       1 1961-07-13 00:00:00.000000      474.0
+ 1-4       1 1961-07-14 00:00:00.000000      474.0
+ 1-40      1 1962-08-22 00:00:00.000000      409.0
+ 1-40      1 1962-08-23 00:00:00.000000      408.0
+ 1-40      1 1962-08-24 00:00:00.000000      393.0
+ 1-40      1 1962-08-27 00:00:00.000000      391.0
+ 1-40      1 1962-08-28 00:00:00.000000      388.0
+ 1-40      1 1962-08-29 00:00:00.000000      396.0
+ 1-40      1 1962-08-30 00:00:00.000000      387.0
+ 1-40      1 1962-08-31 00:00:00.000000      383.0
+ 1-40      1 1962-09-04 00:00:00.000000      388.0
+ 1-40      1 1962-09-05 00:00:00.000000      382.0
+ 1-41      1 1962-09-04 00:00:00.000000      388.0
+ 1-41      1 1962-09-05 00:00:00.000000      382.0
+ 1-41      1 1962-09-06 00:00:00.000000      384.0
+ 1-41      1 1962-09-07 00:00:00.000000      382.0
+ 1-41      1 1962-09-10 00:00:00.000000      383.0
+ 1-41      1 1962-09-11 00:00:00.000000      383.0
+ 1-41      1 1962-09-12 00:00:00.000000      388.0
+ 1-41      1 1962-09-13 00:00:00.000000      395.0
+ 1-41      1 1962-09-14 00:00:00.000000      392.0
+ 1-41      1 1962-09-17 00:00:00.000000      386.0
+ 1-42      1 1962-09-14 00:00:00.000000      392.0
+ 1-42      1 1962-09-17 00:00:00.000000      386.0
+ 1-42      1 1962-09-18 00:00:00.000000      383.0
+ 1-42      1 1962-09-19 00:00:00.000000      377.0
+ 1-42      1 1962-09-20 00:00:00.000000      364.0
+ 1-42      1 1962-09-21 00:00:00.000000      369.0
+ 1-42      1 1962-09-24 00:00:00.000000      355.0
+ 1-42      1 1962-09-25 00:00:00.000000      350.0
+ 1-42      1 1962-09-26 00:00:00.000000      353.0
+ 1-42      1 1962-09-27 00:00:00.000000      340.0
+ 1-43      1 1962-09-26 00:00:00.000000      353.0
+ 1-43      1 1962-09-27 00:00:00.000000      340.0
+ 1-43      1 1962-09-28 00:00:00.000000      350.0
+ 1-43      1 1962-10-01 00:00:00.000000      349.0
+ 1-43      1 1962-10-02 00:00:00.000000      358.0
+ 1-43      1 1962-10-03 00:00:00.000000      360.0
+ 1-43      1 1962-10-04 00:00:00.000000      360.0
+ 1-43      1 1962-10-05 00:00:00.000000      366.0
+ 1-43      1 1962-10-09 00:00:00.000000      359.0
+ 1-43      1 1962-10-10 00:00:00.000000      356.0
+ 1-44      1 1962-10-09 00:00:00.000000      359.0
+ 1-44      1 1962-10-10 00:00:00.000000      356.0
+ 1-44      1 1962-10-11 00:00:00.000000      355.0
+ 1-44      1 1962-10-12 00:00:00.000000      367.0
+ 1-44      1 1962-10-15 00:00:00.000000      357.0
+ 1-44      1 1962-10-16 00:00:00.000000      361.0
+ 1-44      1 1962-10-17 00:00:00.000000      355.0
+ 1-44      1 1962-10-18 00:00:00.000000      348.0
+ 1-44      1 1962-10-19 00:00:00.000000      343.0
+ 1-44      1 1962-10-22 00:00:00.000000      330.0
+ 1-45      1 1962-10-19 00:00:00.000000      343.0
+ 1-45      1 1962-10-22 00:00:00.000000      330.0
+ 1-45      1 1962-10-23 00:00:00.000000      340.0
+ 1-45      1 1962-10-24 00:00:00.000000      339.0
+ 1-45      1 1962-10-25 00:00:00.000000      331.0
+ 1-45      1 1962-10-26 00:00:00.000000      345.0
+ 1-45      1 1962-10-29 00:00:00.000000      352.0
+ 1-45      1 1962-10-30 00:00:00.000000      346.0
+ 1-45      1 1962-10-31 00:00:00.000000      352.0
+ 1-45      1 1962-11-01 00:00:00.000000      357.0
+ 1-46      1 NULL                             NULL
+ 1-46      1 1962-10-31 00:00:00.000000      352.0
+ 1-46      1 1962-11-01 00:00:00.000000      357.0
+ 1-5       1 1961-07-13 00:00:00.000000      474.0
+ 1-5       1 1961-07-14 00:00:00.000000      474.0
+ 1-5       1 1961-07-17 00:00:00.000000      465.0
+ 1-5       1 1961-07-18 00:00:00.000000      466.0
+ 1-5       1 1961-07-19 00:00:00.000000      467.0
+ 1-5       1 1961-07-20 00:00:00.000000      471.0
+ 1-5       1 1961-07-21 00:00:00.000000      471.0
+ 1-5       1 1961-07-24 00:00:00.000000      467.0
+ 1-5       1 1961-07-25 00:00:00.000000      473.0
+ 1-5       1 1961-07-26 00:00:00.000000      481.0
+ 1-6       1 1961-07-25 00:00:00.000000      473.0
+ 1-6       1 1961-07-26 00:00:00.000000      481.0
+ 1-6       1 1961-07-27 00:00:00.000000      488.0
+ 1-6       1 1961-07-28 00:00:00.000000      490.0
+ 1-6       1 1961-07-31 00:00:00.000000      489.0
+ 1-6       1 1961-08-01 00:00:00.000000      489.0
+ 1-6       1 1961-08-02 00:00:00.000000      485.0
+ 1-6       1 1961-08-03 00:00:00.000000      491.0
+ 1-6       1 1961-08-04 00:00:00.000000      492.0
+ 1-6       1 1961-08-07 00:00:00.000000      494.0
+ 1-7       1 1961-08-04 00:00:00.000000      492.0
+ 1-7       1 1961-08-07 00:00:00.000000      494.0
+ 1-7       1 1961-08-08 00:00:00.000000      499.0
+ 1-7       1 1961-08-09 00:00:00.000000      498.0
+ 1-7       1 1961-08-10 00:00:00.000000      500.0
+ 1-7       1 1961-08-11 00:00:00.000000      497.0
+ 1-7       1 1961-08-14 00:00:00.000000      494.0
+ 1-7       1 1961-08-15 00:00:00.000000      495.0
+ 1-7       1 1961-08-16 00:00:00.000000      500.0
+ 1-7       1 1961-08-17 00:00:00.000000      504.0
+ 1-8       1 1961-08-16 00:00:00.000000      500.0
+ 1-8       1 1961-08-17 00:00:00.000000      504.0
+ 1-8       1 1961-08-18 00:00:00.000000      513.0
+ 1-8       1 1961-08-21 00:00:00.000000      511.0
+ 1-8       1 1961-08-22 00:00:00.000000      514.0
+ 1-8       1 1961-08-23 00:00:00.000000      510.0
+ 1-8       1 1961-08-24 00:00:00.000000      509.0
+ 1-8       1 1961-08-25 00:00:00.000000      515.0
+ 1-8       1 1961-08-28 00:00:00.000000      519.0
+ 1-8       1 1961-08-29 00:00:00.000000      523.0
+ 1-9       1 1961-08-28 00:00:00.000000      519.0
+ 1-9       1 1961-08-29 00:00:00.000000      523.0
+ 1-9       1 1961-08-30 00:00:00.000000      519.0
+ 1-9       1 1961-08-31 00:00:00.000000      523.0
+ 1-9       1 1961-09-01 00:00:00.000000      531.0
+ 1-9       1 1961-09-05 00:00:00.000000      547.0
+ 1-9       1 1961-09-06 00:00:00.000000      551.0
+ 1-9       1 1961-09-07 00:00:00.000000      547.0
+ 1-9       1 1961-09-08 00:00:00.000000      541.0
+ 1-9       1 1961-09-11 00:00:00.000000      545.0</tt>
+   </pre>
+   <p style="line-height: 1em;">The function displays the stats_output table on the screen:</p>
+   <pre>
+      <tt>
+ stats                      value_col 
+ -------------------------- --------- 
+ output_table_row_count           463
+ processing_time_in_seconds        16
+ input_table_row_count            369
+ output_split_count                47
+ inserted_row_count                94
+ input_partition_count              1</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="kty1518207745242"> </a>
+	  <h2>SeriesSplitter Troubleshooting</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Problem: Invoking a function using SeriesSplitter does not improve execution time.</h3>
+   <p>
+      <b>Note:</b>  Before trying workaround, verify that the data is skewed and that the function that uses SeriesSplitter does not exploit full parallelism. If the data is not skewed and the function exploits full parallelism, SeriesSplitter cannot improve its execution time.</p>
+		
+   <a name="section_jkk_d55_5cb"> </a>
+   <h3>Workaround:</h3>
+   <ul>
+      <li>Invoke SeriesSplitter and the subsequent function in separate SQL calls. For example, in this SQL call, company1_stock1_split is the output from SeriesSplitter Example: Partition Splitter:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Interpolator (
+  ON company1_stock1_split AS InputTable
+  PARTITION BY id ORDER BY "period"
+  USING
+  TimeColumn ('period')
+  TimeInterval (86400)
+  InterpolationType ('linear')
+  ValueColumns ('stockprice')
+  Accumulate ('id')
+  DuplicateRowsCount (2)
+) AS dt;</tt>
+         </pre>
+         <p style="line-height: 1em;">The preceding SQL call is likely to perform better than the following call, which uses SeriesSplitter in the ON clause of the subsequent function.</p>
+         <pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Interpolator (
+  ON (
+    SELECT * FROM SeriesSplitter (
+      ON company1_stock1 AS InputTable
+      USING
+      PartitionByColumns ('id')
+      OrderByColumns ('period')
+      SplitCount (50)
+      Accumulate ('stockprice')
+      ReturnStatsTable ('false')
+    ) AS dt1
+  ) AS input_table PARTITION BY id ORDER BY period
+  USING
+  TimeColumn ('period')
+  TimeInterval (86400)
+  InterpolationType ('linear')
+  ValueColumns ('stockprice')
+  Accumulate ('id')
+  DuplicateRowsCount (2)
+) AS dt2;</tt>
+         </pre>
+      </li>
+      <li>Adjust these syntax elements as follows:<a name="table_htn_xxx_xfb"> </a>
+         <table class="introtable">
+            <a name="table_htn_xxx_xfb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Syntax Element</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Value</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">DuplicateRowsCount</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">As low as possible.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">SplitCount</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">A smaller multiple (for example, 1) of the number of vworkers in the cluster.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">RowsPerSplit</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">As high as possible (you want the resulting number of splits to be a smaller multiple of the number of vworkers in the cluster).</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">Accumulate</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Specify as few columns as possible.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">DuplicateColumn</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Omit this syntax element.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">PartialSplitID</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">'true'</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">ReturnStatsTable</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">'true'</div>
+               </td>
+            </tr>
+         </table>
+
+      </li>
+   </ul>
+
+
+	
+</t:intro>

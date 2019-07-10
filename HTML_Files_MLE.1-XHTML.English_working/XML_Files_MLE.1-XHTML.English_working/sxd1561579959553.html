@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="copyright" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.rights.owner" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="Shapelet Functions" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="gkr1506620820740" />
+<meta name="DC.Language" content="en-us" />
+
+<link rel="stylesheet" type="text/css" href="css/normal_styles.css" />
+<title>Shapelet Functions</title>
+</head>
+<body id="gkr1506620820740">
+
+	<h1 class="title topictitle1" id="ariaid-title1">Shapelet Functions</h1>
+
+	<div class="body conbody"><div class="section" id="gkr1506620820740__section_fyj_3f4_zdb"><p class="p"><dfn class="term">Shapelets</dfn> are contiguous subsequences of a time series that identify a class with high accuracy. Because shapelets focus on local features of a time series, they can be more accurate and faster than other time-series classification methods. Shapelets can also identify interpretable results, providing useful insights into differences between classes.</p>
+<p class="p">Any classification task that must preserve ordering can be characterized as time-series classification. Many real-world use cases involve data that varies only slightly. Traditional classifiers may be unable to classify such data with high precision.</p>
+</div>
+<div class="section" id="gkr1506620820740__section_lfz_5f4_zdb"><h2 class="title sectiontitle">Common Use Cases</h2><p class="p">The most common use cases are long-term trends with small local pattern changes that distinguish trends from each other. Almost any time-series classification problem can be mapped to a shapelets discovery problem. For example:</p>
+<ul class="ul" id="gkr1506620820740__ul_zv4_gyw_mbb"><li class="li">Clickstream analysis</li>
+<li class="li">Scientific or health applications such as ECG analysis</li>
+<li class="li">Imaging applications such as gesture recognition or motion analysis</li>
+<li class="li">Manufacturing applications such as process anomaly detection</li>
+<li class="li">Financial applications such as stock price analysis</li>
+</ul>
+</div>
+<div class="section" id="gkr1506620820740__section_wls_xf4_zdb"><h2 class="title sectiontitle">Normalization</h2><p class="p">Before a shapelets function classifies or clusters a set of time series, it normalizes and SAX-encodes them. Normalization is required because shapelet classification depends on the distance between two time series. SAX-encoding makes patterns in the data easier to identify and compare. For more information about SAX-encoding, see <a class="xref" href="rbd1558462910521.html#lxc1506547203185" title="This ML Engine function turns time series into smaller symbolic strings, where patterns are more obvious. It can supply data to Shapelet functions.">SAX</a>.</p>
+</div>
+<div class="section" id="gkr1506620820740__section_e53_qf4_zdb"><h2 class="title sectiontitle">References</h2><p class="p">The following references explain in detail how shapelets are identified. <span class="keyword">ML Engine</span> implementation of shapelets is based on the fast shapelet finder algorithm published by Rakthanmanon. The unsupervised shapelet implementation is based on the scalable unsupervised-shapelet algorithm published by Ulanova.</p>
+<ul class="ul" id="gkr1506620820740__ul_aw4_gyw_mbb"><li class="li"><cite class="cite">L. Ye, E. Keogh. Time Series Shapelets: A New primitive for Data Mining, KDD 2009</cite></li>
+<li class="li"><cite class="cite">T. Rakthanmanon, E. Keogh. Fast Shapelets: A scalable algorithm for discovering time series shapelets, SIAM 2013.</cite></li>
+<li class="li"><cite class="cite">J. Zakaria, A. Mueen, E. Keogh. Clustering Time Series using Unsupervised-Shapelets.</cite></li>
+<li class="li"><cite class="cite">L. Ulanova, N. Begum, E. Keogh. Scalable Clustering of Time Series with U-Shapelets</cite></li>
+</ul>
+</div>
+<div class="section" id="gkr1506620820740__section_ktv_3f4_zdb"><h2 class="title sectiontitle">Shapelet Functions</h2>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="gkr1506620820740__table_qdg_lf4_zdb" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:50%" /><col style="width:50%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d225802e82">Function</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d225802e84">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d225802e82 "><a class="xref" href="epp1550499866121.html#azu1506621290339" title="This Machine Learning Engine function takes a set of time series and assigns them to clusters, based on the shapelets that it finds.">ShapeletUnsupervised</a></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d225802e84 ">Takes a set of time series and assigns them to clusters, based on the shapelets that it finds.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d225802e82 "><a class="xref" href="uya1550499792953.html#awl1506626097450" title="This Machine Learning Engine function takes a set of classified time series and outputs a model for classifying time series, based on shapelets that it finds.">ShapeletSupervised</a></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d225802e84 ">Takes a set of classified time series and outputs a model for classifying time series, based on the shapelets that it finds.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d225802e82 "><a class="xref" href="syx1558467536967.html#fzc1506627602124" title="This Machine Learning Engine function takes a set of time series and assigns them to clusters, based on the model output by ShapeletSupervised.">ShapeletSupervisedClassifier</a></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d225802e84 ">Takes a set of time series and assigns them to clusters, based on the model output by ShapeletSupervised.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,656 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="dzb1507741498257"> </a>
+	  <h1>AdaBoostPredict</h1>
+
+	
+		<p style="line-height: 1em;">The AdaBoostPredict function applies the model output by the AdaBoost function to a new data set, outputting predicted labels for each data point.</p>
+
+	
+   <a name="ael1507741552506"> </a>
+   <h2>AdaBoostPredict Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 2.7</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM AdaBoostPredict (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS AttributeTable PARTITION BY <i>key</i> 
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS Model DIMENSION ORDER BY classifier_id, node_id
+  USING
+  AttrTableGroupByColumns ('<i>group_column</i>' [,...] )
+  AttrTablePIDColumns ('<i>pid_column</i>' [,...])
+  AttrTableValColumn ('<i>value_column</i>')
+  [ OutputProb {'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}
+    Responses (<i>'response</i>' [,...]) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="ulj1507741556309"> </a>
+	  <h2>AdaBoostPredict Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>AttrTableGroupbyColumns</dt>
+      <dd>Specify the names of the columns on which the AttributeTable is partitioned.</dd>
+      <dt>AttrTablePIDColumns</dt>
+      <dd>Specify the names of the AttributeTable columns that contain the data point identifiers.</dd>
+      <dt>AttrTableValColumns</dt>
+      <dd>Specify the name of the AttributeTable column that contains the data point values.</dd>
+      <dt>OutputProb</dt>
+      <dd>[Required with Responses, disallowed otherwise.] Specify whether to output a column for each <i>response</i>, showing the probability that the label is correct.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>Responses</dt>
+      <dd>[Required with OutputProb, disallowed otherwise.] Specify the labels for which to output probabilities.</dd>
+      <dd>To see all labels, use either of the following queries. ResponseTable, <i>response_column</i>, and <i>output_table</i> are from the AdaBoost function call that output the model table for this function. ResponseTable is an input table, <i>response_column</i> is the ResponseColumn syntax element value, and <i>output_table</i> is the OutputTable syntax element value.<ul>
+            <li>
+               <pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+SELECT <i>response_column</i> FROM ResponseTable;</tt>
+               </pre>
+            </li>
+            <li>
+               <pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+SELECT prob_label_order FROM <i>output_table</i> SAMPLE 1;</tt>
+               </pre>
+            </li>
+         </ul>
+      </dd>
+      <dd>Default behavior: The function outputs probabilities for all labels.</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the AttributeTable columns to copy to the output table.<p>
+            <b>Note:</b>  If you are using this function to create input for ROC, this syntax element must specify <i>actual_label</i>.</p>
+      </dd>
+   </div>
+
+
+	
+   <a name="dtv1507741560385"> </a>
+   <h2>AdaBoostPredict Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_lsn_wmk_ycb"> </a>
+   <table class="introtable">
+      <a name="table_lsn_wmk_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">AttributeTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains new data set. Has same schema as AdaBoost Input AttributeTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Model</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">AdaBoost Output OutputTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="xaz1507741564186"> </a>
+   <h2>AdaBoostPredict Output</h2>
+   <a name="section_mm3_tmk_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>pid_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, SMALLINT, BIGINT, NUMERIC, VARCHAR, or BLOB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Data point identifier from AttributeTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">pred_label</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Predicted response for data point.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">prob_for_label_<i>response</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with OutputProb ('true').] [Column appears once for each <i>response</i>.] Probability that observation belongs to category <i>response</i>.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="flo1532721749663"> </a>
+   <h2>AdaBoostPredict Examples</h2>
+   <a name="yfu1507741568223"> </a>
+   <h3>AdaBoostPredict Example: Use Model to Predict Home Style</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">This example uses test data and the model output by the AdaBoost Example: Create Model to Predict Home Style to use real estate sales data to predict home style.</p>
+
+   <a name="section_ux3_2hr_42b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>AttributeTable: housing_test_att, created by inputting housing_train (the raw data for DecisionForest Example: TreeType ('classification'), OutOfBag ('false')) to the Unpivoting function:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE housing_prediction AS (
+  SELECT * FROM AdaBoostPredict (
+    ON housing_test_att AS AttributeTable partition BY sn
+    ON abd_model AS Model DIMENSION ORDER BY classifier_id, node_id
+  USING
+  AttrTableGroupByColumns ('attribute')
+  AttrTablePidColumns ('sn')
+  AttrTableValColumn ('value_col')
+  ) AS dt 
+) WITH DATA;</tt>
+         </pre>
+      </li>
+      <li>Model: abd_model, output by AdaBoost Example: Create Model to Predict Home Style</li>
+   </ul>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM housing_test_att ORDER BY 1, 2;</tt>
+   </pre>
+   <a name="table_k4t_j3r_42b"> </a>
+   <table class="introtable">
+      <a name="table_k4t_j3r_42b"> </a>
+      <h4 style="text-align: center;">housing_test_att</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">sn</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">attribute</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">value_col</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">airco</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">bathrms</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">bedrooms</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">driveway</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">fullbase</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">garagepl</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">gashw</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">lotsize</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1700.0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">prefarea</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">price</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">27000.0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">recroom</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">stories</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">airco</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">bathrms</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">bedrooms</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">driveway</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">fullbase</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">garagepl</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">gashw</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">lotsize</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3185.0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">prefarea</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">price</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">37900.0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">recroom</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">stories</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_iks_2hr_42b"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM housing_prediction;</tt>
+   </pre>
+   <a name="section_ejd_fhr_42b"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The pred_label column contains the predicted response.CREATE MULTISET TABLE housing_prediction AS (
+  SELECT * FROM AdaBoostPredict (
+    ON housing_test_att AS AttributeTable PARTITION BY sn
+    ON abd_model AS Model DIMENSION ORDER BY classifier_id, node_id
+    USING
+    AttrTableGroupbyColumns ('attribute')
+    AttrTablePidColumns ('sn')
+    AttrTableValColumn ('value')
+  ) AS dt
+) WITH DATA;</p>
+   <pre>
+      <tt>
+ sn  pred_label 
+ --- ---------- 
+ 469 eclectic  
+ 530 bungalow  
+ 162 bungalow  
+ 177 eclectic  
+  38 eclectic  
+ 301 eclectic  
+ 463 eclectic  
+  53 eclectic  
+ 364 eclectic  
+  13 classic   
+ 255 eclectic  
+ 440 eclectic  
+ 198 classic   
+ 339 bungalow  
+ 260 classic   
+ 377 bungalow  
+ 234 classic   
+ 459 classic   
+ 340 eclectic  
+ 472 eclectic  
+ 274 eclectic  
+ 251 eclectic  
+ 237 classic   
+ 224 eclectic  
+ 329 bungalow  
+ 249 classic   
+ 540 eclectic  
+ 140 classic   
+ 306 eclectic  
+ 411 eclectic  
+ 132 classic   
+ 527 bungalow  
+ 367 bungalow  
+ 104 bungalow  
+ 355 eclectic  
+ 117 eclectic  
+ 403 eclectic  
+ 142 classic   
+ 443 eclectic  
+ 401 eclectic  
+ 161 eclectic  
+ 239 classic   
+ 111 classic   
+  16 classic   
+ 157 eclectic  
+  25 classic   
+ 176 eclectic  
+ 195 classic   
+ 441 eclectic  
+ 317 eclectic  
+ 353 eclectic  
+ 254 eclectic  
+ 408 eclectic  
+ 294 classic</tt>
+   </pre>
+   <a name="section_klp_fhr_42b"> </a>
+   <h4>Prediction Accuracy</h4>
+   <p style="line-height: 1em;">This query returns the prediction accuracy:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT (SELECT COUNT(*) FROM housing_prediction, housing_test
+  WHERE housing_prediction.sn = housing_test.sn
+  AND housing_prediction.pred_label =
+  housing_test.homestyle) / (1.00 *(SELECT COUNT(sn) FROM housing_prediction))
+ AS pa;</tt>
+   </pre>
+   <pre>
+      <tt>
+ pa   
+ ---- 
+ 0.93</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="ypp1532722017608"> </a>
+	  <h3>AdaBoostPredict Example: OutputProb, Responses</h3>
+
+	  <a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">Input tables are from DecisionTree Example: Create Model:<ul>
+         <li>AttributeTable: iris_attribute_test</li>
+         <li>Model: iris_attribute_output</li>
+      </ul>
+   </p>
+
+   <a name="section_rxm_pj5_p2b"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE adaboost_predict AS (
+  SELECT * FROM AdaBoostPredict (
+  ON iris_attribute_test AS AttributeTable PARTITION BY pid
+  ON iris_attribute_output AS Model DIMENSION ORDER BY classifier_id, node_id
+  USING
+  AttrTableGroupbyColumns ('attribute')
+  AttrTablePidColumns ('pid')
+  AttrTableValColumn ('attrvalue')
+  OutputProb ('true')
+  Responses('1','2','3')
+  ) AS dt 
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_l3x_pj5_p2b"> </a>
+   <h4>Output</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM adaboost_predict ORDER BY pid;</tt>
+   </pre>
+   <pre>
+      <tt>
+ pid pred_label prob_for_label_1 prob_for_label_2 prob_for_label_3 
+ --- ---------- ---------------- ---------------- ---------------- 
+   5 1                   0.99621          0.00379                0
+  10 1                   0.99621          0.00379                0
+  15 1                         1                0                0
+  20 1                   0.99621          0.00379                0
+  25 1                   0.97673          0.02327                0
+  30 1                   0.99621          0.00379                0
+  35 1                   0.99621          0.00379                0
+  40 1                   0.99621          0.00379                0
+  45 1                   0.97673          0.02327                0
+  50 1                   0.99621          0.00379                0
+  55 2                   0.00714          0.95673          0.03613
+  60 2                   0.01871          0.94384          0.03745
+  65 2                   0.00714          0.95673          0.03613
+  70 2                   0.00702          0.95747          0.03551
+  75 2                   0.00681          0.95876          0.03443
+  80 2                   0.00702          0.95747          0.03551
+  85 3                         0          0.06343          0.93657
+  90 2                   0.01897          0.94711          0.03392
+  95 2                   0.00681          0.95876          0.03443
+ 100 2                   0.00681          0.95876          0.03443
+ 105 3                         0          0.09791          0.90209
+ 110 3                         0          0.13878          0.86122
+ 115 3                         0          0.02477          0.97523
+ 120 2                   0.01651           0.9039          0.07959
+ 125 3                         0          0.10719          0.89281
+ 130 2                   0.00694          0.98026           0.0128
+ 135 2                   0.01655          0.90962          0.07383
+ 140 3                         0          0.09791          0.90209
+ 145 3                         0          0.10719          0.89281
+ 150 3                         0          0.04876          0.95124</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

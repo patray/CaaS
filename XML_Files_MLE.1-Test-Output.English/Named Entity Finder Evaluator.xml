@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="mdm1507649775932"> </a>
+	  <h1>Named Entity Finder Evaluator</h1>
+
+	
+		<p style="line-height: 1em;">The NamedEntityFinderEvaluatorMap and NamedEntityFinderEvaluatorReduce functions operate as a row and a partition function, respectively. Each function takes a set of evaluating data and creates the precision, recall, and F-measure values of a specified maximum entropy data model. Neither function supports regular-expression-based or dictionary-based models.</p>
+
+	
+   <a name="rio1507649945137"> </a>
+   <h2>Named Entity Finder Evaluator Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>NamedEntityFinderEvaluatorReduce version 1.3, NamedEntityFinderEvaluatorMap version 1.4</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NamedEntityFinderEvaluatorReduce (
+  ON NamedEntityFinderEvaluatorMap (
+    ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+    USING
+    TextColumn ('<i>text_column</i>')
+    InputModelFile ('<i>input_model_file</i>')
+  ) AS <i>alias_1</i> PARTITION BY 1
+) AS <i>alias_2</i>;</tt>
+   </pre>
+   <a name="aui1507650041468"> </a>
+	  <h2>Named Entity Finder Evaluator Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TextColumn</dt>
+      <dd>Specify the name of the input table column that contains the text to analyze.</dd>
+      <dt>InputModelFile</dt>
+      <dd>Specify name of the model file to evaluate.</dd>
+   </div>
+
+
+	
+   <a name="nmu1507650106545"> </a>
+   <h2>NamedEntityFinderEvaluatorMap Input</h2>
+   <a name="section_njv_hqc_ycb"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>text_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Text to analyze. Within the text, each entity must be identified with this syntax:<pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+&lt;START:<i>entity_type</i>&gt; <i>entity</i> &lt;END&gt;</tt>
+               </pre>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>For example:</p>
+               <pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+&lt;START:location&gt;Country1&lt;END&gt; has arrived</tt>
+               </pre>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="gvx1507650176292"> </a>
+   <h2>NamedEntityFinderEvaluatorReduce Output</h2>
+   <a name="section_svc_gqc_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">precision_val</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Precision value of the model.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">recall</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Recall value of the model.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">f_measure</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">F-measure (F<sub>1</sub> score) of the model.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="uhp1507650264997"> </a>
+   <h2>Named Entity Finder Evaluator Example</h2>
+   <a name="section_tvv_qzk_pdb"> </a>
+   <h3>Input</h3>
+   <ul>
+      <li>Input Table: nermem_sports_test, which has rows of sports news</li>
+      <li>
+         <i>model_file</i>: location.sports, output by NamedEntityFinderTrainer Example</li>
+   </ul>
+   <a name="table_nx4_wzk_pdb"> </a>
+   <table class="introtable">
+      <a name="table_nx4_wzk_pdb"> </a>
+      <h4 style="text-align: center;">Input Table: nermem_sports_test</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">content</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">&lt;START:LOCATION&gt; LONDON &lt;END&gt; 1996-08-30</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">West Indian all-rounder &lt;START:PER&gt; Phil Simmons &lt;END&gt; took four for 38 on Friday as &lt;START:ORG&gt; Leicestershire &lt;END&gt; beat &lt;START:ORG&gt; Somerset &lt;END&gt; by an innings and 39 runs in two days to take over at the head of the county championship .</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">After bowling &lt;START:ORG&gt; Somerset &lt;END&gt; out for 83 on the opening morning at &lt;START:LOCATION&gt; Grace Road &lt;END&gt;</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">&lt;START:PER&gt; Hussain &lt;END&gt;</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">By the close &lt;START:ORG&gt; Yorkshire &lt;END&gt; had turned that into a 37-run advantage but off-spinner &lt;START:PER&gt; Such &lt;END&gt; had scuttled their hopes</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">At the &lt;START:LOCATION&gt; Oval &lt;END&gt;</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">He was well backed by &lt;START:LOCATION&gt; England &lt;END&gt; hopeful &lt;START:PER&gt; Mark Butcher &lt;END&gt; who made 70 as &lt;START:ORG&gt; Surrey &lt;END&gt; closed on 429 for seven</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Australian &lt;START:PER&gt; Tom Moody &lt;END&gt; took six for 82 but &lt;START:PER&gt; Chris Adams &lt;END&gt;</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">They were held up by a gritty 84 from &lt;START:PER&gt; Paul Johnson &lt;END&gt; but ex-England fast bowler &lt;START:PER&gt; Martin McCague &lt;END&gt; took four for 55 .</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">20</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">&lt;START:LOCATION&gt; LONDON &lt;END&gt; 1996-08-30</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">22</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">&lt;START:LOCATION&gt; Leicester &lt;END&gt; : &lt;START:ORG&gt; Leicestershire &lt;END&gt; beat &lt;START:ORG&gt; Somerset &lt;END&gt; by an innings and 39 runs .</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_bdf_rzk_pdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NamedEntityFinderEvaluatorReduce (
+  ON NamedEntityFinderEvaluatorMap (
+    ON nermem_sports_test
+    USING
+    InputModelFile ('location.sports')
+    TextColumn ('content')
+  ) PARTITION BY 1
+) AS dt;</tt>
+   </pre>
+   <a name="section_q2p_rzk_pdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ precision_val     recall             f_measure         
+ ----------------- ------------------ ----------------- 
+ 0.847457627118644 0.7936507936507936 0.819672131147541</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

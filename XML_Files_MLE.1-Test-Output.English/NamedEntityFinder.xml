@@ -1,0 +1,658 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="lam1507582387267"> </a>
+	  <h1>NamedEntityFinder</h1>
+
+	
+		<p style="line-height: 1em;">The NamedEntityFinder function evaluates the input, identifies tokens based on the specified model, and outputs the tokens with detailed information. The function does not identify sentences; it simply tokenizes. Token identification is not case-sensitive.</p>
+   <p>
+      <b>Note:</b>  NamedEntityFinder uses files that are preinstalled on ML Engine. For details, see Preinstalled Files That Functions Use.</p>
+	
+   <a name="fsr1507582452484"> </a>
+   <h2>NamedEntityFinder Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.5</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NamedEntityFinder (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY ANY
+  [ ON (<i>configure_table</i>) AS ConfigurationTable DIMENSION ]
+  USING
+  TextColumn ('<i>text_column</i>')
+  [ Models ('<i>entity_type</i>[:<i>model_type</i>:{<i>model_file</i>|<i>regular_expression</i>}'][,...] | 'all' }) ]
+  [ ShowContext ('<i>context_words</i>') ]
+  [ EntityColName ('<i>entity_column</i>') ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="rdh1507582703200"> </a>
+	  <h2>NamedEntityFinder Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TextColumn</dt>
+      <dd>Specify the name of the input table column that contains the text to analyze.</dd>
+      <dt>Models</dt>
+      <dd>[Optional] Required if you do not specify ConfigurationTable, in which case you cannot specify 'all'. Specify the model items to load.</dd>
+      <dd>If you specify both ConfigurationTable and this syntax element, the function loads the specified model items from ConfigurationTable.</dd>
+      <dd>The <i>entity_type</i> is the name of an entity type (for example, PERSON, LOCATION, or EMAIL), which appears in the output table.</dd>
+      <dd>
+         <a name="table_qn5_h1z_fdb"> </a>
+         <table class="introtable">
+            <a name="table_qn5_h1z_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">
+                     <i>model_type</i>
+                  </div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'max entropy'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Maximum entropy language model output by training.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'rule'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Rule-based model, a plain text file with one regular expression on each line.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'dictionary'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Dictionary-based model, a plain text file with one word on each line.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'reg exp'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Regular expression that describes <i>entity_type</i>.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dd>If <i>model_type</i> is 'reg exp', specify <i>regular_expression</i> (a regular expression that describes <i>entity_type</i>); otherwise, specify <i>model_file</i> (the name of the model file).</dd>
+      <dd>
+         <p style="line-height: 1em;">If you specify ConfigurationTable, you can use <i>entity_type</i> as a shortcut. For example, if the ConfigurationTable has the row 'organization, max entropy, en-ner-organization.bin', you can specify Models ('organization') as a shortcut for Models ('organization:max entropy:en-ner-organization.bin').</p>
+         <p>
+            <b>Note:</b>  For <i>model_type</i> 'max entropy', if you specify ConfigurationTable and omit this syntax element, then the JVM of the worker node needs more than 2GB of memory.</p>
+      </dd>
+      <dd>Default: 'all' (If you specify ConfigurationTable but omit this syntax element.)</dd>
+      <dt>ShowContext</dt>
+      <dd>[Optional] Specify the number of context words to output. If <i>context_words</i> is n (which must be a positive integer), the function outputs the n words that precede the entity, the entity, and the <i>n</i> words that follow the entity.</dd>
+      <dd>Default: 0</dd>
+      <dt>EntityColName</dt>
+      <dd>[Optional] Specify the name of the output table column that contains the entity names.</dd>
+      <dd>Default: 'entity'</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of input columns to copy to the output table. No <i>accumulate_column</i> can be an <i>entity_column</i>.</dd>
+      <dd>Default: All input columns</dd>
+   </div>
+
+
+	
+   <a name="bvn1507584767132"> </a>
+   <h2>Creating the Table of Default Models</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">Before calling the NamedEntityFinder function, you must create the table of default models. To create the table, use this command:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE nameFind_configure;
+
+CREATE MULTISET TABLE nameFind_configure (
+  model_name VARCHAR(50),
+  model_type VARCHAR(50),
+  model_file VARCHAR(50)
+);</tt>
+   </pre>
+   <p style="line-height: 1em;">Default English-language models are provided with the SQL functions. Before using these models, you must create a default configure_table, as follows:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+INSERT INTO nameFind_configure VALUES ('person','max entropy','en-ner-person.bin');
+INSERT INTO nameFind_configure VALUES ('location','max entropy','en-ner-location.bin');
+INSERT INTO nameFind_configure VALUES ('organization','max entropy','en-ner-organization.bin');
+INSERT INTO nameFind_configure VALUES ('date','rules','date.rules');
+INSERT INTO nameFind_configure VALUES ('time','rules','time.rules');
+INSERT INTO nameFind_configure VALUES ('phone','rules','phone.rules');
+INSERT INTO nameFind_configure VALUES ('money','rules','money.rules');
+INSERT INTO nameFind_configure VALUES ('email','rules','email.rules');
+INSERT INTO nameFind_configure VALUES ('percentage','rules','percentage.rules');
+</tt>
+   </pre>
+   <a name="table_N1001F_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1001F_N1000E_N1000C_N10001"> </a>
+      <h4 style="text-align: center;">Default English-Language Models in Table nameFind_configure</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">model_name</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">model_type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">model_file</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">person</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">max entropy</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">en-ner-person.bin</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">location</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">max entropy</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">en-ner-location.bin</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">organization</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">max entropy</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">en-ner-organization.bin</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">date</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">rules</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">date.rules</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">time</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">rules</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">time.rules</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">phone</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">rules</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">phone.rules</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">money</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">rules</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">money.rules</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">email</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">rules</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">email.rules</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">percentage</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">rules</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">percentage.rules</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ogq1507584953225"> </a>
+   <h2>NamedEntityFinder Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Input Table Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>text_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains input text.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_z3z_3pc_ycb"> </a>
+   <h3>ConfigurationTable Schema</h3>
+   <p style="line-height: 1em;">This table is optional.</p>
+   <a name="table_N1005B_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1005B_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>model_name</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Name of an entity type (for example, PERSON, LOCATION, or EMAIL).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>model_type</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">One of these model types:<p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <a name="table_qhm_5jw_xfb"> </a>
+                  <table class="introtable">
+                     <a name="table_qhm_5jw_xfb"> </a>
+                     <tr>
+                        <th align="left">
+                           <div style="line-height: 1em;">
+                              <i>model_type</i>
+                           </div>
+                        </th>
+                        <th align="left">
+                           <div style="line-height: 1em;">Description</div>
+                        </th>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">'max entropy'</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Maximum entropy language model created by training</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">'rule'</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Rule-based model, a plain text file with one regular expression on each line</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">'dictionary'</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Dictionary-based model, a plain text file with one word on each line</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">'reg exp'</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Regular expression that describes <i>entity_type</i>
+                           </div>
+                        </td>
+                     </tr>
+                  </table>
+
+               </p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>model_file</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Name of model file that describes the entity type. This column appears if <i>model_type</i> is not 'reg exp'.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">reg_exp</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Regular expression that describes the entity type. This column appears if <i>model_type</i> is 'reg exp'.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="dqt1507585299295"> </a>
+   <h2>NamedEntityFinder Output</h2>
+   <a name="section_fqz_rpc_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">entity_type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Entity type.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">entity</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Entity name.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;"> entity_start</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with ShowEntityContext syntax element.] Start position.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;"> entity_end</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with ShowEntityContext syntax element.] End position.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;"> context</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with ShowEntityContext syntax element.] Words before and after the entity.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="mvt1507585573855"> </a>
+   <h2>NamedEntityFinder Example</h2>
+   <a name="section_qw5_1d2_3db"> </a>
+   <h3>Input</h3>
+   <a name="table_a4q_hd2_3db"> </a>
+   <table class="introtable">
+      <a name="table_a4q_hd2_3db"> </a>
+      <h4 style="text-align: center;">Input Table: assortedtext_input</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">source</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">content</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1001</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">misc</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">contact Alan by email at sports@espn.com for all sport info</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1002</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">misc</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">contact Mark at cricket@espn.com for all cricket info</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1003</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">misc</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">contact Roger at tennis@espn.com for all tennis info</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1004</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">wiki</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">The contiguous United States consists of the 48 adjoining U.S. states plus Washington, D.C., on the continent of North America</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1005</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">wiki</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">California's economy is centered onTechnology,Finance,real estate services, Government, and professional, Scientific and Technical business Services; together comprising 58% of the State Government economy</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1006</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">wiki</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Houston is the largest city in Texas and the fourth-largest in the United States, while San Antonio is the second largest and seventh largest in the state.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1007</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">wiki</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Thomas is a photographer whose natural landscapes of the West are also a statement about the importance of the preservation of the wildness</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NamedEntityFinder (
+  ON assortedtext_input PARTITION BY ANY
+  ON namefind_configure AS ConfigurationTable DIMENSION
+  USING
+  TextColumn ('content')
+  Models ('all')
+  Accumulate ('id', 'source')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_dk5_mdv_bdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ id   source entity           entity_type  
+ ---- ------ ---------------- ------------ 
+ 1001 misc   sports@espn.com  email       
+ 1002 misc   cricket@espn.com email       
+ 1002 misc   Mark             person      
+ 1003 misc   Roger            person      
+ 1003 misc   tennis@espn.com  email       
+ 1004 wiki   Washington       location    
+ 1004 wiki   U.S.             location    
+ 1004 wiki   North America    location    
+ 1004 wiki   United States    location    
+ 1005 wiki   State Government organization
+ 1005 wiki    58%             percentage  
+ 1006 wiki   San Antonio      location    
+ 1006 wiki   United States    location    
+ 1006 wiki   Texas            location    
+ 1007 wiki   Thomas           person</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

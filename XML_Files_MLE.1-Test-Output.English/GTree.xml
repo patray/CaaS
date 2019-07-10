@@ -1,0 +1,851 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="bhu1507815860164"> </a>
+	  <h1>GTree</h1>
+
+	
+		<p style="line-height: 1em;">The GTree function follows all paths in a graph, starting from a given set of root vertices, and calculates specified aggregate functions along those paths.</p>
+   <p style="line-height: 1em;">The GTree function is similar to the function NTree, but GTree is implemented using the SQL-GR engine. The SQL-GR engine allows the GTree function to traverse arbitrary graphs.</p>
+   <p style="line-height: 1em;">Some information in NTree syntax elements is input to the GTree function differently, as the following table shows.</p>
+   <a name="table_N1001D_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1001D_N1000E_N1000C_N10001"> </a>
+      <h4 style="text-align: center;">GTree Analogs of NTree Syntax Elements</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">SQL-MR Function NTree Syntax Element</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">SQL-GR Function GTree Analog</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Root_Node</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">GTree gets the root nodes of the trees from the input table root.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Node_ID</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">GTree gets the nodes from the partition keys for the input tables vertices, edges, and root. The name of these keys can differ, but each partition must have the same number of keys and corresponding keys must have the same data type.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Parent_ID</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">The input table edges and the TargetKey syntax element define the parent ID. If the TargetKey specifies a vertex, then GTree finds its parent in the corresponding partition key entries.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Mode</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">To change the direction in which GTree traverses the graph, reverse the direction of the edges by switching the columns in the edges table partition key with the columns specified by the TargetKey syntax element.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Result</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">GTree gets the aggregate functions and their aliases from its Results syntax element, which is similar to the NTree Result syntax element. However, the parser that GTree uses requires that you enclose each aggregate function and its alias in quotation marks.</div>
+         </td>
+      </tr>
+   </table>
+
+
+	
+   <a name="oms1507815947102"> </a>
+   <h2>GTree Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.4</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GTree (
+  ON <i>vertices_table</i> AS Vertices PARTITION BY <i>vertex_key_column</i> [,...] 
+  ON <i>edges_table</i> AS Edges PARTITION BY <i>source_vertex_key_column</i> [,...] 
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS Root PARTITION BY <i>root_key_column</i>
+  USING
+  TargetKey ({ '<i>edges_column</i>' | <i>edges_column_range</i> }[,...])
+  [ AllowCycles ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ MaxDepth (<i>max_depth</i>) ]
+  [ OutputType ({ 'all' | 'end' }) ]
+  { Results ('<i>func</i>(<i>expr</i>) [ AS <i>alias</i>]' [,...]) ] | EdgeResults ('<i>func</i>(<i>expr</i>) [ AS <i>alias</i>]' [,...])) }
+  [ FinalEdgeFlag ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'})]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="rpp1507816020404"> </a>
+	  <h2>GTree Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetKey</dt>
+      <dd>Specify the names of the columns in the Edges table that identify the target vertex of an edge.</dd>
+      <dt>AllowCycles</dt>
+      <dd>[Optional] Specify whether the input graph can include cycles.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>MaxDepth</dt>
+      <dd>[Optional] Specify the maximum depth to which the function traverses the graph (a nonnegative integer).</dd>
+      <dd>Default: 1000</dd>
+      <dt>OutputType</dt>
+      <dd>[Optional] Specify whether the function outputs all paths ('all') or only paths that end by reaching a leaf vertex, a cycle, or the maximum number of iterations ('end').</dd>
+      <dd>Default: 'end'</dd>
+      <dt>Results</dt>
+      <dd>[Required if you omit EdgeResults.] Specify the aggregate functions to calculate along each vertex in each path (see the following table). The function outputs a results column for each aggregate function. The column name is <i>alias</i>, if specified; otherwise it is <i>func</i>(<i>expr</i>).</dd>
+      <dt>EdgeResults</dt>
+      <dd>[Required if you omit Results.] Specify the aggregate functions to calculate along each edge in each path (see the following table). The function outputs a results column for each aggregate function. The column name is <i>alias</i>, if specified; otherwise it is <i>func</i>(<i>expr</i>).</dd>
+      <dt>FinalEdgeFlag</dt>
+      <dd>[Optional] Specify whether to include the edge that follows the final vertex when calculating the functions that EdgeResults specifies.</dd>
+      <dd>Default: 'true'</dd>
+   </div>
+
+   <a name="section_thv_msz_fdb"> </a>
+   <h3>Aggregate Functions Supported by GTree Function</h3>
+   <p style="line-height: 1em;">The following table describes the aggregate functions that the Results and EdgeResults syntax elements support. In function syntax, expr, expr1, and expr2 are values from the Vertices or Edges table.</p>
+   <a name="table_N1009A_N10094_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1009A_N10094_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Aggregate Function</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Return Value Data Type</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">correl(<i>expr1</i>, <i>expr2</i>)</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns Pearson product-moment correlation between <i>expr1</i> and <i>expr2</i> on path.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">count(<i>expr</i> [,...])</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns number of vertices in path where no <i>expr</i> is null.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">countdistinct(<i>expr</i>)</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns number of distinct values of <i>expr</i> in vertices on path.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">current(<i>expr</i>)</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns value of <i>expr</i> at final vertex in path.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as input</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">cycle()</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns '1' if GTree function ends path by completing a cycle (that is, by visiting a vertex a second time), '0' otherwise.<p>
+                  <b>Note:</b>  Specify this function only in EdgeResults syntax element.</p>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BYTEINT</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">histogram(<i>expr</i>)</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns a JSON string that contains counts of each distinct value of expr on path.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">leaf()</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns '1' if GTree function ends path by reaching a leaf vertex (that is, a vertex with no outgoing edges), '0' otherwise.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BYTEINT</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">level()</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns number of vertices on path from root vertex to last visited vertex.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">max(<i>expr</i>)</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns maximum value of expr over all vertices from root vertex to last visited vertex.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as input</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">maxiteration()</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns '1' if GTree function ends path by reaching maximum number of iterations specified by MaxDepth syntax element, '0' otherwise.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BYTEINT</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">mean(<i>expr</i>)</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns mean value of <i>expr</i> over all vertices from root vertex to last visited vertex.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">min(<i>expr</i>)</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns minimum value of <i>expr</i> over all vertices from root vertex to last visited vertex.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as input</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">path(<i>expr</i>[,...])</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns a string that represents path from root vertex to last visited vertex. string has form 'v1-&gt;v2-&gt;v3...' for a vertex path and '.-v1-&gt;.-v2-&gt;.-v3-&gt;...' for an edge path, where v<i>n</i> is value of <i>n</i>th <i>expr</i>.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CLOB</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">propagate(<i>expr</i>)</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns value of <i>expr</i> at root vertex.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as input</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">range(<i>expr</i>)</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns difference between minimum and maximum values of <i>expr</i> on path (max(<i>expr</i>) - min(<i>expr</i>)).</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as input</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">stdev(<i>expr</i>)</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns standard deviation of expr over all vertices from root vertex to last visited vertex.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">sum(<i>expr</i>)</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Returns sum of <i>expr</i> over all vertices from root vertex to last visited vertex.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as input</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <tt style="font-family: monospace;">sumproduct(<i>expr1</i>, <i>expr2</i>)</tt>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Calculates product of <i>expr1</i> and <i>expr2</i> at each vertex on path and then returns sum of products.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as input if <i>expr1</i> and <i>expr2</i> have same type, otherwise NUMERIC</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+	
+   <a name="lfi1507816096285"> </a>
+   <h2>GTree Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Vertices Schema</h3>
+   <p style="line-height: 1em;">Each row represents a vertex of the graph.</p>
+   <a name="table_N1001F_N1001C_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1001F_N1001C_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>vertex_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any allowed in PARTITION BY clause</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>vertex_key_column</i>.] All or part of unique vertex key. Cannot be NULL.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_t52_t5l_ycb"> </a>
+   <h3>Edges Schema</h3>
+   <p style="line-height: 1em;">Each row represents an edge of the graph.</p>
+   <a name="table_N10070_N1001C_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10070_N1001C_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>source_vertex_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any allowed in PARTITION BY clause</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column appears once for each specified <i>source_vertex_key_column</i>.] All or part of key that identifies source vertex of edge. Must be a <i>vertex_key_column</i> in Vertices table. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_vertex_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as <i>source_vertex_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column appears once for each specified <i>target_vertex_key_column</i>.] All or part of key that identifies target vertex of edge. Must be a <i>vertex_key_column</i> in Vertices table. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>edge_weight</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SMALLINT, INTEGER, or NUMERIC</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Required only for weighted graph.] Edge weight, a positive value. Can be NULL.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_v4t_t5l_ycb"> </a>
+   <h3>Root Schema</h3>
+   <p style="line-height: 1em;">Each row represents a root vertex from which the function starts traversing the graph.</p>
+   <a name="table_N100CF_N1001C_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100CF_N1001C_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>root_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any allowed in PARTITION BY clause</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>root_key_column</i>.] All or part of root vertex key. Must be a <i>vertex_key_column</i> in Vertices table. Cannot be NULL.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="exy1507816391489"> </a>
+   <h2>GTree Output</h2>
+   <a name="section_zjn_45l_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>alias</i> if specified, otherwise <i>func</i>(<i>expr</i>)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Type returned by aggregate function (see GTree Syntax Elements)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified aggregate function.] Result of aggregate function.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="tpd1510708197596"> </a>
+   <h2>GTree Examples</h2>
+   <a name="xhr1526063998718"> </a>
+	  <h3>GTree Example: All Paths from Root Nodes</h3>
+
+	  <a name="section_ydy_tb2_ygb"> </a>
+   <p style="line-height: 1em;">This example shows all paths from root nodes.</p>
+
+   <a name="section_hb5_rkr_t2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The vertices (nodes) are bus stops in a small town. The Vertices table lists each bus stop and the boarding fare at that stop.</p>
+   <a name="table_bdr_tkr_t2b"> </a>
+   <table class="introtable">
+      <a name="table_bdr_tkr_t2b"> </a>
+      <h4 style="text-align: center;">Vertices: gtree_vertices</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">nodeid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">nodestring</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">value</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Park St</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.25</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Main St</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.25</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Walnut St</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.25</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Water St</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">High St</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.25</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">The Edges table represents the bus route. The columns nodeid and nodestring identify the source vertices (where the bus starts) and the columns endnodeid and endnodestring identify the target vertices (where the bus stops).</p>
+   <a name="table_acd_ykr_t2b"> </a>
+   <table class="introtable">
+      <a name="table_acd_ykr_t2b"> </a>
+      <h4 style="text-align: center;">Edges: gtree_edges</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">nodeid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">nodestring</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">endnodeid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">endnodestring</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Park St</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Walnut St</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Main St</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Walnut St</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Walnut St</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Water St</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Water St</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Park St</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Water St</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">High St</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">The Root table defines the set of root vertices from which the function starts traversing the graph.</p>
+   <a name="table_hph_dlr_t2b"> </a>
+   <table class="introtable">
+      <a name="table_hph_dlr_t2b"> </a>
+      <h4 style="text-align: center;">Root: gtree_root</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">nodeid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">nodestring</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">value</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Park St</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.25</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Main St</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.25</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_sk4_zzf_5db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GTree (
+  ON gtree_vertices AS Vertices PARTITION BY nodeid, nodestring
+  ON gtree_edges AS Edges PARTITION BY nodeid, nodestring
+  ON gtree_root AS Root PARTITION BY nodeid, nodestring
+  USING
+  TargetKey ('endnodeid', 'endnodestring')
+  AllowCycles ('t')
+  MaxDepth (10)
+  OutputType ('all')
+  Results (
+    'Propagate (nodeid) AS start_vertex',
+    'Current (nodeid) AS end_vertex',
+    'Path (nodestring)',
+    'Sum (value1)',
+    'Cycle()',
+    'Leaf()'
+  )
+  EdgeResults ('PATH(nodestring, endnodestring) AS edgepath')
+) AS dt ORDER BY 1,2;</tt>
+   </pre>
+   <a name="section_hsw_xzf_5db"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The output table has one column for each function that the Results or EdgeResults syntax element specifies. The edgepath column shows the links that comprise the path, the cycle column shows whether the path is a cycle, and the sum column shows the total fare for the path (the sum of the boarding fares at each node in the path).</p>
+   <pre>
+      <tt>
+ start_vertex end_vertex path(nodestring)                               sum(value1) cycle() leaf() edgepath         
+ ------------ ---------- ----------------                               ----------- ------- ------ ---------------- 
+            1          1 park st-&gt;                                          2.25    false   false  .-park stwalnut st-&gt;.
+            1          3 park st-&gt;walnut st-&gt;                                4.5    false   false  .-park stwalnut st-&gt;.-walnut stwater st-&gt;.
+            1          4 park st-&gt;walnut st-&gt;water st-&gt;                      8.0    true    false  .-park stwalnut st-&gt;.-walnut stwater st-&gt;.-water stpark st-&gt;
+            1          4 park st-&gt;walnut st-&gt;water st-&gt;                      8.0    false   false  .-park stwalnut st-&gt;.-walnut stwater st-&gt;.-water sthigh st-&gt;.
+            1          5 park st-&gt;walnut st-&gt;water st-&gt;high st             10.25    false   true   .-park stwalnut st-&gt;.-walnut stwater st-&gt;.-water sthigh st-&gt;.
+            2          1 main st-&gt;walnut st-&gt;water st-&gt;park st-&gt;           10.25    true    false  .-main stwalnut st-&gt;.-walnut stwater st-&gt;.-water stpark st-&gt;.-park stwalnut st-&gt;
+            2          2 main st-&gt;                                          2.25    false   false  .-main stwalnut st-&gt;.
+            2          3 main st-&gt;walnut st-&gt;                                4.5    false   false  .-main stwalnut st-&gt;.-walnut stwater st-&gt;.
+            2          4 main st-&gt;walnut st-&gt;water st-&gt;                      8.0    false   false  .-main stwalnut st-&gt;.-walnut stwater st-&gt;.-water stpark st-&gt;.
+            2          4 main st-&gt;walnut st-&gt;water st-&gt;                      8.0    false   false  .-main stwalnut st-&gt;.-walnut stwater st-&gt;.-water sthigh st-&gt;.
+            2          5 main st-&gt;walnut st-&gt;water st-&gt;high st             10.25    false   true   .-main stwalnut st-&gt;.-walnut stwater st-&gt;.-water sthigh st-&gt;.</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="kmd1526064031111"> </a>
+	  <h3>GTree Example: Paths That Cycle or End at Leaves</h3>
+
+	  <a name="section_ydy_tb2_ygb"> </a>
+   <p style="line-height: 1em;">This example shows only paths that either cycle or end at leaves.</p>
+
+   <a name="section_gbt_hlr_t2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">Input tables are from GTree Example: All Paths from Root Nodes:</p>
+   <ul>
+      <li>Vertices: gtree_vertices</li>
+      <li>Edges: gtree_edges</li>
+      <li>Root: gtree_root</li>
+   </ul>
+
+
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GTree (
+  ON gtree_vertices AS Vertices PARTITION BY nodeid, nodestring
+  ON gtree_edges AS Edges PARTITION BY nodeid, nodestring
+  ON gtree_root AS Root PARTITION BY nodeid, nodestring
+  USING
+  TargetKey ('endnodeid', 'endnodestring')
+  AllowCycles ('t')
+  MaxDepth (10)
+  <b>OutputType ('end')</b> 
+  Results (
+    'Propagate (nodeid) AS start_vertex',
+    'Current (nodeid) AS end_vertex',
+    'Path (nodestring)',
+    'Sum (value)',
+    'Cycle()',
+    'Leaf()'
+  )
+  EdgeResults ('PATH(nodestring, endnodestring) AS edgepath')
+) AS dt ORDER BY 1,2;</tt>
+   </pre>
+		
+   <a name="section_hsw_xzf_5db"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ start_vertex end_vertex path(nodestring)                           sum(value1) cycle() leaf() edgepath         
+ ------------ ---------- ----------------                           ----------- ------- ------ ---------------- 
+            1          4 park st-&gt;walnut st-&gt;water st-&gt;             8.0          true    false  .-park stwalnut st-&gt;.-walnut stwater st-&gt;.-water stpark st-&gt;
+            1          5 park st-&gt;walnut st-&gt;water st-&gt;high st      10.25        false   true   .-park stwalnut st-&gt;.-walnut stwater st-&gt;.-water sthigh st-&gt;.
+            2          1 main st-&gt;walnut st-&gt;water st-&gt;park st-&gt;    10.25        true    false  .-main stwalnut st-&gt;.-walnut stwater st-&gt;.-water stpark st-&gt;.-park stwalnut st-&gt;
+            2          5 main st-&gt;walnut st-&gt;water st-&gt;high st      10.25        false   true   .-main stwalnut st-&gt;.-walnut stwater st-&gt;.-water sthigh st-&gt;.</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

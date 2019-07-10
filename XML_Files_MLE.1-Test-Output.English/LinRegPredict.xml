@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="vol1507670147308"> </a>
+	  <h1>LinRegPredict</h1>
+
+	  <p style="line-height: 1em;">The LinRegPredict function takes a model built by the Linear Regression function and a test data set whose input attributes are the same as those in the model, and predicts the response variable for each observation in the test data set.</p>
+
+   <a name="esy1507670169042"> </a>
+	  <h2>LinRegPredict Syntax</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Version 1.6</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM LinRegPredict (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable PARTITION BY ANY
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS Model DIMENSION
+  [ USING
+    [ TargetColumns ('<i>target_column</i>' [,...]) ]
+    [ Accumulate ('<i>accumulate_column</i>' [,...]) ]
+  ]
+) AS <i>alias</i>;
+</tt>
+   </pre>
+
+	
+   <a name="qkp1507670188437"> </a>
+	  <h2>LinRegPredict Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumns</dt>
+      <dd>[Optional] Specify the names of the InputTable columns that contain the input variables. You must specify these column names in the same order in which they appear in the model table. For example, suppose that the coefficient_index column of the model table has these values in this order:intercepthousesizelotsizebedroomsgraniteupgradedbathroom</dd>
+      <dd>Then the TargetColumns syntax element must be:<p style="line-height: 1em;">
+            <tt style="font-family: monospace;">TargetColumns ('housesize', 'lotsize', 'bedrooms','granite', 'upgradedbathroom').</tt>
+         </p>
+      </dd>
+      <dd>Otherwise, the function creates incorrect predictions.</dd>
+      <dd>Default: All input columns</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of InputTable columns to copy to the output table.</dd>
+   </div>
+
+
+	
+   <a name="ybm1507670211620"> </a>
+	  <h2>LinRegPredict Input</h2>
+
+	  <a name="section_lxk_s3w_xcb"> </a>
+   <a name="table_ojf_v3w_xcb"> </a>
+   <table class="introtable">
+      <a name="table_ojf_v3w_xcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains test data.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Model</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Linear Regression Output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>InputTable Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>x_component_i</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SMALLINT, INTEGER, BIGINT, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each x component.] Value of <i>i</i>th data point component.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+		
+
+	
+   <a name="knq1507670232561"> </a>
+	  <h2>LinRegPredict Output</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N10017_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10017_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from InputTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">predicted_value </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Predicted response value, based on coefficients from Model table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+		
+
+	
+   <a name="dqk1510778975301"> </a>
+   <h2>LinRegPredict Example</h2>
+   <a name="section_oq4_hkj_4db"> </a>
+   <h3>Input</h3>
+   <ul>
+      <li>InputTable: housing_data, as in the Linear Regression Example</li>
+      <li>Model: LinRegModel, is the output of the Linear Regression Example, created as follows:</li>
+   </ul>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE LinRegModel AS (
+  SELECT * FROM LinReg (
+    ON LinRegInternal (
+      ON housing_data
+    ) AS dt1 PARTITION BY 1
+  ) AS dt2
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_ivz_hkj_4db"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM LinRegPredict ( 
+  ON housing_data AS InputTable PARTITION BY ANY
+  ON LinRegModel AS Model DIMENSION
+  USING
+  InputColumns ('housesize','lotsize','bedrooms','granite','upgradedbathroom')
+  Accumulate ('housesize','lotsize','bedrooms','granite','upgradedbathroom')
+) AS dt ORDER BY 1;</tt>
+   </pre>
+   <a name="section_spk_3kj_4db"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ housesize lotsize bedrooms granite upgradedbathroom predicted_value    
+ --------- ------- -------- ------- ---------------- ------------------ 
+      2200    9600        4       0                1 200178.65324449894
+      2397   14156        4       1                0   187694.857118394
+      2983    9365        5       0                1 221896.99717644157
+      3198    9669        5       1                1 225173.25034326705
+      3247   10061        5       1                1 226336.77540031952
+      3529    9191        6       0                0 207205.14288160563
+      3536   19994        6       1                1  325768.3674812864
+      4032   10150        5       0                1 198619.20669745357</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

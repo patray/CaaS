@@ -1,0 +1,795 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="gjw1507907635272"> </a>
+	  <h1>VWAP</h1>
+
+	  <p style="line-height: 1em;">The VWAP function computes the volume-weighted average price of a traded item (usually an equity share) for each time interval in a series of equal-length time intervals.</p>
+   <p style="line-height: 1em;">Where <tt style="font-family: monospace;">sum</tt> applies to the current time interval:</p>
+   <p style="line-height: 1em;">
+      <tt style="font-family: monospace;">VWAP = sum(<i>volume</i>*<i>price</i>)/sum(<i>volume</i>)</tt>
+   </p>
+
+   <a name="aml1507907707564"> </a>
+   <h2>VWAP Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.6</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM VWAP (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY <i>expression</i> [,...] ORDER BY <i>time_column</i> DESC
+  [ USING
+    [ Price ('<i>price_column</i>') ]
+    [ Volume ('<i>volume_column</i>') ]
+    [ TimeInterval (<i>number_of_seconds</i>) ]
+    [ TimeColumn ('<i>time_column</i>') ]
+  ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="vjc1507907768452"> </a>
+	  <h2>VWAP Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>Price</dt>
+      <dd>[Optional] Specify the name of the input table column that contains the price at which the item traded.</dd>
+      <dd>Default: 'price'</dd>
+      <dt>Volume</dt>
+      <dd>[Optional] Specify the name of the input table column that contains the number of units traded in the transaction.</dd>
+      <dd>Default: 'volume'</dd>
+      <dt>TimeColumn</dt>
+      <dd>[Optional] Specify the name of the input table column that contains the date and time of the trade.</dd>
+      <dd>Default: 'dt'</dd>
+      <dt>TimeInterval</dt>
+      <dd>[Optional] Specify the number of seconds in each time interval.</dd>
+      <dd>Default: 0 (Each row is an interval, and the function calculates no averages.)</dd>
+   </div>
+
+
+	
+   <a name="qyi1507907882054"> </a>
+   <h2>VWAP Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Input Table Schema</h3>
+   <p style="line-height: 1em;">You must partition the input table such that each partition contains all rows of the entity whose volume-weighted average is to be calculated. For example, if the entity is a particular equity share, then all transactions of that share must be in the same partition.</p>
+   <a name="table_N10017_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10017_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>input_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears zero or more times.] Column to copy to output table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>price_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NUMERIC, INTEGER, BIGINT, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Price at which item traded.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>volume_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NUMERIC, INTEGER, BIGINT, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of units traded in transaction.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>time_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">TIMESTAMP</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Timestamp (date and time) of trade. Timestamp of first row in partition is considered to be start time of first interval. Second interval starts immediately after end of first interval, and so on.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="hqb1507908064646"> </a>
+   <h2>VWAP Output</h2>
+   <a name="section_sfz_ypk_ddb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>input_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each <i>input_column</i> in input table.] Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">timestamp</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">TIMESTAMP</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Last timestamp in interval.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">vwap</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Volume-weighted average price for interval.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ecm1510783602273"> </a>
+   <h2>VWAP Example</h2>
+   <a name="section_qr1_wff_pdb"> </a>
+   <h3>Input</h3>
+   <a name="table_lnb_lgf_pdb"> </a>
+   <table class="introtable">
+      <a name="table_lnb_lgf_pdb"> </a>
+      <h4 style="text-align: center;">stock_vol</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">name</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">period</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">stockprice</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">volume</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-17 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">460</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">640000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-18 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">457</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">707200</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-19 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">452</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">747200</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-22 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">459</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3312e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-23 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">462</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.848e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-24 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">459</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">779200</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-25 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">463</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">528000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-26 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">479</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">843200</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-29 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">493</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.728e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-31 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">490</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">880000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-01 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">492</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">760000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-02 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">498</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.848e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-05 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">499</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3472e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-06 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">497</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.48e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-07 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">496</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.0912e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-08 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">490</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.096e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-09 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">489</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">760000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-12 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">478</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">904000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-13 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">487</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.9552e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-14 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">491</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.0912e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-15 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">487</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3232e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-16 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">482</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">376000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-19 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">479</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">339200</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-20 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">478</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">640000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-06-21 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">479</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">640000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-17 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">68.2502</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.7264e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-18 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">67.7501</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.6704e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-19 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">68.375</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5168e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-22 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">67.1251</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.8528e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-23 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">67.1251</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.7184e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Company2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961-05-24 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.2672e+06</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_gzk_wff_pdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM VWAP (
+  ON stock_vol PARTITION BY id ORDER BY period
+  USING
+  Price ('stockprice')
+  Volume ('volume')
+  TimeColumn ('period')
+  TimeInterval (432000)
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_amw_wff_pdb"> </a>
+   <h3>Output</h3>
+   <p style="line-height: 1em;">Because the time interval (86,400 seconds) equals one day, the function groups the first two rows together and the last two rows together, and calculates the volume-weighted average price for each group.</p>
+   <pre>
+      <tt>
+ id name timestamp                  vwap               
+ -- ---- -------------------------- ------------------ 
+  1 ibm  1961-06-02 00:00:00.000000    494.11962890625
+  1 ibm  1961-06-16 00:00:00.000000  485.9997253417969
+  1 ibm  1961-06-21 00:00:00.000000   478.604736328125
+  1 ibm  1961-05-26 00:00:00.000000  465.1324462890625
+  1 ibm  1961-06-09 00:00:00.000000  494.8960876464844
+  1 ibm  1961-05-22 00:00:00.000000     457.2470703125
+  2 ge   1961-05-22 00:00:00.000000  67.89862060546875
+  2 ge   1961-06-21 00:00:00.000000    64.154052734375
+  2 ge   1961-06-16 00:00:00.000000  66.48062896728516
+  2 ge   1961-06-09 00:00:00.000000  66.62847137451172
+  2 ge   1961-06-02 00:00:00.000000  65.82262420654297
+  2 ge   1961-05-26 00:00:00.000000  65.76305389404297
+  3 pg   1961-06-02 00:00:00.000000  19.29766273498535
+  3 pg   1961-06-16 00:00:00.000000  24.12955093383789
+  3 pg   1961-06-21 00:00:00.000000 24.474178314208984
+  3 pg   1961-06-09 00:00:00.000000 22.784996032714844
+  3 pg   1961-05-26 00:00:00.000000  17.52366065979004
+  3 pg   1961-05-22 00:00:00.000000 18.016775131225586</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

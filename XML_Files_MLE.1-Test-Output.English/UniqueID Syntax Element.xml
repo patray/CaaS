@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="fdw1549987717481"> </a>
+	  <h1>UniqueID Syntax Element</h1>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+			<p style="line-height: 1em;">To address the issue of nondeterministic data transfer and its impact on the repeatability and performance of the its functions, ML Engine provides the UniqueID syntax element, which is available for every function except nPath.</p>
+   <p style="line-height: 1em;">When used with a Seed syntax element, the UniqueID syntax element guarantees repeatable results.</p>
+   <p style="line-height: 1em;">When nonuniform distribution of rows across workers affects function performance, the UniqueID syntax element improves performance by guaranteeing uniform distribution. (See Determining if Data Skew Might Impact Performance.)</p>
+
+		
+   <a name="section_wc4_xsr_tgb"> </a>
+   <h2>UniqueID Syntax Element Syntax</h2>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+[ UniqueID ('[<i>input_table_alias</i>:]<i>column</i>' [,...]) ]</tt>
+   </pre>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>
+         <i>input_table_alias</i>
+      </dt>
+      <dd>[Required if function has multiple input tables, optional otherwise.] Alias of an input table for the function.</dd>
+      <dt>
+         <i>column</i> [,...]</dt>
+      <dd>One or more columns that form a unique row identifier in the input table whose alias is <i>input_table_alias</i>. The data type of a <i>column</i> can be any DISTRIBUTIONTYPE; that is, any of the following:<ul>
+            <li>SMALLINT</li>
+            <li>INTEGER</li>
+            <li>BIGINT</li>
+            <li>NUMERIC</li>
+            <li>VARCHAR</li>
+         </ul>
+      </dd>
+      <dd>If the table whose alias is <i>input_table_alias</i> does not have a unique row identifier, you must create one. See Ways to Create Unique Identifier Column.</dd>
+   </div>
+
+   <a name="section_f2n_fxr_tgb"> </a>
+   <h2>Examples: Single Input Table</h2>
+   <p style="line-height: 1em;">Omit optional <i>input_table_alias</i>:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Sampling (
+  ON students AS InputTable PARTITION BY ANY
+  USING
+  <b>UniqueID ('id')</b>
+  SampleFraction('0.2')
+  Seed('2')
+) as dt;
+</tt>
+   </pre>
+   <p style="line-height: 1em;">Specify optional <i>input_table_alias</i>:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Canopy (
+  ON computers_train1 AS <b>InputTable</b>
+  USING
+  <b>UniqueID ('InputTable:id')</b>
+  LooseDistance ('1000')
+  TightDistance ('500')
+) AS dt;
+</tt>
+   </pre>
+   <a name="section_N100B4_N10010_N10001"> </a>
+   <h2>Examples: Multiple Input Tables</h2>
+   <p style="line-height: 1em;">Columns from multiple input tables:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Modularity (
+  ON friends AS <b>vertices</b> PARTITION BY friends_name
+  ON followers_leaders AS <b>edges</b> PARTITION BY follower
+  OUT TABLE CommunityEdgeTable (community_edges)
+  USING
+  <b>UniqueID ('vertices:friends_name','edges:id_col')</b>
+  TargetKey ('leader')
+  CommunityAssociation ('group_id')
+  Accumulate ('friends_name','location')
+) as dt ORDER BY friends_name;
+</tt>
+   </pre>
+   <p style="line-height: 1em;">Column from only one of multiple input tables:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GMM (
+  ON (SELECT 1) AS init_params PARTITION BY 1
+  ON gmm_iris_train AS <b>InputTable</b>
+  OUT TABLE OutputTable (gmm_output_ex1)
+  USING
+  <b>UniqueID ('InputTable:id')</b>
+  ClusterNum (3)
+  CovarianceType ('spherical')
+  MaxIterNum (10)
+  PackOutput (1)
+) AS dt;
+</tt>
+   </pre>
+   <a name="section_epg_jxr_tgb"> </a>
+   <h2>Example: Nested Functions</h2>
+   <p style="line-height: 1em;"/>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NaiveBayesReduce (
+  ON NaiveBayesMap (
+    ON nb_iris_input_train AS <b>input1</b>
+    USING
+    <b>UniqueID ('input1:id')</b>
+    ResponseColumn ('species')
+    NumericInputs ('[1:4]')
+  ) PARTITION BY class_nb
+) AS dt;
+</tt>
+   </pre>
+   <a name="section_mz4_jxr_tgb"> </a>
+   <h2>Example: Input Table without Unique Row Identifier</h2>
+   <p style="line-height: 1em;">Input table iris_attribute_train does not have a unique row identifier. The following two statements create a new table, iris_attr_uniqueid, which is identical to iris_attribute_train but has an additional unique id column named global_id. </p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE iris_attr_uniqueid (
+  <b>global_id INTEGER GENERATED ALWAYS AS IDENTITY(START WITH 1 NO CYCLE)</b>,
+  pid INTEGER,
+  attribute VARCHAR(30),
+  attrvalue FLOAT
+);
+
+INSERT INTO iris_attr_uniqueid
+  SELECT null, pid, attribute, attrvalue FROM iris_attribute_train;
+</tt>
+   </pre>
+   <p style="line-height: 1em;">Use iris_attr_uniqueid in the function call:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM DecisionTree (
+  ON <b>iris_attr_uniqueid</b> AS AttributeTable
+  ON iris_response_train AS ResponseTable
+  OUT TABLE OutputTable (iris_attribute_output)
+  OUT TABLE IntermediateSplitsTable (splits_small)
+  USING
+  <b>UniqueID ('responsetable:pid','attributetable:global_id')
+</b>
+  NumSplits ('3')
+  SplitMeasure ('gini')
+  MaxDepth ('10')
+  IdColumns ('pid')
+  AttributeNameColumns ('attribute')
+  AttributeValueColumn ('attrvalue')
+  ResponseColumn ('response')
+  MinNodeSize ('10')
+  ApproxSplits ('false')
+) AS dt;
+</tt>
+   </pre>
+   <p style="line-height: 1em;">For more examples of creating unique row identifiers, see Ways to Create Unique Identifier Column.</p>
+
+
+	
+</t:intro>

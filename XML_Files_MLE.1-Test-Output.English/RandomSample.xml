@@ -1,0 +1,1933 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="vkk1507737806782"> </a>
+	  <h1>RandomSample</h1>
+
+	  <p style="line-height: 1em;">The RandomSample function takes a data set and uses a specified sampling method to output one or more random samples. Each sample has exactly the number of rows specified.</p>
+   <p style="line-height: 1em;">The RandomSample function is useful for creating test sets, training sets, and initial centers for clustering algorithms.</p>
+   <p style="line-height: 1em;">In addition to the default basic sampling, in which each input table row has a probability of being selected that is proportional to its weight, this function provides two alternate methods, KMeans++ and KMeans||, which are designed for creating a set of initial seeds for the function KMeans.</p>
+
+   <a name="nnl1507737906655"> </a>
+   <h2>RandomSample Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.4</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM RandomSample (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  USING
+  NumSample (<i>sample_size</i> [,...])
+  [ WeightColumn ('<i>weight_column</i>') ]
+  [ SamplingMode ({ 'basic' | 'kmeans++' | 'kmeans||' }) ]
+  [ Distance ({ 'euclidean' | 'manhattan' }) ]
+  [ TargetColumns ( { '<i>target_column</i>' | <i>target_column_range</i> }[,...] ) ]
+  [ NumericAsCategorical ( { '<i>ascat_column</i>' | <i>ascat_column_range</i> }[,...] ) ]
+  [ CategoryWeights (<i>category_weight</i> [,...]) ]
+  [ CategoricalDistance ({ 'overlap' | 'hamming' }) ]
+  [ Seed (<i>seed</i>)
+    SeedColumn ({ '<i>seed_column</i>' | <i>seed_column_range</i> } [,...])
+  ]
+  [ OverSamplingRate (<i>rate</i>) ]
+  [ IterNum (<i>number_of_iterations</i>) ]
+  [ SetIDAsFirstColumn ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="xsk1507737910698"> </a>
+	  <h2>RandomSample Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>NumSample</dt>
+      <dd>Specify the size of each sample, an INTEGER value. If you specify <i>n</i> 
+         <i>sample_size</i> values, the function selects <i>n</i> samples. For each sample, the output table has <i>sample_size</i> rows. The output column set_id identifies the sample to which each row belongs.</dd>
+      <dt>WeightColumn</dt>
+      <dd>[Optional] Specify the name of the InputTable column that contains weights for weighted sampling. The <i>weight_column</i> must have a numeric SQL data type.</dd>
+      <dd>Default behavior: Rows have equal weight.</dd>
+      <dt>SamplingMode</dt>
+      <dd>[Optional] Specify the sampling mode:<a name="table_nyb_svy_fdb"> </a>
+         <table class="introtable">
+            <a name="table_nyb_svy_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'basic'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Each InputTable row has a probability of being selected that is proportional to its weight. Weight of each row is in <i>weight_column</i>.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'kmeans++'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">One row is selected in each of <i>k</i> iterations, where <i>k</i> is number of desired output rows. First row is selected randomly. In subsequent iterations, probability of row being selected is proportional to value in WeightColumn multiplied by distance from nearest row in set of selected rows. Distance is calculated using methods specified by Distance and CategoricalDistance syntax elements.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'kmeans||'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Enhanced version of KMeans++ that exploits parallel architecture to accelerate sampling process. Algorithm is described in paper <i>Scalable K-Means++ by Bahmani et al</i> (http://theory.stanford.edu/~sergei/papers/vldb12-kmpar.pdf). At each iteration, probability that a row is selected is proportional to value in WeightColumn multiplied by distance from nearest row in set of selected rows (as in KMeans++). However, KMeans|| algorithm oversamples at each iteration, significantly reducing required number of iterations; therefore, resulting set of rows might have more than <i>k</i> data points. Each row in resulting set is then weighted by number of rows in table that are closer to that row than to any other selected row, and rows are clustered to produce exactly <i>k</i> rows.</div>
+               </td>
+            </tr>
+         </table>
+
+         <p>
+            <b>Tip:</b>  For optimal performance, use <tt style="font-family: monospace;">'kmeans++'</tt> when the desired sample size is less than 15 and <tt style="font-family: monospace;">'kmeans||'</tt> otherwise.</p>
+      </dd>
+      <dt>Distance</dt>
+      <dd>[Optional] For KMeans++ and KMeans|| sampling, specify the function for computing the distance between numerical variables.</dd>
+      <dt>TargetColumns</dt>
+      <dd>[Optional] Required for KMeans++ and KMeans|| sampling.<p style="line-height: 1em;">Specify the names of the InputTable columns to use to calculate the distance between numerical variables.</p>
+      </dd>
+      <dt>NumericAsCategorical</dt>
+      <dd>[Optional] For KMeans++ and KMeans|| sampling, specify the names of the InputTable columns that contain numerical variables to treat as categorical variables.</dd>
+      <dd>Default behavior: No numerical variables are treated as categorical variables.</dd>
+      <dt>CategoryWeights</dt>
+      <dd>[Optional] For KMeans++ and KMeans|| sampling, specify the weights (DOUBLE PRECISION values) of the categorical variables, including those that the NumericAsCategorical syntax element specifies. Specify the weights in the order (from left to right) that the variables appear in the input table. When calculating the distance between two rows, distances between categorical values are scaled by these weights.</dd>
+      <dd>Default behavior: All categories have equal weight.</dd>
+      <dt>CategoricalDistance</dt>
+      <dd>[Optional] For KMeans++ and KMeans|| sampling, specify the function for computing the distance between categorical variables:<a name="table_b2y_nwy_fdb"> </a>
+         <table class="introtable">
+            <a name="table_b2y_nwy_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'overlap'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Distance between two variables is 0 if they are the same, 1 if they are different.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'hamming'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Distance between two variables is Hamming distance between strings that represent them. Strings must have equal length.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>Seed</dt>
+      <dd>[Optional] Specify the random seed the algorithm uses for repeatable results (for more information, see Nondeterministic Results and UniqueID Syntax Element). The <i>seed</i> must be a LONG value.<p>
+            <b>Note:</b>  If you specify Seed, you must also specify SeedColumn.</p>
+      </dd>
+      <dt>SeedColumn</dt>
+      <dd>[Optional] Specify the names of the InputTable columns by which to partition the input. Function calls that use the same input data, <i>seed</i>, and <i>seed_column</i> output the same result.<p>
+            <b>Note:</b>  If you specify SeedColumn, you must also specify Seed.</p>
+         <p>
+            <b>Note:</b>  Ideally, the number of distinct values in the <i>seed_column</i> is the same as the number of workers in the cluster. A large number of distinct values in the <i>seed_column</i> degrades function performance.</p>
+      </dd>
+      <dt>OverSamplingRate</dt>
+      <dd>[Optional] For KMeans|| sampling, specifies the oversampling rate (a positive DOUBLE PRECISION value). The function multiplies <i>rate</i> by <i>sample_size</i> (for each <i>sample_size</i>).</dd>
+      <dd>Default: 1.0</dd>
+      <dt>IterNum</dt>
+      <dd>[Optional] For KMeans|| sampling, specify the number of iterations (a positive INTEGER value).</dd>
+      <dd>Default: 5</dd>
+      <dt>SetIDAsFirstColumn</dt>
+      <dd>Specify whether the function-generated set_id column is the first output table column. If you specify 'false', set_id is the last output table column.</dd>
+      <dd>Default: 'true'</dd>
+   </div>
+
+
+	
+   <a name="zzb1507737914832"> </a>
+   <h2>RandomSample Input</h2>
+   <a name="section_c4y_rqw_xcb"> </a>
+   <h3>InputTable Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>target_column</i>.] Column to use for sampling.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>weight_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BYTEINT, SMALLINT, INTEGER, BIGINT, NUMERIC, DOUBLE PRECISION, or NUMBER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with WeightColumn syntax element.] Can be an <i>target_column</i>. Weight for weighted sampling of rows.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>seed_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>seed_column</i>.] Can be an <i>target_column</i>. Column by which to partition the input.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="vjl1507737918373"> </a>
+   <h2>RandomSample Output</h2>
+   <a name="section_lln_vqw_xcb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">set_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Identifies sample set to which row belongs. Set numbers start with 0. Appears as first column or last column, depending on SetIDAsFirstColumn syntax element.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each input table column.] Copied from InputTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="nvo1510787993422"> </a>
+   <h2>RandomSample Examples</h2>
+   <a name="zaz1507738181562"> </a>
+  <h3>RandomSample Example: SamplingMode ('basic'), Weighted</h3>
+
+  
+    <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example uses basic sampling to select two samples of five rows each, weighted by car weight. Because the function call includes the Seed and SeedColumn syntax elements, it always produces the same output from the same input.</p>
+
+
+    <a name="section_ubh_hxj_4db"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, fs_input, has 32 observations of 11 variables for
+        different models of cars. The variables vs and am are categorical; the others are
+        numerical.</p>
+   <a name="table_yrz_vdl_t2b"> </a>
+   <table class="introtable">
+      <a name="table_yrz_vdl_t2b"> </a>
+        
+          
+          
+          
+            <tr>
+              <th align="left">
+            <div style="line-height: 1em;">Variable</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+            </tr>
+          
+          
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">mpg</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Miles per U. S. gallon</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">cyl</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Number of cylinders</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">disp</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Displacement (cubic inches)</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">hp</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Gross horsepower</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">drat</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Drive ratio</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">wt</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Weight (lbs/1000)</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">qsec</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Quarter-mile time (seconds)</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">vs</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Engine configuraton (V or S (straight))</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">am</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Transmission type (automatic or manual)</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">gear</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Number of forward gears</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">carb</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Number of carburetors</div>
+         </td>
+            </tr>
+          
+        
+      </table>
+
+   <a name="table_v2p_h2l_t2b"> </a>
+   <table class="introtable">
+      <a name="table_v2p_h2l_t2b"> </a>
+        <h4 style="text-align: center;">fs_input</h4>
+        
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+            <tr>
+              <th align="left">
+            <div style="line-height: 1em;">sn</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">model</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">mpg</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">cyl</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">disp</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">hp</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">drat</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">wt</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">qsec</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">vs</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">am</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">gear</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">carb</div>
+         </th>
+            </tr>
+          
+          
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Mazda RX4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">21</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">160</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">110</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.9</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2.62</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">16.46</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">manual</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Mazda RX4 Wag</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">21</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">160</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">110</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.9</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2.875</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">17.02</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">manual</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Datsun 710</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">22.8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">108</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">93</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.85</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2.32</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">18.61</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">V</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">manual</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Hornet 4 Drive</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">21.4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">258</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">110</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.08</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.215</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">19.44</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">V</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Hornet Sportabout</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">18.7</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">360</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">175</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.15</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.44</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">17.02</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Valiant</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">18.1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">225</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">105</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2.76</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.46</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">20.22</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">V</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Duster 360</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">14.3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">360</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">245</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.21</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.57</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">15.84</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Merc 240D</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">24.4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">146.7</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">62</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.69</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.19</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">20</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">V</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Merc 230</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">22.8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">140.8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">95</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.92</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.15</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">22.9</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">V</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Merc 280</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">19.2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">167.6</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">123</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.92</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.44</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">18.3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">V</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Merc 280C</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">17.8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">167.6</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">123</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.92</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.44</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">18.9</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">V</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Merc 450SE</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">16.4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">275.8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">180</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.07</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4.07</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">17.4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Merc 450SL</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">17.3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">275.8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">180</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.07</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.73</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">17.6</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Merc 450SLC</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">15.2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">275.8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">180</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.07</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.78</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">18</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Cadillac Fleetwood</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">10.4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">472</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">205</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2.93</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">5.25</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">17.98</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Lincoln Continental</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">10.4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">460</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">215</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">5.424</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">17.82</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">17</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Chrysler Imperial</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">14.7</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">440</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">230</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.23</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">5.345</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">17.42</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">18</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Fiat 128</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">32.4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">78.7</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">66</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4.08</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2.2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">19.47</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">V</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">manual</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">19</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Honda Civic</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">30.4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">75.7</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">52</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4.93</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1.615</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">18.52</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">V</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">manual</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">20</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Toyota Corolla</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">33.9</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">71.1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">65</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4.22</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1.835</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">19.9</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">V</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">manual</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">21</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Toyota Corona</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">21.5</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">120.1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">97</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.7</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2.465</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">20.01</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">V</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">22</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Dodge Challenger</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">15.5</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">318</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">150</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2.76</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.52</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">16.87</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">23</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">AMC Javelin</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">15.2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">304</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">150</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.15</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.435</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">17.3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">24</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Camaro Z28</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">13.3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">350</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">245</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.73</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.84</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">15.41</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Pontiac Firebird</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">19.2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">400</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">175</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.08</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.845</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">17.05</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">26</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Fiat X1-9</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">27.3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">79</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">66</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4.08</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1.935</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">18.9</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">V</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">manual</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">27</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Porsche 914-2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">26</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">120.3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">91</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4.43</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2.14</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">16.7</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">manual</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">28</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Lotus Europa</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">30.4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">95.1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">113</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.77</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1.513</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">16.9</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">V</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">manual</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">29</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Ford Pantera L</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">15.8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">351</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">264</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4.22</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.17</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">14.5</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">manual</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">30</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Ferrari Dino</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">19.7</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">145</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">175</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.62</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2.77</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">15.5</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">manual</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">31</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Maserati Bora</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">301</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">335</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.54</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3.57</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">14.6</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">manual</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">32</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Volvo 142E</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">21.4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">121</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">109</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4.11</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2.78</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">18.6</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">V</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">manual</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+            </tr>
+          
+        
+      </table>
+
+
+
+    <a name="section_byy_bxj_4db"> </a>
+   <h4>SQL
+      Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM RandomSample(
+  ON fs_input AS InputTable
+  USING
+  SamplingMode ('basic')
+  NumSample(5,5)
+  WeightColumn('wt')
+  Seed(1)
+  SeedColumn('model')
+) AS dt ORDER BY 1,2,3;</tt>
+   </pre>
+
+    <a name="section_dgj_cxj_4db"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ set_id sn model               mpg  cyl disp  hp    drat wt    qsec  vs am        gear carb 
+ ------ -- ------------------- ---- --- ----- ----- ---- ----- ----- -- --------- ---- ---- 
+      0  1 mazda rx4           21.0   6 160.0 110.0  3.9  2.62 16.46 s  manual       4    4
+      0 13 merc 450sl          17.3   8 275.8 180.0 3.07  3.73  17.6 s  automatic    3    3
+      0 14 merc 450slc         15.2   8 275.8 180.0 3.07  3.78  18.0 s  automatic    3    3
+      0 16 lincoln continental 10.4   8 460.0 215.0  3.0 5.424 17.82 s  automatic    3    4
+      0 28 lotus europa        30.4   4  95.1 113.0 3.77 1.513  16.9 v  manual       5    2
+      1 11 merc 280c           17.8   6 167.6 123.0 3.92  3.44  18.9 v  automatic    4    4
+      1 15 cadillac fleetwood  10.4   8 472.0 205.0 2.93  5.25 17.98 s  automatic    3    4
+      1 17 chrysler imperial   14.7   8 440.0 230.0 3.23 5.345 17.42 s  automatic    3    4
+      1 25 pontiac firebird    19.2   8 400.0 175.0 3.08 3.845 17.05 s  automatic    3    2
+      1 32 volvo 142e          21.4   4 121.0 109.0 4.11  2.78  18.6 v  manual       4    2</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+  
+   <a name="ggv1507738586058"> </a>
+   <h3>RandomSample Example: SamplingMode ('kmeans++')</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">This example uses KMeans++ sampling with the Manhattan distance metric, and treats the numeric variables cyl, gear, and carb as categorical variables (vs and am are also categorical variables). The category weights are assigned in the order that the columns appear in the input table: 1000 to cyl, 10 to vs, 100 to am, 100 to gear, and 100 to carb.</p>
+   <p style="line-height: 1em;">This example also specifies SetIDAsFirstColumn ('false'), causing the function-generated set_id column to appear last in the output table.</p>
+
+   <a name="section_kgm_bxj_4db"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: fs_input, as in RandomSample Example: SamplingMode ('basic'), Weighted</li>
+   </ul>
+
+   <a name="section_byy_bxj_4db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM RandomSample(
+  ON fs_input AS InputTable
+  USING
+  NumSample(10)
+  SamplingMode('KMeans++')
+  TargetColumns('mpg:carb')
+  CategoryWeights(1000,10,100,100,100)
+  NumericAsCategorical('cyl','gear','carb')
+  Distance('manhattan')
+  Seed(1)
+  SeedColumn('model')
+  SetIdAsFirstColumn('false')
+) AS dt ORDER BY 1,2,3;</tt>
+   </pre>
+   <a name="section_dgj_cxj_4db"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ sn model               mpg  cyl disp  hp    drat wt    qsec  vs am        gear carb set_id 
+ -- ------------------- ---- --- ----- ----- ---- ----- ----- -- --------- ---- ---- ------ 
+  1 mazda rx4           21.0   6 160.0 110.0  3.9  2.62 16.46 s  manual       4    4      0
+  3 datsun 710          22.8   4 108.0  93.0 3.85  2.32 18.61 v  manual       4    1      0
+  5 hornet sportabout   18.7   8 360.0 175.0 3.15  3.44 17.02 s  automatic    3    2      0
+ 14 merc 450slc         15.2   8 275.8 180.0 3.07  3.78  18.0 s  automatic    3    3      0
+ 16 lincoln continental 10.4   8 460.0 215.0  3.0 5.424 17.82 s  automatic    3    4      0
+ 20 toyota corolla      33.9   4  71.1  65.0 4.22 1.835  19.9 v  manual       4    1      0
+ 22 dodge challenger    15.5   8 318.0 150.0 2.76  3.52 16.87 s  automatic    3    2      0
+ 28 lotus europa        30.4   4  95.1 113.0 3.77 1.513  16.9 v  manual       5    2      0
+ 31 maserati bora       15.0   8 301.0 335.0 3.54  3.57  14.6 s  manual       5    8      0
+ 32 volvo 142e          21.4   4 121.0 109.0 4.11  2.78  18.6 v  manual       4    2      0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="mjt1507738847957"> </a>
+   <h3>RandomSample Example: SamplingMode ('kmeans||')</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">This example uses KMeans|| sampling. Like RandomSample Example: SamplingMode ('kmeans++'), this example treats the numeric variables cyl, gear, and carb as categorical variables and uses the categorical variables vs and am. However, this example uses the Manhattan distance metric for the numerical variables and the Hamming distance metric for the categorical variables. Because the Hamming distance metric requires categories of equal length, assume that in input table column am, 'manual' has been changed to 'manualsys' (which is the same length as 'automatic').</p>
+
+   <a name="section_kgm_bxj_4db"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: fs_input1, created from fs_input (in RandomSample Example: SamplingMode ('basic'), Weighted) and populated with these statements:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+CREATE TABLE fs_input1 AS (
+SELECT * FROM fs_input
+) WITH DATA;
+</tt>
+         </pre>
+         <pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+UPDATE fs_input1 SET am='manualsys' WHERE am='manual';</tt>
+         </pre>
+      </li>
+   </ul>
+
+   <a name="section_byy_bxj_4db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM RandomSample(
+  ON fs_input1 AS InputTable 
+  USING
+  NumSample(20)
+  SamplingMode('KMeans||')
+  TargetColumns('mpg:carb')
+  categoryWeights(1000,10,100,100,100)
+  NumericAsCategorical('cyl','gear','carb')
+  CategoricalDistance('HAMMING')
+  distance('MANHATTAN')
+  Seed(1)
+  IterNum(2)
+  seedcolumn('model')
+) AS dt ORDER BY 1,2,3;</tt>
+   </pre>
+   <a name="section_dgj_cxj_4db"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ set_id mpg   cyl disp             hp               drat             wt     qsec             vs am        gear carb 
+ ------ ----- --- ---------------- ---------------- ---------------- ------ ---------------- -- --------- ---- ---- 
+      0  10.4   8            466.0            210.0            2.965  5.337             17.9 s  automatic    3    4
+      0  13.8   8            355.0            245.0             3.47  3.705           15.625 s  automatic    3    4
+      0  14.7   8            440.0            230.0             3.23  5.345            17.42 s  automatic    3    4
+      0  15.0   8            301.0            335.0             3.54   3.57             14.6 s  manualsys    5    8
+      0 15.35   8            311.0            150.0            2.955 3.4775           17.085 s  automatic    3    2
+      0  15.8   8            351.0            264.0             4.22   3.17             14.5 s  manualsys    5    4
+      0  16.4   8            275.8            180.0             3.07   4.07             17.4 s  automatic    3    3
+      0  18.5   6            167.6            123.0             3.92   3.44             18.6 v  automatic    4    4
+      0  18.7   8            360.0            175.0             3.15   3.44            17.02 s  automatic    3    2
+      0  19.7   6            145.0            175.0             3.62   2.77             15.5 s  manualsys    5    6
+      0  21.0   6            160.0            110.0              3.9   2.62            16.46 s  manualsys    4    4
+      0  21.4   4            121.0            109.0             4.11   2.78             18.6 v  manualsys    4    2
+      0  21.4   6            258.0            110.0             3.08  3.215            19.44 v  automatic    3    1
+      0  21.5   4            120.1             97.0              3.7  2.465            20.01 v  automatic    3    1
+      0  22.8   4            140.8             95.0             3.92   3.15             22.9 v  automatic    4    2
+      0  22.8   4            108.0             93.0             3.85   2.32            18.61 v  manualsys    4    1
+      0  24.4   4            146.7             62.0             3.69   3.19             20.0 v  automatic    4    2
+      0  26.0   4            120.3             91.0             4.43   2.14             16.7 s  manualsys    5    2
+      0  30.4   4             75.7             52.0             4.93  1.615            18.52 v  manualsys    4    2
+      0  31.2   4 76.2666666666667 65.6666666666667 4.12666666666667   1.99 19.4233333333333 v  manualsys    4    1
+</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

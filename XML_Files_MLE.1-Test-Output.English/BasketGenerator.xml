@@ -1,0 +1,713 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="rfc1507745241683"> </a>
+	  <h1>BasketGenerator</h1>
+
+	
+		<p style="line-height: 1em;">The BasketGenerator function creates baskets (sets) of items. The input is typically a set of purchase transaction records or web page view logs. Each basket is a unique combination or permutation of items.</p>
+
+		<p style="line-height: 1em;">You can use the baskets as part of a collaborative filtering algorithm,
+			which is useful for analyzing purchase behavior of users in a store or on a web site.
+			You can also use this function on activity data (for example, "users who viewed this
+			page also viewed this page").</p>
+
+	
+   <a name="wge1507745129933"> </a>
+   <h2>BasketGenerator Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.6</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM BasketGenerator (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY <i>partition_column</i> [,...]
+  USING
+  TargetColumns ('<i>target_column</i>' [,...])
+  [ BasketSize (<i>basket_size</i>) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+  [ OutputCombinations ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ MaxPartitionSize (<i>max_partition_size</i>) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="jwh1507745140970"> </a>
+	  <h2>BasketGenerator Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumns</dt>
+      <dd>Specify the names of the input columns that contain the items to collect into baskets. If you specify multiple columns, the function treats every unique combination of column values as one item.<p style="line-height: 1em;">For example, you could specify only the column that contains the stock keeping unit (SKU) that identifies an item that was sold. Alternatively, you could specify the SKU column and the columns that contain the month manufactured, color and size.</p>
+      </dd>
+      <dt>BasketSize</dt>
+      <dd>[Optional] Specify the number of items to include in a basket (an INTEGER value).</dd>
+      <dd>Default: 2</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the input columns to copy to the output table. Each <i>accumulate_column</i> must be a <i>partition_column</i>; otherwise, the function is nondeterministic (for more information, see Nondeterministic Results and UniqueID Syntax Element). However, not every <i>partition_column</i> must be an <i>accumulate_column</i>.</dd>
+      <dt>OutputCombinations</dt>
+      <dd>[Optional] Specify whether the function returns a basket for each unique combination of items. If you specify 'false', the function returns a basket for each unique permutation of items.</dd>
+      <dd>In a combination, item order is irrelevant. For example, the baskets "tomatoes and basil" and "basil and tomatoes" are equivalent.</dd>
+      <dd>In a permutation, item order is relevant. For example, the baskets "tomatoes and basil" and "basil and tomatoes" are not equivalent.</dd>
+      <dd>The function returns combinations and permutations in lexicographical order.</dd>
+      <dd>If <i>n</i> is the number of distinct items that can appear in a basket and <i>r</i> is <i>basket_size</i>, then:<ul>
+            <li>The maximum number of combinations is:<p style="line-height: 1em;">
+                  <i>n</i>
+                  <sup>C<sub>r</sub>
+                  </sup> or <i>n</i>!/(<i>r</i>!(<i>n</i>-<i>r</i>)!)</p>
+            </li>
+            <li>The maximum number of permutations is:<p style="line-height: 1em;">
+                  <i>n</i>
+                  <sup>P<sub>r</sub>
+                  </sup> or <i>n</i>!/(<i>n</i>-<i>r</i>)!)</p>
+            </li>
+         </ul>
+      </dd>
+      <dd>If the number of combinations or permutations exceeds one million, the function outputs no rows.</dd>
+      <dd>Default: 'true'</dd>
+      <dt>MaxPartitionSize</dt>
+      <dd>[Optional] Specify the maximum number of items in a partition (an INTEGER value). If the number of items in a partition exceeds <i>max_partition_size</i>, the function ignores that partition.</dd>
+      <dd>Default: 100</dd>
+   </div>
+
+
+	
+   <a name="yww1507745146478"> </a>
+   <h2>BasketGenerator Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Input Table Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BYTEINT, INTEGER, BIGINT, or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>target_column</i>.] Items to collect.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table. Must be a <i>partition_column</i>.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="zoz1507745155768"> </a>
+   <h2>BasketGenerator Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Table Schema</h3>
+   <p style="line-height: 1em;">Each row represents a basket.</p>
+   <p style="line-height: 1em;">If the number of combinations or permutations exceeds one million, the function outputs no rows.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears <i>basket_size</i> times for each specified <i>target_column</i>] Item (value) from input column <i>target_column</i>.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="uyz1510706157451"> </a>
+   <h2>BasketGenerator Examples</h2>
+   <a name="yrs1507745163666"> </a>
+   <h3>BasketGenerator Example: Partition by tranid</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">Partition by tranid is recommended for use on a small number of transactions.</p>
+
+   <a name="section_h5n_s1y_42b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, grocery_transaction, contains data for five transactions or customers. The function outputs the different combinations of two items (basket size of 2) grouped by the transaction id (tranid).</p>
+   <a name="table_im1_w1y_42b"> </a>
+   <table class="introtable">
+      <a name="table_im1_w1y_42b"> </a>
+      <h4 style="text-align: center;">grocery_transaction</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">tranid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">period</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">storeid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">region</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">item</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">sku</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">category</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">999</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">20100715</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">west</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">milk</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">dairy</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">999</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">20100715</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">west</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">butter</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">dairy</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">999</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">20100715</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">west</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">eggs</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">dairy</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">999</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">19990715</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">west</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">flour</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">baking</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">999</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">19990715</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">west</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">spinach</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">produce</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">20100715</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">west</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">milk</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">dairy</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">20100715</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">west</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">eggs</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">dairy</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">19990715</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">west</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">flour</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">baking</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">19990715</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">west</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">spinach</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">produce</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1001</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">20100715</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">west</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">milk</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">dairy</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1001</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">20100715</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">west</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">butter</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">dairy</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1001</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">20100715</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">west</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">eggs</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">dairy</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1002</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">20100715</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">west</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">milk</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">dairy</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1002</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">20100715</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">west</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">butter</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">dairy</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1002</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">20100715</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">west</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">spinach</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">produce</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1500</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">20100715</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">west</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">butter</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">dairy</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1500</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">20100715</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">west</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">eggs</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">dairy</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1500</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">20100715</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">west</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">flour</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">baking</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ebk_3dk_tdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM BasketGenerator (
+  ON grocery_transaction PARTITION BY tranid
+  USING
+  TargetColumns ('item')
+  BasketSize (2)
+  Accumulate ('tranid')
+  OutputCombinations ('true')
+) AS dt;</tt>
+   </pre>
+   <a name="section_k5z_3dk_tdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ tranid item1  item2   
+ ------ ------ ------- 
+   1001 butter eggs   
+   1002 butter milk   
+   1000 eggs   flour  
+   1001 butter milk   
+   1002 butter spinach
+   1000 eggs   milk   
+   1001 eggs   milk   
+   1002 milk   spinach
+   1000 eggs   spinach
+   1500 butter eggs   
+   1000 flour  milk   
+   1500 butter flour  
+   1000 flour  spinach
+   1500 eggs   flour  
+   1000 milk   spinach
+    999 butter eggs   
+    999 butter flour  
+    999 butter milk   
+    999 butter spinach
+    999 eggs   flour  
+    999 eggs   milk   
+    999 eggs   spinach
+    999 flour  milk   
+    999 flour  spinach
+    999 milk   spinach</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="iqi1507745178935"> </a>
+   <h3>BasketGenerator Example: Increase BasketSize</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">The number of combinations is typically reduced for a higher basket size.</p>
+
+   <a name="section_gzm_p1y_42b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>grocery_transaction, as in BasketGenerator Example: Partition by tranid</li>
+   </ul>
+
+   <a name="section_ebk_3dk_tdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM BasketGenerator (
+  ON grocery_transaction PARTITION BY tranid
+  USING
+  TargetColumns ('item')
+  BasketSize (4)
+  Accumulate ('tranid')
+  OutputCombinations ('true')
+) AS dt;</tt>
+   </pre>
+   <a name="section_k5z_3dk_tdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ tranid item1  item2 item3 item4   
+ ------ ------ ----- ----- ------- 
+    999 butter eggs  flour milk   
+   1000 eggs   flour milk  spinach
+    999 butter eggs  flour spinach
+    999 butter eggs  milk  spinach
+    999 butter flour milk  spinach
+    999 eggs   flour milk  spinach</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

@@ -1,0 +1,582 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="pdn1507053855903"> </a>
+	  <h1>HMMEvaluator</h1>
+
+	  <p style="line-height: 1em;">The HMMEvaluator function measures the probabilities of sequences, with respect to each trained HMM.</p>
+
+   <a name="cop1507053908094"> </a>
+   <h2>HMMEvaluator Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.8</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM HMMEvaluator (
+  ON <i>input_table</i> AS InitialStateProbs PARTITION BY <i>model_key</i> 
+  ON <i>state_transition_table</i> AS TransitionProbs PARTITION BY <i>model_key</i> 
+  ON <i>emission_table</i> AS EmissionProbs PARTITION BY <i>model_key</i> 
+  ON <i>observation_table</i> AS ObservationTable PARTITION BY <i>model_key</i> 
+    ORDER BY <i>time_ordered_sequence_column</i> ASC [,...]
+  USING
+  InitStateModelColumn ('<i>model_key_column</i>')
+  InitStateColumn ('<i>state_key_column</i>')
+  InitStateProbColumn ('<i>init_state_probability</i>')
+  TransAttributeColumn ('<i>model_key_column</i>')
+  TransFromStateColumn ('<i>from_state_key_column</i>')
+  TransToStateColumn ('<i>to_state_key_column</i>')
+  TransProbColumn ('<i>trans_probability</i>')
+  EmitModelColumn ('<i>model_key_column</i>')
+  EmitStateColumn ('<i>state_key_column</i>')
+  EmitObsColumn ('<i>observed_key_column</i>')
+  EmitProbColumn ('<i>emit_probability</i>')]
+  ModelColumn ('<i>model_column</i>')
+  SeqColumn ('<i>seq_column</i>')
+  ObservationColumn ('<i>observation_column</i>')
+  [ Incremental ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ ShowChangeRate ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ SeqProbColumn ('<i>sequence_probability_column</i>') ]
+  [ SkipColumn ('<i>skip_key_column</i>') ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="mwx1507053974543"> </a>
+	  <h2>HMMEvaluator Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>InitStateModelColumn</dt>
+      <dd>Specify the <i>model_key_attribute</i> column in the InitialStateProbs table.</dd>
+      <dt>InitStateColumn</dt>
+      <dd>Specify the <i>state_key_attribute</i> column in the InitialStateProbs table.</dd>
+      <dt>InitStateProbColumn</dt>
+      <dd>Specify the probability column in the InitialStateProbs table.</dd>
+      <dt>TransAttributeColumn</dt>
+      <dd>Specify the <i>model_attribute</i> column in the TransitionProbs table.</dd>
+      <dt>TransFromStateColumn</dt>
+      <dd>Specify the <i>from_state_key_attribute</i> column in the TransitionProbs table.</dd>
+      <dt>TransToStateColumn</dt>
+      <dd>Specify the <i>to_state_key_attribute</i> column in the TransitionProbs table.</dd>
+      <dt>TransProbColumn</dt>
+      <dd>Specify the probability column in the TransitionProbs table.</dd>
+      <dt>EmitModelColumn</dt>
+      <dd>Specify the <i>model_attribute</i> column in the EmissionProbs table.</dd>
+      <dt>EmitStateColumn</dt>
+      <dd>Specify the <i>state_key_attribute</i> column in the EmissionProbs table.</dd>
+      <dt>EmitObsColumn</dt>
+      <dd>Specify the <i>observed_key_attribute</i> column in the EmissionProbs table.</dd>
+      <dt>EmitProbColumn</dt>
+      <dd>Specify the probability column in the EmissionProbs table.</dd>
+      <dt>ModelColumn</dt>
+      <dd>Specify the name of the column that contains the model attribute. Then <i>model_column</i> must match a <i>model_key</i> in the PARTITION BY clause.</dd>
+      <dt>SeqColumn</dt>
+      <dd>Specify the name of the column that contains the sequence attribute. The <i>sequence_column</i> must be a sequence attribute in the PARTITION BY clause.</dd>
+      <dt>ObservationColumn</dt>
+      <dd>Specify the name of the column that contains the observed symbols.<p>
+            <b>Note:</b>  Observed symbols are case-sensitive.</p>
+      </dd>
+      <dt>Incremental</dt>
+      <dd>[Optional] Specify whether to compute only new sequence probabilities.<p>
+            <b>Note:</b>  If you omit the SeqProbColumn syntax element, the function cannot determine whether the observed sequence is new; therefore, it treats all model sequences in the input tables as new.</p>
+      </dd>
+      <dd>Default: 'true'</dd>
+      <dt>ShowChangeRate</dt>
+      <dd>[Optional] Specify whether to show the percentage change that corresponds to the applied model with the difference from previous predicted probability.</dd>
+      <dd>Default: 'true'</dd>
+      <dt>SeqProbColumn</dt>
+      <dd>[Optional] Specify the name of the column that contains the values for calculating the change rate.</dd>
+      <dt>SkipColumn</dt>
+      <dd>[Optional] Specify the name of the input column whose value determines whether the function skips the row.</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the <i>input_table</i> columns to copy to the output table.</dd>
+   </div>
+
+
+	
+   <a name="foc1507054088769"> </a>
+   <h2>HMMEvaluator Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_c22_kzv_xcb"> </a>
+   <table class="introtable">
+      <a name="table_c22_kzv_xcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InitialStateProbs</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">InitStateTable, output by either HMMUnsupervised or HMMSupervised. For schema, see HMMUnsupervised Output or HMMSupervised Output.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">TransitionProbs</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">StateTransitionTable, output by HMMUnsupervised or HMMSupervised.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">EmissionProbs</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">EmissionTable, output by HMMUnsupervised or HMMSupervised.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ObservationTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains newly observed sequences. Has same schema as HMMUnsupervised Input table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ptm_q1w_xcb"> </a>
+   <h3>InitialStateProbs Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>model_key_attribute</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Model attribute in column specified by InitStateModelColumn syntax element.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>state_key_attribute</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Symbol defining hidden state.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">probability</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Initial probability of hidden state.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_tsy_w1w_xcb"> </a>
+   <h3>TransitionProbs Schema</h3>
+   <a name="table_N10069_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10069_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>model_attribute</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Model attribute in column specified by TransAttributeColumn syntax element.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>from_state_key_attribute</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Symbol defining hidden state from which a transition emanates.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>to_state_key_attribute</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Symbol defining hidden state to which a transition is made.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">probability</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Probability of transition from from_state to to_state.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_o4x_x1w_xcb"> </a>
+   <h3>EmissionProbs Schema</h3>
+   <a name="table_N100CE_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100CE_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>model_attribute</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Model attribute in column specified by EmitModelColumn syntax element.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>state_key_attribute</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Symbol defining hidden state.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>observed_key_attribute</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Symbol defining observation value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">probability</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Probability of emitting observed symbol, given that HMM is in hidden state.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="pez1507054202140"> </a>
+   <h2>HMMEvaluator Output</h2>
+   <a name="section_tvf_4bw_xcb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>model_attribute</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Model attribute in column specified by ModelColumn attribute.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>seq_attribute</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Symbol defining hidden state.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>observed_key_attribute</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Symbol defining observation value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">sequenceprob</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Function uses previous value under column to calculate change rate.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">change_rate</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Function calculates data in this column based on immediate previous event.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="elg1507054710148"> </a>
+   <h2>HMMEvaluator Example: Loan Default Prediction</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The example evaluates a given loan sequence against the two models: model 1 (trained on default loan cases) and model 2 (trained on paid loan cases). The models are trained and referenced from the loan default prediction example from HMMUnsupervised.</p>
+
+   <a name="section_lnn_3kf_n2b"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">The ObservationTable, test_loan_prediction, is a test loan sequence, which HMMEvaluator uses to predict whether this loan is more likely to be paid in full or to default. The ObservationTable does not include observations of 7 (default) or 8 (paid). The sequence of observations in this table is the same for evaluation of both models (that is, model_id = 1 and model_id = 2).</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM test_loan_prediction;</tt>
+   </pre>
+   <pre>
+      <tt>
+ model_id seq_id seq_vertex_id observed_id 
+ -------- ------ ------------- ----------- 
+        2     17             0    1       
+        1     17             0    1       
+        2     17             1    1       
+        1     17             1    1       
+        2     17             2    1       
+        1     17             2    1       
+        2     17             3    1       
+        1     17             3    1       
+        2     17             4    1       
+        1     17             4    1       
+        2     17             5    1       
+        1     17             5    1       
+        2     17             6    1       
+        1     17             6    1       
+        2     17             7    2       
+        1     17             7    2       
+        2     17             8    1       
+        1     17             8    1       
+        2     17             9    1       
+        1     17             9    1       
+        2     17            10    1       
+        1     17            10    1       
+        2     17            11    1       
+        1     17            11    1       
+        2     17            12    1       
+        1     17            12    1       
+        2     17            13    1       
+        1     17            13    1       
+        2     17            14    3       
+        1     17            14    3       
+        2     17            15    4       
+        1     17            15    4       
+        2     17            16    5       
+        1     17            16    5       
+        2     17            17    6       
+        1     17            17    6       
+        2     17            18    6       
+        1     17            18    6       
+        2     17            19    6       
+        1     17            19    6       
+        2     17            20    6       
+        1     17            20    6       
+        2     17            21    6       
+        1     17            21    6       
+        2     17            22    6       
+        1     17            22    6       
+        2     17            23    6       
+        1     17            23    6       
+        2     17            24    6       
+        1     17            24    6       
+        2     17            25    6       
+        1     17            25    6</tt>
+   </pre>
+   <a name="section_htx_3kf_n2b"> </a>
+   <h3>SQL Call</h3>
+   <p style="line-height: 1em;">The following SQL call creates the probabilities for each observation of the sequence for each model.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM HMMEvaluator (
+  ON pi_loan AS InitialStateProbs PARTITION BY model_id
+  ON A_loan AS TransitionProbs PARTITION BY model_id
+  ON B_loan AS EmissionProbs partition by model_id
+  
+  ON test_loan_prediction AS ObservationTable
+    PARTITION BY model_id ORDER BY seq_id, seq_vertex_id
+  USING
+  InitStateModelColumn ('model_id')
+  InitStateColumn ('state')
+  InitStateProbColumn ('probability')
+  TransAttributeColumn ('model_id')
+  TransFromStateColumn ('from_state')
+  TransToStateColumn ('to_state')
+  TransProbColumn ('probability')
+  EmitModelColumn ('model_id')
+  EmitStateColumn ('state')
+  EmitObsColumn ('observed')
+  EmitProbColumn ('probability')
+  ModelColumn ('model_id')
+  SeqColumn ('seq_id')
+  ObsColumn ('observed_id')
+) AS dt order by 1, 2;</tt>
+   </pre>
+   <a name="section_rh3_jkf_n2b"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ model_id seq_id observed_id sequence_probability   change_rate         
+ -------- ------ ----------- ---------------------- ------------------- 
+ 1        17        1            0.7199629735192733 0.14641556009646198
+ 1        17        1             0.524569452874964 0.14641570219132774
+ 1        17        1           0.44776424808406834 0.14641570219149402
+ 1        17        1             0.382204531284593 0.14641570219149438
+ 1        17        1         2.6218579940030134E-4  0.9164498509928408
+ 1        17        1         2.0332062216725988E-4 0.22451703092876893
+ 1        17        1         1.7354363560893247E-4  0.1464533515632843
+ 1        17        1         1.4813410876512106E-4  0.1464157804154217
+ 1        17        1         1.2644494920337679E-4 0.14641570224811787
+ 1        17        1         1.0793142317718651E-4 0.14641570219157365
+ 1        17        3         2.7327134169588977E-6  0.9746810211844171
+ 1        17        5          8.121584523747848E-8  0.8175492857860137
+ 1        17        6          4.923578806530361E-8 0.39376622971371983
+ 1        17        6           2.37312122630068E-8  0.5180088875284977
+ 1        17        6         1.4095131684809992E-8  0.4060509202565236
+ 1        17        6          6.920349698991573E-9  0.5090255377713513
+ 1        17        6         4.0411630946832795E-9  0.4160464036561398
+ 1        17        6          2.014773095161198E-9  0.5014373218908397
+ 1        17        6         1.1600883622892982E-9  0.4242089270124575
+ 1        17        6         5.857921792975991E-10  0.4950452066068425
+ 1        17        6         3.333775769971005E-10 0.43089445578320834
+ 1        17        4         4.4513854378352796E-7  0.8371074913962618
+ 1        17        2          0.003138065012640915  0.9917895661726096
+ 1        17        1            0.6145490893185858 0.14641570202618986
+ 1        17        1            0.8434584088723958 0.14626415486613584
+ 1        17        1            0.9879618077183383                NULL
+ 2        17        1             0.669153384146038    0.17898447381623
+ 2        17        1            0.4356118429863769 0.19530872762923937
+ 2        17        1            0.3497441100278714 0.19711983120071153
+ 2        17        1           0.28057030359673196 0.19778404967456617
+ 2        17        1         0.0038532513323295547 0.31835786370559743
+ 2        17        1         0.0026775402641211945 0.30512182227614054
+ 2        17        1         0.0020790994852560867 0.22350393265197985
+ 2        17        1           0.00162492088322131  0.2184496726854966
+ 2        17        1         0.0012960583920260918 0.20238677131360863
+ 2        17        1           0.00103483642326063  0.2015510800845175
+ 2        17        3          4.792133961354275E-5  0.9536918700034261
+ 2        17        5          5.125335431147303E-7  0.9303325996737426
+ 2        17        6         2.8214609520483855E-8   0.944950706349832
+ 2        17        6         7.783038818895011E-10  0.9724148625440147
+ 2        17        6         3.900458725776822E-11  0.9498851436240096
+ 2        17        6        1.1619713820935578E-12  0.9702093660313728
+ 2        17        6        5.4342848024295455E-14   0.953232197572384
+ 2        17        6        1.7156886827872147E-15  0.9684284363966318
+ 2        17        6           7.6187572104338E-17  0.9555935917345053
+ 2        17        6        2.5133940603566225E-18  0.9670104455236537
+ 2        17        6        1.0734344516127147E-19  0.9572914383564507
+ 2        17        4          7.356863335139522E-6   0.846480432423879
+ 2        17        2         0.0056528948654449495   0.979852126925129
+ 2        17        1            0.5413403350368006  0.1910071026127294
+ 2        17        1            0.8150313396098428  0.1481947099680822
+ 2        17        1            0.9568282201902067                NULL</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

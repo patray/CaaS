@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="pqx1507825674057"> </a>
+	  <h1>PageRank</h1>
+
+	
+		<p style="line-height: 1em;">The PageRank function computes the PageRank values for a directed graph,
+			weighted or unweighted.</p>
+
+		<a name="fig_pmg_qmk_pw"> </a>
+			<div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+		<p style="line-height: 1em;">PageRank is a link analysis algorithm. It assigns a numerical weight (between 0 and 1) to each node in a directed graph, for the purpose of measuring the relative importance of the node to the graph. The sum of the PageRank values of the nodes is 1. PageRank is applicable to any collection of entities with reciprocal quotations and references.</p>
+
+	
+   <a name="loo1507825730244"> </a>
+   <h2>PageRank Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.6</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM PageRank (
+  ON <i>vertices_table</i> AS Vertices PARTITION BY <i>vertex_key_column</i> [,...] 
+  ON <i>edges_table</i> AS Edges PARTITION BY <i>source_vertex_key_column</i> [,...]
+  USING
+  TargetKey ('<i>target_key_column</i>' [,...])
+  [ EdgeWeight (<i>edge_weight</i>) ]
+  [ DampFactor (<i>damp_factor</i>) ]
+  [ MaxIterNum (<i>max_iterations</i>) ]
+  [ StopThreshold (<i>threshold</i>) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="tpb1507825734066"> </a>
+	  <h2>PageRank Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetKey</dt>
+      <dd>Specify the target key columns in the Edges table.</dd>
+      <dt>EdgeWeight</dt>
+      <dd>[Optional] Specify the column in the Edges table that contains the edge weight, which must be a positive value.</dd>
+      <dd>Default behavior: All edges have the same weight (that is, the graph is unweighted).</dd>
+      <dt>DampFactor</dt>
+      <dd>[Optional] Specify the value to use in the PageRank formula. The <i>damp_factor</i> must be a DOUBLE PRECISION value between 0 and 1.</dd>
+      <dd>Default: 0.85</dd>
+      <dt>MaxIterNum</dt>
+      <dd>[Optional] Specify the maximum number of function iterations before the function completes. The <i>max_iterations</i> must be a positive INTEGER value.<p>
+            <b>Note:</b>  The <i>max_iterations</i> is the number of function iterations (that is, the SQL-GR iterations minus 3).</p>
+      </dd>
+      <dd>Default: 20</dd>
+      <dt>StopThreshold</dt>
+      <dd>[Optional] Specify the convergence criteria value. The threshold must be a DOUBLE PRECISION value.</dd>
+      <dd>Default: 0.0001</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the Vertices table columns to copy to the output table.</dd>
+   </div>
+
+
+	
+   <a name="jaq1507825738605"> </a>
+   <h2>PageRank Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Vertices Table</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10017_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10017_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>vertex_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>vertex_key_column</i>.] All or part of unique vertex key. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_zc2_dgr_ycb"> </a>
+   <h3>Edges Table</h3>
+   <a name="table_N1005D_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1005D_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>source_vertex_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column appears once for each specified <i>source_vertex_key_column</i>.] All or part of key that identifies source vertex of edge. Must be a <i>vertex_key_column</i> in Vertices table. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column appears once for each specified <i>target_key_column</i>.] Number of target nodes of edge.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="nle1507825745017"> </a>
+   <h2>PageRank Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from Vertices table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">pagerank</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">PageRank of vertex.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ohk1510708733986"> </a>
+   <h2>PageRank Example</h2>
+   <a name="section_cx2_4ng_5db"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">Input tables are from AllPairsShortestPath Example: Unweighted, Unbounded Graph:</p>
+   <ul>
+      <li>Vertices: callers</li>
+      <li>Edges: calls</li>
+   </ul>
+
+   <a name="section_bcp_4ng_5db"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM PageRank (
+  ON callers AS Vertices PARTITION BY callerid
+  ON calls AS Edges PARTITION BY callerfrom
+  USING
+  Targetkey ('callerto')
+  EdgeWeight ('calls')
+  Accumulate ('callerid', 'callername')
+) AS dt ORDER BY callerid;</tt>
+   </pre>
+   <a name="section_vny_4ng_5db"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ callerid callername pagerank            
+ -------- ---------- ------------------- 
+        1 john       0.08901149252559355
+        2 carla      0.12265780532507689
+        3 simon      0.09574075508549022
+        4 celine     0.14442118900896703
+        5 winston    0.08901149252559355
+        6 diana       0.4591572655292789</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

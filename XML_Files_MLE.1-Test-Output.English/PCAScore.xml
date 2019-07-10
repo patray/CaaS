@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="ipe1507736776455"> </a>
+	  <h1>PCAScore</h1>
+
+	  <p style="line-height: 1em;">The PCA function outputs a set of principal components, and each principal component is a linear combination of the set of original predictors.</p>
+   <p style="line-height: 1em;">In the output table, table pca_health_ev_scaled, (from PCA Example) the first-ranked principal component is:</p>
+   <p style="line-height: 1em;">-0.082 * age + 0.387 * bmi + (-0.0935) * bloodpressure + 0.042 * glucose …</p>
+   <p style="line-height: 1em;">Using a similar equation, the PCAScore function uses the coefficients from the output table of the PCA function to compute a principal component score for each observation.</p>
+   <p style="line-height: 1em;">A common use of PCAScore output is principal component regression (PCR).</p>
+
+   <a name="xza1507736817767"> </a>
+   <h2>PCAScore Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.2</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM PCAScore (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable PARTITION BY ANY
+  ON <i>pca_table</i> AS PrCompTable DIMENSION ORDER BY component_rank
+  USING
+  Components (<i>num_components</i>)
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="gyo1507736825801"> </a>
+	  <h2>PCAScore Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>Components</dt>
+      <dd>Specify the number of principal components for which to calculate scores. The <i>num_components</i> must be an integer not greater than the number of components (rows) in the PrCompTable.</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the InputTable columns to copy to the output table.</dd>
+   </div>
+
+
+	
+   <a name="xpa1507736829966"> </a>
+   <h2>PCAScore Input</h2>
+   <a name="section_q21_cmw_xcb"> </a>
+   <a name="table_m3p_dmw_xcb"> </a>
+   <table class="introtable">
+      <a name="table_m3p_dmw_xcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains observations.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">PrCompTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">PCA Output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>InputTable Schema</h3>
+   <a name="table_N1001A_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1001A_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>input_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NUMERIC</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Data to transform.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="bum1507736834631"> </a>
+   <h2>PCAScore Output</h2>
+   <a name="section_fgy_ymw_xcb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>principal_component_i</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each of the top <i>num_components</i> components in PrCompTable.] Score of observation for <i>i</i>th principal component.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column copied from InputTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="pzp1507736975674"> </a>
+   <h2>PCAScore Example</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">This example:<ol>
+         <li>Uses PCAScore to reduce a large number of input variables to a smaller set, to which it is easier to apply other predictive modeling techniques (in this case, linear regression).</li>
+         <li>Uses the reduced data set to show how PCR works.</li>
+      </ol>
+   </p>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="mxr1512058340541"> </a>
+	  <h3>Step 1: Create Smaller Data Set</h3>
+   <a name="section_mq5_vjg_n2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The following statement creates the input table, pca_health_ev2, from the table pca_scaled (created in PCA Example), using only the variables age, bmi, bloodpressure, glucose, cigarettes, insulin, and hdl:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE pca_health_ev2 AS (
+  SELECT * FROM PCAReduce (
+    ON PCAMap (
+      ON pca_scaled
+      USING
+      TargetColumns ('age','bmi','bloodpressure','glucose','cigarettes', 'insulin','hdl')
+    ) PARTITION BY 1
+  ) AS dt2
+) WITH DATA;</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM pca_health_ev2 ORDER BY component_rank;</tt>
+   </pre>
+   <pre>
+      <tt>
+ component_rank age                  bmi                   bloodpressure        glucose              cigarettes           insulin              hdl                  sd                 var_proportion      cumulative_var      mean                                                                                                                                                  
+ -------------- -------------------- --------------------- -------------------- -------------------- -------------------- -------------------- -------------------- ------------------ ------------------- ------------------- ----------------------------------------------------------------------------------------------------------------------------------------------------- 
+              1   0.5583834254529891 -0.060595187205856604  0.27919138947629696   0.5628114467260564  0.15648583929470583   0.4970045713164333  0.13538927259606426   1.42680503670853 0.30294235309178996 0.30294235309178996 [-2.3980817331903383E-16, -2.486899575160351E-16, 9.325873406851315E-17, -8.881784197001253E-17, -1.7763568394002505E-17, 0.0, 9.992007221626409E-17]
+              2 -0.25053749577748563    0.6146863354635507  -0.2583830864504223 -0.04747909985805549   0.5795945478993907  0.30549870012270325  0.24721709525354335 1.2743156091409469   0.241648849955396   0.544591203047186 NULL                                                                                                                                                 
+              3  0.09115635850124769   0.14174869929246842 -0.25192452899733103  0.22016232676910066  -0.3922494663895311  -0.2847363971731954   0.7903960692948381 1.0183441028502045  0.1543191535431231  0.6989103565903091 NULL                                                                                                                                                 
+              4 -0.09651563648638843   0.20320018565784712   0.8433338825440954  -0.0927284926384905    0.201301134307841 -0.36378506814584216    0.238163983819638 0.9224470037180572 0.12662328492089597   0.825533641511205 NULL                                                                                                                                                 
+              5  0.18083536491383206    -0.599972969216183 -0.07975547691432035  -0.4854608493263352   0.4194659786495865  0.06912083003656642  0.42961429013770186 0.7802662535208694 0.09059753368801983  0.9161311751992248 NULL                                                                                                                                                 
+              6   0.7414194738847253   0.43134203241200425 -0.08146342199778292   -0.452698200444976 -0.06067408632930419 -0.16172694090464648 -0.15110366257374142 0.5736962918304901 0.04897729691369861  0.9651084721129235 NULL                                                                                                                                                 
+              7  0.15940482473353615  -0.10527302771359373  -0.2600290708743992   0.4281484440245407   0.5153324165940718   -0.644444967451482 -0.17805804671796582  0.484222126096231  0.0348915278870765                 1.0 NULL                                                                                        </tt>
+   </pre>
+   <a name="section_f3h_wjg_n2b"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">This query uses the PCAScore function to compute the first three score variables, which correspond to the first three principal components, accumulating the response variable from the original input data table patient_pca_input:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE pcr1 AS (
+  SELECT * FROM PCAScore (
+    ON pca_scaled AS InputTable PARTITION BY ANY
+    ON pca_health_ev2 AS PrCompTable DIMENSION ORDER BY component_rank
+    USING
+    Accumulate ('pid', 'strokes')
+    Components (3)
+  ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_kqt_wjg_n2b"> </a>
+   <h4>Output</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM pcr1 ORDER BY pid;</tt>
+   </pre>
+   <pre>
+      <tt>
+ pid strokes              principal_component_1 principal_component_2 principal_component_3 
+ --- -------------------- --------------------- --------------------- --------------------- 
+   1  0.24304199773308727    0.8302952240600171   0.20489255944412443   0.20559027239564137
+   2  -1.1378784439321814   -1.2708650767655945  -0.04792816725261051   -0.7322870352737065
+   3   0.7954101743991948     0.195110267755587   -1.1782522912070308    1.0429059671659966
+   4  -1.1378784439321814    -1.579244511221674   0.12268350005146528   -1.0803045155907212
+   5  -1.4140625322652352   0.30854292481439227     2.709389887899765    3.0459452635078605
+   6 -0.03314209059996648   -1.0250517880596157   -1.2376000000708138  -0.25787429342810153
+   7   -0.585510267266074   -1.6165859414652022    0.7122626624930699   -0.9575054086956973
+   8   1.3477783510653023   -1.9824092216112705    0.1590079604576705    0.4948909543016108
+   9  -0.8616943555991278    3.0809342286033687    0.7944955261525494   -1.2894483164958952
+  10   0.7954101743991948    0.7234002078356538    -3.732273405444996   -0.5747403021339348
+  11  -0.3093261789330202    -1.008842496277165   -0.5979300211866893   -0.3010599902582435
+  12   1.3477783510653023  0.023212637125213292  -0.37209892218773394    0.8678743510477422
+  13   1.3477783510653023    1.0917669520792725    -1.164607897382604    2.1766214799585746
+  14  -1.1378784439321814    3.7798880566862363    0.6281322811758272   -0.7444575867324298
+  15 -0.03314209059996648    1.5095349283904942   -0.6438620762403766    0.2356741216731319
+  16   0.5192260860661411    -1.938404783284025  -0.06238010612979375    0.9362381037343539
+  17  -1.4140625322652352   0.12120024801596792    2.0808637455284806   -0.7860602762155817
+  18   0.5192260860661411    -1.132064831951979   -0.9464519509600725  -0.15345908277200465
+  19  -1.1378784439321814     -1.14924571078705     1.716928640681718   -0.5885438218828254
+  20  -1.1378784439321814   -0.4472292099018682     0.669928904550861   -0.3064838365512166
+  21   -0.585510267266074    0.1447490581511024      1.56905011434132    -0.524840241945967
+  22   0.7954101743991948  -0.21556654992946048   -0.9896792588736445    0.1696099417861806
+  23   0.5192260860661411    0.9560385810129385   -0.6493285131865845    0.8250399361604549
+  24   1.0715942627322486   -0.6587903759681892    0.1203923639078256   -0.9157718072510063
+  25    1.623962439398356    1.2596271826928498    0.1343644634382721   -0.7875538765042159
+</tt>
+   </pre>
+   <p style="line-height: 1em;">This step has reduced the original data set from 25 observations with 7 predictors to 25 observations with 3 predictors (the 3 score variables principal_component_1, principal_component_2, and principal_component_3).</p>
+
+
+   <a name="rjg1507736995409"> </a>
+	  <h3>Step 2: Show How PCR Works</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This step uses the reduced data set, pcr1, to show how PCR works. The example regresses the response variable on the 3 score variables identified by PCA. (The number 3 is arbitrary. With a different data set, PCA might identify a different number of score variables. PCA identifies the number of score variables based on the percentage of total variance that they capture.)</p>
+   <p>
+      <b>Note:</b>  For PCR, you must decide before PCA whether to normalize the input data set. For the data set that this example uses, it was appropriate.</p>
+		
+   <a name="section_mq5_vjg_n2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The following statement creates the input table for the linear regression function. The linear regression function requires the response variable to be in the final column; therefore, strokes must be last in the SELECT list.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE pcr2 AS (
+  SELECT principal_component_1, principal_component_2,
+    principal_component_3, strokes 
+  FROM pcr1
+) WITH DATA;</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM pcr2;</tt>
+   </pre>
+   <pre>
+      <tt>
+ principal_component_1 principal_component_2 principal_component_3 strokes              
+ --------------------- --------------------- --------------------- -------------------- 
+   0.21556654992945887    0.9896792588736425   0.16960994178618327   0.7954101743991948
+     -1.25962718269285    -0.134364463438275    -0.787553876504215    1.623962439398356
+   -0.7234002078356577     3.732273405445003   -0.5747403021339288   0.7954101743991948
+    1.0088424962771645    0.5979300211866878   -0.3010599902582418  -0.3093261789330202
+    1.0250517880596144    1.2376000000708163      -0.2578742934281 -0.03314209059996648
+     1.132064831951978    0.9464519509600738  -0.15345908277200326   0.5192260860661411
+   -1.5095349283904946    0.6438620762403761   0.23567412167313243 -0.03314209059996648
+    1.6165859414652024   -0.7122626624930654    -0.957505408695698   -0.585510267266074
+    1.9384047832840248   0.06238010612979778    0.9362381037343512   0.5192260860661411
+   -3.7798880566862354   -0.6281322811758286   -0.7444575867324343  -1.1378784439321814
+  -0.14474905815110067   -1.5690501143413216   -0.5248402419459675   -0.585510267266074
+    0.6587903759681895  -0.12039236390782342   -0.9157718072510054   1.0715942627322486
+   -0.3085429248143898     -2.70938988789977     3.045945263507859  -1.4140625322652352
+  -0.12120024801596593   -2.0808637455284833   -0.7860602762155829  -1.4140625322652352
+    -3.080934228603367   -0.7944955261525505   -1.2894483164958985  -0.8616943555991278
+    1.9824092216112708   -0.1590079604576678   0.49489095430160657   1.3477783510653023
+   -0.8302952240600173  -0.20489255944412654    0.2055902723956421  0.24304199773308727
+    -1.091766952079274    1.1646078973826008    2.1766214799585786   1.3477783510653023
+     1.579244511221674   -0.1226835000514607   -1.0803045155907212  -1.1378784439321814
+    0.4472292099018688   -0.6699289045508605   -0.3064838365512166  -1.1378784439321814
+     1.149245710787051   -1.7169286406817175   -0.5885438218828289  -1.1378784439321814
+    -0.956038581012938    0.6493285131865779    0.8250399361604551   0.5192260860661411
+    1.2708650767655933  0.047928167252614645   -0.7322870352737051  -1.1378784439321814
+ -0.023212637125212883   0.37209892218772994     0.867874351047742   1.3477783510653023
+  -0.19511026775558732     1.178252291207031    1.0429059671659968   0.7954101743991948</tt>
+   </pre>
+   <a name="section_f3h_wjg_n2b"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM LinReg (
+ ON LinRegInternal (
+   ON pcr2
+   ) AS dt1 PARTITION BY 1
+ ) AS dt2 ORDER BY 1;</tt>
+   </pre>
+   <a name="section_kqt_wjg_n2b"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ coefficient_name      value_col               
+ --------------------- ----------------------- 
+ Intercept             -2.2029073310707358E-17
+ principal_component_1     0.02971887194081586
+ principal_component_2      0.4698959686929861
+ principal_component_3     0.25871794248366853</tt>
+   </pre>
+
+	
+</t:intro>

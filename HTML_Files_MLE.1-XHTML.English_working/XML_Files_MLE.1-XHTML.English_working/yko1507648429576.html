@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="copyright" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.rights.owner" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="Path Analysis Functions" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="yko1507648429576" />
+<meta name="DC.Language" content="en-us" />
+
+<link rel="stylesheet" type="text/css" href="css/normal_styles.css" />
+<title>Path Analysis Functions</title>
+</head>
+<body id="yko1507648429576">
+
+	<h1 class="title topictitle1" id="ariaid-title1">Path Analysis Functions</h1>
+
+	<div class="body conbody"><div class="section" id="yko1507648429576__section_dxx_4c4_zdb"><p class="p">The path analysis functions automate path analysis. They are useful for clickstream analysis of web site traffic and other sequence/path analysis tasks, such as advertisement or referral attribution.</p>
+</div>
+<div class="section" id="yko1507648429576__section_yrr_pc4_zdb"><h2 class="title sectiontitle">Terms Function Descriptions Use</h2>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="yko1507648429576__table_sn5_yc4_zdb" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:50%" /><col style="width:50%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d386190e26">Term</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d386190e28">Definition</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e26 "><dfn class="term">Path</dfn></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e28 ">Ordered, start-to-finish series of actions, such as the page views of a user from the start to the end of a session. For example, if the user visits page a, page b, and page c, in that order, the path is: a,b,c</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e26 "><dfn class="term">Sequence</dfn></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e28 ">Path in this format:<pre class="pre codeblock"><code><code class="ph codeph">^,</code><var class="keyword varname">path</var></code></pre><p class="p">The carat (^) indicates that a path follows. For example: ^,a,b,c</p>
+</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e26 "><dfn class="term">Subsequence</dfn> or <dfn class="term">prefix</dfn></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e28 ">For a given sequence, a possible subset of steps that start with the initial step. For example, for the path a,b,c these are the subsequences:<pre class="pre codeblock"><code>^,a
+^,a,b
+^,a,b,c</code></pre></td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e26 "><dfn class="term">Exit subsequence</dfn> or <dfn class="term">prefix</dfn></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e28 ">Subsequence or prefix that is the same as its sequence, indicated by a final dollar sign ($). For example: ^,a,b,c$</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e26 "><dfn class="term">Depth</dfn></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e28 ">Number of steps in a sequence or subsequence. For example, the immediately preceding subsequences have depths 1, 2, and 3, respectively.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e26 "><dfn class="term">Node</dfn></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e28 ">Single step on a path. For example, one web page that the user visits during the session.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e26 "><dfn class="term">Parent</dfn></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e28 ">Path the user traveled to a given node. For example, the parent of c is: ^,a,b</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e26 "><dfn class="term">Child</dfn></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e28 ">Path the user traveled from a given node. For example, these are the children of ^,a:<pre class="pre codeblock"><code>^,a,b
+^,a,b,c</code></pre></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="yko1507648429576__section_pjr_sc4_zdb"><h2 class="title sectiontitle">Path Analysis Functions</h2>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="yko1507648429576__table_zyv_b24_zdb" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:50%" /><col style="width:50%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d386190e105">Function</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d386190e107">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e105 "><a class="xref" href="bqv1558447447291.html#xwn1507648929521" title="This Machine Learning Engine function takes a set of paths and outputs the sequence and all possible subsequences, to input to the function PathSummarizer.">PathGenerator</a></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e107 ">Takes a set of paths and outputs the sequence and all possible subsequences.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e105 "><a class="xref" href="ftl1558447565569.html#odv1507653146030" title="This ML Engine function takes PathGenerator output. For each prefix in input table, returns parent, children, and number of times each subsequence was traveled.">PathSummarizer</a></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e107 ">Takes PathGenerator output and returns, for each prefix in the input table, the parent and children, and number of times each of its subsequences was traveled.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e105 "><a class="xref" href="cdn1558447910639.html#wim1507653724768" title="This ML Engine function takes PathSummarizer output. For each parent in input table, returns parent, children, and times each subsequence was traveled.">PathStart</a></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e107 ">Takes PathGenerator output and returns, for each parent in the input table, the parent and children and the number of times that each of its subsequences was traveled.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e105 "><a class="xref" href="ekt1558448021273.html#aay1507660157006" title="This ML Engine function inputs paths to PathGenerator, inputs PathGenerator output to PathSummarizer, and inputs PathSummarizer output to PathStart.">PathAnalyzer</a></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d386190e107 ">Runs the preceding path analysis functions in the order shown, using the output of PathGenerator as input to PathSummarizer and the output of PathSummarizer as the input to PathStart.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+</body>
+</html>

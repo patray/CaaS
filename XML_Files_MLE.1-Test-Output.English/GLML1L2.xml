@@ -1,0 +1,633 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="fgw1518542561108"> </a>
+	  <h1>GLML1L2</h1>
+   <a name="section_fsk_ssm_sbb"> </a>
+   <p style="line-height: 1em;">The GLML1L2 function differs from the GLM function in these ways:<ul>
+         <li>GLML1L2 supports the regularization models ridge, LASSO, and elastic net.</li>
+         <li>GLML1L2 outputs a model table and, optionally, a factor table (GLM outputs only a model table).</li>
+      </ul>
+   </p>
+   <p style="line-height: 1em;">You can input the model table and factor table to the GLML1L2Predict function.</p>
+
+
+   <a name="ywx1518542566563"> </a>
+	  <h2>GLML1L2 Syntax</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Version 1.4</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GLML1L2 (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+    [ OUT TABLE FactorTable (<i>factor_table</i>) ]
+    USING 
+    TargetColumns ('<i>target_column</i>' [,...])
+    [ CategoricalColumns (({ 'categorical_column' [,...]) ]
+    ResponseColumn ('response_column')
+    [ Family ({ 'BINOMIAL' | 'GAUSSIAN' }) ]
+    [ Alpha (<i>alpha</i>) ]
+    [ Lambda (<i>lambda</i>) ]
+    [ StopThreshold (<i>threshold</i>) ]
+    [ MaxIterNum (<i>max_iterations</i>) ]
+) AS <i>alias</i>;
+</tt>
+   </pre>
+
+	
+   <a name="rja1518542562743"> </a>
+	  <h2>GLML1L2 Syntax Elements</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>FactorTable</dt>
+      <dd>[Optional] Specify the name for the output table that contains the result. You must also specify CategoricalColumns.</dd>
+      <dd>You can use <i>factor_table</i> as InputTable for future GLML1L2 function calls, thereby saving the function from repeating the categorical-to-numerical conversion.</dd>
+      <dt>TargetColumns</dt>
+      <dd>Specify the names of the InputTable columns that contain the variables to use as predictors (independent variables) in the model.</dd>
+      <dt>CategoricalColumns</dt>
+      <dd>[Optional] Specify the names of the InputTable columns that contain categorical variables, and which of their categories to use in the model.</dd>
+      <dd>
+         <a name="table_pw4_pry_fdb"> </a>
+         <table class="introtable">
+            <a name="table_pw4_pry_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">
+                     <i>categorical_column_and_categories</i>
+                  </div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Descriptions</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'<i>categorical_column</i>:<i>max_cardinality</i>'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Uses most common categories in <i>categorical_column</i> and groups other categories into category 'others'. <p style="line-height: 1em; margin: 0px;">
+                        <br/>For example, 'column_a:3' specifies that for column_a, function uses 3 most common categories and sets category of rows that do not belong to those 3 categories to 'others'.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'<i>categorical_column</i>:(<i>category</i> [,...])'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Uses specified categories of <i>categorical_column</i> and groups other categories into category 'others'. <p style="line-height: 1em; margin: 0px;">
+                        <br/>For example, 'column_a : (red, yellow, blue)' specifies that for column_a, function uses categories red, yellow, and blue, and sets category of rows that do not belong to those categories to 'others'.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'<i>categorical_column</i>'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Uses all categories in <i>categorical_column</i>.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dd>If you use this syntax element, you must also specify the FactorTable syntax element, and in the TargetColumns syntax element, you must specify each <i>categorical_column</i>.</dd>
+      <dd>Default behavior: The function treats all variables as numerical.<p>
+            <b>Note:</b>  For information about columns that you must identify as categorical, see Identification of Categorical Columns.</p>
+      </dd>
+      <dt>ResponseColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the responses.</dd>
+      <dt>Family</dt>
+      <dd>[Optional] Specify the distribution exponential family.</dd>
+      <dd>Default: 'GAUSSIAN'</dd>
+      <dt>Alpha</dt>
+      <dd>[Optional] Specify the mixing parameter for penalty computation (see the following table). The <i>alpha</i> must be in [0, 1]. If <i>alpha</i> is in (0,1), it represents α in the elastic net regularization formula in Generalized Linear Model Functions.<a name="table_bdv_f35_lz"> </a>
+         <table class="introtable">
+            <a name="table_bdv_f35_lz"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">
+                     <i>alpha</i>
+                  </div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Regularization Type</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Parameter Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">0</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Ridge</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">½<img src="data:image/png;base64,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"
+                          width=""
+                          height=""/>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">(0,1)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Elastic net</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUQAAABaCAYAAADAQS+ZAAAACXBIWXMAABJ0AAASdAHeZh94AAAAB3RJTUUH4gYBES4yfpATBwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAARi0lEQVR4nO2d/2sb9R/Hn/3w+VXmJftZpNeCw0mKS7uhqdDBTGz3g1JnMusPAwttIgjOzbK0oz9s65rQKgxJG3C/yDSpdkzGGpsK6w+NYto4ckyZsF0Qwd9yzdQ/4PyhfV+va77cJXdJ7/Z6QKBtLvd+p5c87/V+vV9f2mRZlkEQBEHgf62eAEEQxH6BBJEgCGIbEkSCIIhtSBAJgiC2IUEkCILYhgSRIAhiGxJEgiCIbUgQCYIgtiFBJAiC2IYEkSAIYhsSRIIgiG1IEAmCILYxRBCj0SiSyaQRpyJ04PP5IAhCq6dBELahYUEcHx/H9PQ0Dh06ZMR8CB20t7ejr6+PRJEgDKIhQUwmk5iamkIsFoPL5ap5fCaTQSAQwPj4eCPD2pZUKoXu7m7N1nYsFkNPTw8GBwchSZLJsyOIpwC5TvL5vAxADofDNY8VRVH2er0yADkSiciiKNY7rK0pFotyIpGQOY6TeZ6X19bWNL2G4zjZ7XY3YYYEYW/qEsRisSjzPC/zPC8Xi8Wqx+bzeZnjOJnjODmfz2s6/9LSkmZBsCPFYlF2u90yADmRSNQ8fmlpSbnZEARRP3UJYjgclgHUFCwmnFrFsFgsyn6/Xwag6fx2Ri2KWv53zALXetMhCGIvugVxbW1NBiB7vd6axwaDQRmAPD8/X/PY+fl5meM4RQyfdkGU5R23BM/zNY8VRVHzdSEIojy6BZFZIrX8gOwLWuvLzPyLPM/LiURCjkQiJIgq2E1Fy9JZz7EEQexF1y5zJpNBOp2G1+tFe3t71WNnZmYAAH6/v+px6+vrOHLkCLLZLAKBAF555RU9U7I9J0+eBABMTEzUPPbcuXOajyUIogx61JNZh1osN7b81WvlsSV5Pa/dbxSLRTkSicg8zyvvKRgMKhtRbDMENSxudowW/yDzwZKVSBD60SyITKi0+LOY70un3u4ax+qCmM/nlQ2lpaUl5W8cx8ler1fZcIKG3WF2I9Lii2UiS2E4BKEfzUvmr7/+GgBw/vz5msf+/PPPAACe57We3lYUCgX09fVhc3MTq6ur6O/vBwC4XC4Eg0Gk02lcv34doijC6/Xik08+qXo+5p5YXV2tOXZ/fz84jkMul6MMFoLQiSZBlCQJc3NzAIATJ07UPP7vv/8GAHR0dDQwNesSCoVQKpVw9erVPRk8Bw4cAACMjY2B4zh89dVXNc/3/PPPAwAeP36safxgMAgAiMfjOmZNEIQmQVxcXAQAuN3umpsprSaTyaCtra2hRyMIgoB0Og2O4/D2229XPfbGjRtwOp0NjVeON954AwCo4AZB6ESTIH7xxRcAgFOnTpk6GTvwzTffAAACgUBVsQuHw8pS2mg8Hg84jkOpVEIqlTJlDIKwIzUFsVAoIJfLAYAlQmI8Hg/krc2iuh+NsLKyAgAVi118++23AHasOLN4/fXXAQB37twxdRyCsBM1BXF9fV352ePxmDoZO8BuHi+++OKe51KplPK82eXS+vr6ANCymSD0UFMQv/vuOwCA1+vVfFK2cfDo0aM6p2U/JEnChx9+qPyux3f4xx9/AACeffZZza85duwYAKBUKiGTyWh+HUE8zdQURLYEPH78uOaTsi+jKIp1Tsv6/PPPP7t+v3jxIjiOq+tchUIBwI7VpwWXy6WM99NPP9U1LkE8bVQVREEQUCqVAACHDx/WfFL1l1GvdaIWkidFxQqw9/3ll19CkiQUCgUEAgEkk0llc0ov6XQawM6NRis9PT0AgLt379Y1LkE8bVQVxAcPHig/v/DCC7pOHAgEAADff/+95tdkMhlMTk4qv09OTlpuucdiABcWFnDw4EHwPI+VlRWsrq7C5XIpweqFQgGZTAY+n0+xAMvBdol5ntdUlVwNs+rVfmA7kslkEAqF0NHRoYRO+Xw+y312iH1AtTQWVvewxmFlYdVuOI6reSwbo9bDChSLRaXqDMdxcjAY3JWnnEgklPfj9/trpic2kpusHsuuVcpZqqfb7Vbeozr9067vmzCHqirDcmjrrbHHhIEqOdeHnnqI5VALA8un1kKlIh7NuDHpHZu9xyePZ589K+fDm42VrnOzqLpkZkuterNTLl26BJ7nMT09TXm1OpEkCcPDwwCAmzdv1nUOdWjPr7/+asi89JJMJtHd3a0sZTs6OhAKhQxrisXiTp8MCat3A4uoD9ZAjl1nh8OBQCBgue99RUGUJEnZUGG5tHpxOp3Kl5naZWpHkiT4fD7kcjkkEgndvkOGOrSHhe40C0mS0N3djdOnT2N4eBjFYhGyLOP8+fOYm5uDz+czrVOgJElYWFiA2+2m2NkmEAqF0NvbC4fDAVEUIcsybt++jZWVFct97ysKonpDhcUV1oPL5UIul0NPTw+6uroQjUarbiI8zUiShGQyic7OTpRKJaytrSmbU/XidrsBoOn/86GhIUXQR0ZGFHEeGRmB2+1GLpdDNps1ZWwW4rS8vGzK+Wvh8/kazom3CtFoFHNzcwgGg4jFYspq0uPxIBgMolQqKemsVkBTLnO5rAs9tLe3Y3l5GYlEAvfu3cP169cbOp9dyWazmJ2dxdWrV5HNZg2xbpgQNXOnOZlMKpXVywk6m5MZy/h4PI6NjQ0sLy+bUjiD2KFQKChVmy5durTneWZI/fLLL82eWt38v9ITZgTzBgKBhi0eO9Pf3294wQeW3cLcH81gdnYWAHZl5qhhcZVG58azWE8Sw+bADJtgMFj2/83iX/UkdbQaTRbiM888Y/Y8CJN4+eWXmzqeIAjI5XLgOK6suLMajTzPG+rfSyaTmJ2dJTFsIqxG6jvvvLPnOVYGD0DNMnj7CU2CWK9Tn9hfNCNQmX0JWLUdNalUCqOjo+A4ru6d83JkMhlMTEzsEcNQKIRoNGrYOPsRSZIQjUZ3BaWrd/FTqZTydyP9yJlMBqVSCRzH7dEHQRAwODgIAEgkEvu+hqqaioJI6V5EPbDPjTrvmmWSDAwMwOv1IpfLGXaTlSQJZ86cgSiKOHjw4K5Cv8yCsSuCIODo0aOYnp7GtWvXIMsy8vk8kskkhoaGdhUUiUQihgoTc6mpb3yCICAajSrX3ohNwWZT0YdIEPXANm/YRlxHRwdEUQTP8xBF0XBrYXFx8aksIsL69gBQ0kKBnb49U1NTuvr26OXevXsAdlwyoVAIc3Nz4DgON27cMK34sdno6stMENVQFwNh/sFsNotEIoHNzU34/X7DY9JGRkaqFvs1Wgj2C0b37dELq4LFNsZisRiWlpbA8zzee+89y1ZqJ0EkDIPFrqprZzqdTgQCAdy+fRu5XE7xLVmdaj15mB+12jGN+HNb3benUCjsufEBW1ESLPZzYGDAkvHGhgpio82d6NGcRlhmcf/+fQDAkSNH9jzH+ryIokhVvBuk1X17fv/9dwA7Qf9qnE6n4lecmZkxfGyzIQuRMAy2jHr11VfLPs/qM/75559Nm5NZVFumMwu52jGNhBy1um/Pjz/+CKB8JAGw41c0w0JU50trsbQlSUIoFILP59N0fkMFsdoHgB7GPvYjrF9MpdqZZraUcDgcNS1oSZIQj8eV1DpWbGJ8fNy0vGozaHXfHpZ58tJLL5V93sy8+WQyqVim8/PzFW8sLByps7NTV7QBWYiEIbA7NcdxZXeSJUlSdoOfe+45w8d/+PCh8nM+ny97zNDQEEZHR/HWW29BlmUUi0W43W5MTU3h4sWLhs+p2TTSt0cPzEdaSXA3NjYA1F8lSysjIyNl/y5JEo4ePQoAuH37tq5zVgy70dPQiCDKxaWp+eGHH5SfT5w4Ydo8vF5v1RhHr9erfJGcTiempqawsLBgyQ0AI/v2aEV94yv3f1a3LT558qTh40uShFwuV7XpndPpxMrKSl2CXNFCbHbKF2E+ZqZgsrg01iJBjSRJmJiYALAVIGyG5cIq51TLm11eXt5TAaeRSk6twoy+PVr57bffAJS/zsDWRg6wdeMxY0NHy3UG6rdONS2ZrVTPjKiMmSmYzNE/NTWFeDyu+ORY3xhRFBEMBk2LC2SOfr0FIxYXFwFULkSxHzG6b48eVldXAWz5MUOhkHJeJsqsDqUZsY9A/ddZK5oE8d9//zVlcMJ8mpGCyeLSOI7D/Pw8bt26paTR9fb2wul0IpFIIBaLmTYHJsh6dm8FQcCFCxeQSCQslVlx9uxZRRQ5jkMwGNyVDnn58mUAW1bc559/jomJCcP8eWw5HIlEsLm5Cbfbjba2NiUTKRKJmFpgg11nszaMKvoQzVLgVsOCWu/evYv19XUlwNTtduPUqVN4//33bVktpdISxwhYXFpPTw9GRkYqOrvNgvmVysXFVXvN4OAgYrGY5fJtnU4nYrFYxRuMWWX21BtjrcgAUl9ns76jmixEuzQ6DwQC6OrqwtjYGI4fP46HDx9ClmWsra0B2Ep1MrO0fStg76Wjo8O0MdgyplV175hfqdKGzpOwFg2XL182RTiWl5f3bWhUI7D/c7UNjWaMX+46OxwOQ9wCFQXRjr0oHj9+DACKL4vdZTweDz777DMAW0sC5leyA2yJY2YIBItLO3z4sGljVIMJ8pMB4YIg7LkRMDH8+OOPLWcZthpW4bxcJlIzqHSdk8kkHA6HIZ/xqhYi281iO4h24dy5c3v+5vF4lGXlrVu3mj0lU1BbuvU2CtMCi0urFJBtNsyvxGLPGPF4fI81MTQ0hOHh4V1iKAgCHA6H+RO1OMwfXSkg20xY4zBg9+eMlZartDpgBYnX19c1bQ5XFUSWasUsK6vDljKV7iRmLitbgbpRmFk+4VoB2WbDKnTzPL/LrxSPxzE3N4fXXntt19/S6TRGR0d3ZbV0dXU1tcWCVakVkG0mLFIB2PKHs2vX29uLUqm06zqz49va2jA6Ogpgq4VGV1cX2traqhcNlqsQiURa3ji6mXAcJwOQI5FIq6diCPPz88r1E0XR1DH8fr8p569GsVhU3l+lh/p9s+tb6UFUJp/PywBkjuNaPRVTqVogVu0TEgTB1q0EWEl0wFo9IKrBiiiYab21YleZ4XQ6dW1ebG5umjgbe+NyuWy5UfQkVZfM6rX6X3/9ZfpkWslHH30EwPhS662EbXZo3X0liKedqoLY3t6ubDSwHR47Eo1GlfxIO1VYZj4fdX8TgiAqUzMOkVkXVmo2rYdkMomxsTFT041agbpO3LFjx1o4E4KwDjUFke3eMGvDTgiCgFAoBJ7nbdfPV52Eb2ffL0EYSU1BVJdqsmrjmHIIgqAsJW/evGkrMQR2kvDJf0gQ2qkpiE6nE36/H4B9/IiSJGF4eBjA7haOdoIFsZpRk44g7IqmXOY333wTwM6XzOp88MEHyOVyiMVithRDZslzHGepKi4E0Wo0CSJbNouiaPnaiPF4HAsLCwiHw2VzWVOp1L7taqeVO3fuAADl6hKETjQJotPpVOqvsRaIVkSSJFy4cAE8z+Ps2bN7ni8UCpicnNRVRmo/wtp8tipgmiCsiuYmU++++y4Aay+bP/30U5RKJYiiqBQwVT94nkcul7P0BksqlUKpVKrZW4QgiL1oFkSPxwOv1wtRFC2726ynHaFVuXbtGgDgzJkzrZ0IQViQNllHgmImk0Fvby+8Xu+eZj1E6ykUCuB5HjzPm9oDmSDsiq6+zMxKTKfTuzIhiP3BzMwMgJ2eGgRB6EOXhQiQlbhfYdYhXReCqB9dFiKwZSWGw2GyEvcZoVAIwFa1HoIg6kO3hQhsha+wcu3ZbNbSu7J2IJVKYWBgAJFIxFbVegii2dQliMDO0jkcDuPKlStGz4vQiCRJ6OzsBM/z2NjYaPV0CMLS1C2IwFYA8OnTp5FIJCgrokX4fD48evSILHWCMICqLQRqEQgEcP/+fYRCIRw6dIgCgZtMKBTC+vo6VldXSQwJwgAaEkQAuHLlCg4cOIAHDx6QIDaZQqFg22o9BNEKGloyEwRB2AndYTcEQRB2hQSRIAhiGxJEgiCIbUgQCYIgtiFBJAiC2IYEkSAIYhsSRIIgiG3+A3TGO8KNrrzqAAAAAElFTkSuQmCC"
+                          width=""
+                          height=""/>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">1</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">LASSO</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEsAAAAsCAYAAAAtv0UIAAAACXBIWXMAABJ0AAASdAHeZh94AAAAB3RJTUUH4gYBES8mfVH2OwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAAD00lEQVRoge2aMUsrSxiGn72cP7CupViYFB4UDJgoaAwomF20tDBiK6ymsNPKWlCwNdk/YNKInRgFG6MQWcVFRUE3hbVrfkJuIVnQJJq9d8bDgX2qZWYy7+Rl9tvvG0ap1+t1Qjrinz+9gL+J0KwAhGYFIDQrAKFZAQjNCkBoVgBCswLQ1izDMFAUhXK5/KFdURQURZG6qD+p/RU/srOKxSKJRML/s9FolGw2i+d5PyEvDKlmeZ5HIpFgYWGBpaUlXl9fqdfrrK2tkcvlMAzjrzJMqlmLi4vYtk2hUMA0TTRNA8A0TeLxOLZtU6lUZC5BKNLMKhaLlEoldF0nk8k09TeMu7u7k7UE4Ugza2dnB4DV1dWW/aVSCYCxsTFZSxCOFLMcx8G2bVRVZWZmpqnfsiwAIpEIyWRSxhKkIMWsxq5Jp9NNfYeHhywvL6OqKvv7+zLkpSHFrNPTUwAmJyf9tnK5TDabZXZ2Fl3XsW2boaEhGfLS+CVj0svLSwAGBgYAiEajuK5LJBLBdV36+vpkyEpH+M5yHIdarQbgx6NKpUKhUODt7Y35+XkcxxEt+yMI31kPDw8A6Lrut2maRiaToaenh4mJCebm5nh+fhYtLR3hO+v29haA4eHhpr5kMomqqriuS7FYFC0tHeFmHR8fAzA+Pt6yf2RkBICXlxfR0nR1dfn1ZycFt+M4GIbB9vZ2R/MLN8u2bQD6+/tb9st8/Z6envznm5ubtuOq1SrZbJZYLOanOZ0g1KzGkYqqqi2/eJ7n4bouAL29vSKlP6Dretu0pFwuk06nSaVS5PP5QPMKDfAXFxdA62QU4OTkxH+enp4WKQ3gF+VTU1Ntx/z+/ZtKpYKmaU3nZd8h1Kzr62vgvYz5jOd5bGxsALC1teUX0iI5Pz8Hvq43/4+u0NewEdw3NzexLMs/qyqXyxiGgeu6rKyssL6+LlK2SV9WvSnMrGq1Sq1WQ1VV8vk8BwcHdHd3oygKExMTaJpGoVBgd3dXlOQHPM/Dtm3i8biU+UHga/j4+Ai8pwamaWKapqipO6IRr9rFSxEI21mNePFVcJVJQ/9zfuc4DtFoVIiGMLOurq4AGBwcFDVlIBrxanR09EO7ZVnCdpswsxrJXbtkVCaNw8ZIJPLha2dZFrlcjlQq1fQbz/PY29sD3o+UqtXqtzpCYtZ3yahMPM8jFosB4LpuyzKnUWI1+DymVCr56c7Z2Vnbr2lbs46Ojlq2t7ooeH9/D4gLrkG0NU1r2f4V//WyoxJek+yc8K5DAEKzAhCaFYDQrACEZgUgNCsAoVkBCM0KwL+FSU0j+qyHEAAAAABJRU5ErkJggg=="
+                          width=""
+                          height=""/>
+                  </div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dd>Default: 0</dd>
+      <dt>Lambda</dt>
+      <dd>[Optional] Specify the parameter that controls the magnitude of the regularization term. The value <i>lambda</i> must be in the range [0, 100]. The value 0 disables regularization.</dd>
+      <dd>Default: 0</dd>
+      <dt>StopThreshold</dt>
+      <dd>[Optional] Specify the convergence threshold. The <i>threshold</i> must be a nonnegative DOUBLE PRECISION value.</dd>
+      <dd>Default: 1.0e<sup>-7</sup>
+      </dd>
+      <dt>MaxIterNum</dt>
+      <dd>[Optional] Specify the maximum number of iterations over the data. The parameter <i>max_iterations</i> must be a positive INTEGER value in the range [1, 100000].</dd>
+      <dd>Default: 10000</dd>
+   </div>
+
+
+   <a name="tmg1518542565174"> </a>
+	  <h2>GLML1L2 Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>InputTable Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>response_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any numeric SQL data type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Dependent/response variable. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears one or more times.] Independent/predictor variable. Cannot be NULL.<p>
+                  <b>Note:</b>  Teradata recommends using the Scale function on numeric predictors before calling the function.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>categorical_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CHARACTER, VARCHAR, INTEGER, BYTEINT, DATE, TIME</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each categorical <i>target_column</i>.] Categorical independent/predictor variable. Variable name cannot be a Teradata reserved keyword, start with a digit, or contain any nonalphabetic character except underscore (_).<p>
+                  <b>Note:</b>  Do not enclose variable name in single quotation marks.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+
+   <a name="itn1518542565863"> </a>
+	  <h2>GLML1L2 Output</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Output Table Schema</h3>
+   <p style="line-height: 1em;">The function displays the output table to the screen.</p>
+   <a name="table_u3s_gt4_xcb"> </a>
+   <table class="introtable">
+      <a name="table_u3s_gt4_xcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">attribute</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Name of model attribute.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">category</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only for categorical predictor.] Category (level) of predictor.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">estimate</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Estimate of model coefficient.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">information</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Value of nonnumeric attribute, followed by "p" if predictor is used in model.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_edb_vtv_xcb"> </a>
+   <h3>FactorTable Schema</h3>
+   <p style="line-height: 1em;">Each row in the factor table corresponds to a row in the input table.</p>
+   <a name="table_yjx_k54_xcb"> </a>
+   <table class="introtable">
+      <a name="table_yjx_k54_xcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Categorical column: INTEGER<p style="line-height: 1em; margin: 0px;">
+                  <br/>Numeric column: Same as in InputTable</p>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Categorical column: dummy variable<p style="line-height: 1em; margin: 0px;">
+                  <br/>Numeric column: Same as in InputTable.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>response_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column copied from InputTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+	
+   <a name="ksu1518542564557"> </a>
+	  <h2>GLML1L2 Examples</h2>
+
+   <a name="ysp1518542563327"> </a>
+	  <h3>GLML1L2 Example: Ridge Regression, Family ('BINOMIAL')</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+
+			<p style="line-height: 1em;">The input table is admission_train, as in GLM Example: Logistic Regression Analysis with Intercept.</p>
+
+		
+   <a name="section_q4j_mz4_xcb"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">Because the response variable is binary (the admitted column has two possible values), the call specifies Family ('BINOMIAL'). Alpha (0) indicates L2 (ridge regression) regularization.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE admissions_model;
+DROP TABLE admissions_factor_table;
+
+CREATE MULTISET TABLE admissions_model AS (
+  SELECT * FROM GLML1L2 (
+   ON admissions_train AS InputTable
+   OUT TABLE FactorTable (admissions_factor_table)
+   USING
+   TargetColumns ('masters', 'gpa', 'stats', 'programming')
+   CategoricalColumns ('masters', 'stats', 'programming') 
+   ResponseColumn ('admitted') 
+   Family ('BINOMIAL') 
+   Alpha (0)
+   Lambda (0.02)
+  ) AS dt
+) WITH DATA;
+</tt>
+   </pre>
+   <a name="section_iwt_mz4_xcb"> </a>
+   <h4>Output</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM admissions_model;
+</tt>
+   </pre>
+   <pre>
+      <tt>
+ attribute      category estimate              information 
+ -------------- -------- --------------------- ----------- 
+ AIC            NULL         15.21927981934978 NULL       
+ programming    beginner   -1.0259430213730834 p          
+ Features #     NULL                       6.0 NULL       
+ programming    novice     -0.0820786516340258 p          
+ masters        yes        -1.2652530272653697 p          
+ Iterations #   NULL                      28.0 NULL       
+ Lambda         NULL                      0.02 NULL       
+ Alpha          NULL                       0.0 NULL       
+ stats          beginner   0.08063465501463249 p          
+ Regularization NULL                      NULL Ridge      
+ stats          novice   -0.026716553307241597 p          
+ Family         NULL                      NULL Binomial   
+ Converged      NULL                      NULL true       
+ gpa            NULL       0.38346423433872745 p          
+ Rows #         NULL                      40.0 NULL       
+ BIC            NULL        27.041435998147332 NULL       
+ (Intercept)    NULL        0.3838162407664626 p</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+select * from admissions_factor_table;</tt>
+   </pre>
+   <pre>
+      <tt>
+ masters_yes stats_beginner stats_novice programming_beginner programming_novice gpa  admitted 
+ ----------- -------------- ------------ -------------------- ------------------ ---- -------- 
+           1              0            1                    1                  0 3.95      0.0
+           0              0            0                    0                  0 3.83      1.0
+           1              0            1                    0                  1 2.33      1.0
+           1              0            0                    1                  0 3.85      0.0
+           1              0            1                    1                  0 3.46      0.0
+           0              0            0                    0                  1  4.0      1.0
+           1              0            0                    1                  0 3.75      0.0
+           1              0            0                    1                  0 3.46      0.0
+           0              0            1                    0                  1 3.52      1.0
+           0              0            0                    0                  0 3.13      1.0
+           0              0            1                    1                  0 3.68      1.0
+           0              0            0                    0                  0 3.82      1.0
+           0              0            1                    0                  1 3.65      1.0
+           0              0            0                    0                  0 3.93      1.0
+           1              0            0                    0                  0 3.96      0.0
+           0              0            0                    0                  0  3.7      1.0
+           1              1            0                    0                  1  3.5      1.0
+           0              0            1                    0                  1 3.55      1.0
+           1              0            0                    0                  0 1.98      0.0
+           0              0            0                    0                  0 3.71      1.0
+           0              0            0                    0                  1  3.0      0.0
+           1              0            0                    1                  0 2.65      1.0
+           1              0            0                    0                  0  4.0      1.0
+           1              0            0                    0                  0 3.57      1.0
+           1              0            0                    0                  1 3.79      0.0
+           0              0            1                    0                  1 3.44      0.0
+           1              0            0                    0                  0 3.45      0.0
+           0              0            0                    0                  1 1.87      1.0
+           1              0            0                    1                  0  3.5      1.0
+           0              0            1                    1                  0  3.7      1.0
+           1              0            1                    1                  0  4.0      0.0
+           1              1            0                    1                  0 3.95      0.0
+           1              1            0                    0                  0  3.5      1.0
+           1              0            0                    0                  0  3.9      1.0
+           1              0            0                    0                  1 3.59      1.0
+           1              0            0                    0                  0 3.81      1.0
+           0              0            1                    1                  0 3.87      1.0
+           0              1            0                    0                  0  3.6      1.0
+           0              0            0                    0                  0 3.96      1.0
+           1              1            0                    1                  0 3.76      0.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="kax1518542563925"> </a>
+	  <h3>GLML1L2 Example: Factor Table as InputTable</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table is admissions_factor_table, output by GLML1L2 Example: Ridge Regression, Family ('BINOMIAL'). In admissions_factor_table, categorical predictors were converted to integers.</p>
+
+		
+   <a name="section_hvn_ffp_xcb"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">Because the admissions_factor_table has only integers, this call does not specify CategoricalColumns.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE admissions_model_2;
+
+CREATE MULTISET TABLE admissions_model_2 AS (
+  SELECT * FROM GLML1L2 (
+    ON admissions_factor_table AS InputTable
+    USING
+    TargetColumns ('[0:5]')
+    ResponseColumn ('admitted') 
+    Family ('BINOMIAL') 
+    Alpha (0)
+    Lambda (0.02)   
+  ) AS dt
+) WITH DATA;
+</tt>
+   </pre>
+   <a name="section_dgx_ffp_xcb"> </a>
+   <h4>Output</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM admissions_model_2;</tt>
+   </pre>
+   <pre>
+      <tt>
+ attribute            estimate              information 
+ -------------------- --------------------- ----------- 
+ AIC                      15.21927981934978 NULL       
+ Iterations #                          28.0 NULL       
+ Features #                             6.0 NULL       
+ Alpha                                  0.0 NULL       
+ Lambda                                0.02 NULL       
+ stats_novice         -0.026716553307241597 p          
+ programming_novice     -0.0820786516340258 p          
+ Regularization                        NULL Ridge      
+ Family                                NULL Binomial   
+ Converged                             NULL true       
+ gpa                    0.38346423433872745 p          
+ Rows #                                40.0 NULL       
+ BIC                     27.041435998147332 NULL       
+ (Intercept)             0.3838162407664626 p          
+ programming_beginner   -1.0259430213730834 p          
+ stats_beginner         0.08063465501463249 p          
+ masters_yes            -1.2652530272653697 p</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="vxx1519069519876"> </a>
+	  <h3>GLML1L2 Example: LASSO, Family ('GAUSSIAN')</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table is housing_train, as in GLM Example: Gaussian Distribution Analysis.</p>
+
+		
+   <a name="section_mzl_zhp_xcb"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">Because the response variable has a Gaussian distribution, the call specifies Family ('GAUSSIAN'). Alpha (1) indicates L1 (LASSO) regularization.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE housing_model;
+DROP TABLE housing_factor_table;
+
+CREATE MULTISET TABLE housing_model AS (
+  SELECT * FROM GLML1L2 (
+    ON housing_train AS InputTable
+    OUT TABLE FactorTable (housing_factor_table)
+    USING
+    TargetColumns ('lotsize','bedrooms','bathrms','stories','garagepl','driveway',
+      'recroom','fullbase','gashw','airco','prefarea','homestyle')
+    CategoricalColumns ('driveway','recroom','fullbase','gashw','airco','prefarea','homestyle') 
+    ResponseColumn ('price') 
+    Family ('GAUSSIAN') 
+    Alpha (1)
+    Lambda (0.02)
+  ) AS dt
+) WITH DATA;
+</tt>
+   </pre>
+   <a name="section_dst_zhp_xcb"> </a>
+   <h4>Output</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM housing_model;</tt>
+   </pre>
+   <pre>
+      <tt>
+ attribute      category estimate            information 
+ -------------- -------- ------------------- ----------- 
+ AIC            NULL      -8.992753699712395 NULL       
+ Iterations #   NULL                    53.0 NULL       
+ stories        NULL      2445.6699824701327 p          
+ bathrms        NULL       6772.387864268141 p          
+ homestyle      classic  -54128.100924908955 p          
+ Alpha          NULL                     1.0 NULL       
+ homestyle      eclectic  -37577.28812836616 p          
+ prefarea       yes        6465.606895601109 p          
+ Features #     NULL                    13.0 NULL       
+ airco          yes        6478.800674992518 p          
+ Lambda         NULL                    0.02 NULL       
+ fullbase       yes        3588.313479183023 p          
+ Family         NULL                    NULL Gaussian   
+ recroom        yes       1208.5016271782713 p          
+ Converged      NULL                    NULL true       
+ bedrooms       NULL       782.1333264902945 p          
+ Rows #         NULL                   492.0 NULL       
+ gashw          yes        5787.049927907821 p          
+ driveway       yes       2822.6466305663917 p          
+ Regularization NULL                    NULL Lasso      
+ RMSE           NULL      10385.734127243657 NULL       
+ lotsize        NULL       2.080984013010899 p          
+ BIC            NULL       49.78594833117991 NULL       
+ (Intercept)    NULL       71103.48563681456 p          
+ garagepl       NULL      1483.1186058015555 p</tt>
+   </pre>
+   <p style="line-height: 1em;">(housing_factor_table not shown here.)</p>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

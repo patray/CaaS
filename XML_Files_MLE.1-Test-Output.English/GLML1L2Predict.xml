@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="trn1518542850144"> </a>
+	  <h1>GLML1L2Predict</h1>
+   <p style="line-height: 1em;">The GLML1L2Predict function uses the model output by the GLML1L2 function to perform generalized linear model prediction on new input data.</p>
+
+   <a name="rmy1518542929023"> </a>
+	  <h2>GLML1L2Predict Syntax</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Version 1.0</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GLML1L2Predict (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY ANY
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS Model DIMENSION
+  USING
+  [ OutputProb ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+
+	
+   <a name="veh1518542964825"> </a>
+	  <h2>GLML1L2Predict Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputProb</dt>
+      <dd>Specify whether to output the calculated probability for each selected response.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>Accumulate</dt>
+      <dd>Specify the names of input columns to copy to the output table.</dd>
+   </div>
+
+
+	
+   <a name="ekw1518542987316"> </a>
+	  <h2>GLML1L2Predict Input</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_wf1_sw4_xcb"> </a>
+   <table class="introtable">
+      <a name="table_wf1_sw4_xcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>feature_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any numeric SQL data type or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Copied from InputTable used in GLML1L2 call that output Model table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+	
+   <a name="cgj1518543006894"> </a>
+	  <h2>GLML1L2Predict Output</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Output Table Schema</h3>
+
+			<p style="line-height: 1em;">The table is a set of predictions for each test point.</p>
+   <a name="table_xv3_1y4_xcb"> </a>
+   <table class="introtable">
+      <a name="table_xv3_1y4_xcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">prediction</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Predicted value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">prob</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Probability that document belongs to category.</div>
+         </td>
+      </tr>
+   </table>
+
+
+		
+
+	
+   <a name="nrd1518543030274"> </a>
+	  <h2>GLML1L2Predict Examples</h2>
+
+   <a name="rnu1518543051742"> </a>
+	  <h3>GLML1L2Predict Example: Ridge Regression, Family ('BINOMIAL')</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+
+			<p style="line-height: 1em;">The input table is admissions_test, as in GLMPredict_MLE GLMPredict_MLE Example: Logistic Distribution Prediction.</p>
+   <p style="line-height: 1em;">The model table is admissions_model, output of GLML1L2 Example: Ridge Regression, Family ('BINOMIAL').</p>
+
+		
+   <a name="section_zlw_ymp_xcb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GLML1L2Predict (
+  ON admissions_test PARTITION BY ANY
+  ON admissions_model AS Model DIMENSION
+  USING
+  OutputProb ('true')
+  Accumulate ('id')
+) AS dt ORDER BY id;
+</tt>
+   </pre>
+   <a name="section_o5h_zmp_xcb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id prediction prob                
+ -- ---------- ------------------- 
+ 50        0.0 0.42261164778201094
+ 51        0.0  0.4049408918235976
+ 52        1.0  0.6791731064692488
+ 53        1.0  0.6128348254047428
+ 54        1.0  0.6321200551583135
+ 55        1.0  0.8635298008802573
+ 56        1.0  0.8639684744611825
+ 57        1.0  0.8589345247253525
+ 58        1.0  0.8297786450140937
+ 59        1.0  0.8421968614075399
+ 60        1.0  0.8624268462528424
+ 61        1.0  0.6575556307139581
+ 62        1.0  0.8584692566063056
+ 63        1.0  0.8644185196041072
+ 64        1.0      0.640966603964
+ 65        1.0  0.6488695133874245
+ 66        1.0   0.693208669498573
+ 67        0.0 0.35267304201513183
+ 68        1.0  0.7347418494287773
+ 69        1.0  0.8701555291596779</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="jwa1518543085962"> </a>
+	  <h3>GLML1L2Predict Example: LASSO, Family ('GAUSSIAN')</h3>
+
+	  <a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: housing_test, as in GLMPredict_MLE Example: Gaussian Distribution Prediction</li>
+      <li>Model:  housing_model, output of GLML1L2 Example: LASSO, Family ('GAUSSIAN')</li>
+   </ul>
+
+   <a name="section_gv3_q4p_xcb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GLML1L2Predict (
+  ON housing_test PARTITION BY ANY
+  ON housing_model AS Model DIMENSION
+  USING
+  Accumulate ('sn')
+) AS dt ORDER BY sn;
+</tt>
+   </pre>
+   <a name="section_myq_q4p_xcb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ sn  prediction         
+ --- ------------------ 
+  13 37345.831973269815
+  16  43687.09059862308
+  25  40902.03654672491
+  38  72487.79993489318
+  53  79238.81946777017
+ 104 111527.51245186775
+ 111  39102.91738815808
+ 117  66936.75897612597
+ 132  41819.94760124324
+ 140  41611.84919994215
+ 142  44394.19887061475
+ 157  66571.23189229079
+ 161  64900.96267762861
+ 162 107758.84817140205
+ 176   73438.6189187027
+ 177  62378.41894444322
+ 195 37197.885003565505
+ 198  47307.96151089168
+ 224  67232.91218470069
+ 234  35237.08241678744
+ 237   46593.6202622758
+ 239  43377.85857200969
+ 249 37863.799887728994
+ 251  45096.43470435488
+ 254  74665.80555260641
+ 255 60214.195570911885
+ 260  43066.25992025624
+ 274  67232.40606270777
+ 294  38987.53125475488
+ 301 55621.583411818116
+ 306  67339.67883609686
+ 317  65655.23197768882
+ 329 123611.91388294056
+ 339 126281.82379649683
+ 340  58474.80959843659
+ 353  67485.79160065402
+ 355  68425.99104737997
+ 364  77422.31599327197
+ 367 128556.01523545264
+ 377 127201.67378365475
+ 401  84040.85339019273
+ 403  79857.24053097825
+ 408   76218.4796684783
+ 411  78179.19706290774
+ 440   80549.3290271716
+ 441  64670.20979822652
+ 443 61703.972586623415
+ 459   42818.2957274824
+ 463  49293.44779989387
+ 469  61779.16835629488
+ 472  63766.92478426945
+ 527 119762.09345887038
+ 530  116119.0226758564
+ 540  73146.29611369228</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

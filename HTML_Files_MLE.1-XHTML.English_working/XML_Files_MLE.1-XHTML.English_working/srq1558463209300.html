@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="copyright" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.rights.owner" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="TimeSeriesOrders" />
+<meta name="abstract" content="This Machine Learning Engine function determines orders and whether to incorporate a drift term into a time series model." />
+<meta name="description" content="This Machine Learning Engine function determines orders and whether to incorporate a drift term into a time series model." />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="fwf1507221810968" />
+<meta name="DC.Language" content="en-us" />
+
+<link rel="stylesheet" type="text/css" href="css/normal_styles.css" />
+<title>TimeSeriesOrders</title>
+</head>
+<body>
+<div class="nested0" aria-labelledby="ariaid-title1" topicindex="1" topicid="fwf1507221810968" id="fwf1507221810968">
+	<h1 class="title topictitle1" id="ariaid-title1">TimeSeriesOrders</h1>
+
+	<div class="body conbody">
+		<div class="p">The TimeSeriesOrders function automatically determines the following for nonseasonal,
+			univariate time series:<ul class="ul" id="fwf1507221810968__ul_zdh_4pq_r1b">
+				<li class="li">The orders (<var class="keyword varname">p</var>, <var class="keyword varname">d</var>, <var class="keyword varname">q</var>)<p class="p">For descriptions of these orders, see the information about nonseasonal ARIMA models in <a class="xref" href="https://www.otexts.org/fpp/8" target="_blank" title="">https://www.otexts.org/fpp/8</a>.</p>
+</li>
+
+				<li class="li">Whether to include a nonzero constant term (mean) and an explicit dependence on
+					time (a drift term)</li>
+
+			</ul>
+</div>
+
+		<p class="p">If a time series has a seasonal component, the function reports <var class="keyword varname">p</var>, <var class="keyword varname">d</var>, and <var class="keyword varname">q</var>, but does not calculate or report seasonal orders <var class="keyword varname">sp</var>, <var class="keyword varname">sd</var>, and <var class="keyword varname">sq</var>. (For descriptions of the seasonal orders, see the information about seasonal ARIMA models in <a class="xref" href="https://www.otexts.org/fpp/8" target="_blank" title="">https://www.otexts.org/fpp/8</a>.) </p>
+<p class="p">You can use the TimeSeriesOrders output as the orders table of the <a class="xref" href="lla1558463669510.html#zsj1506019075317" title="This Machine Learning Engine function calculates coefficients for sequence of parameters, creating ARIMA model.">ARIMA</a> or <a class="xref" href="lnd1558463317081.html#klg1507052716326" title="This ML Engine function extends ARMA/ARIMA model for multiple response variables, exogenous variables, or variables independent of other variables in system.">VARMAX</a> function.</p>
+
+	</div>
+
+<div class="topic reference nested1" aria-labelledby="ariaid-title2" topicindex="2" topicid="tmg1507221974506" xml:lang="en-us" lang="en-us" id="tmg1507221974506">
+	<h2 class="title topictitle2" id="ariaid-title2">TimeSeriesOrders Syntax</h2>
+
+	<div class="body refbody">
+		<div class="section" id="tmg1507221974506__section_N10014_N10011_N10001"><h3 class="title sectiontitle">Version 1.1</h3><pre class="pre codeblock"><code>SELECT * FROM TimeSeriesOrders (   
+  <span class="ph">ON { <var class="keyword varname">table</var> | <var class="keyword varname">view</var> | (<var class="keyword varname">query</var>) }</span> AS InputTable
+    PARTITION BY { 1 | <var class="keyword varname">partition_column</var> [,...] } ORDER BY <var class="keyword varname">time_column</var> ASC [,...]
+  USING      
+  ResponseColumn ('<var class="keyword varname">response_column</var>')
+  [ PartitionColumns ('<var class="keyword varname">partition_column</var>' [,...]) ]
+  TimeColumns ('<var class="keyword varname">time_column</var>' [,...])
+) AS <var class="keyword varname">alias</var>;</code></pre><div class="note note" id="tmg1507221974506__note_N10066_N10014_N10010_N10001"><span class="notetitle">Note</span><div class="notebody">In the ORDER BY clause, put ASC after each <var class="keyword varname">time_column</var>.</div></div>
+</div>
+
+	</div>
+
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title3" topicindex="3" topicid="beo1507222823837" xml:lang="en-us" lang="en-us" id="beo1507222823837">
+	<h2 class="title topictitle2" id="ariaid-title3">TimeSeriesOrders Syntax Elements</h2>
+
+	<div class="body refbody">
+		<div class="section" id="beo1507222823837__section_N10014_N10011_N10001"><dl class="dl parml"><dt class="dt pt dlterm">ResponseColumn</dt>
+<dd class="dd pd">Specify the name of the <var class="keyword varname">input_table</var> column that contains the response variable.</dd>
+<dt class="dt pt dlterm">PartitionColumns</dt>
+<dd class="dd pd">[Required if you partition by columns, disallowed otherwise.] Specify the partition columns to pass to the output, which must be the same as those in the PARTITION BY clause.</dd>
+<dt class="dt pt dlterm">TimeColumns</dt>
+<dd class="dd pd"><p class="p">Specify the names of the <var class="keyword varname">input_table</var> columns that contain the time stamps of the points in the time sequence.</p>
+</dd>
+</dl>
+
+		</div>
+
+	</div>
+
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title4" topicindex="4" topicid="ozz1507222895047" xml:lang="en-us" lang="en-us" id="ozz1507222895047">
+	<h2 class="title topictitle2" id="ariaid-title4">TimeSeriesOrders Input</h2>
+
+	<div class="body refbody">
+		<div class="section" id="ozz1507222895047__section_N10011_N1000E_N10001">
+			<p class="p">The input table has the same schema as the <a class="xref" href="lnd1558463317081.html#kny1507054403896" title="">VARMAX Input</a> table.</p>
+
+			<div class="p">Each input time series must:<ul class="ul" id="ozz1507222895047__ul_bcx_mfs_51b">
+					<li class="li">Be an ordered sequence in a partition with uniform time intervals</li>
+
+					<li class="li">Fit into memory</li>
+
+					<li class="li">Not include NULL or numeric values</li>
+
+				</ul>
+</div>
+
+		</div>
+
+	</div>
+
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title5" topicindex="5" topicid="qex1507227073634" xml:lang="en-us" lang="en-us" id="qex1507227073634">
+	<h2 class="title topictitle2" id="ariaid-title5">TimeSeriesOrders Output</h2>
+
+	<div class="body refbody">
+		<div class="section" id="qex1507227073634__section_N10011_N1000E_N10001"><h3 class="title sectiontitle">Output Table Schema</h3>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="qex1507227073634__table_lpp_2bt_n1b" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d320703e269">Column</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d320703e271">Data Type</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d320703e273">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d320703e269 "><var class="keyword varname">partition_column</var></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d320703e271 ">Any</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d320703e273 ">[Column appears once for each specified <var class="keyword varname">partition_column</var>.] Column by which input data is partitioned.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d320703e269 ">p</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d320703e271 ">INTEGER</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d320703e273 ">Order of autoregressive part.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d320703e269 ">d</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d320703e271 ">INTEGER</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d320703e273 ">Degree of differencing.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d320703e269 ">q</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d320703e271 ">INTEGER</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d320703e273 ">Order of  moving average part.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d320703e269 ">include_drift</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d320703e271 ">INTEGER</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d320703e273 ">1 if time series model includes drift item, 0 otherwise.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d320703e269 ">include_mean</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d320703e271 ">INTEGER</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d320703e273 ">1 if time series model includes mean vector of response series, 0 otherwise.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+		</div>
+
+	</div>
+
+</div>
+<div class="topic concept nested1" aria-labelledby="ariaid-title6" topicindex="6" topicid="iyt1507221866713" xml:lang="en-us" lang="en-us" id="iyt1507221866713">
+	<h2 class="title topictitle2" id="ariaid-title6">TimeSeriesOrders Examples</h2>
+<div class="related-links">
+<div class="linklistheader">Related Information</div>
+<ul class="linklist linklist">
+<div class="linklistmember"><a class="link" href="lnd1558463317081.html#hyk1507056514956" title="See example of Machine Learning Engine function VARMAX with an orders table output by the TimeSeriesOrders function. The orders tables has one time series.">VARMAX Example: Orders Table, One Time Series</a></div>
+<div class="linklistmember"><a class="link" href="lnd1558463317081.html#rid1507056868188" title="See example of Machine Learning Engine function VARMAX with an orders table output by the TimeSeriesOrders function. The orders tables has two time series.">VARMAX Example: Orders Table, Two Time Series</a></div></ul>
+</div>
+<div class="topic reference nested2" aria-labelledby="ariaid-title7" topicindex="7" topicid="xim1507227146218" xml:lang="en-us" lang="en-us" id="xim1507227146218">
+	<h3 class="title topictitle3" id="ariaid-title7">TimeSeriesOrders Example: PartitionColumns</h3>
+
+	<div class="body refbody"><div class="section" id="xim1507227146218__section_N10014_N10011_N10001"><h4 class="title sectiontitle">Input</h4><ul class="ul" id="xim1507227146218__ul_efd_gj5_32b"><li class="li">milk_3, as in <a class="xref" href="lnd1558463317081.html#rid1507056868188" title="See example of Machine Learning Engine function VARMAX with an orders table output by the TimeSeriesOrders function. The orders tables has two time series.">VARMAX Example: Orders Table, Two Time Series</a></li>
+</ul>
+</div>
+<div class="section" id="xim1507227146218__section_ulv_44j_mdb"><h4 class="title sectiontitle">SQL Call</h4><pre class="pre codeblock"><code>SELECT * FROM TimeSeriesOrders (   
+  ON milk_3 AS InputTable <span class="ph b">PARTITION BY id_partition</span> ORDER BY period ASC
+  USING
+  <span class="ph b">PartitionColumns ('id_partition')</span>
+  TimeColumns ('period')
+  ResponseColumn ('milkpound')
+) AS dt ORDER BY id_partition;</code></pre></div>
+<div class="section" id="xim1507227146218__section_swc_p4j_mdb"><h4 class="title sectiontitle">Output</h4><p class="p">The specified partition column, id_partition, appears in the output table.</p>
+<pre class="pre screen"> id_partition p d q include_drift include_mean 
+ ------------ - - - ------------- ------------ 
+            1 1 1 1             0            0
+            2 0 1 2             0            0</pre>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="xim1507227146218__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+
+	</div>
+
+</div>
+<div class="topic reference nested2" aria-labelledby="ariaid-title8" topicindex="8" topicid="vmn1507230430280" xml:lang="en-us" lang="en-us" id="vmn1507230430280">
+	<h3 class="title topictitle3" id="ariaid-title8">TimeSeriesOrders Example: No PartitionColumns</h3>
+
+	<div class="body refbody">
+		<div class="section" id="vmn1507230430280__section_N10014_N10011_N10001"><h4 class="title sectiontitle">Input</h4><ul class="ul" id="vmn1507230430280__ul_efd_gj5_32b"><li class="li">milk_timeseries, as in <a class="xref" href="lnd1558463317081.html#hyk1507056514956" title="See example of Machine Learning Engine function VARMAX with an orders table output by the TimeSeriesOrders function. The orders tables has one time series.">VARMAX Example: Orders Table, One Time Series</a></li>
+</ul>
+
+		</div>
+<div class="section" id="vmn1507230430280__section_ulv_44j_mdb"><h4 class="title sectiontitle">SQL Call</h4><pre class="pre codeblock"><code>SELECT * FROM TimeSeriesOrders (   
+  ON milk_timeseries AS InputTable PARTITION BY 1 ORDER BY period ASC
+  USING
+  TimeColumns ('period')
+  ResponseColumn ('milkpound')
+) AS dt;</code></pre></div>
+<div class="section" id="vmn1507230430280__section_swc_p4j_mdb"><h4 class="title sectiontitle">Output</h4><p class="p">No partition column appears in the output table.</p>
+<pre class="pre screen"> p d q include_drift include_mean 
+ - - - ------------- ------------ 
+ 0 1 2             1            0</pre>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="vmn1507230430280__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+
+	</div>
+
+</div>
+</div>
+</div>
+</body>
+</html>

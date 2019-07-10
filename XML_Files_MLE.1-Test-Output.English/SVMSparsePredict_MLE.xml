@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="guu1507914686828"> </a>
+	  <h1>SVMSparsePredict_MLE</h1>
+
+	  <p style="line-height: 1em;">The SVMSparsePredict_MLE function takes the model output by the function SVMSparse and a set of test samples (in sparse format) and outputs a prediction for each sample.</p>
+
+   <a name="gpz1507914838043"> </a>
+   <h2>SVMSparsePredict_MLE Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.3</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SVMSparsePredict_MLE (
+  ON <i>sample_table</i> AS InputTable PARTITION BY <i>id_column</i> 
+  ON <i>model_table</i> AS Model DIMENSION
+  USING
+  IDColumn ('<i>id_column</i>')
+  AttributeNameColumn ('<i>attribute_name_column</i>')
+  [ AttributeValueColumn ('<i>attribute_value_column</i>') ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+  [ OutputClassNum (<i>output_class_number</i>) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="qth1507914842941"> </a>
+	  <h2>SVMSparsePredict_MLE Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>IDColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the identifiers of the test samples. The <i>sample_table</i> must be partitioned by this column.</dd>
+      <dt>AttributeNameColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the attributes of the test samples.</dd>
+      <dt>AttributeValueColumn</dt>
+      <dd>[Optional] Specify the name of the InputTable column that contains the attribute values.</dd>
+      <dd>Default behavior: Each attribute has the value 1.</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the InputTable columns to copy to the output table.</dd>
+      <dt>OutputClassNum</dt>
+      <dd>[Optional] Valid only for multiple-class models. Specify the number of class labels to appear in the output table, with its corresponding prediction confidence.</dd>
+      <dd>Default: 1</dd>
+   </div>
+
+
+	
+   <a name="ryw1507914846654"> </a>
+   <h2>SVMSparsePredict_MLE Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_usy_pxw_xcb"> </a>
+   <table class="introtable">
+      <a name="table_usy_pxw_xcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sample table. Contains test data.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Model</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SVMSparse Output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ktl_wxw_xcb"> </a>
+   <h3>InputTable Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_jsg_nqs_nw"> </a>
+   <table class="introtable">
+      <a name="table_jsg_nqs_nw"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, SMALLINT, BIGINT, NUMERIC, VARCHAR, VARBYTE(<i>n</i>), or BLOB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Test sample identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>attribute_name_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, SMALLINT, BIGINT, or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Test sample attribute.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>attribute_value_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, SMALLINT, BIGINT, or NUMERIC</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Attribute value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="jdr1507914850116"> </a>
+   <h2>SVMSparsePredict_MLE Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Table Schema</h3>
+   <p style="line-height: 1em;">The table has the predicted class of each test sample.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, SMALLINT, BIGINT, NUMERIC, VARCHAR, or BLOB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Test sample identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">predict_value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Predicted class of test sample.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">predict_confidence</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Prediction confidence, a value between 0 and 1, computed by formula that follows this table. The higher the value, the more dependable the prediction.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from InputTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_nc3_kyw_xcb"> </a>
+   <h3>Formula for predict_confidence</h3>
+   <a name="fig_p5v_wzb_tw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAANEAAAAuCAYAAAC2/vwjAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAA6bSURBVHhe7Z0JsI1VHMCPrSRLllIR2UNKi5BCxWCsETJI2UJNZjQlFKqxVozGmsY+TNKUXSlr9kS2CKUorZasKU7n93fO67777rvvPve923vvnt/M591zvu9+9/vuPf/zX88nmzYojycKjh8/rk6fPq1+//13dcMNN6hixYrZPfFBdvvX47liLl68qD755BPVsGFD9eOPP9re+MELkSdqihQpov7++2+VK1cudd9999ne+MELkSdN2Lx5s6pXr55txRdeiDxRgz+0du1a1axZM9sTX3gh8kTNrl271A8//KBq1Khhe+ILL0SeqPn888/VQw89JJG5eMQLkSdqpkyZoqpXr65y5sxpe+ILL0SeqPjjjz/UuXPn1P3332974g8vRJ6oWL58ubr22mtVnTp1bE/84YXIc0WcP39efKGRI0eq3377TX333Xfqn3/+sXvji5iX/fDlX7p0SeXJk8f2KPny6bvqqqtsT2KOHTumvvnmG1W2bFlJ7Hn+f/i9MOP4PXPkyKFy586trr76apUtWzZ7RPwQU02E6l+1apXq3bu3evfdd22vUi+//LJ6/PHHbSsxyPi0adNUzZo1Vd68eW2v5/8me/bsYsYVLlxYXXfddSJE8ShAEDNN9PPPP6s2bdqoNWvWqEOHDon2QbPAzp071YkTJ9SDDz4o7WBmz56txo8fL+aDx5PRiJkQPfnkk6JNnn76adsTOe3atVN33HGH6tevn+3xeDIOCeYcBYSLFy8Wc2vdunViRjnQGvPmzVMffvihmjlzpu1VauPGjeqtt95SU6dOlfYbb7yhnnnmGfXnn39KGzjm7bffVlu3blV79uxR77//vrpw4YLsO3XqlHrvvfdUhw4d1JEjR6TPwfFz5sxRX3zxhVxTcGEj/YsWLRItRRUx7587d66YhpShsP+xxx5TK1assO+4DMd+9NFH0s95g3HnDH6fx5MsaKLt27frVq1aaeMk6r/++kuXKFFCb9iwgV3amFq6efPm2gxSaT/33HO6ffv28hpy5cqlZ8yYoRcuXKi///57Xbp0af3pp5/avZfhXDlz5rStxPBeexkJDBw4UE+Z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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <p style="line-height: 1em;">where <i>i</i> is the attribute id, <i>x</i>
+      <sub>i</sub> is the value of attributes in the sample, and <i>w</i>
+      <sub>i</sub> is the weight of attribute <i>i</i>.</p>
+
+   <a name="ccl1510769296925"> </a>
+   <h2>SVMSparsePredict_MLE Example</h2>
+   <a name="section_pvc_mph_zdb"> </a>
+   <h3>Input</h3>
+   <ul>
+      <li>InputTable: svm_iris_input_test</li>
+      <li>Model: svm_iris_model, the SVMSparse Example output table</li>
+   </ul>
+   <a name="table_tyz_wph_zdb"> </a>
+   <table class="introtable">
+      <a name="table_tyz_wph_zdb"> </a>
+      <h4 style="text-align: center;">svm_iris_input_test</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">species</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">attribute</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">value1</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_v1n_mph_zdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE svm_iris_predict_out AS (
+  SELECT * FROM SVMSparsePredict_MLE (
+    ON svm_iris_input_test AS InputTable PARTITION BY id
+    ON svm_iris_model AS Model DIMENSION
+    USING
+    IDColumn ('id')
+    AttributeNameColumn ('attribute')
+    AttributeValueColumn ('value1')
+    Accumulate ('species')
+  ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_hvw_mph_zdb"> </a>
+   <h3>Output</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM svm_iris_predict_out ORDER BY id;</tt>
+   </pre>
+   <pre>
+      <tt>
+ id  predict_value predict_confidence  species    
+ --- ------------- ------------------- ---------- 
+   5 setosa         0.8673981408992447 setosa    
+  10 setosa          0.819661754676374 setosa    
+  15 setosa         0.9278832083866889 setosa    
+  20 setosa         0.8649163062718142 setosa    
+  25 setosa         0.7625677261575177 setosa    
+  30 setosa         0.7938337387742732 setosa    
+  35 setosa         0.8112536447044499 setosa    
+  40 setosa         0.8437537095300566 setosa    
+  45 setosa         0.7972425982898538 setosa    
+  50 setosa         0.8466420177017054 setosa    
+  55 versicolor     0.5047066884921864 versicolor
+  60 versicolor     0.2719532556321491 versicolor
+  65 versicolor     0.2612175692631059 versicolor
+  70 versicolor     0.5714861810659234 versicolor
+  75 versicolor     0.5087806077752018 versicolor
+  80 versicolor     0.5284039049251765 versicolor
+  85 virginica     0.35781510053880333 versicolor
+  90 versicolor      0.457613698073775 versicolor
+  95 versicolor     0.4377497946313431 versicolor
+ 100 versicolor     0.3965425149191664 versicolor
+ 105 virginica       0.871426508573154 virginica 
+ 110 virginica       0.785585474251325 virginica 
+ 115 virginica      0.9296744769374718 virginica 
+ 120 versicolor     0.7188677884044353 virginica 
+ 125 virginica      0.6698284675290832 virginica 
+ 130 versicolor     0.7089506437472127 virginica 
+ 135 versicolor     0.7527003336230892 virginica 
+ 140 virginica      0.5135151359537093 virginica 
+ 145 virginica      0.8569579553464065 virginica 
+ 150 virginica      0.6269248083310807 virginica</tt>
+   </pre>
+   <a name="section_kd5_kqh_zdb"> </a>
+   <h3>Prediction Accuracy</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT (SELECT count(id)
+  FROM svm_iris_predict_out
+  WHERE predict_value = species)/(1.00 * (
+  SELECT count(id) FROM svm_iris_predict_out) )
+AS prediction_accuracy;</tt>
+   </pre>
+   <pre>
+      <tt>
+ prediction_accuracy 
+ ------------------- 
+                0.83</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

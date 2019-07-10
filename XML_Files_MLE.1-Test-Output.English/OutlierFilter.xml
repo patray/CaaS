@@ -1,0 +1,1212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="mte1507833902686"> </a>
+	  <h1>OutlierFilter</h1>
+
+	
+		<p style="line-height: 1em;">The OutlierFilter function is useful for filtering a numeric data set before applying ML Engine functions for which outliers can skew the estimates of parameters and cause inaccurate predictions. Such functions include time series functions, GLM, LAR, LinReg, PCA, and KMeans. The input data set is expected to have millions of attribute-value pairs.</p>
+
+		<p style="line-height: 1em;">The OutlierFilter function filters outliers from a data set, either deleting them or replacing them with a specified value. Optionally, the function stores the outliers in their own table. The function provides these methods for filtering outliers:<ul>
+         <li>Percentile</li>
+         <li>Tukey's test</li>
+         <li>Carling's modification to Tukey's test</li>
+         <li>Median absolute deviation</li>
+      </ul>
+   </p>
+
+		<p style="line-height: 1em;">The method determines the criteria for an observation to classify as an outlier.</p>
+
+	
+   <a name="vxm1507833934995"> </a>
+   <h2>OutlierFilter Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.9</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM OutlierFilter (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  OUT TABLE OutputTable (<i>output_table</i>)
+  [ OUT TABLE OutliersTable (<i>outliers_table</i>) ]
+  USING
+  TargetColumns ('<i>target_column</i>' [,...])
+  [ GroupByColumns ('<i>group_column</i>' [,...]) ]
+  [ OutlierMethod ('<i>method</i>' [,...]) ]
+  [ ApproxPercentile ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ PercentileThreshold (<i>perc_lower</i>, <i>perc_upper</i>]) ]
+  [ PercentileAccuracy (<i>accuracy</i>) ]
+  [ IQRMultiplier (<i>k</i>) ]
+  [ RemoveTail ({ 'both' | 'upper' | 'lower' }) ]
+  [ ReplacementValue ({ 'delete' | 'null' | 'median' | '<i>newval</i>' }) ]
+  [ MADScaleConstant (<i>constant</i>) ]
+  [ MADThreshold (<i>madlimit</i>) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="kpp1507833939682"> </a>
+	  <h2>OutlierFilter Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputTable</dt>
+      <dd>Specify the name of the table where the function stores the copy of the InputTable (including the PARTITION BY column) with the outliers either deleted (by default) or replaced (as specified by the ReplacementValue syntax element).</dd>
+      <dt>OutliersTable</dt>
+      <dd>[Optional] Specify the name of the table where the function outputs copies of the rows of the InputTable that contain outliers.</dd>
+      <dd>Default behavior: Function does not output an outlier table.</dd>
+      <dt>TargetColumns</dt>
+      <dd>Specify the names of the InputTable columns that contain numeric data to filter.</dd>
+      <dt>GroupByColumns</dt>
+      <dd>[Optional] Specify the names of the InputTable columns by which to group the data. If the data schema format is <i>name</i>:<i>value</i>, this list must include <i>name</i>.</dd>
+      <dd>Default behavior: Function does not group data.</dd>
+      <dt>OutlierMethod</dt>
+      <dd>[Optional] Specify one or more of the following methods of filtering outliers:<a name="table_m2g_nxz_fdb"> </a>
+         <table class="introtable">
+            <a name="table_m2g_nxz_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">
+                     <i>method</i>
+                  </div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'percentile'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Percentile.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'tukey'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Tukey's test:<p style="line-height: 1em; margin: 0px;">
+                        <br/>An outlier is defined as any observation smaller than V1 - <i>k</i>*(V3-V1) or larger than V3 + <i>k</i>*(V3-V1), where V1 and V3 are 25th and 75th percentiles of data and <i>k</i> is specified by IQRMultiplier syntax element.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'carling'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Carling's modification to Tukey's test:<p style="line-height: 1em; margin: 0px;">
+                        <br/>An outlier is defined as an observation outside the range V2 ± c*(V3 - V1), where V2 is median of data, V1 and V3 are 25th and 75th percentiles of data, and c is constant (which you cannot change).</p>
+                     <p style="line-height: 1em; margin: 0px;">
+                        <br/>For more information about Carling's modification, see:</p>
+                     <p style="line-height: 1em; margin: 0px;">
+                        <br/>
+                        <i>Carling, Kenneth. "Resistant outlier rules and the non-Gaussian case." Computational Statistics and Data Analysis 33, no. 3 (2000): 249-258.</i> Available at https://core.ac.uk/download/pdf/6559387.pdf.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'MAD-median'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Median absolute deviation (MAD), median of absolute values of residuals.<p style="line-height: 1em; margin: 0px;">
+                        <br/> For example, for <i>i</i> datapoints and median value of data <i>M</i>, MAD=median<sub>
+                           <i>i</i>
+                        </sub>(|x<sub>
+                           <i>i</i>
+                        </sub>-<i>M</i> |).</p>
+                  </div>
+               </td>
+            </tr>
+         </table>
+
+         <p style="line-height: 1em;">Specify either one <i>method</i>, which the function uses for all columns specified by TargetColumns, or specify a <i>method</i> for each column specified by TargetColumns.</p>
+      </dd>
+   </div>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>ApproxPercentile</dt>
+      <dd>[Optional] Specify whether the function calculates the percentiles used as filter limits exactly. Approximate percentiles are typically faster, but can fail when the number of groups exceeds one million.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>PercentileThreshold</dt>
+      <dd>[Optional] Specify the range of percentile values for 'percentile' filtering, [<i>perc_lower</i>, 100 -<i>perc_lower</i>].</dd>
+      <dd>Default: [5, 95]</dd>
+      <dt>PercentileAccuracy</dt>
+      <dd>[Optional] Specify the accuracy of percentiles used for filtering.</dd>
+      <dd>Default: 0.5%</dd>
+      <dt>IQRMultiplier</dt>
+      <dd>[Optional] Specify the multiplier of interquartile range for 'tukey' filtering.</dd>
+      <dd>Default: 1.5</dd>
+      <dt>RemoveTail</dt>
+      <dd>[Optional] Specify the side of the distribution to filter.</dd>
+      <dd>Default: 'both'</dd>
+      <dt>ReplacementValue</dt>
+      <dd>[Optional] Specify how the function handles outliers:<a name="table_dgf_1zz_fdb"> </a>
+         <table class="introtable">
+            <a name="table_dgf_1zz_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'delete'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Function does not copy row to output table.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'null'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Function copies row to output table, replacing each outlier with value NULL.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'median'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Function copies row to output table, replacing each outlier with median value for its group.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <i>newval</i>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Function copies row to output table, replacing each outlier with <i>newval</i>, which must be a numeric value.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>MadScaleConstant</dt>
+      <dd>[Optional] Specify the scale constant used with 'MAD-median' filtering; a DOUBLE PRECISION value.</dd>
+      <dd>Default: 1.4826, which means MAD = 1.4826 * median(|x - median(x)|)</dd>
+      <dt>MadThreshold</dt>
+      <dd>[Optional] Specify the threshold used with 'MAD-median' filtering; a DOUBLE PRECISION value.</dd>
+      <dd>Default: 3, which means that |x-median(x)|/MAD &gt; 3 is flagged as an outlier</dd>
+   </div>
+
+
+	
+   <a name="wbr1507833943655"> </a>
+   <h2>OutlierFilter Input</h2>
+   <a name="section_uds_lks_ycb"> </a>
+   <h3>InputTable Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BYTEINT, SMALLINT, INTEGER, BIGINT, NUMERIC, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>target_column</i>.] Numeric data to filter.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>group_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>group_column</i>.] Column by which to group data.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="pyp1507833948082"> </a>
+   <h2>OutlierFilter Output</h2>
+   <a name="section_frv_xjs_ycb"> </a>
+   <h3>Output Message Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">message</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Reports whether tables were created successfully.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_qn2_fks_ycb"> </a>
+   <h3>OutputTable Schema</h3>
+   <p style="line-height: 1em;">The table has the same schema as the OutlierFilter Input table.</p>
+
+   <a name="section_isn_4ks_ycb"> </a>
+   <h3>OutliersTable Schema</h3>
+   <p style="line-height: 1em;">This table appears only with OutliersTable syntax element. It has the same schema as the OutlierFilter Input table.</p>
+
+   <a name="obv1510711193551"> </a>
+   <h2>OutlierFilter Examples</h2>
+   <a name="vwe1527019299759"> </a>
+	  <h3>OutlierFilter Example: OutlierMethod ('percentile'), ReplacementValue ('null')</h3>
+   <a name="section_qks_tsr_t2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The InputTable has a time series of atmospheric pressure readings (in mbar) for five cities.</p>
+   <a name="table_qqm_wsr_t2b"> </a>
+   <table class="introtable">
+      <a name="table_qqm_wsr_t2b"> </a>
+      <h4 style="text-align: center;">InputTable: ville_pressuredata</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">sn</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">city</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">period</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">pressure_mbar</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Asheville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Asheville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 01:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Asheville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 02:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Asheville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 03:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Asheville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 04:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Asheville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 05:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Asheville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 06:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Asheville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 07:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Asheville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 08:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Asheville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 09:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.7</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Greenville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">26</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Greenville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 01:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">27</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Greenville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 02:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">28</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Greenville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 03:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">29</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Greenville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 04:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Greenville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 05:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">49</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Brownsville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Brownsville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 01:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">51</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Brownsville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 02:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">52</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Brownsville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 03:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">53</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Brownsville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 04:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">54</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Brownsville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 05:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">73</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">74</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 01:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">75</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 02:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1019.9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">76</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 03:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">77</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 04:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">78</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 05:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1019.9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">97</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Knoxville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">98</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Knoxville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 01:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">99</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Knoxville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 02:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1019.9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">100</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Knoxville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 03:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">101</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Knoxville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 04:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">102</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Knoxville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2010-01-01 05:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1019.9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_igj_lk3_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT  * FROM OutlierFilter (
+  ON ville_pressuredata AS InputTable
+  OUT TABLE OutputTable (of_output1)
+  USING
+  TargetColumns ('pressure_mbar ')
+  OutlierMethod ('percentile')
+  PercentileThreshold (1,90)
+  RemoveTail ('both')
+  ReplacementValue ('null')
+  GroupByColumns ('city')
+) AS dt  ;</tt>
+   </pre>
+   <a name="section_tvy_jk3_xdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The outlying values have been replaced by NULL.</p>
+   <pre>
+      <tt>
+ message                            
+ ---------------------------------- 
+ Output tables created successfully
+
+SELECT * FROM of_output1 ORDER BY 1,2,3;
+ sn  city        period                     pressure_mbar 
+ --- ----------- -------------------------- ------------- 
+   1 ashville    2010-01-01 00:00:00.000000        1020.5
+   2 ashville    2010-01-01 01:00:00.000000          NULL
+   3 ashville    2010-01-01 02:00:00.000000        1020.0
+   4 ashville    2010-01-01 03:00:00.000000          NULL
+   5 ashville    2010-01-01 04:00:00.000000        1020.2
+   6 ashville    2010-01-01 05:00:00.000000        1020.0
+   7 ashville    2010-01-01 06:00:00.000000        1020.3
+   8 ashville    2010-01-01 07:00:00.000000        1020.8
+   9 ashville    2010-01-01 08:00:00.000000        1021.3
+  10 ashville    2010-01-01 09:00:00.000000        1021.7
+  11 ashville    2010-01-01 10:00:00.000000        1022.1
+  12 ashville    2010-01-01 11:00:00.000000        1022.0
+  13 ashville    2010-01-01 12:00:00.000000        1021.1
+  14 ashville    2010-01-01 13:00:00.000000        1020.0
+  15 ashville    2010-01-01 14:00:00.000000        1019.3
+  16 ashville    2010-01-01 15:00:00.000000        1019.0
+  17 ashville    2010-01-01 16:00:00.000000        1019.2
+  18 ashville    2010-01-01 17:00:00.000000        1019.6
+  19 ashville    2010-01-01 18:00:00.000000        1020.1
+  20 ashville    2010-01-01 19:00:00.000000        1020.6
+  21 ashville    2010-01-01 20:00:00.000000        1020.9
+  22 ashville    2010-01-01 21:00:00.000000        1021.1
+  23 ashville    2010-01-01 22:00:00.000000        1021.0
+  24 ashville    2010-01-01 23:00:00.000000        1020.9
+  25 greenville  2010-01-01 00:00:00.000000        1020.6
+  26 greenville  2010-01-01 01:00:00.000000          NULL
+  27 greenville  2010-01-01 02:00:00.000000        1020.1
+  28 greenville  2010-01-01 03:00:00.000000          NULL
+  29 greenville  2010-01-01 04:00:00.000000        1020.2
+  30 greenville  2010-01-01 05:00:00.000000        1020.0
+  31 greenville  2010-01-01 06:00:00.000000        1020.4
+  32 greenville  2010-01-01 07:00:00.000000        1020.8
+  33 greenville  2010-01-01 08:00:00.000000        1021.3
+  34 greenville  2010-01-01 09:00:00.000000        1021.7
+  35 greenville  2010-01-01 10:00:00.000000        1022.0
+  36 greenville  2010-01-01 11:00:00.000000        1021.9
+  37 greenville  2010-01-01 12:00:00.000000        1021.1
+  38 greenville  2010-01-01 13:00:00.000000        1020.0
+  39 greenville  2010-01-01 14:00:00.000000        1019.3
+  40 greenville  2010-01-01 15:00:00.000000        1019.0
+  41 greenville  2010-01-01 16:00:00.000000        1019.2
+  42 greenville  2010-01-01 17:00:00.000000        1019.6
+  43 greenville  2010-01-01 18:00:00.000000        1020.1
+  44 greenville  2010-01-01 19:00:00.000000        1020.6
+  45 greenville  2010-01-01 20:00:00.000000        1020.9
+  46 greenville  2010-01-01 21:00:00.000000        1021.0
+  47 greenville  2010-01-01 22:00:00.000000        1020.9
+  48 greenville  2010-01-01 23:00:00.000000        1020.9
+  49 brownsville 2010-01-01 00:00:00.000000        1020.5
+  50 brownsville 2010-01-01 01:00:00.000000          NULL
+  51 brownsville 2010-01-01 02:00:00.000000        1020.0
+  52 brownsville 2010-01-01 03:00:00.000000          NULL
+  53 brownsville 2010-01-01 04:00:00.000000        1020.2
+  54 brownsville 2010-01-01 05:00:00.000000        1020.0
+  55 brownsville 2010-01-01 06:00:00.000000        1020.3
+  56 brownsville 2010-01-01 07:00:00.000000        1020.8
+  57 brownsville 2010-01-01 08:00:00.000000        1021.2
+  58 brownsville 2010-01-01 09:00:00.000000        1021.6
+  59 brownsville 2010-01-01 10:00:00.000000        1022.0
+  60 brownsville 2010-01-01 11:00:00.000000        1021.9
+  61 brownsville 2010-01-01 12:00:00.000000        1021.0
+  62 brownsville 2010-01-01 13:00:00.000000        1019.9
+  63 brownsville 2010-01-01 14:00:00.000000        1019.2
+  64 brownsville 2010-01-01 15:00:00.000000        1019.0
+  65 brownsville 2010-01-01 16:00:00.000000        1019.2
+  66 brownsville 2010-01-01 17:00:00.000000        1019.6
+  67 brownsville 2010-01-01 18:00:00.000000        1020.0
+  68 brownsville 2010-01-01 19:00:00.000000        1020.5
+  69 brownsville 2010-01-01 20:00:00.000000        1020.8
+  70 brownsville 2010-01-01 21:00:00.000000        1020.9
+  71 brownsville 2010-01-01 22:00:00.000000        1020.9
+  72 brownsville 2010-01-01 23:00:00.000000        1020.8
+  73 nashville   2010-01-01 00:00:00.000000        1020.4
+  74 nashville   2010-01-01 01:00:00.000000          NULL
+  75 nashville   2010-01-01 02:00:00.000000        1019.9
+  76 nashville   2010-01-01 03:00:00.000000          NULL
+  77 nashville   2010-01-01 04:00:00.000000        1020.1
+  78 nashville   2010-01-01 05:00:00.000000        1019.9
+  79 nashville   2010-01-01 06:00:00.000000        1020.2
+  80 nashville   2010-01-01 07:00:00.000000        1020.6
+  81 nashville   2010-01-01 08:00:00.000000        1021.1
+  82 nashville   2010-01-01 09:00:00.000000        1021.5
+  83 nashville   2010-01-01 10:00:00.000000        1021.9
+  84 nashville   2010-01-01 11:00:00.000000        1021.8
+  85 nashville   2010-01-01 12:00:00.000000        1021.0
+  86 nashville   2010-01-01 13:00:00.000000        1019.8
+  87 nashville   2010-01-01 14:00:00.000000        1019.2
+  88 nashville   2010-01-01 15:00:00.000000        1018.9
+  89 nashville   2010-01-01 16:00:00.000000        1019.1
+  90 nashville   2010-01-01 17:00:00.000000        1019.5
+  91 nashville   2010-01-01 18:00:00.000000        1019.9
+  92 nashville   2010-01-01 19:00:00.000000        1020.4
+  93 nashville   2010-01-01 20:00:00.000000        1020.7
+  94 nashville   2010-01-01 21:00:00.000000        1020.9
+  95 nashville   2010-01-01 22:00:00.000000        1020.8
+  96 nashville   2010-01-01 23:00:00.000000        1020.7
+  97 knoxville   2010-01-01 00:00:00.000000        1020.4
+  98 knoxville   2010-01-01 01:00:00.000000          NULL
+  99 knoxville   2010-01-01 02:00:00.000000        1019.9
+ 100 knoxville   2010-01-01 03:00:00.000000          NULL
+ 101 knoxville   2010-01-01 04:00:00.000000        1020.0
+ 102 knoxville   2010-01-01 05:00:00.000000        1019.9
+ 103 knoxville   2010-01-01 06:00:00.000000        1020.2
+ 104 knoxville   2010-01-01 07:00:00.000000        1020.6
+ 105 knoxville   2010-01-01 08:00:00.000000        1021.1
+ 106 knoxville   2010-01-01 09:00:00.000000        1021.5
+ 107 knoxville   2010-01-01 10:00:00.000000        1021.9
+ 108 knoxville   2010-01-01 11:00:00.000000        1021.8
+ 109 knoxville   2010-01-01 12:00:00.000000        1021.0
+ 110 knoxville   2010-01-01 13:00:00.000000        1019.9
+ 111 knoxville   2010-01-01 14:00:00.000000        1019.2
+ 112 knoxville   2010-01-01 15:00:00.000000        1018.9
+ 113 knoxville   2010-01-01 16:00:00.000000        1019.2
+ 114 knoxville   2010-01-01 17:00:00.000000        1019.6
+ 115 knoxville   2010-01-01 18:00:00.000000        1020.0
+ 116 knoxville   2010-01-01 19:00:00.000000        1020.5
+ 117 knoxville   2010-01-01 20:00:00.000000        1020.8
+ 118 knoxville   2010-01-01 21:00:00.000000        1020.9
+ 119 knoxville   2010-01-01 22:00:00.000000        1020.9
+ 120 knoxville   2010-01-01 23:00:00.000000        1020.8</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="aul1527019335958"> </a>
+	  <h3>OutlierFilter Example: OutlierMethod ('MAD-median'), ReplacementValue ('median')</h3>
+
+	  <a name="section_qks_tsr_t2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: ville_pressuredata, as in OutlierFilter Example: OutlierMethod ('percentile'), ReplacementValue ('null')</li>
+   </ul>
+
+
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM OutlierFilter (
+ ON ville_pressuredata AS InputTable
+ OUT TABLE OutputTable (of_output2)
+ OUT TABLE OutliersTable (of_outlier2)
+ USING
+ TargetColumns ('pressure_mbar')
+ ReplacementValue ('median')
+ OutlierMethod ('MAD-median')
+ MADScaleConstant (1.4826)
+ MADThreshold (3)
+ GroupByColumns ('city')
+) AS dt ;</tt>
+   </pre>
+		
+   <a name="section_tvy_jk3_xdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The outlying values have been replaced with the median value for the group.</p>
+   <pre>
+      <tt>
+ message                            
+ ---------------------------------- 
+ Output tables created successfully
+
+SELECT * FROM of_output2 ORDER BY 1, 2, 3;
+ sn  city        period                     pressure_mbar 
+ --- ----------- -------------------------- ------------- 
+   1 ashville    2010-01-01 00:00:00.000000        1020.5
+   2 ashville    2010-01-01 01:00:00.000000        1020.8
+   3 ashville    2010-01-01 02:00:00.000000        1020.0
+   4 ashville    2010-01-01 03:00:00.000000        1020.8
+   5 ashville    2010-01-01 04:00:00.000000        1020.2
+   6 ashville    2010-01-01 05:00:00.000000        1020.0
+   7 ashville    2010-01-01 06:00:00.000000        1020.3
+   8 ashville    2010-01-01 07:00:00.000000        1020.8
+   9 ashville    2010-01-01 08:00:00.000000        1021.3
+  10 ashville    2010-01-01 09:00:00.000000        1021.7
+  11 ashville    2010-01-01 10:00:00.000000        1022.1
+  12 ashville    2010-01-01 11:00:00.000000        1022.0
+  13 ashville    2010-01-01 12:00:00.000000        1021.1
+  14 ashville    2010-01-01 13:00:00.000000        1020.0
+  15 ashville    2010-01-01 14:00:00.000000        1019.3
+  16 ashville    2010-01-01 15:00:00.000000        1019.0
+  17 ashville    2010-01-01 16:00:00.000000        1019.2
+  18 ashville    2010-01-01 17:00:00.000000        1019.6
+  19 ashville    2010-01-01 18:00:00.000000        1020.1
+  20 ashville    2010-01-01 19:00:00.000000        1020.6
+  21 ashville    2010-01-01 20:00:00.000000        1020.9
+  22 ashville    2010-01-01 21:00:00.000000        1021.1
+  23 ashville    2010-01-01 22:00:00.000000        1021.0
+  24 ashville    2010-01-01 23:00:00.000000        1020.9
+  25 greenville  2010-01-01 00:00:00.000000        1020.6
+  26 greenville  2010-01-01 01:00:00.000000        1020.8
+  27 greenville  2010-01-01 02:00:00.000000        1020.1
+  28 greenville  2010-01-01 03:00:00.000000        1020.8
+  29 greenville  2010-01-01 04:00:00.000000        1020.2
+  30 greenville  2010-01-01 05:00:00.000000        1020.0
+  31 greenville  2010-01-01 06:00:00.000000        1020.4
+  32 greenville  2010-01-01 07:00:00.000000        1020.8
+  33 greenville  2010-01-01 08:00:00.000000        1021.3
+  34 greenville  2010-01-01 09:00:00.000000        1021.7
+  35 greenville  2010-01-01 10:00:00.000000        1022.0
+  36 greenville  2010-01-01 11:00:00.000000        1021.9
+  37 greenville  2010-01-01 12:00:00.000000        1021.1
+  38 greenville  2010-01-01 13:00:00.000000        1020.0
+  39 greenville  2010-01-01 14:00:00.000000        1019.3
+  40 greenville  2010-01-01 15:00:00.000000        1019.0
+  41 greenville  2010-01-01 16:00:00.000000        1019.2
+  42 greenville  2010-01-01 17:00:00.000000        1019.6
+  43 greenville  2010-01-01 18:00:00.000000        1020.1
+  44 greenville  2010-01-01 19:00:00.000000        1020.6
+  45 greenville  2010-01-01 20:00:00.000000        1020.9
+  46 greenville  2010-01-01 21:00:00.000000        1021.0
+  47 greenville  2010-01-01 22:00:00.000000        1020.9
+  48 greenville  2010-01-01 23:00:00.000000        1020.9
+  49 brownsville 2010-01-01 00:00:00.000000        1020.5
+  50 brownsville 2010-01-01 01:00:00.000000        1020.8
+  51 brownsville 2010-01-01 02:00:00.000000        1020.0
+  52 brownsville 2010-01-01 03:00:00.000000        1020.8
+  53 brownsville 2010-01-01 04:00:00.000000        1020.2
+  54 brownsville 2010-01-01 05:00:00.000000        1020.0
+  55 brownsville 2010-01-01 06:00:00.000000        1020.3
+  56 brownsville 2010-01-01 07:00:00.000000        1020.8
+  57 brownsville 2010-01-01 08:00:00.000000        1021.2
+  58 brownsville 2010-01-01 09:00:00.000000        1021.6
+  59 brownsville 2010-01-01 10:00:00.000000        1022.0
+  60 brownsville 2010-01-01 11:00:00.000000        1021.9
+  61 brownsville 2010-01-01 12:00:00.000000        1021.0
+  62 brownsville 2010-01-01 13:00:00.000000        1019.9
+  63 brownsville 2010-01-01 14:00:00.000000        1019.2
+  64 brownsville 2010-01-01 15:00:00.000000        1019.0
+  65 brownsville 2010-01-01 16:00:00.000000        1019.2
+  66 brownsville 2010-01-01 17:00:00.000000        1019.6
+  67 brownsville 2010-01-01 18:00:00.000000        1020.0
+  68 brownsville 2010-01-01 19:00:00.000000        1020.5
+  69 brownsville 2010-01-01 20:00:00.000000        1020.8
+  70 brownsville 2010-01-01 21:00:00.000000        1020.9
+  71 brownsville 2010-01-01 22:00:00.000000        1020.9
+  72 brownsville 2010-01-01 23:00:00.000000        1020.8
+  73 nashville   2010-01-01 00:00:00.000000        1020.4
+  74 nashville   2010-01-01 01:00:00.000000        1020.6
+  75 nashville   2010-01-01 02:00:00.000000        1019.9
+  76 nashville   2010-01-01 03:00:00.000000        1020.6
+  77 nashville   2010-01-01 04:00:00.000000        1020.1
+  78 nashville   2010-01-01 05:00:00.000000        1019.9
+  79 nashville   2010-01-01 06:00:00.000000        1020.2
+  80 nashville   2010-01-01 07:00:00.000000        1020.6
+  81 nashville   2010-01-01 08:00:00.000000        1021.1
+  82 nashville   2010-01-01 09:00:00.000000        1021.5
+  83 nashville   2010-01-01 10:00:00.000000        1021.9
+  84 nashville   2010-01-01 11:00:00.000000        1021.8
+  85 nashville   2010-01-01 12:00:00.000000        1021.0
+  86 nashville   2010-01-01 13:00:00.000000        1019.8
+  87 nashville   2010-01-01 14:00:00.000000        1019.2
+  88 nashville   2010-01-01 15:00:00.000000        1018.9
+  89 nashville   2010-01-01 16:00:00.000000        1019.1
+  90 nashville   2010-01-01 17:00:00.000000        1019.5
+  91 nashville   2010-01-01 18:00:00.000000        1019.9
+  92 nashville   2010-01-01 19:00:00.000000        1020.4
+  93 nashville   2010-01-01 20:00:00.000000        1020.7
+  94 nashville   2010-01-01 21:00:00.000000        1020.9
+  95 nashville   2010-01-01 22:00:00.000000        1020.8
+  96 nashville   2010-01-01 23:00:00.000000        1020.7
+  97 knoxville   2010-01-01 00:00:00.000000        1020.4
+  98 knoxville   2010-01-01 01:00:00.000000        1020.6
+  99 knoxville   2010-01-01 02:00:00.000000        1019.9
+ 100 knoxville   2010-01-01 03:00:00.000000        1020.6
+ 101 knoxville   2010-01-01 04:00:00.000000        1020.0
+ 102 knoxville   2010-01-01 05:00:00.000000        1019.9
+ 103 knoxville   2010-01-01 06:00:00.000000        1020.2
+ 104 knoxville   2010-01-01 07:00:00.000000        1020.6
+ 105 knoxville   2010-01-01 08:00:00.000000        1021.1
+ 106 knoxville   2010-01-01 09:00:00.000000        1021.5
+ 107 knoxville   2010-01-01 10:00:00.000000        1021.9
+ 108 knoxville   2010-01-01 11:00:00.000000        1021.8
+ 109 knoxville   2010-01-01 12:00:00.000000        1021.0
+ 110 knoxville   2010-01-01 13:00:00.000000        1019.9
+ 111 knoxville   2010-01-01 14:00:00.000000        1019.2
+ 112 knoxville   2010-01-01 15:00:00.000000        1018.9
+ 113 knoxville   2010-01-01 16:00:00.000000        1019.2
+ 114 knoxville   2010-01-01 17:00:00.000000        1019.6
+ 115 knoxville   2010-01-01 18:00:00.000000        1020.0
+ 116 knoxville   2010-01-01 19:00:00.000000        1020.5
+ 117 knoxville   2010-01-01 20:00:00.000000        1020.8
+ 118 knoxville   2010-01-01 21:00:00.000000        1020.9
+ 119 knoxville   2010-01-01 22:00:00.000000        1020.9
+ 120 knoxville   2010-01-01 23:00:00.000000        1020.8
+
+
+SELECT * FROM of_outlier2 ORDER BY 1, 2, 3;
+
+ sn  city        period                     pressure_mbar 
+ --- ----------- -------------------------- ------------- 
+   2 ashville    2010-01-01 01:00:00.000000        9000.0
+   4 ashville    2010-01-01 03:00:00.000000       10000.0
+  26 greenville  2010-01-01 01:00:00.000000        9000.0
+  28 greenville  2010-01-01 03:00:00.000000       10000.0
+  50 brownsville 2010-01-01 01:00:00.000000        9000.0
+  52 brownsville 2010-01-01 03:00:00.000000       10000.0
+  74 nashville   2010-01-01 01:00:00.000000        9000.0
+  76 nashville   2010-01-01 03:00:00.000000       10000.0
+  98 knoxville   2010-01-01 01:00:00.000000        9000.0
+ 100 knoxville   2010-01-01 03:00:00.000000       10000.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

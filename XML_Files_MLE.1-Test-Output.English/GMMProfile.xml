@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="edr1508194035653"> </a>
+	  <h1>GMMProfile</h1>
+
+	
+		<p style="line-height: 1em;">The GMMProfile function takes the output of the function GMM and outputs information about how each cluster diverges from the global data statistics.</p>
+
+	
+   <a name="yde1507734769997"> </a>
+   <h2>GMMProfile Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.3</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GMMProfile (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY 1
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="yja1507734774431"> </a>
+   <h2>GMMProfile Input</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">The input table is the GMM Output OutputTable, a model file.</p>
+
+   <a name="tij1507734778083"> </a>
+   <h2>GMMProfile Output</h2>
+   <a name="section_dmr_1pd_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cluster_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Cluster identification number.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">dimension</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Input dimension name.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">delta_mean</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Difference between mean of cluster and mean of data set along each dimension.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">divergence</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Estimated Kullback-Leibler divergence between cluster and data set along each dimension.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="oxj1507734781714"> </a>
+   <h2>GMMProfile Examples</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">These examples show the delta mean and divergence for each model created with GMM.</p>
+
+   <a name="mrd1466004866353"> </a>
+   <h3>GMMProfile Example: Basic GMM, Spherical Covariance, Packed Output</h3>
+   <a name="section_dn2_pft_rdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: gmm_output_ex1, output by GMM Example: Basic GMM, Spherical Covariance, Packed Output</li>
+   </ul>
+
+   <a name="section_N10018_N1000E_N10001"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GMMProfile (
+  ON gmm_output_ex1 PARTITION BY 1
+) AS dt;</tt>
+   </pre>
+   <a name="section_lld_qft_rdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ cluster_id dimension delta_mean           divergence         
+ ---------- --------- -------------------- ------------------ 
+          0         0  -0.8683333333337775  2.352317121517356
+          0         1   0.3624999999821591   1.06692144493526
+          0         2  -2.3274999999740156  16.91053063503435
+          0         3  -0.9524999999859484 2.9487939520833013
+          1         0  -0.6311092718136166  1.872749456485776
+          1         1  -0.7129568015279435 3.0375092869508227
+          1         2 -0.24574367285799514 11.872102517773868
+          1         3 -0.13376997356364878  2.145435485671642
+          2         0   0.5389789434803692 5.1484229268155435
+          2         1 -0.12893547898895083  0.969666816498592
+          2         2   1.3024297877141255 28.959753927335363
+          2         3   0.5362697376272012  5.129335671098968</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="evz1466004781021"> </a>
+   <h3>GMMProfile Example: Basic GMM, Diagonal Covariance, Unpacked Output</h3>
+   <a name="section_dn2_pft_rdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: gmm_output_ex2, output by GMM Example: Basic GMM, Diagonal Covariance, Unpacked Output</li>
+   </ul>
+
+   <a name="section_hms_wft_rdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GMMProfile (
+  ON gmm_output_ex2 PARTITION BY 1
+) AS dt;</tt>
+   </pre>
+   <a name="section_lld_qft_rdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ cluster_id dimension    delta_mean           divergence            
+ ---------- ------------ -------------------- --------------------- 
+          0 sepal_length  -1.3658333333333366    15.342132372030921
+          0 sepal_width   -0.7550000000000016    14.834050738899432
+          0 petal_length  -2.4700000000000024    19.130912814339993
+          0 petal_width   -0.9050000000000005    15.675363062873892
+          1 sepal_length   0.4341665830400491 1.5367707394138987E10
+          1 sepal_width  -0.18124996295211418   1.840104401880575E9
+          1 petal_length   1.1637497791844298  5.783072541030532E10
+          1 petal_width    0.4762499242214078   8.656770301204807E9
+          2 sepal_length  -0.8555769287192753  1.6207265395178976E9
+          2 sepal_width   0.39115384879464943   5.990384704575897E9
+          2 petal_length  -2.3238461800148213  1.9123928253990194E8
+          2 petal_width   -0.9537179897227525   6.089740988974346E7</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="frz1466004781086"> </a>
+   <h3>GMMProfile Example: DP-GMM, Full Covariance, Unpacked Output</h3>
+   <a name="section_dn2_pft_rdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: dpgmm_output_ex3, output by GMM Example: DP-GMM, Full Covariance, Unpacked Output</li>
+   </ul>
+
+   <a name="section_n2y_wft_rdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GMMProfile (
+  ON dpgmm_output_ex3 PARTITION BY 1
+) AS dt;</tt>
+   </pre>
+   <a name="section_lld_qft_rdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ cluster_id dimension    delta_mean            divergence           
+ ---------- ------------ --------------------- -------------------- 
+          0 sepal_length  4.738958765390484E-5 8.428006765481954E-4
+          0 sepal_width  2.4945504333396743E-5 2.421627114882355E-4
+          0 petal_length 2.9848167462291975E-5 4.053202021469186E-4
+          0 petal_width   9.461584411438975E-6 5.663770946625795E-5
+          1 sepal_length    -5.734145828813979     10.5902460737227
+          1 sepal_width     -3.018409036720571    4.517675838918045
+          1 petal_length    -3.611631867354723    2.740257586317952
+          1 petal_width     -1.144852856350053   1.0911050602645518
+          2 sepal_length    -5.734145828813979     10.5902460737227
+          2 sepal_width     -3.018409036720571    4.517675838918045
+          2 petal_length    -3.611631867354723    2.740257586317952
+          2 petal_width     -1.144852856350053   1.0911050602645518</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

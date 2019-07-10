@@ -1,0 +1,662 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="wvn1506435412030"> </a>
+	  <h1>CCMPrepare</h1>
+
+	  <p style="line-height: 1em;">The CCMPrepare function prepares an input table for the CCM function by adding a partition column, ccm_id, and partitioning the data. Using the CCMPrepare function is optional. However, partitioning the data, instead of having all sequences on one vworker, may increase the speed of the CCM function for large data sets consisting of multiple sequences.</p>
+
+   <a name="sms1506435509358"> </a>
+	  <h2>CCMPrepare Syntax</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Version 1.2</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM CCMPrepare (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY { 1 | <i>key</i> }
+) AS <i>alias</i>;</tt>
+   </pre>
+
+	
+   <a name="tsj1506435584706"> </a>
+	  <h2>CCMPrepare Input</h2>
+
+	  <a name="section_bmn_rpm_wcb"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>sequence_id</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any except DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Time sequence identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>period_id</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Identifier of time period within time sequence.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>timeseries_value</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears one or more times.] Time series value to test for potential causal relationships.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+   <a name="uje1506435686761"> </a>
+	  <h2>CCMPrepare Output</h2>
+
+	  <a name="section_xsh_tpm_wcb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ccm_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains partition column that function uses internally to partition input data across workers consistently over multiple function calls.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>sequence_id</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any except DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains time sequence identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>period_id</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains identifier of time period within time sequence.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>timeseries_value</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains time series values to test for causal relationships. The table can have more than one such column.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+   <a name="ost1510766054709"> </a>
+   <h2>CCMPrepare Example</h2>
+   <a name="section_qjd_tq2_kdb"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">The input table, ccmprepare_input, is a collection of nine time series consisting of 10 values for each of three variables (expenditure, income, and investment).</p>
+   <a name="table_lbv_hr2_kdb"> </a>
+   <table class="introtable">
+      <a name="table_lbv_hr2_kdb"> </a>
+      <h4 style="text-align: center;">ccmprepare_input</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">period</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">expenditure</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">income</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">investment</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">415</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">451</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">180</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">421</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">465</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">179</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">434</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">485</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">185</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">448</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">493</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">192</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">459</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">509</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">211</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">458</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">520</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">202</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">497</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">521</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">207</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">487</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">540</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">214</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">497</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">548</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">231</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">510</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">558</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">229</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">516</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">574</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">234</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">525</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">583</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">237</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">591</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">206</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">538</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">599</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">250</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">546</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">610</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">259</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">555</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">627</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">263</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">574</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">642</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">264</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">574</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">653</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">280</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">586</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">660</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">282</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">602</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">694</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">292</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ln4_tq2_kdb"> </a>
+   <h3>SQL Call</h3>
+   <p style="line-height: 1em;">This call splits the input sequences (column_id) into partitions—one partition for each vworker. The partitioned sequences are identified by column ccm_id in the output.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE ccm_input;
+
+CREATE MULTISET TABLE ccm_input AS (
+  SELECT * FROM CCMPrepare (
+    ON ccmprepare_input PARTITION BY id
+  ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_kty_tq2_kdb"> </a>
+   <h3>Output</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ccm_input ORDER BY 1, 2, 3;</tt>
+   </pre>
+   <pre>
+      <tt>
+ ccm_id id period expenditure income investment 
+ ------ -- ------ ----------- ------ ---------- 
+      0  3      1       617.0  709.0      286.0
+      0  3      2       639.0  734.0      302.0
+      0  3      3       653.0  751.0      304.0
+      0  3      4       668.0  763.0      307.0
+      0  3      5       679.0  766.0      317.0
+      0  3      6       686.0  779.0      314.0
+      0  3      7       697.0  808.0      306.0
+      0  3      8       688.0  785.0      304.0
+      0  3      9       704.0  794.0      292.0
+      0  3     10       699.0  799.0      275.0
+      0  7      1      1101.0 1290.0      526.0
+      0  7      2      1102.0 1314.0      519.0
+      0  7      3      1145.0 1346.0      516.0
+      0  7      4      1173.0 1385.0      531.0
+      0  7      5      1216.0 1416.0      573.0
+      0  7      6      1229.0 1436.0      551.0
+      0  7      7      1242.0 1462.0      538.0
+      0  7      8      1267.0 1493.0      532.0
+      0  7      9      1295.0 1516.0      558.0
+      0  7     10      1317.0 1557.0      524.0
+      1  4      1       709.0  799.0      273.0
+      1  4      2       715.0  812.0      301.0
+      1  4      3       724.0  837.0      280.0
+      1  4      4       746.0  853.0      289.0
+      1  4      5       758.0  876.0      303.0
+      1  4      6       779.0  897.0      322.0
+      1  4      7      1774.0 2040.0      635.0
+      1  4      8      1807.0 2070.0      658.0
+      1  4      9      1831.0 2121.0      675.0
+      1  4     10      1842.0 2132.0      700.0
+      1  8      1      1355.0 1613.0      525.0
+      1  8      2      1371.0 1642.0      519.0
+      1  8      3      1402.0 1690.0      526.0
+      1  8      4      1452.0 1759.0      510.0
+      1  8      5      1485.0 1756.0      519.0
+      1  8      6      1516.0 1780.0      538.0
+      1  8      7      1549.0 1807.0      549.0
+      1  8      8      1567.0 1831.0      570.0
+      1  8      9      1588.0 1873.0      559.0
+      1  8     10      1631.0 1897.0      584.0
+      2  1      1       415.0  451.0      180.0
+      2  1      2       421.0  465.0      179.0
+      2  1      3       434.0  485.0      185.0
+      2  1      4       448.0  493.0      192.0
+      2  1      5       459.0  509.0      211.0
+      2  1      6       458.0  520.0      202.0
+      2  1      7       479.0  521.0      207.0
+      2  1      8       487.0  540.0      214.0
+      2  1      9       497.0  548.0      231.0
+      2  1     10       510.0  558.0      229.0
+      2  5      1      1890.0 2199.0      692.0
+      2  5      2      1958.0 2253.0      759.0
+      2  5      3      1948.0 2276.0      782.0
+      2  5      4      1994.0 2318.0      816.0
+      2  5      5      2061.0 2369.0      844.0
+      2  5      6      2056.0 2423.0      830.0
+      2  5      7      2102.0 2457.0      853.0
+      2  5      8      2121.0 2470.0      852.0
+      2  5      9       798.0  922.0      315.0
+      2  5     10       816.0  949.0      339.0
+      2  9      1      1650.0 1910.0      611.0
+      2  9      2      1685.0 1943.0      597.0
+      2  9      3      1722.0 1976.0      603.0
+      2  9      4      1752.0 2018.0      619.0
+      2  9      5      2145.0 2521.0      833.0
+      2  9      6      2164.0 2545.0      860.0
+      2  9      7      2206.0 2580.0      870.0
+      2  9      8      2225.0 2620.0      830.0
+      2  9      9      2235.0 2639.0      801.0
+      2  9     10      2237.0 2618.0      824.0
+      3  2      1       516.0  574.0      234.0
+      3  2      2       525.0  583.0      237.0
+      3  2      3       529.0  591.0      206.0
+      3  2      4       538.0  599.0      250.0
+      3  2      5       546.0  610.0      259.0
+      3  2      6       555.0  627.0      263.0
+      3  2      7       574.0  642.0      264.0
+      3  2      8       574.0  653.0      280.0
+      3  2      9       586.0  660.0      282.0
+      3  2     10       602.0  694.0      292.0
+      3  6      1       837.0  979.0      364.0
+      3  6      2       858.0  988.0      371.0
+      3  6      3       881.0 1025.0      375.0
+      3  6      4       905.0 1063.0      432.0
+      3  6      5       934.0 1104.0      453.0
+      3  6      6       968.0 1131.0      460.0
+      3  6      7       983.0 1137.0      475.0
+      3  6      8      1013.0 1178.0      496.0
+      3  6      9      1034.0 1211.0      494.0
+      3  6     10      1064.0 1256.0      498.0
+</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

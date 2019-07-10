@@ -1,0 +1,1408 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="vcy1507767993321"> </a>
+	  <h1>NTree</h1>
+
+	
+		<p style="line-height: 1em;">The NTree function is a hierarchical analysis SQL function that can build and traverse tree structures on all worker machines. The function reads the data only once from the disk and creates the trees in memory.</p>
+
+		<p style="line-height: 1em;">The input data must be partitionable, and each partition must fit in
+			memory. Each partition can consist of multiple trees of any size. The function provides
+			different ways of handling cycles.</p>
+
+	
+   <a name="chc1507768926190"> </a>
+   <h2>NTree Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.3</h3>
+   <p>
+      <b>Note:</b>  This function requires "@coprocessor".</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NTree@coprocessor (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+    PARTITION BY { 1 | <i>partition_column</i> [,...] }
+    [ ORDER BY <i>ordering_column</i> [,...] ]
+  USING
+  RootNode (<i>root_node_expression</i>)
+  NodeID (<i>node_id_expression</i>)
+  ParentID (<i>parent_id_expression</i>)
+  [ AllowCycles ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  StartsWith ({ 'root' | 'leaf' | <i>starting_node_id_expression</i> })
+  Direction ({ 'up' | 'down' })
+  OutputType ({ 'end' | 'all' })
+  [ MaxDistance (<i>max_distance</i>) ]
+  [ OutputLogMessages ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'})]
+  Results (<i>aggregate</i> [,...])
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="wfw1507769030861"> </a>
+	  <h2>NTree Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>RootNode</dt>
+      <dd>Specify the BOOLEAN SQL expression that defines the root nodes of the trees (for example, <i>parent_id</i> IS NULL).</dd>
+      <dt>NodeID</dt>
+      <dd>Specify the SQL expression whose value uniquely identifies a node in the input table (for example, <i>order_id</i>).<p>
+            <b>Note:</b>  A node can appear multiple times in the data set, with different parents.</p>
+      </dd>
+      <dt>ParentID</dt>
+      <dd>Specify the SQL expression whose value identifies the parent node.</dd>
+      <dt>AllowCycles</dt>
+      <dd>[Optional] Specify whether trees can contain cycles. If not, a cycle in the data set causes the function to throw an exception. For information about cycles, see Cycles in NTree.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>StartsWith</dt>
+      <dd>Specify the node from which to start tree traversal—'root', 'leaf', or a SQL expression that identifies a node.</dd>
+      <dt>Direction</dt>
+      <dd>Specify the direction of tree traversal from the start node—up to the root node or down to the leaf nodes.</dd>
+      <dt>OutputType</dt>
+      <dd>Specify when to output a tuple—at every node along the traversal path ('all') or only at the end of the traversal path ('end').</dd>
+      <dt>MaxDistance</dt>
+      <dd>[Optional] Specify the maximum tree depth.</dd>
+      <dd>Default: 5</dd>
+      <dt>OutputLogMessages</dt>
+      <dd>[Optional] Specify whether the function prints log messages.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>Results</dt>
+      <dd>Specify aggregate operations to perform during tree traversal, using this syntax:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+               <i>operation</i> (<i>expression</i>) [ ALIAS <i>alias</i> ]</tt>
+         </pre>
+         <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+            <dt>
+               <i>operation</i>
+            </dt>
+            <dd>One of the following:<a name="table_c2v_ztz_fdb"> </a>
+               <table class="introtable">
+                  <a name="table_c2v_ztz_fdb"> </a>
+                  <tr>
+                     <th align="left">
+                        <div style="line-height: 1em;">
+                           <i>operation</i>
+                        </div>
+                     </th>
+                     <th align="left">
+                        <div style="line-height: 1em;">
+                           <i>operation</i> Action for Path from StartsWith Node to Last Traversed Node</div>
+                     </th>
+                  </tr>
+                  <tr>
+                     <td align="left">
+                        <div style="line-height: 1em;">PATH</div>
+                     </td>
+                     <td align="left">
+                        <div style="line-height: 1em;">Outputs value of <i>expression</i> for each node, separating values with '-&gt;'.</div>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td align="left">
+                        <div style="line-height: 1em;">SUM</div>
+                     </td>
+                     <td align="left">
+                        <div style="line-height: 1em;">Computes value of <i>expression</i> for each node and outputs sum of these values.</div>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td align="left">
+                        <div style="line-height: 1em;">LEVEL</div>
+                     </td>
+                     <td align="left">
+                        <div style="line-height: 1em;">Outputs number of hops.</div>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td align="left">
+                        <div style="line-height: 1em;">MAX</div>
+                     </td>
+                     <td align="left">
+                        <div style="line-height: 1em;">Computes value of <i>expression</i> for each node and outputs highest of these values.</div>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td align="left">
+                        <div style="line-height: 1em;">MIN</div>
+                     </td>
+                     <td align="left">
+                        <div style="line-height: 1em;">Computes value of <i>expression</i> for each node and outputs lowest of these values.</div>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td align="left">
+                        <div style="line-height: 1em;">IS_CYCLE</div>
+                     </td>
+                     <td align="left">
+                        <div style="line-height: 1em;">Outputs cycle (if any).</div>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td align="left">
+                        <div style="line-height: 1em;">AVG</div>
+                     </td>
+                     <td align="left">
+                        <div style="line-height: 1em;">Computes value of <i>expression</i> for each node and outputs average of these values.</div>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td align="left">
+                        <div style="line-height: 1em;">PROPAGATE</div>
+                     </td>
+                     <td align="left">
+                        <div style="line-height: 1em;">Evaluates <i>expression</i> with value of StartsWith node and propagates result to every node.</div>
+                     </td>
+                  </tr>
+               </table>
+
+            </dd>
+            <dt>
+               <i>expression</i>
+            </dt>
+            <dd>SQL expression. Must be * if operation is LEVEL or IS_CYCLE.</dd>
+            <dt>
+               <i>alias</i>
+            </dt>
+            <dd>Name of the output table column that contains the result of the operation.<p>
+                  <b>Note:</b>  The function ignores <i>alias</i> if it is the same as an input table column name.</p>
+            </dd>
+         </div>
+      </dd>
+      <dd>Default: The string <tt style="font-family: monospace;">
+            <i>operation</i>(<i>expression</i>)</tt>; for example, <tt style="font-family: monospace;">PATH(<i>node_name</i>)</tt>
+      </dd>
+   </div>
+
+
+	
+   <a name="ehz1507769293645"> </a>
+   <h2>Cycles in NTree</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">A cycle is unidirectional; that is, the output can be different for Direction('up') and Direction('down'). For example, consider this table:</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <h4 style="text-align: center;">emp_table_dept</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">department</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">order_column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">name</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">salary</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">mgr_id</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Marketing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Don</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">20000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Marketing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Pat</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">30000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Marketing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Donna</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Marketing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Kim</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">50000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Marketing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Fred</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">40000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Marketing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Mark</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">70000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Marketing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Rob</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Marketing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Mark</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Marketing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Dave</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">none</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Marketing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Dave</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Peter</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Peter</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">none</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sarah</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">20000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sophia</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">30000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Elizabeth</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">40000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Richard</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">50000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">18</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Carter</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">17</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sarah</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">20000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">John</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">70000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Jessica</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">80000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Jessica</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">80000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Elizabeth</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">40000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Richard</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">50000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">17</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Gary</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">90000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Richard</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">50000.00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">18</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NTree@coprocessor (
+  ON emp_table_dept
+  PARTITION BY department
+  ORDER BY order_column
+  RootNode (mgr_id = 'none')
+  ParentID (mgr_id)
+  NodeID (id)
+  StartsWith (id = '11')
+  <b>Direction ('up')</b>
+  OutputType ('end')
+  Results (PATH (name) AS path, path (id) AS path2, IS_CYCLE (*))
+  AllowCycles ('true')
+) ORDER BY path, path2;</tt>
+   </pre>
+   <a name="table_N102E4_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N102E4_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">path</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">path2</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">is_cycle</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sarah-&gt;Elizabeth-&gt;Jessica</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11-&gt;15-&gt;14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sarah-&gt;Elizabeth-&gt;Jessica-&gt;Sophia-&gt;Peter</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11-&gt;15-&gt;14-&gt;12-&gt;10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sarah-&gt;Elizabeth-&gt;Sophia-&gt;Peter</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11-&gt;15-&gt;12-&gt;10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sarah-&gt;Peter-&gt;Sophia</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11-&gt;10-&gt;12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">If you specify Direction('down') in the preceding query, it returns the following table.</p>
+   <a name="table_N1035E_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1035E_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">path</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">path2</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">is_cycle</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sarah-&gt;Jessica-&gt;Elizabeth</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11-&gt;14-&gt;15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">18</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sarah-&gt;Jessica-&gt;Elizabeth-&gt;Richard-&gt;Gary-&gt;Carter</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11-&gt;14-&gt;15-&gt;16-&gt;17-&gt;18</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sarah-&gt;John</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11-&gt;13</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+   </table>
+
+
+   <a name="sdx1507769625314"> </a>
+   <h2>NTree Input</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">The input table has the data from which to build trees. The only restriction on its schema is that the data must be partitionable and each partition must fit in memory.</p>
+
+   <a name="srv1507769795649"> </a>
+   <h2>NTree Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Node identifier from <i>node_id_expression</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">alias</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified aggregate function.] Result of aggregate function.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="cwy1510708611052"> </a>
+   <h2>NTree Examples</h2>
+   <a name="gaz1526068794580"> </a>
+	  <h3>NTree Example: Find Employee Reports</h3>
+
+	  <a name="section_kfc_qkg_5db"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, employee_table, contains the data to build a tree of employees. Each row represents one employee, identifying both the employee and his or her manager by identifier and name. The employee with no manager, Don, becomes the root of the tree. The other employees become children of their managers.</p>
+   <a name="table_cd4_jlg_5db"> </a>
+   <table class="introtable">
+      <a name="table_cd4_jlg_5db"> </a>
+      <h4 style="text-align: center;">employee_table</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">emp_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">emp_name</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">mgr_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">mgr_name</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">100</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Don</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NULL</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NULL</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">200</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Pat</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Don</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">300</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Donna</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Don</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">400</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Kim</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">200</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Pat</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">500</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Fred</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">400</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Kim</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_snw_mkg_5db"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">This call finds the employees who report to employee 100 (either directly or indirectly) by traversing the tree of employees from employee 100 downward.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NTree@coprocessor (
+  ON employee_table PARTITION BY 1
+  USING
+  RootNode (mgr_id IS NULL)
+  NodeID (emp_id)
+  ParentID (mgr_id)
+  Direction('Down')
+  StartsWith(emp_id=100)
+  OutputType('END')
+  Results (PATH(emp_name) AS path)
+) AS dt;</tt>
+   </pre>
+   <a name="section_hvl_nkg_5db"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The output table shows that employee 100, Don, has two direct reports, Donna and Pat, and two indirect reports, Kim (who reports to Pat) and Fred (who reports to Kim).</p>
+   <pre>
+      <tt>
+ id  path                
+ --- ------------------- 
+ 300 don-&gt;donna         
+ 500 don-&gt;pat-&gt;kim-&gt;fred</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="fcn1526068836473"> </a>
+	  <h3>NTree Example: Find Employee Management Chain</h3>
+
+	  <a name="section_nwq_pkg_5db"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>employee_table, as in NTree Example: Find Employee Reports</li>
+   </ul>
+
+   <a name="section_snw_mkg_5db"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">This call finds the management chain of employee 500 by traversing the tree of employees from employee 500 upward.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NTree@coprocessor (
+  ON employee_table PARTITION BY 1
+  USING
+  RootNode (mgr_id IS NULL)
+  NodeID (emp_id)
+  ParentID (mgr_id)
+  Direction ('Up') 
+  StartsWith (emp_id=500) 
+  OutputType ('END')
+  Results (PATH(emp_name) AS path)
+) AS dt ORDER BY 1;</tt>
+   </pre>
+   <a name="section_hvl_nkg_5db"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The output table shows that employee 500, Fred, reports to Kim, who reports to Pat, who reports to Don.</p>
+   <pre>
+      <tt>
+ id  path                
+ --- ------------------- 
+ 100 fred-&gt;kim-&gt;pat-&gt;don</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="sok1526068868216"> </a>
+	  <h3>NTree Example: Show Reporting Structure by Department</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, emp_table_by_dept, contains data to build trees of departments, and is partitioned by department. In each partition, each row represents one employee in the department, identifying the employee by identifier and name and his or her manager by identifier. Each employee with no manager becomes the root of the department tree. The other employees in that department become children of their managers.</p>
+   <a name="table_rg3_4mg_5db"> </a>
+   <table class="introtable">
+      <a name="table_rg3_4mg_5db"> </a>
+      <h4 style="text-align: center;">emp_table_by_dept</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">department</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">name</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">mgr_id</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Marketing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Dave</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">none</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Marketing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Kim</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Marketing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Donna</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Marketing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Rob</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Marketing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Fran</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Marketing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Mark</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Marketing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Richard</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Marketing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Pat</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Marketing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Don</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Peter</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">none</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sarah</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Dale</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">John</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sophia</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Jessy</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Gary</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">17</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Elizabeth</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">18</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Richard</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+      </tr>
+   </table>
+
+
+		
+   <a name="section_snw_mkg_5db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NTree@coprocessor (
+  ON emp_table_by_dept PARTITION BY department
+  USING
+  RootNode (mgr_id = 'none')
+  ParentID (mgr_id)
+  NodeID (id)
+  StartsWith ('ROOT') 
+  Direction ('DOWN')
+  OutputType ('ALL')
+  Results (PATH(name) AS path, PATH(id) AS path2)
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_hvl_nkg_5db"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The output table shows two department trees, whose roots are Dave and Peter.</p>
+   <pre>
+      <tt>
+ id path                       path2          
+ -- -------------------------- -------------- 
+  1 Dave                       1             
+  2 Dave-&gt;Kim                  1-&gt;2          
+  3 Dave-&gt;Donna                1-&gt;3          
+  4 Dave-&gt;Rob                  1-&gt;4          
+  5 Dave-&gt;Kim-&gt;Fran            1-&gt;2-&gt;5       
+  6 Dave-&gt;Kim-&gt;Mark            1-&gt;2-&gt;6       
+  7 Dave-&gt;Donna-&gt;Richard       1-&gt;3-&gt;7       
+  8 Dave-&gt;Rob-&gt;Pat             1-&gt;4-&gt;8       
+  9 Dave-&gt;Rob-&gt;Don             1-&gt;4-&gt;9       
+ 10 Peter                      10            
+ 11 Peter-&gt;Sarah               10-&gt;11        
+ 12 Peter-&gt;Dale                10-&gt;12        
+ 13 Peter-&gt;John                10-&gt;13        
+ 14 Peter-&gt;Dale-&gt;Jessy-&gt;Sophia 10-&gt;12-&gt;15-&gt;14
+ 15 Peter-&gt;Dale-&gt;Jessy         10-&gt;12-&gt;15    
+ 16 Peter-&gt;Dale-&gt;Gary          10-&gt;12-&gt;16    
+ 17 Peter-&gt;John-&gt;Elizabeth     10-&gt;13-&gt;17    
+ 18 Peter-&gt;John-&gt;Richard       10-&gt;13-&gt;18</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

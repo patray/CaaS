@@ -1,0 +1,1060 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="mcm1507661970733"> </a>
+	  <h1>Histogram</h1>
+
+	  <p style="line-height: 1em;">Histograms are useful for assessing the shape of a data distribution. The Histogram function calculates the frequency distribution of a data set using either the Sturges or Scott algorithm to compute binning (bin width and number of bins). The bin width is the range for each group of values. Binning algorithms make strong assumptions about the shape of the distribution. Appropriate bin width depends on the actual data distribution and analysis goals. The function maps each input row to one bin and returns the row count (frequency) and percentage of rows (proportion) of each bin.</p>
+   <p style="line-height: 1em;">ML Engine histogram implementation includes these capabilities:</p>
+   <ul>
+      <li>User-selected or automatic bin determination</li>
+      <li>User-selected left-inclusive or right-inclusive binning</li>
+      <li>Multiple histograms for distinct groups</li>
+   </ul>
+
+   <a name="lwc1507662302928"> </a>
+   <h2>Histogram Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.5</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Histogram (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  [ ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS CustomBinTable ]
+  OUT TABLE OutputTable (<i>output_table</i>)
+  USING
+  { AutoBin ({ 'Sturges' | 'Scott' | <i>number_of_bins</i> }) |
+    CustomBinColumn ('<i>breaks_col</i>') |
+    StartValue (<i>bin_start</i>)
+    BinSize (<i>bin_size</i>)
+    EndValue (<i>bin_end</i>)
+  }
+  TargetColumn ('<i>target_column</i>')
+  [ Inclusion ({ 'left' | 'right' }) ]
+  [ GroupbyColumns ({ '<i>group_column</i>' | <i>group_column_range</i> }[,...]) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="section_irp_4kj_rbb"> </a>
+   <h3>Bin Definition Options</h3>
+   <ul>
+      <li>The function determines the bin boundaries automatically, using one of two algorithms.</li>
+      <li>You specify the bin boundaries.</li>
+      <li>You provide the minimum and maximum values for the histogram and an optional bin size. If you specify a bin size, all bins have that size; if not, bins might not be the same size.</li>
+   </ul>
+
+   <a name="ino1507662339929"> </a>
+	  <h2>Histogram Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputTable</dt>
+      <dd>Specify the name for the table that the function creates for the output.</dd>
+      <dt>AutoBin</dt>
+      <dd>[Optional] If you specify this syntax element, you must not specify CustomBinTable, CustomBinColumn, StartValue, BinSize, or EndValue.<p style="line-height: 1em;">Specify either the algorithm for selecting bin boundaries or the approximate number of bins to find. The <i>number_of_bins</i> must be a positive integer.</p>
+         <p style="line-height: 1em;">Sturges algorithm for calculating bin width can be written as:</p>
+         <p style="line-height: 1em;">
+            <tt style="font-family: monospace;">
+               <i>w</i> = <i>r</i>/(1 + log<sub>2</sub>
+               <i>n</i>)</tt>
+         </p>
+         <p style="line-height: 1em;">where <i>w</i> is the bin width, <i>r</i> is the range of the data values and <i>n</i> is the number of elements in the data set. Sturges algorithm performs best if the data is normally distributed and <i>n</i> is at least 30.</p>
+         <p style="line-height: 1em;">The Scott algorithm for calculating bin width can be written as:</p>
+         <p style="line-height: 1em;">
+            <tt style="font-family: monospace;">
+               <i>w</i> = 3.49<i>s</i>/(<i>n</i>
+               <sup>1/3</sup>)</tt>
+         </p>
+         <p style="line-height: 1em;">where <i>w</i> is the bin width, <i>s</i> is the standard deviation of the data values and <i>n</i> is the number of elements in the data set. The number of bins is <i>r</i>/<i>w</i>, where <i>r</i> is the range of the data values. The Scott algorithm performs best on normally distributed data.</p>
+      </dd>
+      <dt>CustomBinColumn</dt>
+      <dd>[Required if you specify CustomBinTable, disallowed otherwise.] If you specify this syntax element, you must not specify AutoBin, StartValue, BinSize, or EndValue.<p style="line-height: 1em;">Specify the name of the CustomBinTable column that contains the boundary values. This column must have a numeric SQL data type.</p>
+      </dd>
+      <dt>StartValue</dt>
+      <dd>[Optional] If you specify this syntax element, you must also specify BinSize and EndValue, and you must not specify AutoBin, CustomBinTable, or CustomBinColumn.<p style="line-height: 1em;">Specify the smallest value to use in binning.</p>
+      </dd>
+      <dt>EndValue</dt>
+      <dd>[Optional] If you specify this syntax element, you must also specify StartValue and BinSize, and you must not specify AutoBin, CustomBinTable, or CustomBinColumn.<p style="line-height: 1em;">Specify the largest value to use in binning.</p>
+      </dd>
+      <dt>BinSize</dt>
+      <dd>[Optional] If you specify this syntax element, you must also specify StartValue and EndValue, and you must not specify AutoBin, CustomBinTable, or CustomBinColumn.<p style="line-height: 1em;">Specify this syntax element only for equally sized bins. The <i>bin_size</i> is the width of each bin, a positive DOUBLE PRECISION value.</p>
+      </dd>
+      <dt>GroupByColumns</dt>
+      <dd>[Optional] Specify the names of the InputTable columns that contain the group values for binning. These columns cannot contain DOUBLE PRECISION values.</dd>
+      <dt>Inclusion</dt>
+      <dd>[Optional] Specify whether to include points on bin boundaries in the bin on the left or the bin on the right.</dd>
+      <dd>Default: 'left'</dd>
+      <dt>TargetColumn</dt>
+      <dd>Specify the name of the InputTable column for which to compute statistics. This column must have a numeric SQL data type.</dd>
+   </div>
+
+
+	
+   <a name="rjt1507665360558"> </a>
+   <h2>Histogram Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>InputTable Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NUMERIC</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Values to sort.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>group_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>group_column</i>.] Column by which to group input data. Function produces separate histogram for each group.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_knv_g1j_h2b"> </a>
+   <h3>CustomBinTable Schema</h3>
+   <p style="line-height: 1em;">This table is optional.</p>
+   <a name="table_zjt_j1j_h2b"> </a>
+   <table class="introtable">
+      <a name="table_zjt_j1j_h2b"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">break</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Bin boundary.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="bvr1507662948840"> </a>
+   <h2>Histogram Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Message Schema</h3>
+   <a name="table_hhs_1ks_rcb"> </a>
+   <table class="introtable">
+      <a name="table_hhs_1ks_rcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">output_table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">States that output table is specified in OutputTable syntax element.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">output_columns</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Names of histogram output table columns.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ynv_gfw_xcb"> </a>
+   <h3>OutputTable Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>group_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>group_column</i>.] Column by which InputTable data is grouped.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">bin</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Bin identifier. Starts at 0.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">bin_start</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Lower boundary of bin.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">bin_end</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Upper boundary of bin.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">bin_count</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of input rows in bin.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">bin_percent</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Percent of input rows in bin.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="yzi1510786982190"> </a>
+   <h2>Histogram Examples</h2>
+   <a name="auh1524242329681"> </a>
+	  <h3>Histogram Example: AutoBin ('Sturges')</h3>
+
+	  <a name="section_g5j_klt_r2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The InputTable, cars_hist, has the cylinder (cyl) and horsepower (hp) data for different car models. The examples compute the histograms on the hp column.</p>
+   <a name="table_gr5_mlt_r2b"> </a>
+   <table class="introtable">
+      <a name="table_gr5_mlt_r2b"> </a>
+      <h4 style="text-align: center;">InputTable: cars_hist</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">name</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">cyl</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">hp</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Mazda RX4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">110</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Mazda RX4 Wag</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">110</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Datsun 710</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">93</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Hornet 4 Drive</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">110</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Hornet Sportabout</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">175</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Valiant</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">105</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Duster 360</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">245</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Merc 240D</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">62</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Merc 230</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">95</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Merc 280</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">123</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Merc 280C</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">123</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Merc 450SE</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">180</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Merc 450SL</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">180</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Merc 450SLC</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">180</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Cadillac Fleetwood</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">205</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Lincoln Continental</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">215</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">17</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Chrysler Imperial</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">230</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">18</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Fiat 128</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">19</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Honda Civic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">52</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">20</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Toyota Corolla</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">65</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">21</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Toyota Corona</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">97</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">22</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Dodge Challenger</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">150</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">23</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">AM CJavelin</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">150</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">24</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Camaro Z28</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">245</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Pontiac Firebird</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">175</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">26</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Fiat X1-9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">27</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Porsche 914-2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">91</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">28</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Lotus Europa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">113</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">29</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Ford Pantera L</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">264</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Ferrari Dino</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">175</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">31</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Maserati Bora</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">335</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">32</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Volvo 142E</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">109</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_gyv_mr3_4db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE cars_sturges_out;
+
+ SELECT * FROM Histogram(
+  ON cars_hist AS InputTable
+  OUT TABLE OutputTable (cars_sturges_out)
+  USING
+  AutoBin ('Sturges')
+  TargetColumn ('hp')
+) AS dt ORDER BY 1;</tt>
+   </pre>
+   <a name="section_jn2_nr3_4db"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ output_table                      output_columns                              
+ --------------------------------- ------------------------------------------- 
+ specified in OutputTable argument bin bin_start bin_end bin_count bin_percent</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM cars_sturges_out ORDER BY 1;</tt>
+   </pre>
+   <pre>
+      <tt>
+ bin bin_start bin_end bin_count bin_percent 
+ --- --------- ------- --------- ----------- 
+   0      50.0   100.0         9       28.13
+   1     100.0   150.0         8          25
+   2     150.0   200.0         8          25
+   3     200.0   250.0         5       15.63
+   4     250.0   300.0         1        3.13
+   5     300.0   350.0         1        3.13</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="yjx1524242402489"> </a>
+	  <h3>Histogram Example: AutoBin ('Scott')</h3>
+
+	  <a name="section_wnz_fmt_r2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: cars_hist, as in Histogram Example: AutoBin ('Sturges')</li>
+   </ul>
+
+   <a name="section_gyv_mr3_4db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE cars_scott_out;</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Histogram(
+  ON cars_hist AS InputTable
+  OUT TABLE OutputTable(cars_scott_out)
+  USING
+  AutoBin('Scott')
+  TargetColumn('hp')
+) AS dt ORDER BY 1;</tt>
+   </pre>
+   <a name="section_jn2_nr3_4db"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ output_table                      output_columns                              
+ --------------------------------- ------------------------------------------- 
+ specified in OutputTable argument bin bin_start bin_end bin_count bin_percent</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM cars_scott_out ORDER BY 1;</tt>
+   </pre>
+   <pre>
+      <tt>
+ bin bin_start bin_end bin_count bin_percent 
+ --- --------- ------- --------- ----------- 
+   0       0.0   100.0         9       28.13
+   1     100.0   200.0        16          50
+   2     200.0   300.0         6       18.75
+   3     300.0   400.0         1        3.13</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="opk1507664990250"> </a>
+   <h3>Histogram Example: BinSize, StartValue, EndValue</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">You specify one bin size and start and end values, and the output is grouped for each values of grouping variable (cyl).</p>
+
+   <a name="section_wnz_fmt_r2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: cars_hist, as in Histogram Example: AutoBin ('Sturges')</li>
+   </ul>
+
+   <a name="section_gyv_mr3_4db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE cars_hist_out;</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Histogram(
+  ON cars_hist AS InputTable
+  OUT TABLE OutputTable(cars_hist_out)
+  USING
+  StartValue(20)
+  BinSize(50)
+  EndValue(400)
+  Inclusion('right')
+  TargetColumn('hp')
+  GroupbyColumns('cyl')
+) AS dt;</tt>
+   </pre>
+   <a name="section_jn2_nr3_4db"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ output_table                      output_columns                                    
+ --------------------------------- ------------------------------------------------- 
+ specified in OutputTable argument "cyl" bin bin_start bin_end bin_count bin_percent</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT *  FROM cars_hist_out order by 1,2;</tt>
+   </pre>
+   <pre>
+      <tt>
+ cyl bin bin_start bin_end bin_count bin_percent 
+ --- --- --------- ------- --------- ----------- 
+   4   0      20.0    70.0         5       45.45
+   4   1      70.0   120.0         6       54.55
+   4   2     120.0   170.0         0           0
+   4   3     170.0   220.0         0           0
+   4   4     220.0   270.0         0           0
+   4   5     270.0   320.0         0           0
+   4   6     320.0   370.0         0           0
+   4   7     370.0   400.0         0           0
+   6   0      20.0    70.0         0           0
+   6   1      70.0   120.0         4       57.14
+   6   2     120.0   170.0         2       28.57
+   6   3     170.0   220.0         1       14.29
+   6   4     220.0   270.0         0           0
+   6   5     270.0   320.0         0           0
+   6   6     320.0   370.0         0           0
+   6   7     370.0   400.0         0           0
+   8   0      20.0    70.0         0           0
+   8   1      70.0   120.0         0           0
+   8   2     120.0   170.0         2       14.29
+   8   3     170.0   220.0         7          50
+   8   4     220.0   270.0         4       28.57
+   8   5     270.0   320.0         0           0
+   8   6     320.0   370.0         1        7.14
+   8   7     370.0   400.0         0           0
+</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="xnr1530116264130"> </a>
+	  <h3>Histogram Example: CustomBinTable</h3>
+
+	  <a name="section_ihn_4bj_h2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: cars_hist, as in Histogram Example: AutoBin ('Sturges')</li>
+      <li>CustomBinTable: bin_breaks</li>
+   </ul>
+   <a name="table_gsc_ybj_h2b"> </a>
+   <table class="introtable">
+      <a name="table_gsc_ybj_h2b"> </a>
+      <h4 style="text-align: center;">bin_breaks</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">break</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">50.0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">100.0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">150.0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">200.0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">250.0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">300.0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">350.0</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ety_jbj_h2b"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Histogram(
+  ON cars_hist AS InputTable
+  ON bin_breaks AS CustomBinTable
+  OUT TABLE OutputTable(cars_hist_out2)
+  USING
+  CustomBinColumn('break')
+  ValueColumn('hp')
+  GroupbyColumns('cyl')
+) AS dt;</tt>
+   </pre>
+   <a name="section_wl5_kbj_h2b"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ output_table                      output_columns                                    
+ --------------------------------- ------------------------------------------------- 
+ specified in OutputTable argument "cyl" bin bin_start bin_end bin_count bin_percent</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM cars_hist_out2;</tt>
+   </pre>
+   <pre>
+      <tt>
+ cyl bin bin_start bin_end bin_count bin_percent 
+ --- --- --------- ------- --------- ----------- 
+   4   1     100.0   150.0         2       18.18
+   4   3     200.0   250.0         0           0
+   4   5     300.0   350.0         0           0
+   8   1     100.0   150.0         0           0
+   8   3     200.0   250.0         5       35.71
+   8   5     300.0   350.0         1        7.14
+   6   1     100.0   150.0         6       85.71
+   6   3     200.0   250.0         0           0
+   6   5     300.0   350.0         0           0
+   4   0      50.0   100.0         9       81.82
+   4   2     150.0   200.0         0           0
+   4   4     250.0   300.0         0           0
+   8   0      50.0   100.0         0           0
+   8   2     150.0   200.0         7          50
+   8   4     250.0   300.0         1        7.14
+   6   0      50.0   100.0         0           0
+   6   2     150.0   200.0         1       14.29
+   6   4     250.0   300.0         0           0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

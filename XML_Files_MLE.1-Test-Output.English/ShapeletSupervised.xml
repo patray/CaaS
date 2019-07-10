@@ -1,0 +1,1026 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="awl1506626097450"> </a>
+	  <h1>ShapeletSupervised</h1>
+
+	  <a name="section_pc2_rh4_zdb"> </a>
+   <p style="line-height: 1em;">The ShapeletSupervised function takes a set of classified time series and outputs a model for classifying time series, based on the shapelets that it finds. The model is input to the function ShapeletSupervisedClassifier.</p>
+
+
+   <a name="orb1506626225476"> </a>
+   <h2>ShapeletSupervised Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.17</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ShapeletSupervised (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  [ ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS ResponseTable ]
+  [ OUT TABLE ModelTable (<i>output_model_table</i>) ]
+  USING
+  IDColumn ('<i>id_column</i>')
+  TimeColumn ('<i>time_column</i>')
+  TargetColumn ('<i>target_column</i>')
+  ResponseColumn ('<i>category_column</i>')
+  [ SAXSymbolsPerWindow (<i>symbols_per_window</i>) ]
+  [ SAXMinWindowSize (<i>min_window_size</i>) ]
+  [ SAXMaxWindowSize (<i>max_window_size</i>) ]
+  [ SAXOutputFrequency (<i>gap_between_windows</i>) ]
+  [ RandomProjections (<i>projections</i>) ]
+  [ ShapeletCount (<i>num_shapelets</i>) ]
+  [ TimeInterval (<i>num_data_points</i>) ]
+  [ Seed (<i>seed</i>) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="cke1506626322388"> </a>
+	  <h2>ShapeletSupervised Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>ModelTable</dt>
+      <dd>[Optional] Specify the name for the model table that the function outputs.</dd>
+      <dd>Default: shapelet_model in the current schema</dd>
+      <dt>IDColumn</dt>
+      <dd>Specify the name of the column in InputTable and ResponseTable that contains the unique identity of a time series.</dd>
+      <dt>TimeColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the time axis of the data.</dd>
+      <dt>TargetColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the data points.</dd>
+      <dt>ResponseColumn</dt>
+      <dd>Specify the name of the ResponseTable column that contains the category (class) of the time series.</dd>
+      <dt>SAXSymbolsPerWindow</dt>
+      <dd>[Optional] Specify the SAX syntax element SymbolsPerWindow, which specifies the number of SAX code symbols to create from a window. The <i>symbols_per_window</i> must an INTEGER in the range [1, 1000000]. If the <i>symbols_per_window</i> is greater than the length of the shortest time series in input data set (<i>d</i>), its value becomes <i>d</i>.</dd>
+      <dd>Default: 10</dd>
+      <dt>SAXMinWindowSize</dt>
+      <dd>[Optional] Specify the SAX syntax element WindowSize , which specifies the size of the sliding window. The <i>min_window_size</i> defines the length (number of data points) of the shortest shapelet; the minimum span (time series length) used to distinguish two time series from each other.</dd>
+      <dd>The <i>min_window_size</i> must be an integer in the range [1, 1000000]. If the <i>min_window_size</i> is greater than the length of the shortest time series in input data set (<i>d</i>), its value becomes <i>d</i>. If <i>min_window_size</i> is smaller than <i>symbols_per_window</i>, its value becomes <i>symbols_per_window</i>.</dd>
+      <dd>Default: 10</dd>
+      <dt>SAXMaxWindowSize</dt>
+      <dd>[Optional] Specify the SAX syntax element WindowSize , which specifies the size of the sliding window. The <i>max_window_size</i> defines the length of the longest shapelet; the maximum span used to distinguish two time series from each other. The <i>max_window_size</i> must be an integer in the range [1, 1000000] that is greater than or equal to <i>min_window_size</i>.</dd>
+      <dd>If the <i>max_window_size</i> is greater than the length of the shortest time series in input data set (<i>d</i>), its value becomes <i>d</i>.</dd>
+      <dd>A greater difference between <i>min_window_size</i> and <i>max_window_size</i> increases the probability of identifying better shapelets at the cost of higher execution time. The function uses this formula to compute the number of sliding windows, <i>n</i>:<p style="line-height: 1em;">
+            <i>n</i> = ((<i>max_window_size </i>- <i>min_window_size</i>) / <i>symbols_per_window</i>)+1</p>
+         <p style="line-height: 1em;">The maximum value of <i>n</i> is 20.</p>
+      </dd>
+      <dd>Default: 70</dd>
+      <dt>SAXOutputFrequency</dt>
+      <dd>[Optional] Specify the SAX syntax element OutputFrequency, which specifies the number of data points to skip between successive sliding windows. The <i>gap_between_windows</i> must be an integer in the range [1, 1000]. A smaller value increases accuracy (the chance of distinguishing time series from each other) at the cost of higher execution time.</dd>
+      <dd>Default: 10</dd>
+      <dt>RandomProjections</dt>
+      <dd>[Optional] Specify the number of iterations required for random masking of SAX words during shapelet training. The <i>projections</i> must be an INTEGER in the range [1, 40].</dd>
+      <dd>Default: 10<p style="line-height: 1em;">Specifying a greater <i>projections</i> for a longer input time series increases the probability of identifying better shapelets at the cost of higher execution time.</p>
+      </dd>
+      <dt>ShapeletCount</dt>
+      <dd>[Optional] Specify the maximum number of shapelets in the output model table. The <i>num_shapelets</i> must be an INTEGER in the range [1, 100000].</dd>
+      <dd>Default: 20</dd>
+      <dt>TimeInterval</dt>
+      <dd>[Optional] Specify the number of data points in a time series to skip between consecutive time series windows when calculating the distance of a shapelet from a time series.<p style="line-height: 1em;">The function builds a shapelet classification tree based on the distance of a shapelet from the time series data. Because a shapelet is typically much smaller than a complete time series, the function calculates the distance of a shapelet from a time series by sliding the shapelet across time series windows of shapelet length, calculating the distance between the shapelet and each window, and then selecting the smallest distance.</p>
+         <p style="line-height: 1em;">The <i>num_data_points</i> is the number of data points to skip when sliding from one time series window to the next. The <i>num_data_points</i> must be an INTEGER in the range [1, 1000000]. The value 1 gives optimal results at the cost of higher execution time.</p>
+         <p style="line-height: 1em;">Default: 10</p>
+      </dd>
+      <dt>Seed</dt>
+      <dd>[Optional] Specify the random seed the algorithm uses for repeatable results (for more information, see Nondeterministic Results and UniqueID Syntax Element). The <i>seed</i> must be an INTEGER in the range [1, 100000].</dd>
+      <dd>Default: 23</dd>
+   </div>
+
+
+	
+   <a name="ope1506626424052"> </a>
+   <h2>ShapeletSupervised Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>InputTable Schema</h3>
+   <a name="table_i2t_mvs_rcb"> </a>
+   <table class="introtable">
+      <a name="table_i2t_mvs_rcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any except DATE, TIME, or TIMESTAMP</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Time series identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>time_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BYTEINT, SMALLINT, INTEGER, BIGINT, NUMERIC, DOUBLE PRECISION, DATE, TIME, or TIMESTAMP</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Time axis of data.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BYTEINT, SMALLINT, INTEGER, BIGINT, NUMERIC, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Time series data.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>category_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR, NUMERIC, TIME, DATE</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Time series category.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_s3p_dxs_wcb"> </a>
+   <h3>ResponseTable Schema</h3>
+   <p style="line-height: 1em;">This table is optional.</p>
+   <a name="table_ovn_1ws_rcb"> </a>
+   <table class="introtable">
+      <a name="table_ovn_1ws_rcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Time series identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>category_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR, NUMERIC, TIME, DATE</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Time series category.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="asz1506626524684"> </a>
+   <h2>ShapeletSupervised Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Message Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">stats</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Reports creation of model table, number of shapelets, and number of rows.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_e4n_yws_wcb"> </a>
+   <h3>ModelTable Schema</h3>
+   <p style="line-height: 1em;">The function saves this model table to <i>output_model_table</i>, whose default value is shapelet_model in the current schema.</p>
+   <a name="table_N10049_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10049_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">shapelet_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Shapelet identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">time_instant</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Shapelet time axis, represented as integer.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as <i>target_column</i> in InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Shapelet data point value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">split_value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Shapelet split value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">left_child_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">shapelet_id of left child of shapelet in shapelet tree.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">right_child_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">shapelet_id of right child of shapelet in shapelet tree.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">left_class</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Class (category) identifier of left child of shapelet.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">right_class</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Class (category) identifier of right child of shapelet.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="pwu1510767467465"> </a>
+   <h2>ShapeletSupervised Example</h2>
+   <a name="section_ill_g3j_mdb"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">The input table has 10 price observations for four stocks. The column period contains time values, represented by integers.</p>
+   <a name="table_dwn_43j_mdb"> </a>
+   <table class="introtable">
+      <a name="table_dwn_43j_mdb"> </a>
+      <h4 style="text-align: center;">InputTable: shapelets_train</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">stockid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">period</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">stockprice</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">stock_category</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22418</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">460</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22419</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">457</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22420</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">452</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22421</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">459</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22422</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">462</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22423</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">459</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22424</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">463</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22425</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">479</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22426</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">493</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22427</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">490</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22418</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">492</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22419</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">498</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22420</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">499</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22421</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">497</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22422</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">496</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22423</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">490</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22424</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">489</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22425</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">478</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22426</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">487</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22427</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">491</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22418</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">68.2502</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Healthcare</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22419</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">67.7501</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Healthcare</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22420</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">68.375</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Healthcare</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22421</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">67.1251</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Healthcare</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22422</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">67.1251</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Healthcare</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22423</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Healthcare</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22424</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66.5002</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Healthcare</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22425</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">64.1251</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Healthcare</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22426</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">64.7501</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Healthcare</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22427</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">65.375</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Healthcare</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22418</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66.625</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Healthcare</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22419</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66.8746</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Healthcare</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22420</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">67.0003</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Healthcare</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22421</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">67.2499</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Healthcare</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22422</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">65.8752</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Healthcare</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22423</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66.1248</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Healthcare</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22424</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66.5002</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Healthcare</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22425</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">67.7501</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Healthcare</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22426</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">67.4995</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Healthcare</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22427</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">67.2499</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Healthcare</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_uyz_g3j_mdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ShapeletSupervised (
+  ON shapelets_train AS InputTable
+  OUT TABLE ModelTable (shapelets_model)
+  USING
+  IDColumn ('id')
+  TimeColumn ('period')
+  TargetColumn ('stockprice')
+  ResponseColumn ('stock_category')
+  SAXMinWindowSize (3)
+  SAXMaxWindowSize (6)
+  SAXOutputFrequency (1)
+  SAXSymbolsPerWindow (3)
+  RandomProjections (10)
+  TimeInterval (1)
+) AS dt;</tt>
+   </pre>
+   <a name="section_x3l_h3j_mdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ stats                         
+ ----------------------------- 
+ shapelet model table created.
+ number of shapelets : 1      
+ number of rows : 6</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM shapelets_model;</tt>
+   </pre>
+   <pre>
+      <tt>
+ shapelet_id time_instant value_col split_value        left_child_id right_child_id left_class right_class 
+ ----------- ------------ --------- ------------------ ------------- -------------- ---------- ----------- 
+           1            1  67.12512 1.2180900573730469             0              0 healthcare technology 
+           1            2      66.0 1.2180900573730469             0              0 healthcare technology 
+           1            3 66.500158 1.2180900573730469             0              0 healthcare technology 
+           1            4  64.12512 1.2180900573730469             0              0 healthcare technology 
+           1            5 64.750082 1.2180900573730469             0              0 healthcare technology 
+           1            6 65.375038 1.2180900573730469             0              0 healthcare technology</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="vhh1518209216903"> </a>
+	  <h2>ShapeletSupervised Troubleshooting</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Problem: The function runs slowly for large input data sets.</h3>
+   <p style="line-height: 1em;">For a large input data set, the function runs slowly, spending much time on one step, or it terminates with a failure message. Consult the logs for error messages and troubleshooting information.</p>
+
+		
+   <a name="section_ywn_hx5_5cb"> </a>
+   <h3>Workarounds:</h3>
+   <ul>
+      <li>Improve the execution time of the saxification step, in any of the following ways:<ul>
+            <li>Decrease the difference between the SAXMinWindowSize and SAXMaxWindowSize syntax element values.</li>
+            <li>Increase the SAXOutputFrequency syntax element value.</li>
+            <li>Decrease the SAXSymbolsPerWindow syntax element value.</li>
+         </ul>
+      </li>
+      <li>Decrease the number of masking operations by decreasing the RandomProjections syntax element value.</li>
+      <li>Decrease the number of shapelets in the output table by decreasing the ShapeletCount syntax element value.</li>
+      <li>Increase the number of data points to skip between consecutive time series windows when calculating the distance of a shapelet from a time series by increasing the TimeInterval syntax element value.</li>
+   </ul>
+
+   <a name="section_v3k_jx5_5cb"> </a>
+   <h3>Problem: Classification accuracy is not good enough.</h3>
+   <p style="line-height: 1em;">The function completes successfully, but the classification accuracy is low.</p>
+
+   <a name="section_zq2_lx5_5cb"> </a>
+   <h3>Workarounds:</h3>
+   <ul>
+      <li>Improve the accuracy of the saxification step, in any of the following ways:<ul>
+            <li>Increase the difference between the SAXMinWindowSize and SAXMaxWindowSize syntax element values.</li>
+            <li>Decrease the SAXOutputFrequency syntax element value.</li>
+            <li>Increase the SAXSymbolsPerWindow syntax element value.</li>
+         </ul>
+      </li>
+      <li>Increase the number of masking operations by increasing the RandomProjections syntax element value.</li>
+      <li>Increase the number of shapelets in the output table by increasing the ShapeletCount syntax element value.</li>
+      <li>Decrease the number of data points to skip between consecutive time series windows when calculating the distance of a shapelet from a time series by decreasing the TimeInterval syntax element value.</li>
+   </ul>
+
+
+	
+</t:intro>

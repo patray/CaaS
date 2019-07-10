@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="lhg1506370281349"> </a>
+	  <h1>ChangePointDetectionRT</h1>
+
+	  <p style="line-height: 1em;">Real-time change-point detection typically uses the sliding window algorithm and assumes that the data follows a distribution, but has different parameters <i>θ</i> in different segments. In the two following hypotheses about the parameter,</p>
+   <p style="line-height: 1em;">
+      <i>H</i>
+      <sub>0</sub>:<i>θ</i> = <i>θ</i>
+      <sub>0</sub>
+   </p>
+   <p style="line-height: 1em;">
+      <i>H</i>
+      <sub>1</sub>:<i>θ</i> = <i>θ</i>
+      <sub>1</sub>
+   </p>
+   <p style="line-height: 1em;">the reference part has parameter <i>θ</i>
+      <sub>0</sub> and the testing part in the sliding window has parameter <i>θ</i>
+      <sub>1</sub>, with the following notation:</p>
+   <a name="fig_d5p_f31_mw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <p style="line-height: 1em;">This is the decision rule for testing the sliding window:</p>
+   <p style="line-height: 1em;">If <i>S</i>
+      <sub>
+         <i>j</i>
+      </sub>
+      <sup>
+         <i>k</i>
+      </sup> &lt; <i>h</i>
+      <sub>0</sub>, choose <i>H</i>
+      <sub>0</sub>.</p>
+   <p style="line-height: 1em;">If <i>S</i>
+      <sub>
+         <i>j</i>
+      </sub>
+      <sup>
+         <i>k</i>
+      </sup> ≥ <i>h</i>
+      <sub>0</sub>, choose <i>H</i>
+      <sub>1</sub>.</p>
+   <p style="line-height: 1em;">The ChangePointDetectionRT function detects change points in a stochastic process or time series, using real-time change-point detection, implemented with these algorithms:</p>
+   <ul>
+      <li>Search algorithm: sliding window</li>
+      <li>Segmentation algorithm: normal distribution</li>
+   </ul>
+   <p style="line-height: 1em;">Use this function when the input data cannot be stored in memory, or when the application requires a real-time response. If the input data can be stored in memory and the application does not require a real-time response, use the function ChangePointDetection.</p>
+
+   <a name="aip1506370376441"> </a>
+   <h2>ChangePointDetectionRT Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.3</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ChangePointDetectionRT (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY <i>partition_expr</i> ORDER BY <i>order_by_expr</i> 
+  USING
+  TargetColumn ('<i>value_column</i>')
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+  [ SegmentationMethod ('normal_distribution') ]
+  [ WindowSize (<i>window_size</i>) ]
+  [ ChangePointThreshold (<i>change_point_threshold</i>) ]
+  [ OutputType ({ 'CHANGEPOINT' | 'VERBOSE' | 'SEGMENT' }) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="njc1506370495929"> </a>
+	  <h2>ChangePointDetectionRT Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumn</dt>
+      <dd>Specify the name of the input table column that contains the time series data.</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the input table columns to copy to the output table.<p>
+            <b>Tip:</b>  To identify change points in the output table, specify the columns that appear in <i>partition_exp</i> and <i>order_by_exp</i>.</p>
+      </dd>
+      <dt>SegmentationMethod</dt>
+      <dd>[Optional] Specify the segmentation method, normal distribution (in each segment, the data is in a normal distribution).</dd>
+      <dt>WindowSize</dt>
+      <dd>[Optional] Specify the size of the sliding window. The ideal window size depends heavily on the data. Experiment with this value.</dd>
+      <dd>Default: 10</dd>
+      <dt>ChangePointThreshold</dt>
+      <dd>[Optional] Specify a DOUBLE PRECISION value that the function compares to <i>ln</i>(<i>L</i>
+         <sub>1</sub>)−<i>ln</i>(<i>L</i>
+         <sub>0</sub>). The definition of Log(<i>L</i>
+         <sub>1</sub>) and Log(<i>L</i>
+         <sub>0</sub>) are in ChangePointDetection. They are the logarithms of <i>L</i>
+         <sub>1</sub> and <i>L</i>
+         <sub>0</sub>.</dd>
+      <dd>Default: 10</dd>
+      <dt>OutputType</dt>
+      <dd>[Optional] Specify the output table columns. The schema of the output table is Change-Point Detection Functions Output Table Schema, OutputOption ('CHANGEPOINT') in ChangePointDetection Output.</dd>
+      <dd>Default: 'CHANGEPOINT'</dd>
+   </div>
+
+
+	
+   <a name="cma1506370582505"> </a>
+   <h2>ChangePointDetectionRT Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The input table has the same schema as the ChangePointDetection Input table.</p>
+
+   <a name="wep1506370639110"> </a>
+   <h2>ChangePointDetectionRT Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The output table has the same schema as the ChangePointDetection Output table.</p>
+
+   <a name="rsq1510718103603"> </a>
+   <h2>ChangePointDetectionRT Examples</h2>
+   <a name="fic1522875941826"> </a>
+	  <h3>ChangePointDetectionRT Example: ChangePointThreshold 10, Window Size 3, Default Output</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Output table of ChangePointDetection Example: One Series, Default Options</li>
+   </ul>
+
+		
+   <a name="section_gqp_krx_jdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ChangePointDetectionRT (
+  ON cpt PARTITION BY sid ORDER BY id
+  USING
+  TargetColumn ('val')
+  ChangePointThreshold (10)
+  WindowSize (3)
+  Accumulate ('sid', 'id')
+) AS dt;</tt>
+   </pre>
+   <a name="section_gby_krx_jdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ sid id cptid 
+ --- -- ----- 
+   1 11     1
+   1 21     2
+   1 31     3
+   1 36     4</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="umv1522876701631"> </a>
+	  <h3>ChangePointDetectionRT Example: ChangePointThreshold 20, Window Size 3, VERBOSE Output</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Output table of ChangePointDetection Example: One Series, Default Options</li>
+   </ul>
+
+		
+   <a name="section_dbv_btx_jdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ChangePointDetectionRT (
+  ON cpt PARTITION BY sid ORDER BY id
+  USING
+  TargetColumn ('val')
+  ChangePointThreshold (20)
+  WindowSize (3)
+  OutputType ('VERBOSE')
+  Accumulate ('sid', 'id')
+) AS dt;</tt>
+   </pre>
+   <a name="section_i1c_ctx_jdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ sid id cptid difference         
+ --- -- ----- ------------------ 
+   1 11     1  40764.17120423399
+   1 21     2 41833.897703948904
+   1 31     3  48358.16436132501
+   1 36     4  27.71258103679313</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="xtr1522877404612"> </a>
+	  <h3>ChangePointDetectionRT Example: ChangePointThreshold 100, Window Size 3, Default Output</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Output table of ChangePointDetection Example: One Series, Default Options</li>
+   </ul>
+
+   <a name="section_g4x_s5x_jdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ChangePointDetectionRT (
+  ON cpt PARTITION BY sid ORDER BY id
+  USING
+  TargetColumn ('val')
+  ChangePointThreshold (100)
+  WindowSize (3)
+  Accumulate ('sid', 'id')
+) AS dt;</tt>
+   </pre>
+   <a name="section_grs_t5x_jdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ sid id cptid 
+ --- -- ----- 
+   1 11     1
+   1 21     2
+   1 31     3</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

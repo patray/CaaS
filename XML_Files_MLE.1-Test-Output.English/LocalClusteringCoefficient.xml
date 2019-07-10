@@ -1,0 +1,1319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="lyo1507821929412"> </a>
+	  <h1>LocalClusteringCoefficient</h1>
+
+	
+		<p style="line-height: 1em;">The clustering coefficient, introduced by Watts and Strogatz in the
+			context of binary undirected graphs, is frequently used for analyzing the structure of a
+			network. The LocalClusteringCoefficient function extends the clustering coefficient to
+			directed and weighted graphs. The LocalClusteringCoefficient function is based on the
+			paper <i>"Clustering in complex directed networks"</i>by Georgio
+			Fagiolo.</p>
+
+		<p style="line-height: 1em;">For general information about the clustering coefficient, see <i>D. J. Watts and S. H. Strogatz. Collective dynamics of "small-world"
+				networks. Nature, 393:440–442, 1998</i>
+   </p>
+
+	
+   <a name="ohn1507822407811"> </a>
+   <h2>LocalClusteringCoefficient Background</h2>
+   <a name="section_N10019_N10016_N10001"> </a>
+   <p style="line-height: 1em;">The definition of the local clustering coefficient depends on the graph type:</p>
+   <ul>
+      <li>Unweighted, Undirected Network (BUN)</li>
+      <li>Unweighted, Directed Network (BDN)</li>
+      <li>Weighted, Directed Network (WDN)</li>
+      <li>Weighted, Undirected Network (WUN)</li>
+   </ul>
+
+   <a name="otu1507823229335"> </a>
+   <h3>Unweighted, Undirected Network (BUN)</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The local clustering coefficient was originally defined on an unweighted, undirected graph—also called a bi-directed network (BUN). A simple BUN has no self-loops and no multiple edges.</p>
+   <p style="line-height: 1em;">Let <i>G</i> = (<i>V</i>, <i>E</i>) be a simple BUN with a set of nodes (vertices) <i>V</i> and a set of edges <i>E</i>.</p>
+   <p style="line-height: 1em;">The degree <i>d</i>
+      <sub>
+         <i>i</i>
+      </sub> of node <i>i</i> is the number of nodes in <i>V</i> that are adjacent to <i>i</i>. A complete subgraph of three nodes of <i>G</i> is called a triangle. This is the formula for the number of triangles of node <i>i</i>:</p>
+   <a name="fig_frs_mqj_pw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <p style="line-height: 1em;">where <i>a</i>
+      <sub>
+         <i>ij</i>
+      </sub> = 1 if there is an edge from <i>i</i> to <i>j</i>; otherwise <i>a</i>
+      <sub>
+         <i>ij</i>
+      </sub> = 0.</p>
+   <p style="line-height: 1em;">A triple Ƴ at a node <i>i</i> is a path of length two for which <i>i</i> is the center node. This is the formula for the maximum number of triples of node <i>i</i>:</p>
+   <a name="fig_ury_1rj_pw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGgAAABJCAYAAADR7GMyAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAAAOwSURBVHhe7ZqNUeMwEEbTAjXQAj1QAjXQAh3QAR1QARXQAA3QAT2Ee5l8dxmNHa1+7OzN7pvx3EXEdtDz/kjhcExck4Kck4Kck4Kck4Kck4Kck4Kck4Kck4Kck4Kck4Kck4Kck4Kck4Kck4IMvL6+Hg+Hw+l4eXk5j+5DCjLy9vZ2EvTx8XEe2YcUZESCfn5+ziP7kIKMkNru7+/Pr/YjtCCi4fHx0RQVvO/5+fn8ap2vry/zNS2EFcQEPjw8HN/f388j/6DO8DNS2t3d3d8mgTRnAZGcP4Owgp6enk5HiWoNUpAokYwRHVaIohkdX0hBRA2RUaahz8/Pk4hyYnnNeAvf39+nc7jmCOEEIUVpq4SIYlJLcUQDRyszUl04QYhZih5ATpn2eB/jS0IBAWvNg6Joqc5ZCScIOUsTqvRWimByGe9doCJ8pD0PJUiTvVTslwSpZWZ8rV5xXEP37K1FoQTVnmaiS2sYJpRIQ5gE0eFdpiuah1ptUopcS4M1wgiyTBSTjyQOJl+iNFamP65laaWRyPk9hBFEDUHQZQSMQjRaapOisGUdJcII0lqmtxaUqEPj3xp6OKw7EZeEEaRiPws1CaTBWpojcnhvTx0KI0h1ZBZEDtcjzVlSF4JqDcUSYQT1TtAsuH/PAxJCkFLMLQX1ptghQYS59q+Wjpkd0wiqF+U2zp7cRBC/sLqimV8JS7D1qCFB5TpmTySotYscEnQJH2DWl1SzSUF/4Oa92xlbE16QJuBazbm2Lb814QWNbGUswbVajhrhBenmS2hyLBO5FfoM4bo4wc21jc+2R5nqGOM9tyLsOkgghJsjaWlD0LotvyW3FsT93e4kWLflt6RnL46FOA+W/uyKg//3/C69D8jmglq25bekNcUoLSJEn51ahmTGW4q9ruVyN1sF2rItvyXcu2Vi9bnLzlQda0tH6Pr7IJ4+njrrtvxWaJJG9wd7BOmcnt9/lxrkAcvfJFjg/NbJJr32NAgQRhDU/qqnhmpJS/SMPhihBGk50JNqlKpbJ1r3bGkqLgklCHommSjo3UscjdpwgkhPSLJ+bzUiR0uMkcYknCAmHEHWOtIrBziP80cIJwh4oi1RhMSlCWY9U9sVUPT01h4RUhBQG67tbmuC146aIH4+Y2EeVpBqy1p90OJy7biWImekNhFWECCJJ72W6lqghZ95zdCC/gdSkHNSkHNSkHNSkHNSkHNSkHNSkHNSkHNSkHNSkHNSkHNSkHNSkHNSkHNSkGuOx19vsuXGsUPuQgAAAABJRU5ErkJggg=="
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <p style="line-height: 1em;">The maximum number of triples occurs when every neighbor of node <i>i</i> is connected to every other neighbor of node <i>i</i>.</p>
+   <p style="line-height: 1em;">This is the formula for the clustering coefficient for a node <i>i</i> with <i>d</i>
+      <sub>
+         <i>i</i>
+      </sub> ≥ 2:</p>
+   <p style="line-height: 1em;">
+      <i>c</i>
+      <sub>
+         <i>i</i>
+      </sub> = δ<sub>
+         <i>i</i>
+      </sub> / τ<sub>
+         <i>i</i>
+      </sub>
+   </p>
+
+   <a name="zut1507823344466"> </a>
+   <h3>Unweighted, Directed Network (BDN)</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">For an unweighted, directed network (BDN), given a vertex <i>i</i>, the BDN triangle types can be categorized to four patterns.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <h4 style="text-align: center;">Triangle Type Patterns</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Pattern</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Illustration</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Cycle</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">There is a cyclical relation among <i>i</i> and any two of its neighbors: <i>i</i>→<i>j</i>→<i>h</i>→<i>i</i>, or the reverse.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <a name="fig_n1k_vtj_pw"> </a>
+               <div style="text-align: center;">
+                  <div style="margin: auto; display: inline-block">
+                     <img src="data:image/png;base64,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"
+                          width=""
+                          height=""/>
+                  </div>
+               </div>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Middleman</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">One of <i>i</i>’s neighbors, <i>j</i>, both holds an outward edge to a third neighbor, <i>h</i>, and uses <i>i</i> to reach <i>h</i> in two steps.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <a name="fig_bsj_b5j_pw"> </a>
+               <div style="text-align: center;">
+                  <div style="margin: auto; display: inline-block">
+                     <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQcAAABpCAIAAAC4QHFuAAAACXBIWXMAAAsSAAALEgHS3X78AAAPC0lEQVR42u1dW0wc1xk+c9uZvbLGZENtCE6MG9vBlxia0Dgtld3YSivFah23kSrZalAUtVKJbPehSSO7oDxUrWJkW62aNKQqL7nQKsJS2hrZqCTBoik4JibEFpsYyjrFlNrLwl5mZ3a2D5OuycLOzs6Zy5mz84kH8M6Mh/Of7/znv3wHIpvNAjtAkjKSJMnf0zQDHNjCZJlMJiMCAEiSJEjKLoajEX8/URSEdEoU0nnspSiacbGMiyMIwpl/SCGbzQrpVJpP5laxHAiCoBkXy3lIkkL5VyCQ9RXZbDYRj2VEQentCYLlPC7W7cxFdFaxVGJhOR/ywHIelvM4rCgNmYyYWJxX+W6Mi3V7/M6MtBxCOpVMLKq8mKJoj68CTVdP2p0SAAAhzScTC86ktBElPrdyPIbm74IcK7LZbDIeK9WDCWk+zSedqWlhYJ1Kxkte/kSBTyUcVhTHilGaGvCphF3yafghmVjUNvhpPilJGYcVRRyF5iUf5l4HkI6iUFKkqrr2uWefV7aakOYdVihmMAS+0JJTdHzlra0zR62IKHi421MOKxRZoZiHVbFoSQi6Y+yhbLWBd99bt/7Le/d+69+ffWYXq6HFCuWIouj4Fn2CA0P2vYpz2uf1PPvToyOjl0+f/q1drEbaaPTVjG/W8RWIrWWNO3Y8/aOn7fUb2YkVasaXIEhnmpoM/JpuSPxM5ExTs+cQRWPGK7S6AymKzsAF3BRFO9MUHavNzUznfbMiJVCzGlp9UKKQhukCoCja6w8609ReVkOwjQ2tHRTNuEhS+yu5WM6Zo7azGuNCzmrIxRWaG4xJkkRwfMsEnNunmVEISpGQYwXj4mjGpcUwTjO5pe6CcbEagmw0JQAo5qDcHn+p4Zfb43Nkq/ayGkEQyOorEFUdqRHi5QaXc3udvRMiSCXjano0KYrmPD5kE4aI1isIgoj/azJy7i3ltYSimfc7f+FQAh3EroU/fu1lqrDfJggCJGL/ONGBcg4dUVZMnO19/Xu7pSzrr1jt9vgYF5sbRIIgKJphOY8vsMrrq/jPx+Ovf383H4s6MxIFjHSd2v6DH3t9FV5/kOU8NOOiaEb+crFujzfgr1gdWHMPGwjOR6bQDZMQfKf+9iMjr54GAFTU1snxt7I3mB5656WH6p9483xo8zZnXlq7ltU2t7CBoLxHUvAGTa1tfzna+p3f/9nxFaow2NkxOz5KsxwAQM0sr21uAQC4K1f3tx+ZHR91pqZV4GPRcN+ZhgMH1VzMBoIb9uybONvrsEIVdh4+1vhkW+OTP5HHruj1XCAY2rS16t6GJ95wfIWVGO461djapv76hgMHw31nnB2UWoT7zjz6YhelrlAdum/brvtOyDvakqziQEfMR6b4WLTUVanhwMHBzo6dh485vqL4Dkr2wioHq7a5Rf6aHR91Ym7rguyTGiZ3bXMLH4siaDW0WCGPkRwqlIqHDh8b7OxwJqj5mB4aYANBNdvd5WhsfQZBq6HFisHOjsbWZ7TdW1FTxwaCTsBtSUSheRckW216aMBhxcqYHR9lA8GKmjrNT2hqbRvpOuVMUzMx1tPdBBfO7Tx8bKyn22FFob3pKcjxZQPB2uYWZPN9+IGPRSf6erXteJeifs9jSBEDFVaM9XTX73lM2940L62BbL4Py73TruMn4J+zYe++6aEBdMJuJFjBx6LTQwMb9u7T5Wlyvs+ZskZDzsbC7Hi/GHa3DSOz+0WCFcO6lhrkfB/KbTZ44IKupYbQ5m3oWM16VmgrABUN4Ea6TjoT1zhMDw2ENm+D3/HmWe0CGk7eelZoKwAVDbsRzPdhFlHo3knABoKhzdtQsJrFrIApABVdeFDL92ED+Gwh4tGFxayAKQAVBWr5PjzAx6Kz46Pw2dhCaGpts9xqVrICvgCkDNTyfXhgsLPjISP7+WqbWyb6eq21mmWs0KsAZAuPjA3mI1OQ/QdqsOv4CWutZhkr9CoAKQOpfB8G6G8/0mR8u35FTZ21VrOGFfoWgIqG3Recop4emDjbu2HPPiNSIytarb/9SHmxor/9iGlaE3TyfXaHegGqLlbbsGefVVazgBXTQwOmLTlOdKFjkG0aJWQ0HDholdUsYMVw1ymTxxegke+zL2DUYJBWs0QaYDYrjCsAKQOFfJ+tHYVmNRik1SwRHpvKCqMLQMrYdfyE00urbcdrQja2ECwRHpvKCqMLQMqQxZBOlrZUjPV077TaaiYLj81jBbwAVZd9qoX5PptSon7PY9a+g/nRhXmssCqiWApr8312DLJ1VIPBWM1k4bFJrFh6Aqm1sDDfZzsMI3PwnMnCY5NYYWYBSI1HdsLuojBCDQZJDNOsZgYrzC8AKQPZI+uQwgXEzro0U3hsOCusKgApA80j69CBEQJUeJgmPDacFVYVgJThHDRol4giL+w2R3hsLCusLQAVjS6cgwZXhNFqMEh3YULnDmn0+CJ4Dntu4XEOGlxxx2uCGgwGJgiPSUMpYXkBqGhaI9x3xgm78/ZOJqjBYGCC8NgoViBSAFIRdjtN5rdhphoMZasZxYphm/zlIUfCuhRmqsFQtpohrECtAFQ0gHMOGgRWqMEgrWac8NgQVlxA8o+dKYTdzkGDwCI1GIzVjBMe688KNAtARReeMlfqodC7iU50oT8rhu35t0zL+aBBa9VgMDBIeKwzK1AuACljw959ZSthtVYNBgODhMd6sgL9ApAyLD+yzhKgoAaDtJruLW16smKwswPxApAyLD+yzokotFlNd+Gxbqww5wRSE8LusjpoEB01GGR0oa/wWDdWmHMCqdEot4MGkVKDwVhNX+GxPqywVwFIGeXTA4KaGgwG+gqP9WGFvQpAajwy9k3mcv+BfVMjhlpNB1bYPVxbDquOrDM3yD65057ZWBOsBssK+xaAlGHJkXWmwbg/R4iH1WBZYd8CkDLwPmgQZTUYvNXghcdQrLB7AajoPhXLgwbRV4NZHl1AsQK/iGIp5HwfZhJWu6jBYKwGLzzWzgo8CkDKMPnIOhNg095NDVaDCbu1swKPApCaIcYg7J4dH50422svNRgM5KITH4tq66jVyAqcCkDKwOOgQT4W7W8/+u6vnscyyF4OWcI62Nkx0ddrEivwKwAVW3hsf9Dg7EejsetTkX8OvvXUfuwP++Fj0bee2j/z4cjIq6e1LWdaWIFfAUgZGBw0mIpFAQDphVjD44cwDrVzAfeu4yeE+CIAYHroHQ1PoBU+i96cvX0dw/j8qwC+BSBlNLW29bcfffTFLgBANpvNZMTcRwRBUBSNyHtGb85Gb97I/egLrApWhmjaNT00ENq09dETr5ZDUCEvZIf+NvLXo61jf+rmY1E2EBRFISMKuQsoiqZohiCIFW8nstls3j/NXP90bvb63Gwkn0A0U732nmuvdT3S/htQfpg42yvE/7tu7+OikM53uCRJM6yL5UiSsuTdRDEdmbwamboqLjF8DlWhmuh7/V859Ey5rWUAgMtvdlXUrFl13wPL5zkAgGZcLtZN04wSKxYXboWvXFzqIlbEuvUN6+q3lNXgZjJiKrG41EWs7Ls5D8t5TH63meufhq9cXJEPedzYuOVBmnaVj9WEdCqVjK/Ih6VgXCzn9i31G7dZEb05O/bBO0UHV0awMtRw/9fKZIhFIZ1MLBQd3M9dM814vIFCrll3hK9cjExdVXmxzx/c/sDuMrFaMrEgpHmVF1MU7fFV5KxG5ryEekr8n0LvlomXSMRjKikBAMiIQiIeM+fdIlNX1VMCALC4EL30/nlRTGNvtTSfVE+Jz628OH97SyzvSi+9f149JXLEmAxfxntws9ns0sFSTww+lTD63eTtbul3RSfDY/hvd5NxDXflrEYCACbDY6VSQsbkJ2Ma/nsbIZVcVO8lloJPJSQpY/TeSbOHwd1qGn+7nNVIUUzPXP+00HWv/KFnz74nlYiBr7vIZrMKXvi5Z5+vqq5VdOIpQx2FQlKknK2WyYiZwku8SqvRczciCo6iqXHLl6rvUHjK8gQuRkG20sZ0965v1N1VW+R2t9egd5u7oTTs5Ww15XBCpdVI5Tzs8Mjlk79T6q8SRWFx4Vbux7GebmyUOoKgFJWe7//7z9tfULhAkqSimVzNiN6CtRo2m6i8Kac85mqsJkkZMpWCHR1REOYjU4OdHacaqgY7O7ARIWmLKPR9gu5bZx2fgAj4WPTlnfW5/i4JeiWSJEmHVoWPzvzxwvHn5O9rv9qCjdx543cPMBV3YBZQ5jDy0i85DpNSN825w31nwn1nQpu27n7h14H6rbAPhH+n9Y/sv2vjA2M93XLPCTaNg/HF+Yym1JwZ84BmRLh3a3z6Z8HKEB47KDGVDKyta2ptazhwkJd02LXqwArO7atubqltbtl1/MWxnu7Z8dEyaUGzEL7AqqKNOUUMzzB4DMV8ZPKJN87ldA0i9FpGkiRxbeLDyU+gyjoP796PZRNBKhlP88lCnx469MO3z56bm5lWeIK/YrVBrR8lNXqs6Goe3v04lusFpNUIgvBXrCar7qyBWrT8QVz7ahgXW+ijSx9cevvsuW/v/abC7QqNyvCoXns3zO1VoRqAKWjGBWM1+Xba51/Fub2ao7eauntxHV+KokmSlCRp+Ufb79+u7CUAAK7CpNJhB+VfFawMad5EVa+9B1tW0AyM1eSWZxIAsLGhWbOjwHh85ZBJM6MYF2fou61br7GZv3rN3XjE2QWt5vFr3h3IChkSABCsDFWv0eKRN25pBliDZlxM6Us+QRCcx2f0uwUrQxocNef21m/agbnVaMbFujUsZLlFkMzNb5+/tOz1xoYHZc0q3uDcvlIFqJzba45mtX7jjpKWM5pmykQVw7m9JS1n8kKWiwO/oMW7cnlo5rNr6gb363h74aXIZrOp5KKafn2CINzewHLFo6GYDF9Wk0UsK6GYDD6VUNPSv1wolq/bnpuNhK9cVAi+q9fcXb9pR1kNrgxRSKeSiyuGcbldaZ7Q0TSkkvHwlYuFev44t3fd+ga8I8BCkFUTYoGWNpIkWc6zPAIkVuzVWVy4NXP92tK2P5p2BStDVaEazrA+UHtwQxREIZ13xgdNM4yLs4QPX3y39NyNSCoZl3sHOc7Lub1Vd9aUw0ZXGZKUyYiCJElyQwBJkvIZH4U2uv8DkjrKin1A2kkAAAAASUVORK5CYII="
+                          width=""
+                          height=""/>
+                  </div>
+               </div>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">In</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>i</i> holds two inward edges.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;"> 
+               <img src="data:image/png;base64,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"
+                    width=""
+                    height=""/> 
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Out</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>i</i> holds two outward edges.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <a name="fig_mqb_45j_pw"> </a>
+               <div style="text-align: center;">
+                  <div style="margin: auto; display: inline-block">
+                     <img src="data:image/png;base64,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"
+                          width=""
+                          height=""/>
+                  </div>
+               </div>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">For each pattern, this is the formula for the clustering coefficient (CC):</p>
+   <p style="line-height: 1em;">
+      <i>c</i>
+      <sub>
+         <i>i</i>
+      </sub>* = δ<sub>
+         <i>i</i>
+      </sub>* / τ<sub>
+         <i>i</i>
+      </sub>*</p>
+   <p style="line-height: 1em;">where {*}={<i>cycle</i>, <i>middleman</i>, <i>in</i>, <i>out</i>}.</p>
+   <p style="line-height: 1em;">These are the triples for each pattern:</p>
+   <p style="line-height: 1em;">τ<sub>
+         <i>i</i>
+      </sub>
+      <sup>
+         <i>cyc</i>
+      </sup> = <i>d</i>
+      <sub>
+         <i>i</i>
+      </sub>
+      <sup>
+         <i>in</i>
+      </sup> 
+      <i>d</i>
+      <sub>
+         <i>i</i>
+      </sub>
+      <sup>
+         <i>out</i>
+      </sup> - <i>d</i>
+      <sub>
+         <i>i</i>
+      </sub>
+      <sup>↔</sup>
+   </p>
+   <p style="line-height: 1em;">where <i>d</i>
+      <sub>
+         <i>i</i>
+      </sub>
+      <sup>↔</sup> is the number of bilateral edges between <i>i</i> and its neighbors.</p>
+   <p style="line-height: 1em;">τ<sub>
+         <i>i</i>
+      </sub>
+      <sup>
+         <i>mid</i>
+      </sup> = <i>d</i>
+      <sub>
+         <i>i</i>
+      </sub>
+      <sup>
+         <i>in</i>
+      </sup>
+      <i>d</i>
+      <sub>
+         <i>i</i>
+      </sub>
+      <sup>
+         <i>out</i>
+      </sup> - <i>d</i>
+      <sub>
+         <i>i</i>
+      </sub>
+      <sup>↔</sup>
+   </p>
+   <p style="line-height: 1em;">τ<sub>
+         <i>i</i>
+      </sub>
+      <sup>
+         <i>in</i>
+      </sup> = <i>d</i>
+      <sub>
+         <i>i</i>
+      </sub>
+      <sup>
+         <i>in</i>
+      </sup>(<i>d</i>
+      <sub>
+         <i>i</i>
+      </sub>
+      <sup>
+         <i>in</i>
+      </sup> - 1)</p>
+   <p style="line-height: 1em;">τ<sub>
+         <i>i</i>
+      </sub>
+      <sup>
+         <i>out</i>
+      </sup> = <i>d</i>
+      <sub>
+         <i>i</i>
+      </sub>
+      <sup>
+         <i>out</i>
+      </sup>(<i>d</i>
+      <sub>
+         <i>i</i>
+      </sub>
+      <sup>
+         <i>out</i>
+      </sup> - 1)</p>
+
+   <a name="edc1507823540923"> </a>
+   <h3>Weighted, Directed Network (WDN)</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">For a weighted, directed network (WDN), CC is extended as:</p>
+   <a name="fig_ky1_qzj_pw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGUAAABMCAYAAAB033kxAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAAAM3SURBVHhe7ZsPbTJBEEexgAYs4AEJaMACDnCAAxSgAAMYwAEe7usjN8lkPyh37c3uXPm95NIATZru2/mzs+2iE+mQlIRISkIkJSGSkhBJSYikJERSEiIpP+ByuXSHw6F/NT2SMoL7/d5tNpvueDx2+/3+8ZzP5/7T6ZCUkVyv1261WnXL5TJECEjKCHyk7Ha7x6NImZjFYjHqMVRTPhBJSYikJERSEiIpDrorOiraXQr7er0OLeivkBQHh0GE3G63x2taX+Rst9vH61pIioMoITo8dh6piaQ4OK0TGafTqX+nDZJSQA1BDIJaISk9FHlqCmMUaoivLbWRlC8QQi2x2sFrho4IaoGkfMHiI8HTMo19vBSmvM+KO0NH3tc5pQGkLBaflOV5JcUkRtabj5dC6mKRSyx9RV1kfUdzKfzy7MpWvJJit4s+gux7o1NaMynsQFIHbSj5nF+4TCE14Gez0L7zspRWRgmf8X70JmoaKSwIu5F2tOVhjRkXkcGC83BOebbw1BE+j948KSKFdNAqUsbAJipnYxFMLsV227vHaF1TxsAmsjQXSdP0NTeIZjYRERO5kSRlBKRaopyvkUhKQiQlIaFSrFux4k7b2bL1nQthUuhSOIMgBuy++7dS7FQ99JlLZ+cJkUKHwoL4EzGLw3viPSGrZKf07PiI+u0zJZNLsYggXb2D1rK8XBIBUix1ReVy1ZQfMFTKnBctmsml0F2x2H5GZK2xHzjSBPB94n9CVgUJNgqn6COovD41UXOEFBpJs62KqOgZ0tRwz8Jm4iuNDKk6gmZSiCQ7WM4F0q81GlFCoJkUK/JES/bLLcMixUb4fy5SqCd+DDMn/mxNyQJRSrSyQYje8qlx01jy8VIQYtFq7Xz5Vyy1+XgpHjv4tq5xkuKgVmSYxUmKo1UNKZGUHtpzpAyZbkcjKT1WT74bkNq8Lvo/vCSlx6Sw4HRjLUdAktJDO8xZhefZlKHGeMWQlIEg6V16mwpJGUitv7gHSRkIdabW/Y+kDITzS60zjKQMxMb1REx0XZGUgdCRUVNqtMqSkhBJSYikJERSEiIpCZGUhEhKQiQlIZKSEElJiKSko+v+Aafj7qNBX9ToAAAAAElFTkSuQmCC"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <p style="line-height: 1em;">where {*}={<i>cycle</i>, <i>middleman</i>, <i>in</i>, <i>out</i>}.</p>
+   <p style="line-height: 1em;">Assuming <i>w</i>
+      <sub>
+         <i>ij</i>
+      </sub> is the weight on the edge <i>i</i>→<i>j</i>, for node <i>i</i>, these are the formulas for the weighted triangle for each pattern:</p>
+   <a name="fig_wy3_tzj_pw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <a name="xhj1507823645782"> </a>
+   <h3>Weighted, Undirected Network (WUN)</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">For a weighted, undirected network (WUN), assuming that <i>w</i>
+      <sub>
+         <i>ij</i>
+      </sub> is the weight on the edge <i>i</i>→<i>j</i>, for node <i>i</i>, the formula for the clustering coefficient is:</p>
+   <a name="fig_qkg_11k_pw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <a name="jmz1507822498985"> </a>
+   <h2>LocalClusteringCoefficient Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.2</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM LocalClusteringCoefficient (
+  ON <i>vertices_table</i> AS Vertices PARTITION BY <i>vertex_key_column</i> [,...] 
+  ON <i>edges_table</i> AS Edges PARTITION BY <i>source_vertex_key_column</i> [,...]
+  USING
+  TargetKey ({ '<i>target_vertex_column</i>' | <i>target_vertex_column_range</i> }[,...])
+  [ Directed ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ EdgeWeight ('<i>edge_weight</i>') ]
+  [ DegreeRange ({ '[<i>min</i>:<i>max</i>]' | '[<i>min</i>:]' | '[:<i>max</i>]' }) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <p>
+      <b>Note:</b>  In the DegreeRange syntax element, the brackets inside the single quotation marks are required. They do not indicate that their contents are optional.</p>
+   <a name="xos1507822657388"> </a>
+	  <h2>LocalClusteringCoefficient Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetKey</dt>
+      <dd>Specify the key of the target vertex of an edge. The key consists of one or more Edges table column names.</dd>
+      <dt>Directed</dt>
+      <dd>[Optional] Specify whether the graph is directed.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>EdgeWeight</dt>
+      <dd>[Optional] Specify the name of the Edges table column that contains the edge weights. Each edge weight is a positive value in the range (0-1].</dd>
+      <dd>Default behavior: The function treats the input graph as unweighted.</dd>
+      <dt>DegreeRange</dt>
+      <dd>[Optional] Specify the edge degree range—at least <i>min</i> and at most <i>max</i> (<tt style="font-family: monospace;">[<i>min</i>:<i>max</i>]</tt>), at least <i>min</i> (<tt style="font-family: monospace;">[<i>min</i>:]</tt>), or at most max (<tt style="font-family: monospace;">[:<i>max</i>]</tt>). The <i>min</i> and <i>max</i> must be positive integers. The function outputs only nodes with degrees in the specified range.</dd>
+      <dd>Default behavior: The function outputs all nodes.</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the Vertices table columns to copy to the output table.</dd>
+   </div>
+
+
+	
+   <a name="oxj1507823777263"> </a>
+   <h2>LocalClusteringCoefficient Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Vertices Schema</h3>
+   <p style="line-height: 1em;">Each row represents a vertex of the graph. If the table has duplicate vertices, the function uses the first one and ignores its duplicates. The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10017_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10017_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>vertex_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>vertex_key_column</i>.] All or part of unique vertex key. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_lng_dwl_ycb"> </a>
+   <h3>Edges Schema</h3>
+   <p style="line-height: 1em;">Each row represents an edge of the graph. The table can have additional columns, but the function ignores them.</p>
+   <p style="line-height: 1em;">The data-checking rules for the Edges table are, given nodes A and B:</p>
+   <ul>
+      <li>No graph can have multiple A→B edges.</li>
+      <li>An undirected graph cannot have edges A→B and B→A.</li>
+   </ul>
+   <a name="table_vlt_41k_pw"> </a>
+   <table class="introtable">
+      <a name="table_vlt_41k_pw"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>source_vertex_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column appears once for each specified <i>source_vertex_key_column</i>.] All or part of key that identifies source vertex of edge. Must be a <i>vertex_key_column</i> in Vertices table. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_vertex_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column appears once for each specified <i>target_vertex_key_column</i>.] All or part of key that identifies target vertex of edge. Must be a <i>vertex_key_column</i> in Vertices table. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>edge_weight</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Required only for weighted graph.] Edge weight. Function uses only positive edge weights. Sum of edge weights that function uses must be 1.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="aqa1507823841606"> </a>
+   <h2>LocalClusteringCoefficient Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The output table schema depends on the graph type. For descriptions of the graph types, see LocalClusteringCoefficient Background.</p>
+   <p style="line-height: 1em;">The output table schemas for BDN and WDN graphs use cycle, middleman, in, and out triangles, which are explained in Unweighted, Directed Network (BDN).</p>
+
+   <a name="section_zcd_xwl_ycb"> </a>
+   <h3>Output Table Schema, BUN Graph</h3>
+   <a name="table_N1002B_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1002B_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Vertices table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from Vertices table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">degree</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of neighbors of node (nodes directly connected to this node).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">tri_cnt</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of triangles of node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cc</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Clustering coefficient of node.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ly2_1xl_ycb"> </a>
+   <h3>Output Table Schema, BDN Graph</h3>
+   <a name="table_N1008A_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1008A_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Vertices table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from Vertices table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">in_degree</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of incoming edges.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">out_degree</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of outgoing edges.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">bi_degree</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Total number of edges.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cyc_tri_cnt</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of cycle triangles for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">mid_tri_cnt</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of middleman triangles for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">in_tri_cnt</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of in triangles for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">out_tri_cnt</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of out triangles for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">tri_cnt</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Total number of triangles for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cyc_cc</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Clustering coefficient for cycle triangles for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">mid_cc</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Clustering coefficient for middleman triangles for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">in_cc</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Clustering coefficient for in triangles for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">out_cc</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Clustering coefficient for out triangles for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">avg_cc</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Overall clustering coefficient for node.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_fmj_dxl_ycb"> </a>
+   <h3>Output Table Schema, WDN Graph</h3>
+   <a name="table_N101E2_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N101E2_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Vertices table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from Vertices table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">in_degree</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of incoming edges.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">out_degree</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of outgoing edges.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">bi_degree</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Total number of edges.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cyc_tri_cnt</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of cycle triangles for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">mid_tri_cnt</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of middleman triangles for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">in_tri_cnt</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of in triangles for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">out_tri_cnt</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of out triangles for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">tri_cnt</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Total number of triangles for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cyc_cc</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Clustering coefficient for cycle triangles for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">mid_cc</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Clustering coefficient for middleman triangles for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">in_cc</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Clustering coefficient for in triangles for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">out_cc</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Clustering coefficient for out triangles for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">avg_cc</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Overall clustering coefficient for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">w_cyc_cc</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Weighted clustering coefficient for cycle triangles for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">w_mid_cc</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Weighted clustering coefficient for middleman triangles for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">w_in_cc</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Weighted clustering coefficient for in triangles for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">w_out_cc</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Weighted clustering coefficient for out triangles for node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">w_avg_cc</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Overall weighted clustering coefficient for node.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_vq3_cxl_ycb"> </a>
+   <h3>Output Table Schema, WUN Graph</h3>
+   <a name="table_N10175_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10175_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Vertices table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from Vertices table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">degree</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of neighbors (nodes directly connected to this node).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">tri_cnt</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of triangles of node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cc</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Clustering coefficient of node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">w_cc</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Weighted clustering coefficient of node.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="tww1510708307483"> </a>
+   <h2>LocalClusteringCoefficient Examples</h2>
+   <a name="aqn1507824116862"> </a>
+   <h3>LocalClusteringCoefficient Example: WUN</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example treats the input graph as a weighted, undirected network (WUN).</p>
+
+   <a name="section_ctp_ylr_t2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">In the following figure, nodes represent countries, edges connect countries that trade with each other, and numbers on edges represent trade propensity.</p>
+   <a name="fig_N10014_N1000E_N1000C_N10001"> </a>
+   <h4 style="text-align: center;">Graph of Trading Partners</h4>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <p style="line-height: 1em;">The graph in the figure is represented by the Vertices and Edges tables country and trade, respectively.</p>
+   <a name="table_dzz_1mr_t2b"> </a>
+   <table class="introtable">
+      <a name="table_dzz_1mr_t2b"> </a>
+      <h4 style="text-align: center;">Vertices: country</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">countryid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">name</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">USA</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">China</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">UK</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Japan</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">France</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_lyx_2mr_t2b"> </a>
+   <table class="introtable">
+      <a name="table_lyx_2mr_t2b"> </a>
+      <h4 style="text-align: center;">Edges: trade</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">fromid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">toid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">tradeweight</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.5</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_of1_5bg_5db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM LocalClusteringCoefficient (
+  ON trade as Edges PARTITION BY fromid
+  ON country as Vertices PARTITION BY countryid
+  USING
+  TargetKey ('toid')
+  EdgeWeight ('tradeweight') 
+  Directed ('f') 
+  Accumulate ('countryid', 'name')
+) AS dt ORDER BY countryid;</tt>
+   </pre>
+   <a name="section_p4h_5bg_5db"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ countryid name   degree tri_cnt cc w_cc    
+ --------- ------ ------ ------- -- ------- 
+         1 usa         4       6  1 0.44642
+         2 china       2       2  2 1.01569
+         3 uk          4       6  1 0.44642
+         4 japan       2       2  2 0.85667
+         5 france      2       2  2 0.80615</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="arx1507824211830"> </a>
+   <h3>LocalClusteringCoefficient Example: WUN, DegreeRange 3+</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example treats the input graph as a weighted, undirected network and outputs only nodes with degree range 3 or greater.</p>
+
+   <a name="section_nbw_3mr_t2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">Input tables are from LocalClusteringCoefficient Example: WUN:</p>
+   <ul>
+      <li>Edges: trade</li>
+      <li>Vertices: country</li>
+   </ul>
+
+   <a name="section_of1_5bg_5db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM LocalClusteringCoefficient (
+  ON trade AS Edges PARTITION BY fromid
+  ON country AS Vertices PARTITION BY countryid
+  USING
+  TargetKey ('toid')
+  Directed ('f')
+  EdgeWeight ('tradeweight')
+  DegreeRange ('[3:]') 
+  Accumulate ('countryid', 'name')
+) AS dt ORDER BY countryid;</tt>
+   </pre>
+   <a name="section_p4h_5bg_5db"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ countryid name degree tri_cnt cc w_cc    
+ --------- ---- ------ ------- -- ------- 
+         1 usa       4       6  1 0.44642
+         3 uk        4       6  1 0.44642</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="mkq1507824531185"> </a>
+   <h3>LocalClusteringCoefficient Example: WDN</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example treats the input graph as a weighted, directed network (WDN).</p>
+
+   <a name="section_nbw_3mr_t2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">Input tables are from LocalClusteringCoefficient Example: WUN:</p>
+   <ul>
+      <li>Edges: trade</li>
+      <li>Vertices: country</li>
+   </ul>
+
+   <a name="section_of1_5bg_5db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM LocalClusteringCoefficient (
+  ON trade AS Edges PARTITION BY fromid
+  ON country AS Vertices PARTITION BY countryid
+  USING
+  TargetKey ('toid')
+  EdgeWeight ('tradeweight') 
+  Directed ('t') 
+  Accumulate ('countryid')
+) AS dt ORDER BY countryid;</tt>
+   </pre>
+   <a name="section_p4h_5bg_5db"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ countryid in_degree out_degree bi_degree cyc_tri_cnt mid_tri_cnt in_tri_cnt out_tri_cnt tri_cnt cyc_cc mid_cc in_cc out_cc  avg_cc  w_cyc_cc w_mid_cc w_in_cc w_out_cc w_avg_cc 
+ --------- --------- ---------- --------- ----------- ----------- ---------- ----------- ------- ------ ------ ----- ------- ------- -------- -------- ------- -------- -------- 
+         1         2          3         1           2           1          1           2       6    0.4    0.2   0.5 0.33333 0.33333  0.17901  0.07268   0.171  0.17967  0.14881
+         2         1          1         0           1           1          0           0       2      1      1     0       0       1  0.43089   0.5848       0        0  0.50785
+         3         2          3         1           2           1          1           2       6    0.4    0.2   0.5 0.33333 0.33333  0.17901  0.09865  0.2924  0.11757  0.14881
+         4         2          0         0           0           0          2           0       2      0      0     1       0       1        0        0 0.42833        0  0.42833
+         5         1          1         0           1           1          0           0       2      1      1     0       0       1  0.46416    0.342       0        0  0.40308</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

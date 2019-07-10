@@ -1,0 +1,1107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="zqh1507735899373"> </a>
+	  <h1>KModes</h1>
+
+	
+		<p style="line-height: 1em;">KModes is an extension of KMeans that supports categorical data. KModes
+			models are fit similarly to KMeans models. The core algorithm is an
+			expectation-maximization algorithm that finds a locally optimal solution.</p>
+
+		<p style="line-height: 1em;">These are the main steps to fitting the model:</p>
+
+		<ol>
+			   <li>Initialization<p style="line-height: 1em;">Select a set of K initial cluster centers. You can create this set with the RandomSample function, which samples rows from an input table using the kmeans++ and kmeans|| algorithms. These initialization algorithms create initial cluster centers that are more likely to lead to better local optima.</p>
+      </li>
+
+			   <li>E step<p style="line-height: 1em;">A mapper assigns each point in the input
+					table to one of the K clusters, and stores the sums of the numerical attributes
+					and counts of the categorical attributes.</p>
+      </li>
+
+			   <li>M step<p style="line-height: 1em;">A reducer aggregates the the statistics created for each worker in the E step and creates new cluster centers. For numerical attributes, the new center is the mean of the value of the attribute for the points assigned to the cluster. For categorical attributes, the new center is the mode of the attribute value for the points assigned to the cluster.</p>
+      </li>
+
+		</ol>
+
+		<p style="line-height: 1em;">The algorithm runs for either a set number of iterations or until the
+			change in movement of the cluster centers drops below a user-specified threshold.</p>
+
+		<p style="line-height: 1em;">When assigning points to a cluster, a hybrid distance function that
+			combines a numeric distance and a categorical distance is required. The default distance
+			between two data points in a KModes model is the squared Euclidean distance:</p>
+
+		<a name="fig_mjt_s13_4w"> </a>
+			<div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+		
+		<p style="line-height: 1em;">where N denotes the indexes of numerical attributes, C denotes the indexes of categorical attributes, and w<sub>j</sub> denotes the weight to assign to a category.</p>
+
+		<p style="line-height: 1em;">The Manhattan distance can also be used:</p>
+
+		<a name="fig_ijs_nd3_4w"> </a>
+			<div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+		
+	
+   <a name="gtm1507735943788"> </a>
+   <h2>KModes Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.6</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM KModes (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  [ ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InitialSeedTable ]
+  OUT TABLE OutputTable (<i>output_table</i>)
+  USING
+  [ NumClusters (<i>clusters</i> [,...] ) ]
+  [ ModelIDColumn ('<i>model_id_column</i>') ]
+  TargetColumns ('<i>target_column</i>' [,...] )
+  [ StopThreshold (<i>threshold</i>) ]
+  [ MaxIterNum (<i>max_iterations</i>) ]
+  [ NumericDistanceMethod ({ 'euclidean' | 'manhattan' }) ]
+  [ CategoricalDistanceMethod ({ 'overlap' | 'hamming' }) ]
+  [ CategoryWeights ('<i>weight</i>' [,...] ) ]
+  [ NumericAsCategorical ({ '<i>ascat_column</i>' | <i>ascat_column_range</i> }[,...]) ]
+  [ Seed (<i>seed</i>)
+    SeedColumns ('<i>seed_column</i>' [,...])
+  ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="edx1507735947827"> </a>
+	  <h2>KModes Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputTable</dt>
+      <dd>Specify the name of the table in which to output the centroids of the clusters.</dd>
+      <dt>NumClusters</dt>
+      <dd>[Required if you omit InitialSeedTable, disallowed otherwise.] Specify the number of clusters. If you specify a single value, the function trains a single model with the specified number of clusters. If you specify multiple values, the function trains a model for each value.</dd>
+      <dt>ModelIDColumn</dt>
+      <dd>[Optional] Specify the name of the InitialSeedTable column that contains seed values for multiple models.</dd>
+      <dt>TargetColumns</dt>
+      <dd>Specify the input table columns to use for clustering.</dd>
+      <dt>StopThreshold</dt>
+      <dd>[Optional] Specify the convergence threshold. When the centroids move by less than <i>threshold</i>, the algorithm has converged. The <i>threshold</i> must be a nonnegative DOUBLE value.</dd>
+      <dd>Default: 0.0395</dd>
+      <dt>MaxIterNum</dt>
+      <dd>[Optional] Specify the maximum number of iterations that the algorithm runs before quitting if the convergence threshold is not met. The <i>max_iterations</i> must be a positive INTEGER.</dd>
+      <dd>Default: 10</dd>
+      <dt>NumericDistanceMethod</dt>
+      <dd>[Optional] Specify the distance metric for numeric dimensions.</dd>
+      <dd>Default: 'euclidean'</dd>
+      <dt>CategoricalDistanceMethod</dt>
+      <dd>[Optional] Specify the distance metric for categorical dimensions:<a name="table_d5b_34z_fdb"> </a>
+         <table class="introtable">
+            <a name="table_d5b_34z_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">overlap</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Distance is 0 if two points are in same category, 1 otherwise.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">hamming</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Used for categories that are strings of equal length. Percentage of different characters.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>CategoryWeights</dt>
+      <dd>[Optional] Specify the weight of each category in the KModes distance. Each <i>weight</i> must be a DOUBLE value.</dd>
+      <dd>Default behavior: All categories have equal weight.</dd>
+      <dt>NumericAsCategorical</dt>
+      <dd>[Optional] Specify the input table columns that contain numeric variables to interpret as categorical variables. These columns must have numeric SQL data types.</dd>
+      <dd>Default behavior: No numeric variables are treated as categorical variables.</dd>
+      <dt>Seed</dt>
+      <dd>[Optional] Specify the random seed the algorithm uses for repeatable results (for more information, see Nondeterministic Results and UniqueID Syntax Element). The <i>seed</i> must be a LONG value.<p>
+            <b>Note:</b>  If you specify Seed:<ul>
+               <li>You must also specify SeedColumn.</li>
+               <li>You must specify NumClusters, not InitialSeedTable.</li>
+            </ul>
+         </p>
+      </dd>
+      <dt>SeedColumn</dt>
+      <dd>[Optional] Specify the names of the InputTable columns by which to partition the input. Function calls that use the same input data, <i>seed</i>, and <i>seed_column</i> output the same result. If you specify SeedColumn, you must also specify Seed.<p>
+            <b>Note:</b>  Ideally, the number of distinct values in the <i>seed_column</i> is the same as the number of workers in the cluster. A very large number of distinct values in the <i>seed_column</i> degrades function performance.</p>
+      </dd>
+   </div>
+
+
+	
+   <a name="mlb1519242503900"> </a>
+	  <h2>Ways to Create Multiple Models</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">You can create multiple models and compare their metrics to find the best model. There are two ways to create multiple models simultaneously:<ul>
+         <li>In the NumClusters syntax element, specify multiple values. <p style="line-height: 1em;">For example, NumClusters (3, 3, 4) fits 3 models, two with 3 clusters and one model with 4 clusters. It is good practice to try multiple initializations when fitting KModes, which is why you might use the same number more than once.</p>
+         </li>
+         <li>Use the RandomSample function to select multiple sets of rows from the input data table, and use these randomly selected samples as seeds in the KModes function.<p style="line-height: 1em;">Create a table from a call to RandomSample. Give the NumSample syntax element a set of values <i>x</i>
+               <sub>1</sub>, <i>x</i>
+               <sub>2</sub>, …, <i>x</i>
+               <sub>
+                  <i>n</i>
+               </sub> where <i>n</i> is the number of different sets of rows to create (this becomes the number of models later created by KModes) and <i>x</i>
+               <sub>
+                  <i>i</i>
+               </sub> is the number of seed rows to select for each model (this determines the number of clusters in model <i>i</i> later created by KModes). The table column set_id identifies each set of points.</p>
+            <p style="line-height: 1em;">Call KModes, giving the InitialSeedTable syntax element that name of the table you created and specifying ModelIDColumn ('set_id').</p>
+         </li>
+      </ul>
+   </p>
+
+		
+
+	
+   <a name="qso1507735951693"> </a>
+	  <h2>KModes Input</h2>
+
+	  <a name="section_N100FD_N1000C_N10001"> </a>
+   <a name="table_rxs_bvd_ycb"> </a>
+   <table class="introtable">
+      <a name="table_rxs_bvd_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains data points to cluster, with one dimension in each column.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InitialSeedTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Required if you omit NumClusters, disallowed otherwise.] Contains points that serve as initial cluster centers.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_qp5_pns_ddb"> </a>
+   <h3>InputTable and InitialSeedTable Schema</h3>
+   <a name="table_N10107_N100FE_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10107_N100FE_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">dimension_<i>i</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each dimension.] Data for dimension <i>i</i>. Each dimension is a feature (attribute) by which to cluster data. Function determines number of dimensions from data.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+   <a name="jut1507735955371"> </a>
+	  <h2>KModes Output</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Output Summary Schema</h3>
+   <p style="line-height: 1em;">This table is displayed on the screen.</p>
+   <a name="table_N10159_N100FE_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10159_N100FE_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">model_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only if multiple models are trained.] Integer, starting with 0, identifying model.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">summary</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Model data:<ul>
+                  <li>Number of Clusters (found in model)</li>
+                  <li>Number of Iterations (required to create model)</li>
+                  <li>Model Converged (whether algorithm converged)</li>
+                  <li>Number of Data Points (number of input rows used to build model)</li>
+               </ul>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">between_cluster_error</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sum of squared distances of centroids to global mean, where squared distance of each mean to global mean is multiplied by number of data points in cluster.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">total_within_cluster_error</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sum of all within_cluster_ss values.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">pseudo_f</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Value given by this formula:<p style="line-height: 1em; margin: 0px;">
+                  <br/>(<i>between_cluster_errror</i> / (<i>K</i> - 1)) /</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>(<i>total_within_cluster_error</i> / (<i>N</i> - <i>K</i>))</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>where <i>N</i> is total number of data points, or total weight if points are weighted, and <i>K</i> is number of clusters.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ix4_lzd_ycb"> </a>
+   <h3>OutputTable Schema</h3>
+   <a name="table_N101DB_N100FE_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N101DB_N100FE_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">model_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only if multiple models are trained.] Model identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cluster_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Cluster identifier assigned by function.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>numerical_attribute</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each numerical attribute.] Name of numerical attribute.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>categorical_attribute</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each categorical attribute and for each numerical attribute specified by NumericAsCategorical.] Name of attribute.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">within_cluster_ss</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Total distance summed over all points in cluster, between point and cluster center, as calculated by distance metric.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cluster_weight</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Total weight of data points assigned to cluster.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">distance_metric</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Value of Distance syntax element in function call (copied to output table so that you need not specify it again when calling KModesPredict).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">category_weights</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Value of CategoryWeights syntax element in function call (copied to output table so that you need not specify it again when calling KModesPredict).</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+	
+   <a name="eaf1510704155615"> </a>
+   <h2>KModes Examples</h2>
+   <a name="oxt1525792951371"> </a>
+	  <h3>KModes Example: InitialSeedTable</h3>
+
+	  <a name="section_eyv_vbr_t2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The InputTable has 32 observations on 11 variables, about different models of cars.</p>
+   <a name="table_np3_bcr_t2b"> </a>
+   <table class="introtable">
+      <a name="table_np3_bcr_t2b"> </a>
+      <h4 style="text-align: center;">InputTable: kmodes_input</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Variable</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">drat</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">wt</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">qsec</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">vs</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">am</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">gear</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">carb</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">mpg</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Normalized numerical</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Miles/US gallon</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.835197792</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.22254417</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.307088658</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cyl</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Numerical treated as categorical</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of cylinders</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.246659826</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.077504765</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.073449451</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">disp</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Normalized numerical</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Displacement (cubic inches)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.24956575</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.636460997</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.364760755</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">hp</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Normalized numerical</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Gross horsepower</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.685575235</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.174596366</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.239934874</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">drat</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Normalized numerical</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Rear axle ratio</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.473999587</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.917004624</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.426006817</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">V</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">manual</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">wt</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Normalized numerical</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Weight (lb/1000)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.564607761</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.309415603</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.54772305</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">qsec</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Normalized numerical</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1/4 mile time</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.722980874</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.360516446</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.124126363</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">vs</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Categorical</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Engine (V or straight)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.043834734</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.457097039</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.314395417</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">manual</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">am</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Categorical</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Transmission (automatic or manual)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.90416444</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.039646647</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.907275602</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">V</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">manual</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">gear</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Numerical treated as categorical</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of forward gears</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.90416444</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.310481114</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.588295128</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">V</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">manual</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">carb</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Numerical treated as categorical</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of carburetors</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.166003916</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.048290296</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.874010283</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">manual</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">The InitialSeedTable has three points that serve as initial cluster centers.</p>
+   <a name="table_ox4_wcr_t2b"> </a>
+   <table class="introtable">
+      <a name="table_ox4_wcr_t2b"> </a>
+      <h4 style="text-align: center;">InitialSeedTable: kmodes_init</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">model</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">mpg</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">cyl</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">disp</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">hp</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">drat</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">wt</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">qsec</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">vs</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">am</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">gear</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">carb</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Datsun 710</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.449543447</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.990182091</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.783040459</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.473999587</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.917004624</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.426006817</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">V</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">manual</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Ferrari Dino</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.064813069</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.691647397</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.412942174</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.043834734</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.457097039</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.314395417</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">manual</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Lincoln Continental</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.607882616</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.849931752</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.996348337</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.115740088</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.255335698</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.016088927</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">S</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">automatic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE kmodes_clusters;
+
+SELECT * FROM KModes (
+  ON kmodes_input AS InputTable
+  ON kmodes_init AS InitialSeedTable
+  OUT TABLE OutputTable (kmodes_clusters)
+  USING
+  TargetColumns ('mpg:carb')
+  NumericAsCategorical ('cyl','gear','carb')
+) AS dt;</tt>
+   </pre>
+		
+   <a name="section_rmb_s2j_tdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">With InitialSeedTable, the cluster centers and assignments are the same every time, with the same distance metric (in this case, the default, Euclidean).</p>
++<p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM kmodes_clusters;</tt>
+   </pre>
+   <pre>
+      <tt>
+ cluster_id mpg                disp               hp                 drat              wt                 qsec              cyl vs am        gear carb within_cluster_ss cluster_weight distance_metric   category_weights          
+ ---------- ------------------ ------------------ ------------------ ----------------- ------------------ ----------------- --- -- --------- ---- ---- ----------------- -------------- ----------------- ------------------------- 
+ 1               -0.2639188168       -0.059076587        0.760068841      0.4478156392       -0.221011145     -1.2494800924 6   s  manual    5    4     20.7870494221671            5.0 NULL              NULL                     
+ 0          -0.724943435928571  0.890010157642857  0.511912862714286     -0.9434069635  0.794435602785714      -0.180375863 8   s  automatic 3    4     43.6174097337196           14.0 EUCLIDEAN,OVERLAP [1.0, 1.0, 1.0, 1.0, 1.0]
+ 2           0.882215552923077 -0.935750713230769 -0.843624945153846 0.843739945692308 -0.770541747153846 0.674820195846154 4   v  manual    4    2     48.7743732753756           13.0 NULL              NULL</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="ppg1507735971500"> </a>
+   <h3>KModes Example: NumClusters</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">This example specifies NumClusters ('3') to obtain three clusters. Because different cluster centers are produced each time you run the example, cluster assignments might differ.</p>
+
+   <a name="section_r3z_2dr_t2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: kmodes_input, as in KModes Example: InitialSeedTable</li>
+   </ul>
+
+   <a name="section_zhc_5cj_tdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE kmodes_clusters1;
+
+SELECT * FROM KModes (
+  ON kmodes_input AS InputTable
+  OUT TABLE OutputTable (kmodes_clusters1)
+  USING
+  NumClusters (3)
+  TargetColumns ('mpg:carb')
+  NumericAsCategorical('cyl','gear','carb')
+) AS dt ;</tt>
+   </pre>
+   <a name="section_jls_5cj_tdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ set_id summary                                                                                          between_cluster_error total_within_cluster_error pseudo_f           
+ ------ ------------------------------------------------------------------------------------------------ --------------------- -------------------------- ------------------ 
+ 0      Number of Clusters: 3
+Number of Iterations: 3
+Model Converged: true
+Number of Data Points: 32.0
+     196.2432817153941          111.7567182974282 16.974535569904358</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM kmodes_clusters1;</tt>
+   </pre>
+   <pre>
+      <tt>
+ set_id cluster_id mpg                disp               hp                 drat              wt                  qsec               cyl vs am        gear carb within_cluster_ss cluster_weight distance_metric   category_weights          
+ ------ ---------- ------------------ ------------------ ------------------ ----------------- ------------------- ------------------ --- -- --------- ---- ---- ----------------- -------------- ----------------- ------------------------- 
+ 0      1          -0.263918816857143 -0.187711613285714  0.444196075857143 0.492702406571429 -0.0928210307142857 -0.772368446571429 6   s  manual    4    4     32.2124975506323            7.0 NULL              NULL                     
+ 0      0          -0.724943435928571  0.890010157642857  0.511912862714286     -0.9434069635   0.794435602785714       -0.180375863 8   s  automatic 3    4     43.6174097337196           14.0 EUCLIDEAN,OVERLAP [1.0, 1.0, 1.0, 1.0, 1.0]
+ 0      2            1.09060362018182  -1.01328735581818 -0.934195692090909 0.887161876727273  -0.952031929363636  0.721076473636364 4   v  manual    4    2     35.9268110130763           11.0 NULL              NULL</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

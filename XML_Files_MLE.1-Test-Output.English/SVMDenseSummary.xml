@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="tbs1507909904503"> </a>
+	  <h1>SVMDenseSummary</h1>
+
+	  <p style="line-height: 1em;">SVMDenseSummary extracts readable information from the model produced by SVMDense. The function can display either a summary of the model training results or a table containing the weights for each attribute.</p>
+
+   <a name="zij1507909939265"> </a>
+   <h2>SVMDenseSummary Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.5</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SVMDenseSummary (
+  ON (SELECT TOP 1 * FROM <i>input_table</i>) AS InputTable PARTITION BY 1
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS Model DIMENSION
+  USING
+  TargetColumns ('<i>target_column</i>' [,...] )
+  [ OutputSummary ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="pgw1507909943600"> </a>
+	  <h2>SVMDenseSummary Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumns</dt>
+      <dd>Specify the InputTable columns that contain the attributes of the test samples. These columns must have numeric data types.</dd>
+      <dt>OutputSummary</dt>
+      <dd>[Optional] Specify whether the function outputs only a summary of the model.</dd>
+      <dd>Default: 'false' (The function outputs a table that contains the weight of each attribute in the model.)</dd>
+   </div>
+
+
+	
+   <a name="bho1507909948496"> </a>
+   <h2>SVMDenseSummary Input</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">The input is the same as the SVMDensePredict Input.</p>
+
+   <a name="aqf1507909952900"> </a>
+   <h2>SVMDenseSummary Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">If OutputSummary is true, the output is a message; if OutputSummary is false, the output is a table that contains the weight of each attribute in the model.</p>
+
+   <a name="section_jzl_h2x_xcb"> </a>
+   <h3>Output Message Schema, OutputSummary ('true')</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">message</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Summary of model.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_fk1_j2x_xcb"> </a>
+   <h3>Output Table Schema, OutputSummary ('false')</h3>
+   <a name="table_N10049_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10049_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">classid</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Identifier of class of model attribute.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">classlabel</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Label of class of model attribute.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">attribute</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Model attribute. Attribute of bias is '&lt;bias&gt;'.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">attributeid</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Identifier of model attribute.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">weight</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Weight of model attribute.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="cif1510778404582"> </a>
+   <h2>SVMDenseSummary Examples</h2>
+   <a name="jua1512143191258"> </a>
+	  <h3>SVMDenseSummary Example: OutputSummary ('true')</h3>
+   <a name="section_eyw_f1f_pdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: svm_iris_train (see SVMDense Examples Input)</li>
+      <li>Model: densesvm_iris_rbf_model, the SVMDense Example: Radial Basis Model (RBF) Model output</li>
+   </ul>
+
+   <a name="section_amj_g1f_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SVMDenseSummary (
+  ON (SELECT TOP 1 * FROM svm_iris_train) AS InputTable PARTITION BY 1
+  ON densesvm_iris_rbf_model AS Model DIMENSION
+  USING
+  TargetColumns ('[1:4]')
+  OutputSummary ('true')
+) AS dt ;
+</tt>
+   </pre>
+   <a name="section_vxt_g1f_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ message                                                                                                                                    
+ ------------------------------------------------------------------------------------------------------------------------------------------ 
+ The model is trained with 120 samples and 512 unique attributes with hash projection                                                      
+ There are 3 different classes in the training set                                                                                         
+ The model is converged after 39 steps with epsilon 0.01, the average value of the loss function for the training set is 15.280333289700877
+ The corresponding training parameters are cost:1.0 bias:0.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="gnl1512143160146"> </a>
+	  <h3>SVMDenseSummary Example: OutputSummary ('false')</h3>
+   <a name="section_n3g_p3g_ndb"> </a>
+   <p style="line-height: 1em;">Set the ShowSummary syntax element to false to output the model parameters (weights, attributes, and so on).</p>
+
+   <a name="section_eyw_f1f_pdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: svm_iris_train (see SVMDense Examples Input)</li>
+      <li>Model: densesvm_iris_rbf_model, the SVMDense Example: Radial Basis Model (RBF) Model output</li>
+   </ul>
+
+   <a name="section_amj_g1f_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SVMDenseSummary (
+  ON (SELECT TOP 1 * FROM svm_iris_train) AS InputTable PARTITION BY 1
+  ON densesvm_iris_rbf_model AS Model DIMENSION
+  USING
+  TargetColumns ('[1:4]')
+  OutputSummary ('false')
+)AS dt;
+</tt>
+   </pre>
+   <a name="section_vxt_g1f_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ classid classlabel attribute      attributeid weight               
+ ------- ---------- -------------- ----------- -------------------- 
+       0 setosa     "sepal_width"            1  0.17668614274598424
+       1 versicolor "sepal_width"            1  -0.2581050936190464
+       2 virginica  "sepal_width"            1 -0.05148409297039791
+       0 setosa     "sepal_length"           0   0.2124457045066159
+       1 versicolor "sepal_length"           0 -0.18895676841065615
+       2 virginica  "sepal_length"           0 -0.14795974623093944
+       0 setosa     "petal_width"            3   0.1495107028305408
+       1 versicolor "petal_width"            3 -0.32278838874104604
+       2 virginica  "petal_width"            3  0.05151405569228511
+       0 setosa     "petal_length"           2  0.18552583229853534
+       1 versicolor "petal_length"           2  -0.4127026264766183
+       2 virginica  "petal_length"           2  0.08001136090545642</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+</t:intro>

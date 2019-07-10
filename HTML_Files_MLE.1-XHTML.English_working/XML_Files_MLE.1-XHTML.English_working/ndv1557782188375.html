@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="copyright" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.rights.owner" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="Column Specification Syntax Elements" />
+<meta name="abstract" content="See the syntax details for Machine Learning Engine analytic functions with syntax elements that specify ( {'column' | column_range }[,...] )." />
+<meta name="description" content="See the syntax details for Machine Learning Engine analytic functions with syntax elements that specify ( {'column' | column_range }[,...] )." />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="kdt1507595753284" />
+<meta name="DC.Language" content="en-us" />
+
+<link rel="stylesheet" type="text/css" href="css/normal_styles.css" />
+<title>Column Specification Syntax Elements</title>
+</head>
+<body id="kdt1507595753284">
+<h1 class="title topictitle1" id="ariaid-title1">Column Specification Syntax Elements</h1>
+<div class="body refbody"><div class="section" id="kdt1507595753284__section_N1000E_N1000C_N10001"><div class="p">Some <span class="keyword">ML Engine</span> functions have column specification syntax elements with this syntax:<pre class="pre codeblock"><code><var class="keyword varname">syntax_element</var> ( {'<var class="keyword varname">column</var>' | <var class="keyword varname">column_range</var> }[,...] )</code></pre></div>
+<div class="p">The <var class="keyword varname">column</var> is a column name. This is the syntax of <var class="keyword varname">column_range</var>:<pre class="pre codeblock"><code>'<var class="keyword varname">start_column</var>:<var class="keyword varname">end_column</var>' [, '-<var class="keyword varname">exclude_column</var>' ]</code></pre></div>
+<p class="p">The range includes its endpoints.</p>
+<div class="p">The <var class="keyword varname">start_column</var> and <var class="keyword varname">end_column</var> can be:<ul class="ul" id="kdt1507595753284__ul_s1f_kfn_jz"><li class="li">Column names (for example, <code class="ph codeph">'column1:column2'</code>)</li>
+<li class="li">Nonnegative integers that represent the indexes of columns in the table (for example, <code class="ph codeph">'[0:4]'</code>)<p class="p">The first column has index 0; therefore, <code class="ph codeph">'[0:4]'</code> specifies the first five columns in the table.</p>
+</li>
+<li class="li">Empty. For example:<ul class="ul" id="kdt1507595753284__ul_t1f_kfn_jz"><li class="li"><code class="ph codeph">'[:4]'</code> specifies all columns up to and including the column with index 4.</li>
+<li class="li"><code class="ph codeph">'[4:]'</code> specifies the column with index 4 and all columns after it.</li>
+<li class="li"><code class="ph codeph">'[:]'</code> specifies all columns in the table.</li>
+</ul>
+</li>
+</ul>
+</div>
+<p class="p">The <var class="keyword varname">exclude_column</var> is a column in the specified range, represented by either its name or its index (for example, <code class="ph codeph">'[0:99]', '-[50]', '-column10'</code> specifies the columns with indexes 0 through 99, except the column with index 50 and column10).</p>
+<p class="p">Column ranges cannot overlap, and cannot include any specified <var class="keyword varname">column</var>.</p>
+</div>
+</div>
+</body>
+</html>

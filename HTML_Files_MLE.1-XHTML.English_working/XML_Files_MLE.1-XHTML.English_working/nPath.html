@@ -1,0 +1,1872 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="copyright" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.rights.owner" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="nPath" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="ppf1534196263854" />
+<meta name="DC.Language" content="en-us" />
+
+<link rel="stylesheet" type="text/css" href="css/normal_styles.css" />
+<title>nPath</title>
+</head>
+<body>
+<div class="nested0" aria-labelledby="ariaid-title1" topicindex="1" topicid="ppf1534196263854" id="ppf1534196263854">
+	<h1 class="title topictitle1" id="ariaid-title1">nPath</h1>
+
+<div class="topic concept nested1" aria-labelledby="ariaid-title2" topicindex="2" topicid="nnz1507231322706" xml:lang="en-us" lang="en-us" id="nnz1507231322706">
+	<h2 class="title topictitle2" id="ariaid-title2">Introduction to nPath</h2>
+
+	<div class="body conbody"><p class="p">The nPath function scans a set of rows, looking for patterns that you specify. For each set of input rows that matches the pattern, nPath produces a single output row. The function provides a flexible pattern-matching capability that lets you specify complex patterns in the input data and define the values that are output for each matched input set.</p>
+<div class="fig fignone" id="nnz1507231322706__fig_p1f_mhf_lw"><div class="caption"></div><br /><img class="image" id="nnz1507231322706__image_vrm_mhf_lw" src="asx1466005254602.svg" alt="How Machine Learning Engine function nPath works" /><br /></div>
+<p class="p">nPath is useful when your goal is to identify the paths that lead to an outcome. For example, you can use nPath to analyze:</p>
+<ul class="ul" id="nnz1507231322706__ul_qwt_4fl_p1b"><li class="li">Web site click data, to identify paths that lead to sales over a specified amount</li>
+<li class="li">Sensor data from industrial processes, to identify paths to poor product
+				quality</li>
+<li class="li">Healthcare records of individual patients, to identify paths that indicate that patients are at risk of developing conditions such as heart disease or diabetes</li>
+<li class="li">Financial data for individuals, to identify paths that provide information about credit or fraud risks</li>
+</ul>
+<p class="p">The output from the nPath function can be input to other <span class="keyword">ML Engine</span> functions or to a visualization tool such as Teradata AppCenter.</p>
+<div class="fig fignone" id="nnz1507231322706__fig_pwj_shf_lw"><div class="caption"><span class="figcap">Sankey Diagram of <span class="keyword">ML Engine</span> nPath Output</span></div><br /><img class="image" id="nnz1507231322706__image_nyl_phf_lw" src="hoh1466005255238.png" alt="Sankey diagram of output from Machine Learning Engine function nPath" /><br /></div>
+<div class="p">An nPath call specifies:<ul class="ul" id="nnz1507231322706__ul_nk4_3g4_cz"><li class="li"><a class="xref" href="anj1558127449015.html#sal1507231621140" title="">Mode (overlapping or nonoverlapping)</a></li>
+<li class="li"><a class="xref" href="anj1558127449015.html#duh1507234733202" title="">Pattern to match</a></li>
+<li class="li"><a class="xref" href="anj1558127449015.html#hkc1507231941696" title="">Symbols to use</a></li>
+<li class="li">[Optional] <a class="xref" href="anj1558127449015.html#ffp1507311580978" title="">Filters to apply</a></li>
+<li class="li"><a class="xref" href="anj1558127449015.html#kpw1507312276859" title="">Results to output</a></li>
+</ul>
+</div>
+</div>
+
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title3" topicindex="3" topicid="ize1507231436584" xml:lang="en-us" lang="en-us" id="ize1507231436584"><h2 class="title topictitle2" id="ariaid-title3">nPath Syntax</h2>
+<div class="body refbody"><div class="section" id="ize1507231436584__section_N1000E_N1000C_N10001"><h3 class="title sectiontitle">Version 1.1</h3><div class="note note" id="ize1507231436584__note_N10019_N10011_N1000E_N10001"><span class="notetitle">Note</span><div class="notebody">This function requires "@coprocessor".</div></div>
+<pre class="pre codeblock"><code>SELECT * FROM nPath@coprocessor (
+  <span class="ph">ON { <var class="keyword varname">table</var> | <var class="keyword varname">view</var> | (<var class="keyword varname">query</var>) }</span> PARTITION BY <var class="keyword varname">partition_column</var> ORDER BY <var class="keyword varname">order_column</var> [ ASC | DESC ][<var class="keyword varname">...</var>]
+  [ <span class="ph">ON { <var class="keyword varname">table</var> | <var class="keyword varname">view</var> | (<var class="keyword varname">query</var>) }</span> 
+    [ PARTITION BY <var class="keyword varname">partition_column</var> | DIMENSION ] ORDER BY <var class="keyword varname">order_column</var> [ ASC | DESC ] 
+  ][<var class="keyword varname">...</var>]
+  USING 
+  Mode ({ OVERLAPPING | NONOVERLAPPING })
+  Pattern ('<var class="keyword varname">pattern</var>')
+  Symbols ({ <var class="keyword varname">col_expr</var> = <var class="keyword varname">symbol_predicate</var> AS <var class="keyword varname">symbol</var> } [,...])
+  [ Filter (<var class="keyword varname">filter_expression</var> [,...]) ]
+  Result ({ <var class="keyword varname">aggregate_function</var> (<var class="keyword varname">col_expr</var> OF <var class="keyword varname">symbol</var>) AS <var class="keyword varname">alias_1</var> }[,...])
+) AS <var class="keyword varname">alias_2</var>;</code></pre><div class="note note" id="ize1507231436584__note_N10075_N10012_N1000F_N10001"><span class="notetitle">Note</span><div class="notebody">The nPath function is not tied to any schema and must not be qualified with a schema name.</div></div>
+</div>
+</div>
+<div class="related-links">
+<div class="linklistheader">Related Information</div>
+<ul class="linklist linklist relinfo">
+<div class="linklistmember"><a class="link" href="eta1543514041091.html" title="See the format for comments in queries that call Machine Learning Engine analytic functions.">Comments in Queries</a></div></ul>
+</div></div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title4" topicindex="4" topicid="sal1507231621140" xml:lang="en-us" lang="en-us" id="sal1507231621140">
+	<h2 class="title topictitle2" id="ariaid-title4">nPath Syntax Elements</h2>
+
+	<div class="body refbody">
+		<div class="section" id="sal1507231621140__section_N10011_N1000E_N10001"><dl class="dl parml"><dt class="dt pt dlterm">Mode</dt>
+<dd class="dd pd">Specify the pattern-matching mode:
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="sal1507231621140__table_sng_gmy_fdb" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:50%" /><col style="width:50%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d251457e249">Option</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e251">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e249 "><code class="ph codeph">OVERLAPPING</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e251 ">Find every occurrence of pattern in partition, regardless of whether it is part of a previously found match. One row can match multiple symbols in a given matched pattern.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e249 "><code class="ph codeph">NONOVERLAPPING</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e251 ">Start next pattern search at row that follows last pattern match.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</dd>
+<dt class="dt pt dlterm">Pattern</dt>
+<dd class="dd pd">Specify the pattern for which the function searches. You compose <var class="keyword varname">pattern</var> with the symbols (which you define in the Symbols syntax element), operators, and parentheses. <p class="p">When patterns have multiple operators, the function applies them in order of precedence, and applies operators of equal precedence from left to right. To force the function to evaluate a subpattern first, enclose it in parentheses. For more information, see <a class="xref" href="anj1558127449015.html#duh1507234733202" title="">nPath Patterns</a>.</p>
+</dd>
+<dt class="dt pt dlterm">Symbols</dt>
+<dd class="dd pd">Specify the symbols that appear in the values of the Pattern and Result syntax elements. The <var class="keyword varname">col_expr</var> is an expression whose value is a column name, <var class="keyword varname">symbol</var> is any valid identifier, and <var class="keyword varname">symbol_predicate</var> is a SQL predicate (often a column name).<p class="p">For example, this Symbols syntax element is for analyzing website visits:</p>
+<pre class="pre codeblock"><code>Symbols (
+  pagetype = 'homepage' AS H,
+  pagetype &lt;&gt; 'homepage' AND pagetype &lt;&gt; 'checkout' AS PP,
+  pagetype = 'checkout' AS CO
+)</code></pre><p class="p">The <var class="keyword varname">symbol</var> is case-insensitive; however, a <var class="keyword varname">symbol</var> of one or two uppercase letters is easy to identify in patterns.</p>
+<p class="p">If <var class="keyword varname">col_expr</var> represents a column that appears in multiple input tables, you must qualify the ambiguous column name with its table name. For example:</p>
+<pre class="pre codeblock"><code>Symbols (
+  weblog.pagetype = 'homepage' AS H,
+  weblog.pagetype = 'thankyou' AS T,
+  ads.adname = 'xmaspromo' AS X,
+  ads.adname = 'realtorpromo' AS R
+)</code></pre><p class="p">For more information about symbols that appear in the Pattern syntax element value, see <a class="xref" href="anj1558127449015.html#hkc1507231941696" title="">nPath Symbols</a>. For more information about symbols that appear in the Result syntax element value, see <a class="xref" href="anj1558127449015.html#kpw1507312276859" title="">nPath Results</a>.</p>
+</dd>
+<dt class="dt pt dlterm">Filter</dt>
+<dd class="dd pd">[Optional] Specify filters to impose on the matched rows. The function combines the filter expressions using the AND operator.<p class="p">This is the <var class="keyword varname">filter_expression</var> syntax:</p>
+<pre class="pre codeblock"><code><var class="keyword varname">symbol_expression comparison_operator symbol_expression</var></code></pre><p class="p">The two symbol expressions must be type-compatible. This is the <var class="keyword varname">symbol_expression</var> syntax:</p>
+<pre class="pre codeblock"><code>{ FIRST | LAST }(<var class="keyword varname">column_with_expression</var> OF [ANY](<var class="keyword varname">symbol</var>[,...]))</code></pre><p class="p">The <var class="keyword varname">column_with_expression</var> cannot contain the operator AND or OR, and all its columns must come from the same input. If the function has multiple inputs, <var class="keyword varname">column_with_expression</var> and symbol must come from the same input.</p>
+<p class="p">The <var class="keyword varname">comparison_operator</var> is either <code class="ph codeph">&lt;</code>, <code class="ph codeph">&gt;</code>, <code class="ph codeph">&lt;=</code>, <code class="ph codeph">&gt;=</code>, <code class="ph codeph">=</code>, or <code class="ph codeph">!=</code>.</p>
+<p class="p">Whether this syntax element improves or degrades nPath performance depends on several factors. For details, see <a class="xref" href="anj1558127449015.html#ffp1507311580978" title="">nPath Filters</a>.</p>
+</dd>
+<dt class="dt pt dlterm">Result</dt>
+<dd class="dd pd">Specify the output columns. The <var class="keyword varname">col_expr</var> is an expression whose value is a column name; it specifies the values to retrieve from the matched rows. The function applies <var class="keyword varname">aggregate_function</var> to these values. For details, see <a class="xref" href="anj1558127449015.html#kpw1507312276859" title="">nPath Results</a>.<p class="p">The function evaluates this syntax element once for every matched pattern in the partition (that is, it outputs one row for each pattern match).</p>
+</dd>
+</dl>
+</div>
+
+	</div>
+
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title5" topicindex="5" topicid="rdo1507231702191" xml:lang="en-us" lang="en-us" id="rdo1507231702191"><h2 class="title topictitle2" id="ariaid-title5">nPath Input</h2>
+<div class="body refbody"><div class="section" id="rdo1507231702191__section_tcc_2pt_wcb"><p class="p">The function requires at least one partitioned input table, and can have additional input tables that are either partitioned or DIMENSION tables.</p>
+<div class="note note" id="rdo1507231702191__note_N1006B_N1000E_N1000C_N10001"><span class="notetitle">Note</span><div class="notebody">If the input to nPath is nondeterministic, the results are nondeterministic. For more information, see <a class="xref" href="qym1549987102806.html" title="Learn why you can get different results from a Machine Learning Engine analytic function using the same input tables and syntax element values.">Nondeterministic Results and UniqueID Syntax Element</a>.</div></div>
+</div>
+<div class="section" id="rdo1507231702191__section_N1000E_N1000C_N10001"><h3 class="title sectiontitle">Input Table Schema</h3>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="rdo1507231702191__table_N10014_N1000E_N1000C_N10001" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:28.57142857142857%" /><col style="width:14.285714285714285%" /><col style="width:57.14285714285714%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry nocellnorowborder" style="vertical-align:top;" id="d251457e442">Column</th>
+<th class="entry nocellnorowborder" style="vertical-align:top;" id="d251457e444">Data Type</th>
+<th class="entry cell-norowborder" style="vertical-align:top;" id="d251457e446">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e442 "><var class="keyword varname">partition_column</var></td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e444 ">INTEGER or VARCHAR</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d251457e446 ">Column by which every partitioned input table is partitioned.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e442 "><var class="keyword varname">order_column</var></td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e444 ">INTEGER or VARCHAR</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d251457e446 ">Column by which every input table is ordered.</td>
+</tr>
+<tr class="row"><td class="entry row-nocellborder" style="vertical-align:top;" headers="d251457e442 "><var class="keyword varname">input_column</var></td>
+<td class="entry row-nocellborder" style="vertical-align:top;" headers="d251457e444 ">INTEGER or VARCHAR</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e446 ">Data to search for patterns.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title6" topicindex="6" topicid="izm1507231778801" xml:lang="en-us" lang="en-us" id="izm1507231778801"><h2 class="title topictitle2" id="ariaid-title6">nPath Output</h2>
+<div class="body refbody"><div class="section" id="izm1507231778801__section_r1m_x4t_wcb"><h3 class="title sectiontitle">Output Table Schema</h3>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="izm1507231778801__table_N1000E_N1000C_N10001" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:18.032786885245905%" /><col style="width:24.590163934426233%" /><col style="width:57.37704918032788%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry nocellnorowborder" style="vertical-align:top;" id="d251457e492">Column</th>
+<th class="entry nocellnorowborder" style="vertical-align:top;" id="d251457e494">Data Type</th>
+<th class="entry cell-norowborder" style="vertical-align:top;" id="d251457e496">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e492 "><var class="keyword varname">partition_column</var></td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e494 "><span class="ph">Same as in Input table</span></td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d251457e496 ">Column by which partitioned input tables are partitioned.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e492 "><var class="keyword varname">order_column</var></td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e494 "><span class="ph">Same as in Input table</span></td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d251457e496 ">Column by which input tables are ordered.</td>
+</tr>
+<tr class="row"><td class="entry row-nocellborder" style="vertical-align:top;" headers="d251457e492 "><var class="keyword varname">result_column</var></td>
+<td class="entry row-nocellborder" style="vertical-align:top;" headers="d251457e494 ">Same as result of <var class="keyword varname">aggregate_function</var></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e496 ">Determined by Result syntax element. For details, see <a class="xref" href="anj1558127449015.html#kpw1507312276859" title="">nPath Results</a>.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="topic concept nested1" aria-labelledby="ariaid-title7" topicindex="7" topicid="hkc1507231941696" xml:lang="en-us" lang="en-us" id="hkc1507231941696"><h2 class="title topictitle2" id="ariaid-title7">nPath Symbols</h2>
+<div class="body conbody"><div class="section" id="hkc1507231941696__section_N1000E_N1000C_N10001"><p class="p">A <dfn class="term">symbol</dfn> identifies a row in the Pattern and Result syntax elements. A symbol can be any valid identifier (that is, a sequence of characters and digits that begins with a character) but is typically one or two uppercase letters. Symbols are case-insensitive; that is, 'SU' is identical to 'su', and the system reports an error if you use both.</p>
+<p class="p">For example, suppose that you have this input table:</p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="hkc1507231941696__table_cjj_cj4_cz" class="table" width="100%" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:10.81081081081081%" /><col style="width:10.81081081081081%" /><col style="width:10.81081081081081%" /><col style="width:10.81081081081081%" /><col style="width:13.513513513513514%" /><col style="width:10.81081081081081%" /><col style="width:16.216216216216218%" /><col style="width:16.216216216216218%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d251457e561">record</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e563">city</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e565">temp</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e567">rh</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e569">cloudcover</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e571">windspeed</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e573">winddirection</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e575">rained_next_day</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e561 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e563 ">Tuscson</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e565 ">81</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e567 ">30</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e569 ">0.0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e571 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e573 ">NW</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e575 ">1</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e561 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e563 ">Tempe</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e565 ">76</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e567 ">40</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e569 ">0.2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e571 ">15</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e573 ">NE</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e575 ">0</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e561 ">3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e563 ">Tuscson</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e565 ">70</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e567 ">70</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e569 ">0.4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e571 ">10</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e573 ">N</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e575 ">0</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e561 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e563 ">Tusayan</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e565 ">75</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e567 ">50</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e569 ">0.4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e571 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e573 ">NW</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e575 ">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">This table has examples of symbol definitions and the rows of the table that they match in NONOVERLAPPING mode:</p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="hkc1507231941696__table_n1s_nk4_cz" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:60%" /><col style="width:40%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d251457e654">Symbol Definition</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e656">Rows Matched</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e654 "><code class="ph codeph">temp &gt;= 80 AS H</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e656 ">1</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e654 "><code class="ph codeph">winddirection = 'NW' AS NW</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e656 ">1, 4</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e654 "><code class="ph codeph">winddirection = 'NW' OR windspeed &gt; 12 AS W</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e656 ">1, 2, 4</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e654 "><code class="ph codeph">cloudcover != 0.0 AND rh &gt; 35 AS C</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e656 ">2, 3, 4<p class="p">(An alternative to <code class="ph codeph">!=</code> is <code class="ph codeph">&lt;&gt;</code>.)</p>
+</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e654 "><code class="ph codeph">'true' AS A</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e656 ">1, 2, 3, 4<p class="p">This symbol definition matches all rows, for any input table.</p>
+</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e654 "><code class="ph codeph">city like 'tu%' AS TU</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e656 ">None <p class="p">The like operator is case-sensitive. The <code class="ph codeph">%</code> operator matches any number of characters.</p>
+</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e654 "><code class="ph codeph">city not like 'tu%' AS TU</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e656 ">None</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e654 "><code class="ph codeph">city ilike 'tu%' AS TU</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e656 ">1, 3, 4 <p class="p">The ilike operator is case-insensitive.</p>
+</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e654 "><code class="ph codeph">city not ilike 'tu%' AS N</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e656 ">2</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e654 "><code class="ph codeph">city ilike 'tu%n' as T</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e656 ">1, 3, 4 <p class="p">The <code class="ph codeph">%</code> operator matches any number of characters.</p>
+</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e654 "><code class="ph codeph">city ilike 'tu___n' as T</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e656 ">1, 3 <p class="p">The underscore (_) operator matches any single character. The pattern <code class="ph codeph">'tu___n'</code> has three underscores, so it matches 'Tucson' but not 'Tusayan'.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">Rows with NULL values do not match any symbol. That is, the function ignores rows with missing values.</p>
+</div>
+</div>
+<div class="topic concept nested2" aria-labelledby="ariaid-title8" topicindex="8" topicid="uex1507233172664" xml:lang="en-us" lang="en-us" id="uex1507233172664"><h3 class="title topictitle3" id="ariaid-title8">LAG and LEAD Expressions in Symbol Predicates</h3>
+<div class="body conbody"><div class="section" id="uex1507233172664__section_N1000E_N1000C_N10001"><p class="p">You can create symbol predicates that compare a row to a previous or subsequent row, using a LAG or LEAD operator.</p>
+</div>
+<div class="section" id="uex1507233172664__section_sn1_rzj_mdb"><h4 class="title sectiontitle">LAG Expression Syntax</h4><pre class="pre codeblock"><code>{ <var class="keyword varname">current_expr operator</var> LAG (<var class="keyword varname">previous_expr</var>, <var class="keyword varname">lag_rows</var> [, <var class="keyword varname">default</var>]) |
+  LAG (<var class="keyword varname">previous_expr</var>, <var class="keyword varname">lag_rows</var> [, <var class="keyword varname">default</var>]) <var class="keyword varname">operator current_expr</var> }</code></pre><dl class="dl parml"><dt class="dt pt dlterm"><var class="keyword varname">current_expr</var></dt>
+<dd class="dd pd">Name of a column from the current row, or an expression operating on a column from the current row.</dd>
+<dt class="dt pt dlterm"><var class="keyword varname">operator</var></dt>
+<dd class="dd pd">Either <code class="ph codeph">&gt;, &gt;=, &lt;, &lt;=, =,</code> or <code class="ph codeph">!=</code>.</dd>
+<dt class="dt pt dlterm"><var class="keyword varname">previous_expr</var></dt>
+<dd class="dd pd">Name of a column from a previous row, or an expression operating on a column from a previous row.</dd>
+<dt class="dt pt dlterm"><var class="keyword varname">lag_rows</var></dt>
+<dd class="dd pd">Number of rows to count backward from the current row to reach the previous row. For example, if <var class="keyword varname">lag_rows</var> is 1, the previous row is the immediately preceding row.</dd>
+<dt class="dt pt dlterm"><var class="keyword varname">default</var></dt>
+<dd class="dd pd">Value to use for <var class="keyword varname">previous_expr</var> when there is no previous row (that is, when the current row is the first row or there is no row that is <var class="keyword varname">lag_rows</var> before the current row).</dd>
+</dl>
+</div>
+<div class="section" id="uex1507233172664__section_skg_rzj_mdb"><h4 class="title sectiontitle">LAG and LEAD Expression Rules</h4><ul class="ul" id="uex1507233172664__ul_c5p_q1k_mdb"><li class="li">A symbol definition can have multiple LAG and LEAD expressions.</li>
+<li class="li">A symbol definition that has a LAG or LEAD expression cannot have an OR operator.</li>
+<li class="li">If a symbol definition has a LAG or LEAD expression and the input is not a table, you must create an alias of the input query, as in <a class="xref" href="anj1558127449015.html#knr1523641167790" title="See example of LAG expression in Machine Learning Engine function nPath where the input query needs an alias.">LAG and LEAD Expressions Example: Input Query with Alias</a>.</li>
+</ul>
+</div>
+</div>
+<div class="topic reference nested3" aria-labelledby="ariaid-title9" topicindex="9" topicid="knr1523641167790" xml:lang="en-us" lang="en-us" id="knr1523641167790">
+	<h4 class="title topictitle4" id="ariaid-title9">LAG and LEAD Expressions Example: Input Query with Alias</h4>
+
+	<div class="body refbody">
+		<div class="section" id="knr1523641167790__section_N10011_N1000E_N10001"><h5 class="title sectiontitle">Input</h5>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="knr1523641167790__table_cvb_mck_mdb" class="table" frame="border" border="1" rules="all"><div class="caption"><span class="tablecap">bank_web_clicks</span></div><colgroup><col style="width:25%" /><col style="width:25%" /><col style="width:25%" /><col style="width:25%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d251457e904">customer_id</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e906">session_id</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e908">page</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e910">datestamp</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e904 ">529</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e906 ">0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e908 ">ACCOUNT SUMMARY</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e910 ">2004-03-17 16:35:00</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e904 ">529</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e906 ">0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e908 ">FAQ</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e910 ">2004-03-17 16:38:00</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e904 ">529</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e906 ">0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e908 ">ACCOUNT HISTORY</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e910 ">2004-03-17 16:42:00</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e904 ">529</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e906 ">0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e908 ">FUNDS TRANSFER</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e910 ">2004-03-17 16:45:00</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e904 ">529</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e906 ">0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e908 ">ONLINE STATEMENT ENROLLMENT</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e910 ">2004-03-17 16:49:00</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e904 ">529</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e906 ">0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e908 ">PROFILE UPDATE</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e910 ">2004-03-17 16:50:00</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e904 ">529</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e906 ">0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e908 ">ACCOUNT SUMMARY</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e910 ">2004-03-17 16:51:00</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e904 ">529</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e906 ">0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e908 ">CUSTOMER SUPPORT</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e910 ">2004-03-17 16:53:00</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e904 ">529</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e906 ">0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e908 ">VIEW DEPOSIT DETAILS</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e910 ">2004-03-17 16:57:00</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e904 ">529</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e906 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e908 ">ACCOUNT SUMMARY</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e910 ">2004-03-18 01:16:00</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e904 ">529</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e906 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e908 ">ACCOUNT SUMMARY</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e910 ">2004-03-18 01:18:00</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e904 ">529</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e906 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e908 ">FAQ</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e910 ">2004-03-18 01:20:00</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e904 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e906 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e908 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e910 ">...</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+		</div>
+<div class="section" id="knr1523641167790__section_ofs_ybk_mdb"><h5 class="title sectiontitle">SQL Call</h5><pre class="pre codeblock"><code>SELECT * FROM nPath@coprocessor (
+  ON (SELECT customer_id, session_id, datestamp, page FROM bank_web_clicks) AS alias1
+    PARTITION BY customer_id, session_id
+    ORDER BY datestamp
+  USING
+  Mode (NONOVERLAPPING)
+  Pattern ('(DUP|A)*')
+  Symbols (
+    'true' AS A,
+    page = LAG (page,1) AS DUP
+  )
+  Result (
+    FIRST (customer_id OF any (A)) AS customer_id,
+    FIRST (session_id OF A) AS session_id,
+    FIRST (datestamp OF A) AS first_date,
+    LAST (datestamp OF ANY(A,DUP)) AS last_date,
+    ACCUMULATE (page OF A) AS page_path,
+    ACCUMULATE (page of DUP) AS dup_path)
+) AS dt GROUP BY 1;</code></pre></div>
+<div class="section rotate" id="knr1523641167790__section_wl2_zbk_mdb"><h5 class="title sectiontitle">Output</h5>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="knr1523641167790__table_i23_vck_mdb" class="table rotate" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:16.666666666666664%" /><col style="width:16.666666666666664%" /><col style="width:16.666666666666664%" /><col style="width:16.666666666666664%" /><col style="width:16.666666666666664%" /><col style="width:16.666666666666664%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1050">customer_id</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1052">session_id</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1054">first_date</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1056">last_date</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1058">page_path</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1060">dup_path</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1050 ">529</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1052 ">0</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1054 ">2004-03-17 16:35:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1056 ">2004-03-17 16:57:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1058 ">[ACCOUNT SUMMARY, FAQ, ACCOUNT HISTORY, FUNDS TRANSFER, ONLINE STATEMENT ENROLLMENT, PROFILE UPDATE, ACCOUNT SUMMARY, CUSTOMER SUPPORT, VIEW DEPOSIT DETAILS]</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1060 ">[]</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1050 ">529</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1052 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1054 ">2004-03-18 01:16:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1056 ">2004-03-18 01:28:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1058 ">[ACCOUNT SUMMARY, FAQ, ACCOUNT SUMMARY, FUNDS TRANSFER, ACCOUNT HISTORY, VIEW DEPOSIT DETAILS, ACCOUNT SUMMARY, ACCOUNT HISTORY]</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1060 ">[ACCOUNT SUMMARY]</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1050 ">529</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1052 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1054 ">2004-03-18 09:22:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1056 ">2004-03-18 09:36:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1058 ">[ACCOUNT SUMMARY, ACCOUNT HISTORY, FUNDS TRANSFER, ACCOUNT SUMMARY, FAQ]</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1060 ">[ACCOUNT SUMMARY, ACCOUNT SUMMARY, FAQ]</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1050 ">529</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1052 ">3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1054 ">2004-03-18 22:41:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1056 ">2004-03-18 22:55:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1058 ">[ACCOUNT SUMMARY, ACCOUNT HISTORY, ACCOUNT SUMMARY, ACCOUNT HISTORY, FAQ, ACCOUNT SUMMARY]</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1060 ">[ACCOUNT SUMMARY]</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1050 ">529</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1052 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1054 ">2004-03-19 08:33:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1056 ">2004-03-19 08:41:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1058 ">[ACCOUNT SUMMARY, FAQ, VIEW DEPOSIT DETAILS, FAQ]</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1060 ">[]</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1050 ">529</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1052 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1054 ">2004-03-19 10:06:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1056 ">2004-03-19 10:14:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1058 ">[ACCOUNT SUMMARY, FUNDS TRANSFER, VIEW DEPOSIT DETAILS, ACCOUNT HISTORY]</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1060 ">[VIEW DEPOSIT DETAILS]</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1050 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1052 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1054 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1056 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1058 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1060 ">...</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="knr1523641167790__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+
+	</div>
+
+</div>
+<div class="topic reference nested3" aria-labelledby="ariaid-title10" topicindex="10" topicid="lrg1507234030779" xml:lang="en-us" lang="en-us" id="lrg1507234030779"><h4 class="title topictitle4" id="ariaid-title10">LAG and LEAD Expressions Example: First and Most Expensive Purchases</h4>
+<div class="body refbody"><div class="section" id="lrg1507234030779__section_N1000E_N1000C_N10001"><p class="p">Whenever a user visits the home page and then visits checkout pages and buys increasingly expensive products, the nPath query returns the first purchase and the most expensive purchase.</p>
+</div>
+<div class="section" id="lrg1507234030779__section_hfh_dck_mdb"><h5 class="title sectiontitle">Input</h5><p class="p">The input table is a collection of clickstream data for different products with price information. Columns userid and sessionid identify the users.</p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="lrg1507234030779__table_xz2_vdk_mdb" class="table" frame="border" border="1" rules="all"><div class="caption"><span class="tablecap">aggregate_clicks</span></div><colgroup><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1201">userid</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1203">sessionid</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1205">productname</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1207">pagetype</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1209">clicktime</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1211">referrer</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1213">productprice</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1039</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">sneakers</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">home</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-07-29 20:17:59</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">100</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1039</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">books</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">home</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-04-21 13:17:59</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">300</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1039</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">television</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">home</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-05-23 13:17:59</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">500</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1039</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">envelopes</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">home</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-07-16 11:17:59</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">10</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1039</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">envelopes</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">home1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-07-16 11:18:16</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">10</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1039</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">envelopes</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">page1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-07-16 11:18:18</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">10</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1039</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">bookcases</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">home</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-08-19 22:17:59</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">150</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1039</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">bookcases</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">home1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-08-19 22:18:02</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">150</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1039</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">bookcases</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">page1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-08-19 22:18:05</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">150</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1039</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">bookcases</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">page2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-08-22 04:20:05</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">150</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1039</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">bookcases</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">checkout</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-08-24 14:30:05</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">150</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1039</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">bookcases</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">page2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-08-27 23:03:05</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">150</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1040</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">tables</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">home</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-07-29 20:17:59</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">250</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1040</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">Appliances</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">home</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-04-21 13:17:59</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company6</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">1500</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1040</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">laptops</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">home</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-05-23 13:17:59</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company7</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">800</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1040</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">chairs</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">home</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-07-16 11:17:59</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">400</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1040</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">chairs</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">home1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-07-16 11:18:16</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">400</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1040</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">chairs</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">page1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-07-16 11:18:18</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">400</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1040</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">cellphones</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">home</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-08-19 22:17:59</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">600</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1040</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">cellphones</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">home1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-08-19 22:18:02</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">600</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1040</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">cellphones</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">page1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-08-19 22:18:05</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">600</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1040</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">cellphones</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">page2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-08-22 04:20:05</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">600</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1040</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">cellphones</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">checkout</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-08-24 14:30:05</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">600</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">1040</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">cellphones</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">page2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">2009-08-27 23:03:05</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">Company8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">600</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1201 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1203 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1205 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1207 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1209 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1211 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1213 ">...</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="lrg1507234030779__section_ofs_ybk_mdb"><h5 class="title sectiontitle">SQL Call</h5><pre class="pre codeblock"><code>SELECT * FROM nPath@coprocessor (
+  ON aggregate_clicks PARTITION BY sessionid
+    ORDER BY clicktime ASC, productname, pagetype, userid
+  USING
+  Mode (NONOVERLAPPING)
+  Pattern ('H+.D*.X*.P1.P2+')
+  Symbols (
+    'true' AS X,
+    pagetype = 'home' AS H,
+    pagetype &lt;&gt; 'home' AND pagetype &lt;&gt; 'checkout' AS D,
+    pagetype = 'checkout' AS P1,
+    pagetype = 'checkout' AND
+    productprice &gt; 100 AND
+    productprice &gt; LAG (productprice, 1, 100::REAL) AS P2
+  )
+  Result (
+    FIRST (productname OF P1) AS first_product,
+    MAX_CHOOSE (productprice, productname OF P2) AS max_product,
+    FIRST (sessionid OF P2) AS sessionid
+  )
+) AS dt;</code></pre></div>
+<div class="section" id="lrg1507234030779__section_wl2_zbk_mdb"><h5 class="title sectiontitle">Output</h5>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="lrg1507234030779__table_mrv_22k_mdb" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1608">first_product</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1610">max_product</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1612">sessionid</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1608 ">bookcases</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1610 ">cellphones</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1612 ">5</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="lrg1507234030779__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title11" topicindex="11" topicid="duh1507234733202" xml:lang="en-us" lang="en-us" id="duh1507234733202"><h2 class="title topictitle2" id="ariaid-title11">nPath Patterns</h2>
+<div class="body refbody"><div class="section" id="duh1507234733202__section_N1000E_N1000C_N10001"><p class="p">The value of the Pattern syntax element specifies the sequence of rows for which the function searches. You compose the pattern definition, <var class="keyword varname">pattern</var>, with symbols (which you define in the Symbols syntax element), operators, and parentheses. In the pattern definition, symbols represent rows. You can combine symbols with pattern operators to define simple or complex patterns of rows for which to search.</p>
+</div>
+<div class="section" id="duh1507234733202__section_azl_fny_fdb"><h3 class="title sectiontitle">Basic Pattern Operators</h3><p class="p">The following table lists and describes the basic pattern operators, in decreasing order of precedence. In the table, <code class="ph codeph">A</code> and <code class="ph codeph">B</code> are symbols that have been defined in the Symbols syntax element.</p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="duh1507234733202__table_rcc_vr4_cz" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1659">Operator</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1661">Description</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1663">Precedence</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1659 "><code class="ph codeph">A</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1661 ">Matches one row that meets the definition of <code class="ph codeph">A</code>.</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1663 ">1 (highest)</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1659 "><code class="ph codeph">A.</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1661 ">Matches one row that meets the definition of <code class="ph codeph">A</code>.</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1663 ">1</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1659 "><code class="ph codeph">A?</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1661 ">Matches 0 or 1 rows that satisfy the definition of <code class="ph codeph">A</code>.</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1663 ">1</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1659 "><code class="ph codeph">A*</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1661 ">Matches 0 or more rows that satisfy the definition of <code class="ph codeph">A</code> (greedy operator).</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1663 ">1</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1659 "><code class="ph codeph">A+</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1661 ">Matches 1 of more rows that satisfy the definition of <code class="ph codeph">A</code> (greedy operator).</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1663 ">1</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1659 "><code class="ph codeph">A.B</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1661 ">Matches two rows, where the first row meets the definition of <code class="ph codeph">A</code> and the second row meets the definition of <code class="ph codeph">B</code>.</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1663 ">2</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1659 "><code class="ph codeph">A|B</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1661 ">Matches one row that meets the definition of either <code class="ph codeph">A</code> or <code class="ph codeph">B</code>.</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1663 ">3</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">The nPath function uses greedy pattern matching. That is, it finds the longest available match when matching patterns specified by nongreedy operators. For more information, see <a class="xref" href="anj1558127449015.html#gmb1507234864207" title="">nPath Greedy Pattern Matching</a>.</p>
+</div>
+<div class="section" id="duh1507234733202__section_fcy_gny_fdb"><h3 class="title sectiontitle">Pattern Operator Precedence</h3><div class="p">
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="duh1507234733202__table_zlh_cny_fdb" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:50%" /><col style="width:50%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1765">Example</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1767">Equivalent</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1765 "><code class="ph codeph">A.B+</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1767 "><code class="ph codeph">A.(B+)</code></td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1765 "><code class="ph codeph">A|B*</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1767 "><code class="ph codeph">A|(B*)</code></td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1765 "><code class="ph codeph">A.B|C</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1767 "><code class="ph codeph">(A.B)|C</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p class="p">Example:</p>
+<pre class="pre codeblock"><code>A.(B|C)+.D?.X*.A</code></pre><p class="p">The preceding pattern definition matches any set of rows whose first row meets the definition of symbol <code class="ph codeph">A</code>, followed by a non-empty sequence of rows, each of which meets the definition of either symbol <code class="ph codeph">B</code> or <code class="ph codeph">C</code>, optionally followed by one row that meets the definition of symbol <code class="ph codeph">D</code>, followed by any number of rows that meet the definition of symbol <code class="ph codeph">X</code>, and ending with a row that meets the definition of symbol <code class="ph codeph">A</code>.</p>
+<p class="p">You can use parentheses to define precedence rules. Parentheses are recommended for clarity, even where not strictly required.</p>
+</div>
+<div class="section" id="duh1507234733202__section_jbb_mny_fdb"><h3 class="title sectiontitle">Start Anchor and End Anchor Pattern Operators</h3><p class="p">To indicate that a sequence of rows must start or end with a row that matches a certain symbol, use the start anchor (<code class="ph codeph">^</code>) or end anchor (<code class="ph codeph">$</code>) operator.</p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="duh1507234733202__table_mdb_ws4_cz" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:50%" /><col style="width:50%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1835">Operator</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1837">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1835 "><code class="ph codeph">^A</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1837 ">Appears only at beginning of pattern. Indicates that set of rows must start with row that meets  definition of <code class="ph codeph">A</code>.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1835 "><code class="ph codeph">A$</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1837 ">Appears only at end of pattern. Indicates that set of rows must end with row that meets definition of <code class="ph codeph">A</code>.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="duh1507234733202__section_j23_sny_fdb"><h3 class="title sectiontitle">Subpattern Operators</h3><p class="p">Subpattern operators let you specify how often a subpattern must appear in a match. You can specify a minimum number, exact number, or range. In the following table, <code class="ph codeph">X</code> represents any pattern definition composed of symbols and any of the previously described pattern operators.</p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="duh1507234733202__table_zzx_1t4_cz" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:50%" /><col style="width:50%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1872">Operator</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e1874">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1872 "><code class="ph codeph">(X){a}</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1874 ">Matches exactly <code class="ph codeph">a</code> occurrences of pattern <code class="ph codeph">X</code>.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1872 "><code class="ph codeph">(X){a,}</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1874 ">Matches at least <code class="ph codeph">a</code> occurrences of pattern <code class="ph codeph">X</code>.</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1872 "><code class="ph codeph">(X){a,b}</code></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1874 ">Matches at least <code class="ph codeph">a</code> and no more than <code class="ph codeph">b</code> occurrences of pattern <code class="ph codeph">X</code>.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="topic reference nested2" aria-labelledby="ariaid-title12" topicindex="12" topicid="gmb1507234864207" xml:lang="en-us" lang="en-us" id="gmb1507234864207"><h3 class="title topictitle3" id="ariaid-title12">nPath Greedy Pattern Matching</h3>
+<div class="body refbody"><div class="section" id="gmb1507234864207__section_N1000E_N1000C_N10001"><p class="p">The nPath function uses greedy pattern matching, finding the longest available match despite any nongreedy operators in the pattern.</p>
+<p class="p">For example, consider the input table link2:</p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="gmb1507234864207__table_N10017_N1000E_N1000C_N10001" class="table" frame="border" border="1" rules="all"><div class="caption"><span class="tablecap">link2</span></div><colgroup><col style="width:12.5%" /><col style="width:37.5%" /><col style="width:25%" /><col style="width:25%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry nocellnorowborder" style="vertical-align:top;" id="d251457e1940">userid</th>
+<th class="entry nocellnorowborder" style="vertical-align:top;" id="d251457e1942">title1</th>
+<th class="entry nocellnorowborder" style="vertical-align:top;" id="d251457e1944">startdate</th>
+<th class="entry cell-norowborder" style="vertical-align:top;" id="d251457e1946">enddate</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e1940 ">21</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e1942 ">Chief Exec Officer</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e1944 ">1994-10-01</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d251457e1946 ">2005-02-28</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e1940 ">21</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e1942 ">Software Engineer</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e1944 ">1996-10-01</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d251457e1946 ">2001-06-30</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e1940 ">21</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e1942 ">Software Engineer</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e1944 ">1998-10-01</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d251457e1946 ">2001-06-30</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e1940 ">21</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e1942 ">Chief Exec Officer</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e1944 ">2005-03-01</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d251457e1946 ">2007-03-31</td>
+</tr>
+<tr class="row"><td class="entry row-nocellborder" style="vertical-align:top;" headers="d251457e1940 ">21</td>
+<td class="entry row-nocellborder" style="vertical-align:top;" headers="d251457e1942 ">Chief Exec Officer</td>
+<td class="entry row-nocellborder" style="vertical-align:top;" headers="d251457e1944 ">2007-06-01</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e1946 ">null</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">This query returns the following table:</p>
+<pre class="pre codeblock"><code>SELECT job_transition_path, count(*) AS count1 FROM nPath@coprocessor (
+  ON link2 PARTITION BY userid ORDER BY startdate
+  USING
+  Mode (NONOVERLAPPING)
+  Pattern ('<span class="ph b">CEO.ENGR.OTHER*</span>')
+  Symbols (title1 ilike 'software eng%' AS ENGR,
+    true AS OTHER,
+    title1 ilike 'Chief Exec Officer' AS CEO)
+  Result (accumulate(title1 OF ANY(ENGR,OTHER,CEO))
+    AS job_transition_path)
+) AS dt GROUP BY 1;</code></pre>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="gmb1507234864207__table_N100AB_N1000E_N1000C_N10001" class="table" width="100%" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:87.5%" /><col style="width:12.5%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry nocellnorowborder" style="vertical-align:top;" id="d251457e2007">job_transition_path</th>
+<th class="entry cell-norowborder" style="vertical-align:top;" id="d251457e2009">count</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry row-nocellborder" style="vertical-align:top;" headers="d251457e2007 ">[Chief Exec Officer, Software Engineer, Software Engineer, Chief Exec Officer, Chief Exec Officer]</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2009 ">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">In the pattern, CEO matches the first row, ENGR matches the second row, and
+                OTHER* matches the remaining rows:</p>
+<div class="fig fignone" id="gmb1507234864207__fig_pbm_5qh_mw"><div class="caption"></div><br /><img class="image" id="gmb1507234864207__image_f35_5qh_mw" src="ymp1466005257712.svg" alt="How pattern 'CEO.ENGR.OTHER*' matches cells in title column in greedy pattern matching example of MLE function nPath" /><br /></div>
+<p class="p">This query returns the following table:</p>
+<pre class="pre codeblock"><code>SELECT job_transition_path, count(*) AS count1 FROM nPath@coprocessor (
+  ON link2 PARTITION BY userid ORDER BY startdate
+  USING
+  Mode (NONOVERLAPPING)
+  Pattern ('<span class="ph b">CEO.ENGR.OTHER*.CEO</span>')
+  Symbols (title1 ilike 'software eng%' AS ENGR,
+    true AS OTHER,
+    title1 ilike 'Chief Exec Officer' AS CEO)
+  Result (accumulate(title1 of ANY(ENGR,OTHER,CEO))
+    AS job_transition_path)
+) AS dt GROUP BY 1;</code></pre>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="gmb1507234864207__table_N100F6_N1000E_N1000C_N10001" class="table" width="100%" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:87.5%" /><col style="width:12.5%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry nocellnorowborder" style="vertical-align:top;" id="d251457e2036">job_transition_path</th>
+<th class="entry cell-norowborder" style="vertical-align:top;" id="d251457e2038">count</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry row-nocellborder" style="vertical-align:top;" headers="d251457e2036 ">[Chief Exec Officer, Software Engineer, Software Engineer, Chief Exec Officer, Chief Exec Officer]</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2038 ">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">In the pattern, CEO matches the first row, ENGR matches the second row, OTHER*
+                matches the next two rows, and CEO matches the last row:</p>
+<div class="fig fignone" id="gmb1507234864207__fig_vyh_crh_mw"><div class="caption"></div><br /><img class="image" id="gmb1507234864207__image_dsq_crh_mw" src="fsx1466005258354.svg" alt="How pattern 'CEO.ENGR.OTHER*.CEO' matches cells in title column in greedy pattern matching example of MLE function nPath" /><br /></div>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="gmb1507234864207__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title13" topicindex="13" topicid="ffp1507311580978" xml:lang="en-us" lang="en-us" id="ffp1507311580978"><h2 class="title topictitle2" id="ariaid-title13">nPath Filters</h2>
+<div class="body refbody"><div class="section" id="ffp1507311580978__section_N10011_N1000E_N10001"><p class="p">The Filter syntax element specifies filters to impose on the matched rows. Filtering out most matches can improve performance, but memory fragmentation can degrade it. Memory fragmentation can occur in these cases:</p>
+<ul class="ul"><li class="li">The mode is NONOVERLAPPING and the pattern includes the end anchor operator (<code class="ph codeph">$</code>) but not the start anchor operator (<code class="ph codeph">^</code>).</li>
+<li class="li">The mode is OVERLAPPING and the pattern does not include the start anchor operator.</li>
+<li class="li">The first symbol in the pattern can match an infinite number of input rows.</li>
+<li class="li">The data partition is huge.</li>
+<li class="li">The Java Virtual Machine (JVM) is too small.</li>
+</ul>
+<p class="p">If nPath runs much slower with the Filter syntax element, increase the size of the JVM. If the problem persists, alter the pattern.</p>
+</div>
+</div>
+<div class="topic reference nested2" aria-labelledby="ariaid-title14" topicindex="14" topicid="wrh1507311692324" xml:lang="en-us" lang="en-us" id="wrh1507311692324"><h3 class="title topictitle3" id="ariaid-title14">nPath Filters Example</h3>
+<div class="body refbody"><div class="section" id="wrh1507311692324__section_N10011_N1000E_N10001"><p class="p">Using clickstream data from an online store, this example finds the sessions where the user visited the checkout page within 10 minutes of visiting the home page. Because there is no way to know in advance how many rows might appear between the home page and the checkout page, the example cannot use a LAG or LEAD expression. Therefore, it uses the Filter syntax element.</p>
+</div>
+<div class="section" id="wrh1507311692324__section_in1_kfk_mdb"><h4 class="title sectiontitle">Input</h4>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="wrh1507311692324__table_xzw_qfk_mdb" class="table" frame="border" border="1" rules="all"><div class="caption"><span class="tablecap">clickstream</span></div><colgroup><col style="width:25%" /><col style="width:25%" /><col style="width:25%" /><col style="width:25%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2124">userid</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2126">sessionid</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2128">clicktime</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2130">pagetype</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2124 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2126 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2128 ">10-10-2012 10:15</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2130 ">home</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2124 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2126 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2128 ">10-10-2012 10:16</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2130 ">view</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2124 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2126 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2128 ">10-10-2012 10:17</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2130 ">view</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2124 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2126 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2128 ">10-10-2012 10:20</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2130 ">checkout</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2124 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2126 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2128 ">10-10-2012 10:30</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2130 ">checkout</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2124 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2126 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2128 ">10-10-2012 10:35</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2130 ">view</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2124 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2126 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2128 ">10-10-2012 10:45</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2130 ">view</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2124 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2126 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2128 ">10-10-2012 13:15</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2130 ">home</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2124 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2126 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2128 ">10-10-2012 13:16</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2130 ">view</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2124 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2126 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2128 ">10-10-2012 13:43</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2130 ">checkout</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2124 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2126 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2128 ">10-10-2012 13:35</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2130 ">view</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2124 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2126 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2128 ">10-10-2012 13:45</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2130 ">view</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="wrh1507311692324__section_pyk_kfk_mdb"><h4 class="title sectiontitle">SQL Call</h4><pre class="pre codeblock"><code>SELECT * FROM nPath@coprocessor (
+  ON clickstream PARTITION BY userid ORDER BY clicktime
+  USING
+  Symbols (pagetype='home' AS home,
+    pagetype!='home' AND pagetype!='checkout' AS view,
+    pagetype='checkout' AS checkout)
+  Pattern ('home.<span class="ph b">view*</span>.checkout')
+  Result (FIRST(userid of ANY(home, checkout, view)) AS userid,
+    FIRST (sessionid of ANY(home, checkout, view)) AS sessionid,
+    COUNT (* of any(home, checkout, view)) AS cnt,
+    FIRST (clicktime of ANY(home)) AS firsthome,
+    LAST (clicktime of ANY(checkout)) AS lastcheckout)
+  <span class="ph b">Filter (FIRST (clicktime + '10 minutes' ::interval OF ANY (home)) &gt;</span> 
+    <span class="ph b">FIRST (clicktime of any(checkout)))</span> 
+  Mode (NONOVERLAPPING)
+) AS dt;</code></pre></div>
+<div class="section" id="wrh1507311692324__section_a5v_kfk_mdb"><h4 class="title sectiontitle">Output</h4>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="wrh1507311692324__table_lpj_yfk_mdb" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:20%" /><col style="width:20%" /><col style="width:20%" /><col style="width:20%" /><col style="width:20%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2268">userid</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2270">sessionid</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2272">cnt</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2274">firsthome</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2276">lastcheckout</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2268 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2270 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2272 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2274 ">2012-10-10 10:15:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2276 ">2012-10-10 10:20:00</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="wrh1507311692324__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title15" topicindex="15" topicid="kpw1507312276859" xml:lang="en-us" lang="en-us" id="kpw1507312276859"><h2 class="title topictitle2" id="ariaid-title15">nPath Results</h2>
+<div class="body refbody"><div class="section" id="kpw1507312276859__section_N1000E_N1000C_N10001"><p class="p">The Result syntax element defines the output columns, specifying the values to retrieve from the matched rows and the aggregate function to apply to these values.</p>
+<p class="p">For each pattern, the nPath function can apply one or more aggregate functions to the matched rows and output the aggregated results.</p>
+<p class="p">Supported aggregate functions:</p>
+<ul class="ul"><li class="li">SQL aggregate functions AVG, COUNT, MAX, MIN, and SUM</li>
+<li class="li"><span class="keyword">ML Engine</span> nPath sequence aggregate functions described in the following table</li>
+</ul>
+<p class="p">In the following table, <var class="keyword varname">col_expr</var> is an expression whose value is a column name, <var class="keyword varname">symbol</var> is defined by the Symbols syntax element, and <var class="keyword varname">symbol_list</var> has this syntax:</p>
+<pre class="pre codeblock"><code>{ symbol | ANY (symbol[,...]) }</code></pre>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="kpw1507312276859__table_N1003A_N1000E_N1000C_N10001" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:33.33333333333333%" /><col style="width:66.66666666666666%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry nocellnorowborder" style="vertical-align:top;" id="d251457e2336">Function</th>
+<th class="entry cell-norowborder" style="vertical-align:top;" id="d251457e2338">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e2336 "><pre class="pre codeblock"><code>COUNT (
+ { * | [DISTINCT] <var class="keyword varname">col_expr</var> }
+ OF <var class="keyword varname">symbol_list</var> )</code></pre></td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d251457e2338 ">Returns either the number of total number of matched rows (*) or the number (or distinct number) of <var class="keyword varname">col_expr</var> values in the matched rows.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e2336 "><pre class="pre codeblock"><code>FIRST (
+  <var class="keyword varname">col_expr</var> OF <var class="keyword varname">symbol_list</var> )</code></pre></td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d251457e2338 ">Returns the <var class="keyword varname">col_expr</var> value of the first matched row.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e2336 "><pre class="pre codeblock"><code>LAST (
+  <var class="keyword varname">col_expr</var> OF <var class="keyword varname">symbol_list</var> )</code></pre></td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d251457e2338 ">Returns the <var class="keyword varname">col_expr</var> value of the last matched row.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e2336 "><pre class="pre codeblock"><code>NTH (
+ <var class="keyword varname">col_expr</var>, <var class="keyword varname">n</var> OF <var class="keyword varname">symbol_list</var> )</code></pre></td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d251457e2338 ">Returns the <var class="keyword varname">col_expr</var> value of the <var class="keyword varname">n</var>th matched row, where <var class="keyword varname">n</var> is a nonzero value of the data type SMALLINT, INTEGER, or BIGINT.<p class="p">The sign of <var class="keyword varname">n</var> determines whether the <var class="keyword varname">n</var>th matched row is <var class="keyword varname">n</var>th from the first or last matched row. For example, if <var class="keyword varname">n</var> is 1, the <var class="keyword varname">n</var>th matched row is the first matched row, and if <var class="keyword varname">n</var> is -1, the <var class="keyword varname">n</var>th matched row is the last matched row.</p>
+<p class="p">If <var class="keyword varname">n</var> is greater than the number of matched rows, the <var class="keyword varname">n</var>th function returns NULL.</p>
+</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e2336 "><pre class="pre codeblock"><code>FIRST_NOTNULL (
+  <var class="keyword varname">col_expr</var> OF <var class="keyword varname">symbol_list</var> )</code></pre></td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d251457e2338 ">Returns the first non-null <var class="keyword varname">col_expr</var> value in the matched rows.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e2336 "><pre class="pre codeblock"><code>LAST_NOTNULL (
+  <var class="keyword varname">col_expr</var> OF <var class="keyword varname">symbol_list</var> )</code></pre></td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d251457e2338 ">Returns the last non-null <var class="keyword varname">col_expr</var> value in the matched rows.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e2336 "><pre class="pre codeblock"><code>MAX_CHOOSE (
+  <var class="keyword varname">quantifying_col_expr</var>,
+  <var class="keyword varname">descriptive_col_expr</var>
+  OF <var class="keyword varname">symbol_list</var> )</code></pre></td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d251457e2338 ">Returns the <var class="keyword varname">descriptive_col_expr</var> value of the matched row with the highest-sorted <var class="keyword varname">quantifying_col_expr</var> value. For example, <code class="ph codeph">MAX_CHOOSE (product_price, product_name OF B)</code> returns the product_name of the most expensive product in the rows that map to B.<p class="p">The <var class="keyword varname">descriptive_col_expr</var> can have any data type. The <var class="keyword varname">qualifying_col_expr</var> must have a sortable datatype (SMALLINT, INTEGER, BIGINT, DOUBLE PRECISION, DATE, TIME, TIMESTAMP, VARCHAR, or CHARACTER).</p>
+</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e2336 "><pre class="pre codeblock"><code>MIN_CHOOSE (
+  <var class="keyword varname">quantifying_col_expr</var>,
+  <var class="keyword varname">descriptive_col_expr</var>
+  OF <var class="keyword varname">symbol_list</var> )</code></pre></td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d251457e2338 ">Returns the <var class="keyword varname">descriptive_col_expr</var> value of the matched row with the lowest-sorted <var class="keyword varname">qualifying_col_expr</var> value. For example, <code class="ph codeph">MIN_CHOOSE (product_price, product_name OF B)</code> returns the product_name of the least expensive product in the rows that map to B.<p class="p">The <var class="keyword varname">descriptive_col_expr</var> can have any data type. The <var class="keyword varname">qualifying_col_expr</var> must have a sortable datatype (SMALLINT, INTEGER, BIGINT, DOUBLE PRECISION, DATE, TIME, TIMESTAMP, VARCHAR, or CHARACTER).</p>
+</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e2336 "><pre class="pre codeblock"><code>DUPCOUNT (
+  <var class="keyword varname">col_expr</var> OF <var class="keyword varname">symbol_list</var> )</code></pre></td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d251457e2338 ">Returns the duplicate count for <var class="keyword varname">col_expr</var> in the matched rows. That is, for each matched row, the function returns the number of occurrences of the current value of <var class="keyword varname">col_expr</var> in the immediately preceding matched row.<p class="p">When <var class="keyword varname">col_expr</var> is also the ORDER BY col_expr, this function returns the equivalent of <code class="ph codeph">ROW_NUMBER()-RANK()</code>.</p>
+</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d251457e2336 "><pre class="pre codeblock"><code>DUPCOUNTCUM (
+  <var class="keyword varname">col_expr</var> OF <var class="keyword varname">symbol_list</var> )</code></pre></td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d251457e2338 ">Returns the cumulative duplicate count for <var class="keyword varname">col_expr</var> in the matched rows. That is, for each matched row, the function returns the number of occurrences of the current value of <var class="keyword varname">col_expr</var> in all preceding matched rows.<p class="p">When <var class="keyword varname">col_expr</var> is also the ORDER BY <var class="keyword varname">col_expr</var>, this function returns the equivalent of <code class="ph codeph">ROW_NUMBER()-DENSE_RANK()</code>.</p>
+</td>
+</tr>
+<tr class="row"><td class="entry row-nocellborder" style="vertical-align:top;" headers="d251457e2336 "><pre class="pre codeblock"><code>ACCUMULATE (
+  [ DISTINCT | CDISTINCT ]
+  <var class="keyword varname">col_expr</var> OF <var class="keyword varname">symbol_list</var>
+  [ DELIMITER '<var class="keyword varname">delimiter</var>'] )</code></pre></td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2338 ">Returns, for each matched row, the concatenated values in <var class="keyword varname">col_expr</var>, separated by <var class="keyword varname">delimiter</var>. The default delimiter is ', ' (a comma followed by a space).<p class="p">DISTINCT limits the concatenated values to distinct values.</p>
+<p class="p">CDISTINCT limits the concatenated values to consecutive distinct values.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">You can compute an aggregate over more than one symbol. For example, <code class="ph codeph">SUM (val OF ANY (A,B))</code> computes the sum of the values of the attribute <var class="keyword varname">val</var> across all rows in the matched segment that map to A or B.</p>
+</div>
+</div>
+<div class="topic concept nested2" aria-labelledby="ariaid-title16" topicindex="16" topicid="fza1511212762232" xml:lang="en-us" lang="en-us" id="fza1511212762232">
+	<h3 class="title topictitle3" id="ariaid-title16">nPath Results Examples</h3>
+
+<div class="topic reference nested3" aria-labelledby="ariaid-title17" topicindex="17" topicid="jxw1510768405439" xml:lang="en-us" lang="en-us" id="jxw1510768405439"><h4 class="title topictitle4" id="ariaid-title17">nPath Results Example: FIRST, LAST_NOTNULL, MAX_CHOOSE, MIN_CHOOSE</h4>
+<div class="body refbody"><div class="section" id="jxw1510768405439__section_ivl_pkk_mdb"><h5 class="title sectiontitle">Input</h5>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="jxw1510768405439__table_b5k_3lk_mdb" class="table" frame="border" border="1" rules="all"><div class="caption"><span class="tablecap">trans1</span></div><colgroup><col style="width:20%" /><col style="width:20%" /><col style="width:20%" /><col style="width:20%" /><col style="width:20%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2667">userid</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2669">gender</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2671">ts</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2673">productname</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2675">productamt</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2667 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2669 ">M</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2671 ">2012-01-01 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2673 ">shoes</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2675 ">100</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2667 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2669 ">M</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2671 ">2012-02-01 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2673 ">books</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2675 ">300</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2667 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2669 ">M</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2671 ">2012-03-01 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2673 ">television</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2675 ">500</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2667 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2669 ">M</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2671 ">2012-04-01 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2673 ">envelopes</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2675 ">10</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2667 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2669 "> </td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2671 ">2012-01-01 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2673 ">bookcases</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2675 ">150</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2667 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2669 "> </td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2671 ">2012-02-01 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2673 ">tables</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2675 ">250</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2667 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2669 ">F</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2671 ">2012-03-01 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2673 ">appliances</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2675 ">1500</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2667 ">3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2669 ">F</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2671 ">2012-01-01 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2673 ">chairs</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2675 ">400</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2667 ">3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2669 ">F</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2671 ">2012-02-01 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2673 ">cellphones</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2675 ">600</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2667 ">3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2669 ">F</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2671 ">2012-03-01 00:00:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2673 ">dvds</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2675 ">50</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="jxw1510768405439__section_m1x_pkk_mdb"><h5 class="title sectiontitle">SQL Call</h5><pre class="pre codeblock"><code>SELECT * FROM nPath@coprocessor (
+  ON trans1 PARTITION BY userid ORDER BY ts
+  USING
+  Mode (nonoverlapping)
+  Pattern ('A+')
+  Symbols (TRUE AS A)
+  Result (FIRST(userid OF A) AS Userid,
+    LAST_NOTNULL (gender OF A) AS Gender,
+    MAX_CHOOSE (productamt, productname OF A) AS Max_prod,
+    MIN_CHOOSE (productamt, productname OF A) AS Min_prod)
+) AS dt;</code></pre></div>
+<div class="section" id="jxw1510768405439__section_tbj_qkk_mdb"><h5 class="title sectiontitle">Output</h5>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="jxw1510768405439__table_czq_plk_mdb" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:25%" /><col style="width:25%" /><col style="width:25%" /><col style="width:25%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2802">userid</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2804">gender</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2806">max_prod</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2808">min_prod</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2802 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2804 ">M</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2806 ">television</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2808 ">envelopes</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2802 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2804 ">F</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2806 ">appliances</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2808 ">bookcases</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2802 ">3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2804 ">F</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2806 ">cellphones</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2808 ">dvds</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="jxw1510768405439__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+</div>
+</div>
+<div class="topic reference nested3" aria-labelledby="ariaid-title18" topicindex="18" topicid="znx1510768323007" xml:lang="en-us" lang="en-us" id="znx1510768323007"><h4 class="title topictitle4" id="ariaid-title18">nPath Results Example: FIRST, ACCUMULATE</h4>
+<div class="body refbody"><div class="section" id="znx1510768323007__section_ivl_pkk_mdb"><h5 class="title sectiontitle">Input</h5>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="znx1510768323007__table_p42_cmk_mdb" class="table" frame="border" border="1" rules="all"><div class="caption"><span class="tablecap">clicks</span></div><colgroup><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2878">userid</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2880">sessionid</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2882">productname</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2884">pagetype</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2886">clicktime</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2888">referrer</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e2890">productprice</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2878 ">1039</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2880 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2882 ">null</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2884 ">home</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2886 ">06:59:13</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2888 ">Company1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2890 ">100</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2878 ">1039</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2880 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2882 ">null</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2884 ">home</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2886 ">07:00:10</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2888 ">Company3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2890 ">300</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2878 ">1039</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2880 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2882 ">television</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2884 ">checkout</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2886 ">07:00:12</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2888 ">Company3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2890 ">500</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2878 ">1039</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2880 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2882 ">television</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2884 ">checkout</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2886 ">07:00:18</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2888 ">Company3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2890 ">10</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2878 ">1039</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2880 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2882 ">envelopes</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2884 ">checkout</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2886 ">07:01:00</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2888 ">Company4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2890 ">10</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2878 ">1039</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2880 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2882 ">null</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2884 ">checkout</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2886 ">07:01:10</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2888 ">Company4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e2890 ">10</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="znx1510768323007__section_m1x_pkk_mdb"><h5 class="title sectiontitle">SQL Call</h5><pre class="pre codeblock"><code>SELECT * FROM nPath@coprocessor (
+  ON clicks PARTITION BY sessionid ORDER BY clicktime
+  USING
+  Mode ('nonoverlapping')
+  Symbols (pagetype='home' AS H, pagetype='checkout' AS C,
+           pagetype!='home' AND pagetype!='checkout' AS A)
+  Pattern ('^H+.A*.C+$')
+  Result (
+    FIRST (sessionid OF ANY (H, A, C)) AS sessionid,
+    FIRST (clicktime OF H) AS firsthome,
+    FIRST (clicktime OF C) AS firstcheckout,
+    ACCUMULATE (productname OF ANY (H,A,C) DELIMITER '*')
+      AS products_accumulate,
+    ACCUMULATE (CDISTINCT productname OF ANY (H,A,C) DELIMITER '$$')
+      AS cde_dup_products,
+    ACCUMULATE (DISTINCT productname OF ANY (H,A,C))
+      AS de_dup_products
+  )
+) AS dt;</code></pre></div>
+<div class="section rotate" id="znx1510768323007__section_tbj_qkk_mdb"><h5 class="title sectiontitle">Output</h5>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="znx1510768323007__table_dyz_vmk_mdb" class="table fittight" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:16.666666666666664%" /><col style="width:16.666666666666664%" /><col style="width:16.666666666666664%" /><col style="width:16.666666666666664%" /><col style="width:16.666666666666664%" /><col style="width:16.666666666666664%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d251457e3001">sessionid</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e3003">firsthome</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e3005">firstcheckout</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e3007">products_accumulate</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e3009">cde_dup_products</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e3011">de_dup_products</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3001 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3003 ">06:59:13</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3005 ">07:00:12</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3007 ">[null*null*television*television*envelopes*null]</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3009 ">[null$$television$$envelopes$$null]</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3011 ">[null, television, envelopes]</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="znx1510768323007__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+</div>
+</div>
+<div class="topic reference nested3" aria-labelledby="ariaid-title19" topicindex="19" topicid="ihl1510768126783" xml:lang="en-us" lang="en-us" id="ihl1510768126783"><h4 class="title topictitle4" id="ariaid-title19">nPath Results Example: FIRST, ACCUMULATE, COUNT, NTH</h4>
+<div class="body refbody"><div class="section" id="ihl1510768126783__section_ivl_pkk_mdb"><h5 class="title sectiontitle">Input</h5><p class="p">The input table is clicks, as in <a class="xref" href="anj1558127449015.html#znx1510768323007" title="See example of Machine Learning Engine function nPath in which Result specifies the symbols FIRST and ACCUMULATE.">nPath Results Example: FIRST, ACCUMULATE</a>.</p>
+</div>
+<div class="section" id="ihl1510768126783__section_m1x_pkk_mdb"><h5 class="title sectiontitle">SQL Call</h5><pre class="pre codeblock"><code>SELECT * FROM nPath@coprocessor (
+  ON clicks PARTITION BY sessionid ORDER BY clicktime
+  USING
+  Mode ('nonoverlapping')
+  Symbols (pagetype='home' AS H, pagetype='checkout' AS C,
+           pagetype!='home' AND pagetype!='checkout' AS A)
+  Pattern ('^H+.A*.C+$')
+  Result (
+    FIRST (sessionid OF ANY (H, A, C)) AS sessionid,
+    FIRST (clicktime OF H) AS firsthome,
+    FIRST (clicktime OF C) AS firstcheckout,
+    ACCUMULATE (productname OF ANY (H,A,C))
+      AS products_accumulate,
+    COUNT (DISTINCT productname OF ANY(H,A,C))
+      AS count_distinct_products,
+    ACCUMULATE (CDISTINCT productname OF ANY (H,A,C))
+      AS consecutive_distinct_products,
+    ACCUMULATE (DISTINCT productname OF ANY (H,A,C))
+      AS distinct_products,
+    NTH (productname, -1 OF ANY(H,A,C)) AS nth
+  )
+) AS dt;</code></pre></div>
+<div class="section rotate" id="ihl1510768126783__section_tbj_qkk_mdb"><h5 class="title sectiontitle">Output</h5>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="ihl1510768126783__table_xjs_nnk_mdb" class="table fittight" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:12.5%" /><col style="width:12.5%" /><col style="width:12.5%" /><col style="width:12.5%" /><col style="width:12.5%" /><col style="width:12.5%" /><col style="width:12.5%" /><col style="width:12.5%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d251457e3085">sessionid</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e3087">firsthome</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e3089">firstcheckout</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e3091">products_accumulate</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e3093">count_distinct_products</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e3095">consecutive_distinct_products</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e3097">distinct_products</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e3099">nth</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3085 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3087 ">06:59:13</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3089 ">07:00:12</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3091 ">[null, null, television, television, envelopes, null]</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3093 ">3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3095 ">[null, television, envelopes, null]</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3097 ">[null, television, envelopes]</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3099 ">null</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="ihl1510768126783__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="topic concept nested1" aria-labelledby="ariaid-title20" topicindex="20" topicid="zqw1515695344984" xml:lang="en-us" lang="en-us" id="zqw1515695344984">
+	<h2 class="title topictitle2" id="ariaid-title20">nPath Examples</h2>
+
+<div class="topic reference nested2" aria-labelledby="ariaid-title21" topicindex="21" topicid="qdl1466004781889" xml:lang="en-us" lang="en-us" id="qdl1466004781889"><h3 class="title topictitle3" id="ariaid-title21">nPath Example: Pages Visited in Each Session</h3>
+<div class="body refbody"><div class="section" id="qdl1466004781889__section_d4r_ply_xgb"><p class="p">This example accumulates the pages visited in each session.</p>
+</div>
+<div class="section" id="qdl1466004781889__section_z1y_njf_p2b"><h4 class="title sectiontitle">Input</h4><ul class="ul" id="qdl1466004781889__ul_xmc_pjf_p2b"><li class="li">aggregate_clicks, as in <a class="xref" href="anj1558127449015.html#lrg1507234030779" title="See example of LAG expression in Machine Learning Engine function nPath where the query returns the first purchase and the most expensive purchase for users who buy increasingly expensive products.">LAG and LEAD Expressions Example: First and Most Expensive Purchases</a> (under <a class="xref" href="anj1558127449015.html#hkc1507231941696" title="">nPath Symbols</a>)</li>
+</ul>
+</div>
+<div class="section" id="qdl1466004781889__section_lnl_svk_mdb"><h4 class="title sectiontitle">SQL Call</h4><pre class="pre codeblock"><code>SELECT * FROM NPath@coprocessor (
+  ON aggregate_clicks PARTITION BY sessionid ORDER BY clicktime
+  USING
+    Mode(nonoverlapping)
+    Pattern('A*')
+    Symbols(true AS A)
+    Result(first(sessionid of A) AS sessionid,
+           accumulate(pagetype of A) AS path)
+) AS dt;</code></pre></div>
+<div class="section" id="qdl1466004781889__section_wnm_svk_mdb"><h4 class="title sectiontitle">Output</h4><pre class="pre screen"> sessionid path                                                                                                                                       
+ --------- ------------------------------------------------------------------------------------------------------------------------------------------ 
+         4 [home, home, home, home, home, home, home1, home1, home1, page1, page1, page1]                                                            
+         2 [home, home, home, home, home, home, home, home, home, home1, page1, checkout, checkout, home, home]                                      
+         3 [home, home, home, home, home, home, home, home, home1, page1, home, home1, page1, home]                                                  
+         1 [home, home1, page1, home, home1, page1, home, home, home, home1, page1, checkout, home, home, home, home, home, home, home, home, home]  
+         5 [home, home, home, home, home1, home1, home1, page1, page1, page1, page2, page2, page2, checkout, checkout, checkout, page2, page2, page2]
+</pre>
+</div>
+</div>
+</div>
+<div class="topic reference nested2" aria-labelledby="ariaid-title22" topicindex="22" topicid="qyy1466004781952" xml:lang="en-us" lang="en-us" id="qyy1466004781952"><h3 class="title topictitle3" id="ariaid-title22">nPath Example: Sessions Start at Home and Visit Page1</h3>
+<div class="body refbody"><div class="section" id="qyy1466004781952__section_rqt_tly_xgb"><p class="p">This example finds the sessions that start at the home page and visit Page1.</p>
+</div>
+<div class="section" id="qyy1466004781952__section_z1y_njf_p2b"><h4 class="title sectiontitle">Input</h4><ul class="ul" id="qyy1466004781952__ul_xmc_pjf_p2b"><li class="li">aggregate_clicks, as in <a class="xref" href="anj1558127449015.html#lrg1507234030779" title="See example of LAG expression in Machine Learning Engine function nPath where the query returns the first purchase and the most expensive purchase for users who buy increasingly expensive products.">LAG and LEAD Expressions Example: First and Most Expensive Purchases</a> (under <a class="xref" href="anj1558127449015.html#hkc1507231941696" title="">nPath Symbols</a>)</li>
+</ul>
+</div>
+<div class="section" id="qyy1466004781952__section_b3d_kwk_mdb"><h4 class="title sectiontitle">SQL Call</h4><pre class="pre codeblock"><code>SELECT * FROM NPath@coprocessor (
+  ON aggregate_clicks PARTITION BY sessionid ORDER BY clicktime
+  USING
+    Mode(nonoverlapping)
+    Pattern('^H.A*.P1.A*')
+    Symbols(pagetype='home' AS H, pagetype='page1' AS P1, TRUE AS A)
+    Result(FIRST(sessionid OF A) AS sessionid,
+           accumulate(pagetype OF ANY(H,P1,A)) AS path)
+) AS dt;</code></pre></div>
+<div class="section" id="qyy1466004781952__section_wzt_kwk_mdb"><h4 class="title sectiontitle">Output</h4><pre class="pre screen"> sessionid path                                                                                                                                       
+ --------- ------------------------------------------------------------------------------------------------------------------------------------------ 
+         4 [home, home, home, home, home, home, home1, home1, home1, page1, page1, page1]                                                            
+         2 [home, home, home, home, home, home, home, home, home, home1, page1, checkout, checkout, home, home]                                      
+         5 [home, home, home, home, home1, home1, home1, page1, page1, page1, page2, page2, page2, checkout, checkout, checkout, page2, page2, page2]
+         1 [home, home1, page1, home, home1, page1, home, home, home, home1, page1, checkout, home, home, home, home, home, home, home, home, home]  
+         3 [home, home, home, home, home, home, home, home, home1, page1, home, home1, page1, home]</pre>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="qyy1466004781952__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+</div>
+</div>
+<div class="topic reference nested2" aria-labelledby="ariaid-title23" topicindex="23" topicid="nhw1466004782019" xml:lang="en-us" lang="en-us" id="nhw1466004782019"><h3 class="title topictitle3" id="ariaid-title23">nPath Example: Checkout Paths for Purchases Over $200</h3>
+<div class="body refbody"><div class="section" id="nhw1466004782019__section_rqt_tly_xgb"><p class="p">This example finds the paths to the checkout page for purchases over $200.</p>
+</div>
+<div class="section" id="nhw1466004782019__section_z1y_njf_p2b"><h4 class="title sectiontitle">Input</h4><ul class="ul" id="nhw1466004782019__ul_xmc_pjf_p2b"><li class="li">aggregate_clicks, as in <a class="xref" href="anj1558127449015.html#lrg1507234030779" title="See example of LAG expression in Machine Learning Engine function nPath where the query returns the first purchase and the most expensive purchase for users who buy increasingly expensive products.">LAG and LEAD Expressions Example: First and Most Expensive Purchases</a> (under <a class="xref" href="anj1558127449015.html#hkc1507231941696" title="">nPath Symbols</a>)</li>
+</ul>
+</div>
+<div class="section" id="nhw1466004782019__section_i1w_zwk_mdb"><h4 class="title sectiontitle">SQL Call</h4><pre class="pre codeblock"><code>SELECT * FROM NPath@coprocessor (
+  ON aggregate_clicks PARTITION BY sessionid ORDER BY clicktime
+  USING
+    Mode(nonoverlapping)
+    Pattern('A*.C+.A*')
+    Symbols(productprice &gt; 200 AND pagetype='checkout' AS C, true AS A)
+    Result(first(sessionid of A) AS sessionid,
+           accumulate(pagetype OF ANY(A,C)) AS path,
+           AVG(productprice OF ANY(A,C)) AS sum)
+) AS dt;</code></pre></div>
+<div class="section" id="nhw1466004782019__section_emj_1xk_mdb"><h4 class="title sectiontitle">Output</h4><pre class="pre screen"> sessionid path                                                                                                                                       sum               
+ --------- ------------------------------------------------------------------------------------------------------------------------------------------ ----------------- 
+         1 [home, home1, page1, home, home1, page1, home, home, home, home1, page1, checkout, home, home, home, home, home, home, home, home, home]   602.8571428571429
+         5 [home, home, home, home, home1, home1, home1, page1, page1, page1, page2, page2, page2, checkout, checkout, checkout, page2, page2, page2] 363.1578947368421</pre>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="nhw1466004782019__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+</div>
+</div>
+<div class="topic reference nested2" aria-labelledby="ariaid-title24" topicindex="24" topicid="ons1466004782088" xml:lang="en-us" lang="en-us" id="ons1466004782088"><h3 class="title topictitle3" id="ariaid-title24">nPath Example: Mode (OVERLAPPING)</h3>
+<div class="body refbody"><div class="section" id="ons1466004782088__section_z1y_njf_p2b"><h4 class="title sectiontitle">Input</h4><ul class="ul" id="ons1466004782088__ul_xmc_pjf_p2b"><li class="li">aggregate_clicks, as in <a class="xref" href="anj1558127449015.html#lrg1507234030779" title="See example of LAG expression in Machine Learning Engine function nPath where the query returns the first purchase and the most expensive purchase for users who buy increasingly expensive products.">LAG and LEAD Expressions Example: First and Most Expensive Purchases</a> (under <a class="xref" href="anj1558127449015.html#hkc1507231941696" title="">nPath Symbols</a>)</li>
+</ul>
+</div>
+<div class="section" id="ons1466004782088__section_zgv_nxk_mdb"><h4 class="title sectiontitle">SQL Call</h4><pre class="pre codeblock"><code>SELECT * FROM NPath@coprocessor (
+  ON aggregate_clicks PARTITION BY sessionid ORDER BY clicktime
+  USING
+    Mode (overlapping)
+    Pattern ('A.A')
+    Symbols (TRUE AS A)
+    Result (FIRST(sessionid OF A) AS sessionid,
+            accumulate(pagetype OF A) AS path)
+) AS dt ORDER BY sessionid;</code></pre></div>
+<div class="section" id="ons1466004782088__section_e2g_4xk_mdb"><h4 class="title sectiontitle">Output</h4><pre class="pre screen"> sessionid path                 
+ --------- -------------------- 
+         1 [home, home]        
+         1 [home, home]        
+         1 [home, home]        
+         1 [home, home]        
+         1 [checkout, home]    
+         1 [page1, checkout]   
+         1 [home1, page1]      
+         1 [home, home1]       
+         1 [home, home]        
+         1 [home, home]        
+         1 [page1, home]       
+         1 [home, home1]       
+         1 [page1, home]       
+         1 [home1, page1]      
+         1 [home, home1]       
+         1 [home1, page1]      
+         1 [home, home]        
+         1 [home, home]        
+         1 [home, home]        
+         1 [home, home]        
+         2 [checkout, checkout]
+         2 [home1, page1]      
+         2 [home, home1]       
+         2 [home, home]        
+         2 [home, home]        
+         2 [home, home]        
+         2 [home, home]        
+         2 [home, home]        
+         2 [home, home]        
+         2 [home, home]        
+         2 [home, home]        
+         2 [page1, checkout]   
+         2 [checkout, home]    
+         2 [home, home]        
+         3 [home, home1]       
+         3 [home1, page1]      
+         3 [home, home1]       
+         3 [home, home]        
+         3 [home, home]        
+         3 [home, home]        
+         3 [home, home]        
+         3 [home, home]        
+         3 [home, home]        
+         3 [home, home]        
+         3 [page1, home]       
+         3 [home1, page1]      
+         3 [page1, home]       
+         4 [home1, page1]      
+         4 [home1, home1]      
+         4 [home, home1]       
+         4 [home, home]        
+         4 [home, home]        
+         4 [home, home]        
+         4 [home, home]        
+         4 [home, home]        
+         4 [home1, home1]      
+         4 [page1, page1]      
+         4 [page1, page1]      
+         5 [checkout, page2]   
+         5 [checkout, checkout]
+         5 [page2, checkout]   
+         5 [page2, page2]      
+         5 [page1, page2]      
+         5 [page1, page1]      
+         5 [page1, page1]      
+         5 [home1, page1]      
+         5 [home1, home1]      
+         5 [home1, home1]      
+         5 [home, home1]       
+         5 [home, home]        
+         5 [home, home]        
+         5 [home, home]        
+         5 [page2, page2]      
+         5 [checkout, checkout]
+         5 [page2, page2]      
+         5 [page2, page2]</pre>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="ons1466004782088__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+</div>
+</div>
+<div class="topic reference nested2" aria-labelledby="ariaid-title25" topicindex="25" topicid="jic1466004782150" xml:lang="en-us" lang="en-us" id="jic1466004782150"><h3 class="title topictitle3" id="ariaid-title25">nPath Example: First Product with Multiple Referrers</h3>
+<div class="body refbody"><div class="section" id="jic1466004782150__section_xyv_2my_xgb"><p class="p">This example finds the first product with multiple referrers in any session.</p>
+</div>
+<div class="section" id="jic1466004782150__section_z1y_njf_p2b"><h4 class="title sectiontitle">Input</h4><ul class="ul" id="jic1466004782150__ul_xmc_pjf_p2b"><li class="li">aggregate_clicks, as in <a class="xref" href="anj1558127449015.html#lrg1507234030779" title="See example of LAG expression in Machine Learning Engine function nPath where the query returns the first purchase and the most expensive purchase for users who buy increasingly expensive products.">LAG and LEAD Expressions Example: First and Most Expensive Purchases</a> (under <a class="xref" href="anj1558127449015.html#hkc1507231941696" title="">nPath Symbols</a>)</li>
+</ul>
+</div>
+<div class="section" id="jic1466004782150__section_l4t_nyk_mdb"><h4 class="title sectiontitle">SQL Call</h4><pre class="pre codeblock"><code>SELECT * FROM NPath@coprocessor (
+  ON aggregate_clicks PARTITION BY sessionid ORDER BY clicktime
+  USING
+    Mode(nonoverlapping)
+    Pattern('REFERRER{2,}')
+    Symbols(referrer IS NOT NULL AS REFERRER)
+    Result (FIRST(sessionid OF REFERRER) AS sessionid,
+            FIRST(productname OF REFERRER) AS product)
+) AS dt;</code></pre></div>
+<div class="section" id="jic1466004782150__section_dqg_4yk_mdb"><h4 class="title sectiontitle">Output</h4><pre class="pre screen"> sessionid product    
+ --------- ---------- 
+         5 appliances
+         4 tables    
+         2 tables    
+         3 bookcases 
+         1 envelopes</pre>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="jic1466004782150__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+</div>
+</div>
+<div class="topic reference nested2" aria-labelledby="ariaid-title26" topicindex="26" topicid="wzi1507323901672" xml:lang="en-us" lang="en-us" id="wzi1507323901672"><h3 class="title topictitle3" id="ariaid-title26">nPath Example: Sessions that Checked 3-6 Products</h3>
+<div class="body refbody"><div class="section" id="wzi1507323901672__section_xyv_2my_xgb"><p class="p">This example finds the data for sessions that checked three to six products.</p>
+</div>
+<div class="section" id="wzi1507323901672__section_N10011_N1000E_N10001"><p class="p">For sessions where the user checked between three and six products (exclusive),
+                return the names of the most and least expensive products, the maximum price of the
+                most expensive product, and the minimum price of the least expensive product.</p>
+</div>
+<div class="section" id="wzi1507323901672__section_z1y_njf_p2b"><h4 class="title sectiontitle">Input</h4><ul class="ul" id="wzi1507323901672__ul_xmc_pjf_p2b"><li class="li">aggregate_clicks, as in <a class="xref" href="anj1558127449015.html#lrg1507234030779" title="See example of LAG expression in Machine Learning Engine function nPath where the query returns the first purchase and the most expensive purchase for users who buy increasingly expensive products.">LAG and LEAD Expressions Example: First and Most Expensive Purchases</a> (under <a class="xref" href="anj1558127449015.html#hkc1507231941696" title="">nPath Symbols</a>)</li>
+</ul>
+</div>
+<div class="section" id="wzi1507323901672__section_z5y_fzk_mdb"><h4 class="title sectiontitle">SQL Call</h4><pre class="pre codeblock"><code>SELECT * FROM NPath@coprocessor (
+  ON aggregate_clicks PARTITION BY sessionid ORDER BY clicktime
+  USING
+    Mode(nonoverlapping)
+    Pattern('H+.D*.C{3,6}.D')
+    Symbols(pagetype = 'home' AS H, pagetype='checkout' AS C,
+            pagetype&lt;&gt;'home' AND pagetype&lt;&gt;'checkout' AS D)
+    Result(first(sessionid of C) AS sessionid,
+           max_choose(productprice, productname of C) AS most_expensive_product,
+           max(productprice of C) AS max_price,
+           min_choose(productprice, productname of C) AS least_expensive_product,
+           min(productprice of C) AS min_price)
+) AS dt;</code></pre></div>
+<div class="section" id="wzi1507323901672__section_edp_gzk_mdb"><h4 class="title sectiontitle">Output</h4><pre class="pre screen"> sessionid most_expensive_product max_price least_expensive_product min_price 
+ --------- ---------------------- --------- ----------------------- --------- 
+         5 cellphones                 600.0 bookcases                   150.0</pre>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="wzi1507323901672__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+</div>
+</div>
+<div class="topic reference nested2" aria-labelledby="ariaid-title27" topicindex="27" topicid="ujm1507324164056" xml:lang="en-us" lang="en-us" id="ujm1507324164056"><h3 class="title topictitle3" id="ariaid-title27">nPath Example: Sessions that Checked at Least 3 Products</h3>
+<div class="body refbody"><div class="section" id="ujm1507324164056__section_xyv_2my_xgb"><p class="p">This example finds the data for sessions that checked at least three products.</p>
+</div>
+<div class="section" id="ujm1507324164056__section_N1000E_N1000C_N10001"><p class="p">Modify the SQL call in <a class="xref" href="anj1558127449015.html#wzi1507323901672" title="See example of Machine Learning Engine function nPath that finds the data for sessions that checked three to six products.">nPath Example: Sessions that Checked 3-6 Products</a> to find sessions where the user checked at least three products by changing the Pattern syntax element.</p>
+</div>
+<div class="section" id="ujm1507324164056__section_z1y_njf_p2b"><h4 class="title sectiontitle">Input</h4><ul class="ul" id="ujm1507324164056__ul_xmc_pjf_p2b"><li class="li">aggregate_clicks, as in <a class="xref" href="anj1558127449015.html#lrg1507234030779" title="See example of LAG expression in Machine Learning Engine function nPath where the query returns the first purchase and the most expensive purchase for users who buy increasingly expensive products.">LAG and LEAD Expressions Example: First and Most Expensive Purchases</a> (under <a class="xref" href="anj1558127449015.html#hkc1507231941696" title="">nPath Symbols</a>)</li>
+</ul>
+</div>
+<div class="section" id="ujm1507324164056__section_p3b_yzk_mdb"><h4 class="title sectiontitle">SQL Call</h4><pre class="pre codeblock"><code>SELECT * FROM NPath@coprocessor (
+  ON aggregate_clicks PARTITION BY sessionid ORDER BY clicktime
+  USING
+    Mode(nonoverlapping)
+    Pattern('H+.D*.C{3,}.D')
+    Symbols(pagetype = 'home' AS H, pagetype='checkout' AS C,
+            pagetype&lt;&gt;'home' AND pagetype&lt;&gt;'checkout' AS D)
+    Result(first(sessionid of C) AS sessionid,
+           max_choose(productprice, productname of C) AS most_expensive_product,
+           max(productprice of C) AS max_price,
+           min_choose(productprice, productname of C) AS least_expensive_product,
+           min(productprice of C) AS min_price)
+) AS dt;</code></pre></div>
+<div class="section" id="ujm1507324164056__section_u4m_yzk_mdb"><h4 class="title sectiontitle">Output</h4><pre class="pre screen"> sessionid most_expensive_product max_price least_expensive_product min_price 
+ --------- ---------------------- --------- ----------------------- --------- 
+         5 cellphones                 600.0 bookcases                   150.0</pre>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="ujm1507324164056__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+</div>
+</div>
+<div class="topic reference nested2" aria-labelledby="ariaid-title28" topicindex="28" topicid="jel1507324469900" xml:lang="en-us" lang="en-us" id="jel1507324469900"><h3 class="title topictitle3" id="ariaid-title28">nPath Example: Multiple Partitioned Input Tables and Dimension Input Table</h3>
+<div class="body refbody"><div class="section" id="jel1507324469900__section_N10011_N1000E_N10001"><p class="p">An e-commerce store wants to count the advertising impressions that lead to a user clicking an online advertisement. The example counts the online advertisements that the user viewed and the television advertisements that the user might have viewed.</p>
+</div>
+<div class="section" id="jel1507324469900__section_x54_y1l_mdb"><h4 class="title sectiontitle">Input</h4>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="jel1507324469900__table_o5c_hbl_mdb" class="table" frame="border" border="1" rules="all"><div class="caption"><span class="tablecap">impressions</span></div><colgroup><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d251457e3573">userid</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e3575">ts</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e3577">imp</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3573 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3575 ">2012-01-01</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3577 ">ad1</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3573 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3575 ">2012-01-02</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3577 ">ad1</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3573 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3575 ">2012-01-03</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3577 ">ad1</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3573 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3575 ">2012-01-04</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3577 ">ad1</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3573 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3575 ">2012-01-05</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3577 ">ad1</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3573 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3575 ">2012-01-06</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3577 ">ad1</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3573 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3575 ">2012-01-07</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3577 ">ad1</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3573 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3575 ">2012-01-08</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3577 ">ad2</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3573 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3575 ">2012-01-09</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3577 ">ad2</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3573 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3575 ">2012-01-10</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3577 ">ad2</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3573 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3575 ">2012-01-11</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3577 ">ad2</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3573 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3575 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3577 ">...</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="jel1507324469900__table_g4g_qbl_mdb" class="table" frame="border" border="1" rules="all"><div class="caption"><span class="tablecap">clicks2</span></div><colgroup><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d251457e3674">userid</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e3676">ts</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e3678">click</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3674 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3676 ">2012-01-01</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3678 ">ad1</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3674 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3676 ">2012-01-08</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3678 ">ad2</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3674 ">3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3676 ">2012-01-16</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3678 ">ad3</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3674 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3676 ">2012-01-23</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3678 ">ad4</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3674 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3676 ">2012-02-01</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3678 ">ad5</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3674 ">6</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3676 ">2012-02-08</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3678 ">ad6</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3674 ">7</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3676 ">2012-02-14</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3678 ">ad7</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3674 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3676 ">2012-02-24</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3678 ">ad8</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3674 ">9</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3676 ">2012-03-02</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3678 ">ad9</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3674 ">10</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3676 ">2012-03-10</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3678 ">ad10</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3674 ">11</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3676 ">2012-03-18</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3678 ">ad11</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3674 ">12</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3676 ">2012-03-25</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3678 ">ad12</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3674 ">13</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3676 ">2012-03-30</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3678 ">ad13</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3674 ">14</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3676 ">2012-04-02</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3678 ">ad14</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3674 ">15</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3676 ">2012-04-06</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3678 ">ad15</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="jel1507324469900__table_tf1_xbl_mdb" class="table" frame="border" border="1" rules="all"><div class="caption"><span class="tablecap">tv_spots</span></div><colgroup><col style="width:50%" /><col style="width:50%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d251457e3795">ts</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d251457e3797">tv_imp</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3795 ">2012-01-01</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3797 ">ad1</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3795 ">2012-01-02</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3797 ">ad2</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3795 ">2012-01-03</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3797 ">ad3</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3795 ">2012-01-04</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3797 ">ad4</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3795 ">2012-01-05</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3797 ">ad5</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3795 ">2012-01-06</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3797 ">ad6</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3795 ">2012-01-07</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3797 ">ad7</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3795 ">2012-01-08</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3797 ">ad8</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3795 ">2012-01-09</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3797 ">ad9</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3795 ">2012-01-10</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3797 ">ad10</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3795 ">2012-01-11</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3797 ">ad11</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3795 ">2012-01-12</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3797 ">ad12</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3795 ">2012-01-13</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3797 ">ad13</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3795 ">2012-01-14</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3797 ">ad14</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3795 ">2012-01-15</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d251457e3797 ">ad15</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="jel1507324469900__section_p11_z1l_mdb"><h4 class="title sectiontitle">SQL Call</h4><p class="p">The tables impressions and clicks have a user_id column, but the table tv_spots is only a record of television advertisements shown, which any user might have seen. Therefore, tv_spots must be a dimension table.</p>
+<pre class="pre codeblock"><code>SELECT * FROM NPath@coprocessor (
+  ON impressions PARTITION BY userid ORDER BY ts
+  ON clicks2 PARTITION BY userid ORDER BY ts
+  ON tv_spots DIMENSION ORDER BY ts
+  USING
+    Mode('nonoverlapping')
+    Symbols(true AS imp, TRUE AS click,TRUE AS tv_imp)
+    Pattern('(imp|tv_imp)*.click')
+    Result (COUNT(* OF imp) AS imp_cnt, 
+            COUNT(* OF tv_imp) AS tv_imp_cnt)
+) AS dt;</code></pre></div>
+<div class="section" id="jel1507324469900__section_usl_z1l_mdb"><h4 class="title sectiontitle">Output</h4><pre class="pre screen">imp_cnt tv_imp_cnt 
+ ------- ---------- 
+      23          0
+      19          0
+      24          0
+      22          0
+      23          0
+      22          0
+      19          0
+      23          0
+      18          0
+      22          0
+      20          0
+      25          0
+      21          0
+      22          0
+      22          0
+</pre>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="jel1507324469900__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,776 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="gvy1507819181878"> </a>
+	  <h1>XMLRelation</h1>
+
+	
+		<p style="line-height: 1em;">The XMLRelation function takes XML documents and outputs their element
+			names, attribute values, text, and structural information in a relational table, which
+			you can search with SQL queries. The function maintains multilevel paths from the input
+			XML documents to the XML elements.</p>
+
+	
+   <a name="cyv1507819228501"> </a>
+   <h2>XMLRelation Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.9</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM XMLRelation (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+  USING
+  TextColumn ('<i>text_column</i>')
+  DocIDColumns ({ '<i>docid_column</i>' | <i>docid_column_range</i> }[,...])
+  [ MaxDepth (<i>max_depth</i>) ]
+  [ ExcludeElements ('<i>node</i>[/<i>...</i>][{<i>node</i>[,...]}]' [,...]) ]
+  [ AttributeAsNode ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ AttributeDelimiter ('<i>delimiter</i>') ]
+  [ OutputType ({ 'fullpath' | 'fulldata' | 'parentchild' }) ]
+  [ ErrorHandler ('{'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}[;[<i>output_column</i>:] <i>column</i>[,...] ]') ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <p>
+      <b>Note:</b>  In the ExcludeElements syntax element, you must type the braces ({ and }).</p>
+   <a name="pnn1507819232073"> </a>
+	  <h2>XMLRelation Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TextColumn</dt>
+      <dd>Specify the name of the input table column that contains the XML documents. The function skips malformed XML documents.</dd>
+      <dt>DocIDColumns</dt>
+      <dd>Specify the names of the input table columns that contain the identifiers of the XML documents. No <i>docid_column</i> can have the same name as an output table column. For output column names, see XMLRelation Output.</dd>
+      <dt>MaxDepth</dt>
+      <dd>[Optional] Specify the maximum depth in the XML tree at which to process XML documents. The MaxDepth and OutputType syntax elements determine the schema of the output table.</dd>
+      <dd>Default: 5</dd>
+      <dd>Maximum: 1000</dd>
+      <dt>ExcludeElements</dt>
+      <dd>[Optional] Specify the paths to the nodes to exclude from processing. The function excludes each specified node and its child nodes. Here are examples of paths to nodes:'chapter''root/book''root/book/{author,chapter}'</dd>
+      <dt>AttributeAsNode</dt>
+      <dd>[Optional] Specify whether to treat the attributes of a node as its child nodes.</dd>
+      <dd>Default: 'false' (Attributes of a node are stored in one element of the output tuple.)</dd>
+      <dt>AttributeDelimiter</dt>
+      <dd>[Optional] Specify the delimiter used to separate multiple attributes of one node in XML documents.</dd>
+      <dd>Default: ',' (comma)</dd>
+      <dt>OutputType</dt>
+      <dd>[Optional] Specify the output table schema. The MaxDepth and OutputType syntax elements determine the schema of the output table, and the number of columns in the output table must not exceed 1600.</dd>
+      <dd>Default: 'fullpath'</dd>
+      <dt>ErrorHandler</dt>
+      <dd>[Optional] Specify whether the function handles errors that occur when parsing an XML document.</dd>
+      <dd>If you specify 'true':<ul>
+            <li>If an error occurs while parsing a row, the function skips that row. When the function completes the parsing, it outputs only the nodes that were error-free.</li>
+            <li>You can tell the function to output an additional column named <i>output_column</i> and populate it with the values of the specified columns.<p style="line-height: 1em;">The name <i>output_column</i> can contain only lowercase letters and underscores. Default: errorhandler</p>
+               <p style="line-height: 1em;">In the output column, the values of the specified columns are separated with semicolons.</p>
+               <p style="line-height: 1em;">For example, the following syntax element adds the column error_info to the output table and populates it with the values of input columns col1 and col2 (with a semicolon after each value):</p>
+               <pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+ErrorHandler ('true;error_info:col1,col2')</tt>
+               </pre>
+            </li>
+         </ul>
+      </dd>
+      <dd>Default: 'false' (The function aborts and throws an exception.)</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of input column names to copy to the output table. No <i>accumulate_column</i> can have the same name as an output table column. For output column names, see XMLRelation Output.</dd>
+   </div>
+
+
+	
+   <a name="cbp1507819236158"> </a>
+   <h2>XMLRelation Input</h2>
+   <a name="section_jg3_nkn_zcb"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>text_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">XML document to parse. Function skips malformed XML documents.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>docid_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>docid_column</i>.] Identifier of XML document. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="gkd1507819240032"> </a>
+   <h2>XMLRelation Output</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">The output table schema depends on the OutputType syntax element.</p>
+
+   <a name="section_pfh_5sj_1cb"> </a>
+   <h3>XMLRelation Output Table Schema, OutputType ('fullpath') (Default)</h3>
+   <p style="line-height: 1em;">In this table, <i>n</i> is in the range [0, <i>max_depth</i>).] The node at depth 0 is the root.</p>
+   <a name="table_zzs_r5j_1cb"> </a>
+   <table class="introtable">
+      <a name="table_zzs_r5j_1cb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>docid_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>docid_column</i>.] Column copied from input table. Identifier of XML document.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>out_nodeid</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Identifier of extracted node. Unique within XML document.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">element</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Node name.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">attributes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Node attributes. Value has this form:<p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <i>attributename</i> = <i>value</i> [<i>delimiter</i> 
+                  <i>value</i> … ]</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">value_col</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Node value (text content).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">d<i>n</i>element</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each <i>n</i>.] Name of node at depth <i>n</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">d<i>n</i>attributes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each <i>n</i>.] Attributes of node at depth <i>n</i>. Value has this form:<p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <i>attributename</i> = <i>value</i> [<i>delimiter</i> 
+                  <i>value</i> … ]</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">d<i>n</i>value_col</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each <i>n</i>.] Value (text content) of node at depth <i>n</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">d<i>n</i>id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each <i>n</i>.] Identifier of node at depth <i>n</i> (its <i>out_nodeid</i>).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from input table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_evj_tsj_1cb"> </a>
+   <h3>Output Table Schema, OutputType ('fulldata')</h3>
+   <p style="line-height: 1em;">In this table, <i>n</i> is in the range [0, <i>max_depth</i>).] The node at depth 0 is the root.</p>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>docid_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>docid_column</i>.] Column copied from input table. Identifier of XML document.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>out_nodeid</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Identifier of extracted node. Unique within XML document. </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">d<i>n</i>element</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each <i>n</i>.] Name of node at depth <i>n</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">d<i>n</i>attributes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each <i>n</i>.] Attributes of node at depth <i>n</i>. Value has this form:<p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <i>attributename</i> = <i>value</i> [<i>delimiter</i> 
+                  <i>value</i> … ]</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">d<i>n</i>value_col</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each <i>n</i>.] Value (text content) of node at depth <i>n</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">d<i>n</i>id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each <i>n</i>.] Identifier of node at depth <i>n</i> (its <i>out_nodeid</i>).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from input table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_o5v_tsj_1cb"> </a>
+   <h3>OutputType Table Schema, OutputType ('parentchild')</h3>
+   <a name="table_h4j_ftj_1cb"> </a>
+   <table class="introtable">
+      <a name="table_h4j_ftj_1cb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>docid_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>docid_column</i>.] Column copied from input table. Identifier of XML document.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>out_nodeid</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Identifier of extracted node. Unique within XML document.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">element</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Node name.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">attributes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Node attributes. Value has this form:<p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <i>attributename</i> = <i>value</i> [<i>delimiter</i> 
+                  <i>value</i> … ]</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">value_col</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Node value (text content).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">parent_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Parent node identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column copied from input table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="qaa1510713538161"> </a>
+   <h2>XMLRelation Examples</h2>
+   <a name="jio1507819263432"> </a>
+   <h3>XMLRelation Example: OutputType ('fulldata')</h3>
+   <a name="section_dz3_jgn_zdb"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, xmlrelation_input, contains an xml document that has these hierarchical nodes: School at level 1, Dept at level 2, Class at level 3, and Student and Grade at level 4.</p>
+   <a name="table_ch5_ngn_zdb"> </a>
+   <table class="introtable">
+      <a name="table_ch5_ngn_zdb"> </a>
+      <h4 style="text-align: center;">xmlrelation_input</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">xid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">xmldocument</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">&lt;School name="UCLA"&gt;<p style="line-height: 1em; margin: 0px;">
+                  <br/>: &lt;Dept name="EE"&gt;</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>: &lt;Class A="grad" B="undergrad"&gt;</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>: &lt;Student&gt;Harry&lt;/Student&gt;</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>: &lt;Grade&gt;A+&lt;/Grade&gt;</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>: &lt;/Class&gt;</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>: &lt;/Dept&gt;</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>: &lt;/School&gt;</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM XMLRelation(
+  ON xmlrelation_input
+  USING
+  TextColumn('xmldocument')
+  DocIDColumns('xid')
+  MaxDepth(3)
+  <b>OutputType('fulldata')
+</b>
+) AS dt ;</tt>
+   </pre>
+   <a name="section_utm_kgn_zdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The output table shows the elements, attributes, values, and ids for each node.</p>
+   <pre>
+      <tt>
+ xid out_nodeid d0element d0attributes d0value_col d0id d1element d1attributes d1value_col d1id d2element d2attributes       d2value_col d2id d3element d3attributes d3value_col d3id 
+ --- ---------- --------- ------------ ----------- ---- --------- ------------ ----------- ---- --------- ------------------ ----------- ---- --------- ------------ ----------- ---- 
+   1          4 School    name=UCLA                   1 Dept      name=EE                     2 Class     A=grad,B=undergrad                3 Student                Harry          4
+   1          5 School    name=UCLA                   1 Dept      name=EE                     2 Class     A=grad,B=undergrad                3 Grade                  A+             5
+   1          3 School    name=UCLA                   1 Dept      name=EE                     2 Class     A=grad,B=undergrad                3 NULL      NULL         NULL        NULL
+   1          2 School    name=UCLA                   1 Dept      name=EE                     2 NULL      NULL               NULL        NULL NULL      NULL         NULL        NULL
+   1          1 School    name=UCLA                   1 NULL      NULL         NULL        NULL NULL      NULL               NULL        NULL NULL      NULL         NULL        NULL</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="beg1507819272063"> </a>
+   <h3>XMLRelation Example: OutputType ('parentchild')</h3>
+   <a name="section_oqg_zhn_zdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li> xmlrelation_input, as in XMLRelation Example: OutputType ('fulldata')</li>
+   </ul>
+
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM XMLRelation(
+  ON xmlrelation_input
+  USING
+  TextColumn('xmldocument')
+  DocIDColumns('xid')
+  MaxDepth(3)
+  <b>OutputType('parentchild')
+</b>
+) AS dt;</tt>
+   </pre>
+   <a name="section_ejw_zhn_zdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The output table shows the attribute, value, and parent node for each node.</p>
+   <pre>
+      <tt>
+ xid out_nodeid element attributes         value_col parent_id 
+ --- ---------- ------- ------------------ --------- --------- 
+   1          4 Student                    Harry             3
+   1          5 Grade                      A+                3
+   1          3 Class   A=grad,B=undergrad                   2
+   1          2 Dept    name=EE                              1
+   1          1 School  name=UCLA                         NULL</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="hcz1507819280809"> </a>
+   <h3>XMLRelation Example: OutputType ('fullpath')</h3>
+   <a name="section_a4h_n3n_zdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>xmlrelation_input, as in XMLRelation Example: OutputType ('fulldata')</li>
+   </ul>
+
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">This call specifies the default Output syntax element value.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM XMLRelation (
+  ON xmlrelation_input
+  USING
+  TextColumn ('xmldocument')
+  DocIDColumns ('xid')
+  MaxDepth (3)
+  <b>OutputType('fullpath')
+</b>
+) AS dt;
+</tt>
+   </pre>
+   <a name="section_cwy_n3n_zdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The output table shows the ID for each node in a separate column.</p>
+   <pre>
+      <tt>
+ xid out_nodeid element attributes         value_col d0id d1id d2id d3id 
+ --- ---------- ------- ------------------ --------- ---- ---- ---- ---- 
+   1          4 Student                    Harry        1    2    3    4
+   1          5 Grade                      A+           1    2    3    5
+   1          3 Class   A=grad,B=undergrad              1    2    3 NULL
+   1          2 Dept    name=EE                         1    2 NULL NULL
+   1          1 School  name=UCLA                       1 NULL NULL NULL</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="qhb1507819287884"> </a>
+   <h3>XMLRelation Example: Output Attributes as Nodes</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example outputs the attributes as if they were nodes.</p>
+
+   <a name="section_kl2_qcp_xdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>xmlrelation_input, as in XMLRelation Example: OutputType ('fulldata')</li>
+   </ul>
+
+   <a name="section_lqn_qcp_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM XMLRelation (
+  ON xmlrelation_input
+  USING
+  TextColumn ('xmldocument')
+  DocIDColumns ('xid')
+  MaxDepth (3)
+  <b>AttributeAsNode ('true')
+</b>
+) AS dt;</tt>
+   </pre>
+   <a name="section_llx_qcp_xdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The element column contains both actual nodes and attributes that are output as nodes. For the latter, the attributes column contains a tilde (~).</p>
+   <pre>
+      <tt>
+ xid out_nodeid element attributes         value_col d0id d1id d2id d3id 
+ --- ---------- ------- ------------------ --------- ---- ---- ---- ---- 
+   1          2 name    ~                  UCLA         1    2 NULL NULL
+   1          4 name    ~                  EE           1    3    4 NULL
+   1          6 A       ~                  grad         1    3    5    6
+   1          7 B       ~                  undergrad    1    3    5    7
+   1          8 Student                    Harry        1    3    5    8
+   1          9 Grade                      A+           1    3    5    9
+   1          5 Class   A=grad,B=undergrad              1    3    5 NULL
+   1          3 Dept    name=EE                         1    3 NULL NULL
+   1          1 School  name=UCLA                       1 NULL NULL NULL</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="ufq1507819304043"> </a>
+   <h3>XMLRelation Example: ErrorHandler</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example handles a malformed input document.</p>
+
+   <a name="section_kl2_qcp_xdb"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The second XML document is malformed.</p>
+   <a name="table_mp1_mdp_xdb"> </a>
+   <table class="introtable">
+      <a name="table_mp1_mdp_xdb"> </a>
+      <h4 style="text-align: center;">xmlrelation_error</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">xid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">xmldocument</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">&lt;School name="UCLA"&gt;<p style="line-height: 1em; margin: 0px;">
+                  <br/>: &lt;Dept name="EE"&gt;</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>: &lt;/Dept&gt;</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>: &lt;/School&gt;</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">&lt;School /School&gt; name="UTA"&gt;</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_lqn_qcp_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM XMLRelation (
+  ON xmlrelation_error
+  USING
+  TextColumn ('xmldocument')
+  DocIDColumns ('xid')
+  MaxDepth (1)
+  <b>ErrorHandler ('true;xmldocument')</b>
+) AS dt ;</tt>
+   </pre>
+   <a name="section_llx_qcp_xdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ xid out_nodeid element attributes value_col d0id d1id errorhandler                  
+ --- ---------- ------- ---------- --------- ---- ---- ----------------------------- 
+   1          2 Dept    name=EE                 1    2 NULL                         
+   1          1 School  name=UCLA               1 NULL NULL                         
+   2       NULL NULL    NULL       NULL      NULL NULL &lt;School /School&gt; name="UTA"&gt;;</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

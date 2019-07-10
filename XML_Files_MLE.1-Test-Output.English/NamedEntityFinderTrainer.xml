@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="woh1507217729138"> </a>
+	  <h1>NamedEntityFinderTrainer</h1>
+
+	
+		<p style="line-height: 1em;">The NamedEntityFinderTrainer function takes training data and outputs a Maximum Entropy data model. The function is based on OpenNLP, and follows its annotation. For more information on OpenNLP, see https://opennlp.apache.org/docs/1.8.4/manual/opennlp.html.</p>
+
+		<p style="line-height: 1em;">The trainer supports only the English language.</p>
+   <p>
+      <b>Note:</b>  NamedEntityFinder uses files that are preinstalled on ML Engine. For details, see Preinstalled Files That Functions Use.</p>
+	
+   <a name="wmt1507217804883"> </a>
+   <h2>NamedEntityFinderTrainer Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.6</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NamedEntityFinderTrainer (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY 1
+  USING
+  OutputModelFile (<i>output_model_file</i>)
+  TextColumn ('<i>text_column</i>')
+  EntityType ('<i>entity_type</i>')
+  [ IterNum (<i>iterator</i>)]
+  [ Cutoff (<i>cutoff</i>)]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="iua1507217902971"> </a>
+	  <h2>NamedEntityFinderTrainer Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputModelFile</dt>
+      <dd>Specify the name of the data model file to create.</dd>
+      <dt>TextColumn</dt>
+      <dd>Specify the name of the input table column that contains the text to analyze.</dd>
+      <dt>EntityType</dt>
+      <dd>Specify the entity type to train (for example, PERSON). The input training documents must contain the same tag.</dd>
+      <dt>IterNum</dt>
+      <dd>[Optional] Specify the iterator number for training (an openNLP training parameter).</dd>
+      <dd>Default: 100</dd>
+      <dt>Cutoff</dt>
+      <dd>[Optional] Specify the cutoff number for training (an openNLP training parameter).</dd>
+      <dd>Default: 5</dd>
+   </div>
+
+
+	
+   <a name="rhu1507217955226"> </a>
+   <h2>NamedEntityFinderTrainer Input</h2>
+   <a name="section_zfd_54c_ycb"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>text_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Text to analyze. Within the text, each entity must be identified with this syntax:<pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+&lt;START:<i>entity_type</i>&gt;<i>entity</i>&lt;END&gt;</tt>
+               </pre>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>For example:</p>
+               <pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+&lt;START:location&gt;Country1&lt;END&gt; has arrived</tt>
+               </pre>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="bod1507218017441"> </a>
+   <h2>NamedEntityFinderTrainer Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The function outputs a message and a Max Entropy model (a binary file automatically installed on ML Engine).</p>
+
+   <a name="section_myd_z4c_ycb"> </a>
+   <h3>Output Message Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">train_result</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Message indicating whether the function ran successfully.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="eja1507218101866"> </a>
+   <h2>NamedEntityFinderTrainer Example</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Input</h3>
+   <ul>
+      <li>Input Table: nermem_sports_train, which has 50 rows of sports news</li>
+   </ul>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <h4 style="text-align: center;">Input Table: nermem_sports_train</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">content</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CRICKET - &lt;START:ORG&gt; LEICESTERSHIRE &lt;END&gt; TAKE OVER AT TOP AFTER INNINGS VICTORY .</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">&lt;START:LOCATION&gt; LONDON &lt;END&gt; 1996-08-30</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">West Indian all-rounder &lt;START:PER&gt; Phil Simmons &lt;END&gt; took four for 38 on Friday as &lt;START:ORG&gt; Leicestershire &lt;END&gt; beat &lt;START:ORG&gt; Somerset &lt;END&gt; by an innings and 39 runs in two days to take over at the head of the county championship .</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Their stay on top</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">After bowling &lt;START:ORG&gt; Somerset &lt;END&gt; out for 83 on the opening morning at &lt;START:LOCATION&gt; Grace Road &lt;END&gt;</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Trailing by 213</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">&lt;START:ORG&gt; Essex &lt;END&gt;</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">&lt;START:PER&gt; Hussain &lt;END&gt;</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">By the close &lt;START:ORG&gt; Yorkshire &lt;END&gt; had turned that into a 37-run advantage but off-spinner &lt;START:PER&gt; Such &lt;END&gt; had scuttled their hopes</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">At the &lt;START:LOCATION&gt; Oval &lt;END&gt;</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">He was well backed by &lt;START:LOCATION&gt; England &lt;END&gt; hopeful &lt;START:PER&gt; Mark Butcher &lt;END&gt; who made 70 as &lt;START:ORG&gt; Surrey &lt;END&gt; closed on 429 for seven</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_zmn_jf3_cdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NamedEntityFinderTrainer (
+  ON nermem_sports_train PARTITION BY 1
+  USING
+  EntityType ('LOCATION')
+  TextColumn ('content')
+  OutputModelFile (location.sports)
+) AS dt;</tt>
+   </pre>
+   <a name="section_wp5_jf3_cdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ train_result    
+ --------------- 
+ model installed</tt>
+   </pre>
+   <p style="line-height: 1em;">The model table, location.sports, is in binary format.</p>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

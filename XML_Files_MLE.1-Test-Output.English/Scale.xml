@@ -1,0 +1,1046 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="zzl1507825806540"> </a>
+   <h1>Scale</h1>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The Scale function uses statistical information from the ScaleMap function to scale the input data set.</p>
+   <p>
+      <b>Note:</b>  To scale the sequences in each partition independently, use the function ScaleByPartition.</p>
+   <a name="dkq1507825813210"> </a>
+   <h2>Scale Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.7</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Scale (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable PARTITION BY ANY
+  ON (
+    SELECT * FROM ScaleMap (
+    ...
+    ) AS <i>alias_1</i>
+  ) AS Statistic DIMENSION
+  USING
+  ScaleMethod ('<i>method</i>' [,...])
+  [ GlobalScale ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ TargetColumns ( { '<i>target_column</i>' | <i>target_column_range</i> }[,...] ) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+  [ Multiplier (<i>multiplier</i> [,...]) ]
+  [ Intercept (<i>intercept</i> [,...]) ]
+) AS <i>alias_2</i>;</tt>
+   </pre>
+   <a name="ebw1507825817022"> </a>
+	  <h2>Scale Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>ScaleMethod</dt>
+      <dd>Specify one or more statistical methods to use to scale the data set. For <i>method</i> values and descriptions, see Location and Scale for Statistical Methods.</dd>
+      <dd>If you specify multiple methods, the output table includes the column scalemethod (which contains the method name) and a row for each input-row/method combination.</dd>
+      <dt>GlobalScale</dt>
+      <dd>[Optional] Specify whether all InputTable columns are scaled to the same location and scale. For a description of location and scale and the values that are used with each ScaleMethod, see Location and Scale for Statistical Methods.</dd>
+      <dd>Default: 'false' (Each InputTable column is scaled separately.)</dd>
+      <dt>TargetColumns</dt>
+      <dd>[Optional] Specify the InputTable columns that contain the values to scale. The columns must contain numeric values between -1e<sup>308</sup> and 1e<sup>308</sup>.</dd>
+      <dd>Default: All columns of the Statistic table (the output of the ScaleMap function in the Scale syntax) except stattype</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the InputTable columns to copy to the output table.</dd>
+      <dt>Multiplier</dt>
+      <dd>[Optional] Specify one or more multiplying factors to apply to the input variables—<i>multiplier</i> in this formula:<p style="line-height: 1em;">
+            <i>X'</i> = <i>intercept</i> + <i>multiplier</i> * (<i>X</i> - <i>location</i>)/<i>scale</i>
+         </p>
+         <p style="line-height: 1em;">If you specify only one <i>multiplier</i>, it applies to all columns specified by the TargetColumns syntax element. If you specify multiple multiplying factors, each <i>multiplier</i> applies to the corresponding input column. For example, the first <i>multiplier</i> applies to the first column specified by the TargetColumns syntax element, the second <i>multiplier</i> applies to the second input column, and so on.</p>
+         <p style="line-height: 1em;">Default: <i>multiplier</i> is 1.</p>
+      </dd>
+      <dt>Intercept</dt>
+      <dd>[Optional] Specify one or more addition factors incrementing the scaled results—<i>intercept</i> in this formula:<p style="line-height: 1em;">
+            <i>X'</i> = <i>intercept</i> + <i>multiplier</i> * (<i>X</i> - <i>location</i>)/<i>scale</i>
+         </p>
+      </dd>
+      <dd>If you specify only one <i>intercept</i>, it applies to all columns specified by the TargetColumns syntax element. If you specify multiple addition factors, each <i>intercept</i> applies to the corresponding input column.</dd>
+      <dd>This is the syntax of <i>intercept</i>:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+[-]{<i>number</i> | min | mean | max }</tt>
+         </pre>
+         <p style="line-height: 1em;">where <tt style="font-family: monospace;">min</tt>, <tt style="font-family: monospace;">mean</tt>, and <tt style="font-family: monospace;">max</tt> are the scaled global minimum, mean, and maximum values of the corresponding columns.</p>
+      </dd>
+      <dd>This is the formula for computing the scaled global minimum:<p style="line-height: 1em;">
+            <i>scaledmin</i> = (minX - <i>location</i>)/<i>scale</i>
+         </p>
+      </dd>
+      <dd>The formulas for computing the scaled global mean and maximum are analogous to the preceding formula. For example, if <i>intercept</i> is <tt style="font-family: monospace;">'- min'</tt> and <i>multiplier</i> is 1, this is the formula for computing the scaled result X' from the original value X:<p style="line-height: 1em;">X' = -<i>scaledmin</i> + 1 * (X - <i>location</i>/<i>scale</i>)</p>
+      </dd>
+      <dd>Default: <i>intercept</i> is 0.</dd>
+   </div>
+
+
+	
+   <a name="pxc1522254582043"> </a>
+	  <h3>Location and Scale for Statistical Methods</h3>
+
+	  <a name="section_N10127_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">Two important parameters in scaling are location and scale. The values that the function uses for location and scale depend on the ScaleMethod syntax element value, as the following table shows. In the table, <i>X</i> represents an input column, and <i>X</i>mean, min<i>X</i>, and max<i>X</i> are the mean, minimum, and maximum values of the column <i>X</i>.</p>
+   <a name="table_N1012E_N10128_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1012E_N10128_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">ScaleMethod</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Location</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Scale</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">mean</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>X</i>
+               <sub>
+                  <i>mean</i>
+               </sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">sum</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Σ <i>X</i>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ustd</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Standard deviation, calculated according to biased estimator of variance.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">std</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>X</i>
+               <sub>
+                  <i>mean</i>
+               </sub>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Standard deviation, calculated according to unbiased estimator of variance.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">range</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">min<i>X</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">max<i>X</i> - min<i>X</i>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">midrange</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">(max<i>X</i>+min<i>X</i>)/2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">(max<i>X</i> - min<i>X</i>)/2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">maxabs</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Maximum of absolute value of X.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+   <a name="vns1507825822609"> </a>
+   <h2>Scale Input</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <a name="table_tjg_2ns_ycb"> </a>
+   <table class="introtable">
+      <a name="table_tjg_2ns_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Has the same schema as ScaleMap Input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Statistic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Has the same schema as ScaleMap Output.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="xjh1507825829761"> </a>
+   <h2>Scale Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Table Schema</h3>
+   <p style="line-height: 1em;">If you specify multiple methods, the output table has a row for each input-row/method combination.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from InputTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>target_column</i>.] Normalized value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">scalemethod</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only if you specify multiple methods.] Scale method used to compute <i>target_column</i> value. For possible values, see Scale Syntax Elements.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="vze1510711979876"> </a>
+   <h2>Scale Examples</h2>
+   <a name="vgd1507825836871"> </a>
+   <h3>Scale Example: ScaleMethod ('midrange')</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example scales (normalizes) input data using the midrange method and the default values for the syntax elements Intercept and Multiplier (0 and 1, respectively).</p>
+
+   <a name="section_chl_vwn_xdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: scale_housing, which has data about houses<p style="line-height: 1em;">The type column has categorical data; the other columns have numerical data. The id column identifies the rows. The table has some NULL values.</p>
+      </li>
+      <li>Statistic: created by calling the ScaleMap function inside the Scale call</li>
+   </ul>
+   <a name="table_xsm_2xn_xdb"> </a>
+   <table class="introtable">
+      <a name="table_xsm_2xn_xdb"> </a>
+      <h4 style="text-align: center;">InputTable: scale_housing</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">price</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">lotsize</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">bedrooms</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">bathrms</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">stories</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">42000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5850</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left">
+            <div style="line-height: 1em;">4000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">49500</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3060</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60500</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6650</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">61000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6360</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">bungalow</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4160</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">bungalow</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3880</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">bungalow</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">69000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4160</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">bungalow</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">83800</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4800</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">bungalow</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">88500</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5500</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_xzw_vwn_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Scale (
+  ON ScaleMap (
+  ON scale_housing
+  USING
+  TargetColumns ('[2:6]')
+  MissValue ('omit')
+  ) AS statistic DIMENSION
+  ON scale_housing AS InputTable PARTITION BY ANY
+  USING
+  ScaleMethod ('midrange')
+  Accumulate ('id')
+) AS dt ORDER BY id,price,lotsize;</tt>
+   </pre>
+   <a name="section_e3n_wwn_xdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The values in the Output Table are calculated as follows. As shown in the descriptions of the syntax elements Multiplier and Intercept, the formula for computing the scaled value X' from the input value X is: </p>
+   <p style="line-height: 1em;">
+      <i>X'</i> = <i>intercept</i> + <i>multiplier</i> * (<i>X</i> - <i>location</i>)/<i>scale</i>
+   </p>
+   <p style="line-height: 1em;">In this example, ScaleMethod is “midrange”, so location and scale are calculated as shown (see Location and Scale for Statistical Methods):</p>
+   <ul>
+      <li>
+         <i>location</i> = (max<i>X</i>+min<i>X</i>)/2</li>
+      <li>
+         <i>scale</i> = (max<i>X</i>-min<i>X</i>)/2</li>
+   </ul>
+   <p style="line-height: 1em;">In the equations above, max<i>X</i> and min<i>X</i> are the maximum and minimum values of column <i>X</i> respectively.</p>
+   <p style="line-height: 1em;">For example, consider row 1 of the price column in InputTable and the following output table:<ul>
+         <li>The value in the input table is 49500.</li>
+         <li>In this example, <i>intercept</i> and <i>multiplier</i> take their default values, 0 and 1 respectively.</li>
+         <li>max<i>X</i> and min<i>X</i> are the maximum and minimum values in the Price column of the input table. These values are 88500 and 42000 respectively.</li>
+         <li>Location and scale are calculated using the equations shown above:<ul>
+               <li>
+                  <i>location</i> = (88500+42000)/2=65250</li>
+               <li>
+                  <i>scale</i> = (88500-42000)/2=23250</li>
+            </ul>
+         </li>
+         <li>The scaled value shown in the output table is calculated as follows:<p style="line-height: 1em;">
+               <i>X'</i>=0 + 1 * (42000-65250)/23250 = -0.67741935</p>
+         </li>
+      </ul>
+   </p>
+   <pre>
+      <tt>
+ id price                lotsize              bedrooms bathrms stories             
+ -- -------------------- -------------------- -------- ------- ------------------- 
+  1                 -1.0   0.5543175487465181      1.0    -1.0 -0.3333333333333333
+  3  -0.6774193548387096                 -1.0      1.0    -1.0                -1.0
+  4 -0.20430107526881722                  1.0      1.0    -1.0 -0.3333333333333333
+  5  -0.1827956989247312   0.8384401114206128     -1.0    -1.0                -1.0
+  6  0.03225806451612903  -0.3871866295264624      1.0    -1.0                -1.0
+  8  0.16129032258064516  -0.3871866295264624      1.0    -1.0  0.3333333333333333
+  9   0.7978494623655914 -0.03064066852367688      1.0    -1.0                -1.0
+ 10                  1.0   0.3593314763231198      1.0     1.0                 1.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="cdp1507825856111"> </a>
+   <h3>Scale Example: ScaleMethod ('midrange'), Intercept (-min)</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example is like Scale Example: ScaleMethod ('midrange') except that the Intercept syntax element has the value -min (where min is the global minimum value). This example also specifies a Multiplier value, but it is the default, as in Scale Example: ScaleMethod ('midrange').</p>
+
+   <a name="section_chl_vwn_xdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: scale_housing, as in Scale Example: ScaleMethod ('midrange')</li>
+      <li>Statistic: scale2, created with this statement:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET table scale2 AS (
+  SELECT * FROM ScaleMap (
+  ON scale_housing
+  USING
+  TargetColumns ('[2:6]')
+  MissValue ('omit')
+) AS dt ) WITH DATA;</tt>
+         </pre>
+      </li>
+   </ul>
+
+   <a name="section_xzw_vwn_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Scale (
+  ON scale_housing AS InputTable PARTITION BY ANY
+  ON scale2 AS statistic DIMENSION
+  USING
+  ScaleMethod ('midrange')
+  Accumulate ('id')
+  Intercept ('-min')
+  Multiplier (1)
+) AS dt ORDER BY id,price,lotsize;
+</tt>
+   </pre>
+   <a name="section_e3n_wwn_xdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">In this example, the intercept syntax element is “-min”. As shown in the description of the Intercept syntax element, in this case the intercept is calculated as:</p>
+   <p style="line-height: 1em;">
+      <i>scaledmin</i>=(min<i>X</i>- <i>location</i>)/<i>scale</i>
+   </p>
+   <p style="line-height: 1em;">The formula for computing the scaled value <i>X'</i> from the input value <i>X</i> becomes:</p>
+   <p style="line-height: 1em;">
+      <i>X'</i>=-<i>scaledmin</i>+<i>multiplier</i>*(<i>X</i>-<i>location</i>)/<i>scale</i>
+   </p>
+   <p style="line-height: 1em;">ScaleMethod is “midrange”, so location and scale are the same as shown in Scale Example: ScaleMethod ('midrange').</p>
+   <p style="line-height: 1em;">For example, consider the value in the Price column in row id = 3:<ul>
+         <li>The value in the input table is 49500.</li>
+         <li>In this example, <i>multiplier</i> has its default value, 1.</li>
+         <li>
+            <i>scaledmin</i> is calculated using the above equation:<p style="line-height: 1em;">
+               <i>scaledmin</i>= (min<i>X</i>-<i>location</i>)/<i>scale</i>= (42000-65250)/23250= -1</p>
+         </li>
+         <li>The scaled value shown in the output table is calculated as follows:<p style="line-height: 1em;">
+               <i>X'</i>=-<i>scaledmin</i>+<i>multiplier</i>*(<i>X</i>-<i>location</i>)/<i>scale</i>= -(-1)+1* (49500-65250)/23250= 0.3225806</p>
+         </li>
+      </ul>
+   </p>
+   <p style="line-height: 1em;"/>
+   <pre>
+      <tt>
+ id price               lotsize            bedrooms bathrms stories            
+ -- ------------------- ------------------ -------- ------- ------------------ 
+  1                 0.0 1.5543175487465182      2.0     0.0 0.6666666666666667
+  3 0.32258064516129037                0.0      2.0     0.0                0.0
+  4  0.7956989247311828                2.0      2.0     0.0 0.6666666666666667
+  5  0.8172043010752688 1.8384401114206128      0.0     0.0                0.0
+  6   1.032258064516129 0.6128133704735377      2.0     0.0                0.0
+  8  1.1612903225806452 0.6128133704735377      2.0     0.0 1.3333333333333333
+  9  1.7978494623655914 0.9693593314763231      2.0     0.0                0.0
+ 10                 2.0 1.3593314763231197      2.0     2.0                2.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="zgm1507825887728"> </a>
+   <h3>Scale Example: Use Training Data to Scale Test Data</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example creates statistics using ScaleMap on a training data set and then
+                uses these statistics to scale a similar test data set.</p>
+
+   <a name="section_chl_vwn_xdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Training data: scale_housing, as in Scale Example: ScaleMethod ('midrange')</li>
+      <li>Test data: scale_housing_test</li>
+   </ul>
+   <a name="table_usd_114_xdb"> </a>
+   <table class="introtable">
+      <a name="table_usd_114_xdb"> </a>
+      <h4 style="text-align: center;">scale_housing_test</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">price</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">lotsize</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">bedrooms</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">bathrms</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">stories</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">bungalow</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">90000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7200</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">30500</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">27000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1700</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">36000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2880</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">classic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">37000</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3600</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_xzw_vwn_xdb"> </a>
+   <h4>SQL Call to Create Statistics Table from Training Data</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE multiset table scale_stat AS (
+SELECT * FROM ScaleMap (
+	ON scale_housing
+	USING
+	TargetColumns('[2:6]')
+	MissValue ('omit')
+  ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_nlf_wwn_xdb"> </a>
+   <h4>SQL Call to Scale Test Data</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Scale (
+  ON scale_housing_test AS InputTable PARTITION BY ANY
+  ON scale_stat AS statistic DIMENSION
+  USING
+  ScaleMethod ('midrange')
+  Accumulate ('id')
+) AS dt ORDER BY id,price,lotsize;</tt>
+   </pre>
+   <a name="section_e3n_wwn_xdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id price               lotsize             bedrooms bathrms stories             
+ -- ------------------- ------------------- -------- ------- ------------------- 
+ 11   1.064516129032258  1.3064066852367688      1.0     1.0                -1.0
+ 12 -1.4946236559139785  -1.033426183844011     -1.0    -1.0                -1.0
+ 13 -1.6451612903225807 -1.7576601671309193      1.0    -1.0 -0.3333333333333333
+ 14 -1.2580645161290323 -1.1002785515320335      1.0    -1.0                -1.0
+ 15 -1.2150537634408602 -0.6991643454038997     -1.0    -1.0                -1.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="qij1507825918896"> </a>
+   <h3>Scale Example: Multiple Methods</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example scales input data using multiple methods—midrange, mean, maxabs, and range—in the same function call.</p>
+
+   <a name="section_chl_vwn_xdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Training data: scale_housing, as in Scale Example: ScaleMethod ('midrange')</li>
+      <li>Test data: tmpScale, created with this statement:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET table tmpScale AS (
+  SELECT * FROM ScaleMap (
+  ON scale_housing
+  USING
+  TargetColumns ('[2:6]')
+  MissValue ('omit')
+  ) AS dt 
+) WITH DATA;</tt>
+         </pre>
+      </li>
+   </ul>
+
+   <a name="section_xzw_vwn_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Scale (
+  ON scale_housing AS InputTable PARTITION BY ANY
+  ON tmpScale AS statistic DIMENSION
+  USING
+  ScaleMethod ('midrange','mean','maxabs','range')
+  Accumulate ('id')
+) AS dt ORDER BY id,price,lotsize;</tt>
+   </pre>
+   <a name="section_e3n_wwn_xdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id price                lotsize              bedrooms           bathrms stories             scalemethod 
+ -- -------------------- -------------------- ------------------ ------- ------------------- ----------- 
+  1             -23037.5                782.5              0.125  -0.125               0.125 mean       
+  1                 -1.0   0.5543175487465181                1.0    -1.0 -0.3333333333333333 midrange   
+  1                  0.0   0.7771587743732591                1.0     0.0  0.3333333333333333 range      
+  1   0.4745762711864407   0.8796992481203008                1.0     0.5                 0.5 maxabs     
+  3             -15537.5              -2007.5              0.125  -0.125              -0.875 mean       
+  3  -0.6774193548387096                 -1.0                1.0    -1.0                -1.0 midrange   
+  3  0.16129032258064516                  0.0                1.0     0.0                 0.0 range      
+  3    0.559322033898305  0.46015037593984964                1.0     0.5                0.25 maxabs     
+  4              -4537.5               1582.5              0.125  -0.125               0.125 mean       
+  4 -0.20430107526881722                  1.0                1.0    -1.0 -0.3333333333333333 midrange   
+  4   0.3978494623655914                  1.0                1.0     0.0  0.3333333333333333 range      
+  4   0.6836158192090396                  1.0                1.0     0.5                 0.5 maxabs     
+  5              -4037.5               1292.5             -0.875  -0.125              -0.875 mean       
+  5  -0.1827956989247312   0.8384401114206128               -1.0    -1.0                -1.0 midrange   
+  5  0.40860215053763443   0.9192200557103064                0.0     0.0                 0.0 range      
+  5   0.6892655367231638    0.956390977443609 0.6666666666666666     0.5                0.25 maxabs     
+  6  0.03225806451612903  -0.3871866295264624                1.0    -1.0                -1.0 midrange   
+  6   0.5161290322580645   0.3064066852367688                1.0     0.0                 0.0 range      
+  6   0.7457627118644068   0.6255639097744361                1.0     0.5                0.25 maxabs     
+  6                962.5               -907.5              0.125  -0.125              -0.875 mean       
+  8  0.16129032258064516  -0.3871866295264624                1.0    -1.0  0.3333333333333333 midrange   
+  8   0.5806451612903226   0.3064066852367688                1.0     0.0  0.6666666666666666 range      
+  8   0.7796610169491526   0.6255639097744361                1.0     0.5                0.75 maxabs     
+  8               3962.5               -907.5              0.125  -0.125               1.125 mean       
+  9   0.7978494623655914 -0.03064066852367688                1.0    -1.0                -1.0 midrange   
+  9   0.8989247311827957  0.48467966573816157                1.0     0.0                 0.0 range      
+  9   0.9468926553672317   0.7218045112781954                1.0     0.5                0.25 maxabs     
+  9              18762.5               -267.5              0.125  -0.125              -0.875 mean       
+ 10                  1.0   0.3593314763231198                1.0     1.0                 1.0 midrange   
+ 10                  1.0   0.6796657381615598                1.0     1.0                 1.0 range      
+ 10                  1.0   0.8270676691729323                1.0     1.0                 1.0 maxabs     
+ 10              23462.5                432.5              0.125   0.875               2.125 mean</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="rqs1507825946446"> </a>
+   <h3>Scale Example: Use Scale Output in KMeans</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example uses the Scale function to scale data (using the maxabs method) before inputting it to the function KMeans, which outputs the centroids of the clusters in the data set. (KMeans explains the reason for scaling data before inputting it to a distance-based analysis function like KMeans.)</p>
+   <p style="line-height: 1em;">For an example of using Scale functions to convert input variables into z-scores for use with the Principal Components Analysis (PCA) functions, see PCA Example.</p>
+
+   <a name="section_chl_vwn_xdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: computers_train1, as in KMeans Example: NumClusters, UnpackColumns ('false')</li>
+      <li>Statistic: created by calling the ScaleMap function inside the Scale call</li>
+   </ul>
+
+   <a name="section_xzw_vwn_xdb"> </a>
+   <h4>SQL Call to Create Table of Scaled Data</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE computers_normalized AS (
+  SELECT * FROM Scale (
+    ON computers_train1 AS InputTable PARTITION BY ANY
+    ON (
+      SELECT * FROM ScaleMap (
+        ON computers_train1
+        USING
+        TargetColumns ('[1:5]')
+        MissValue ('omit')
+     ) AS dt1
+   ) AS statistic DIMENSION
+   USING
+   ScaleMethod ('maxabs')
+   Accumulate ('id')
+  ) AS dt2
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_nlf_wwn_xdb"> </a>
+   <h4>SQL Call to Input Scaled Data to KMeans</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM KMeans (
+  ON computers_normalized AS InputTable
+  OUT TABLE OutputTable (computers_centroid)
+  USING
+  NumClusters ('8')
+  StopThreshold ('0.05')
+  MaxIterNum ('10')
+) AS dt;</tt>
+   </pre>
+   <p>
+      <b>Note:</b>  The result of this query varies with each run. For repeatability, use the InitialSeeds syntax element instead of the NumClusters syntax element.</p>
+   <a name="section_e3n_wwn_xdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ clusterid mean                                                                                       size withinss         
+ --------- ------------------------------------------------------------------------------------------ ---- ---------------- 
+ 0         0.520659010288158 0.603350604490499 0.175562135044001 0.236183074265976 0.880829015544038  579  11.895719506972 
+ 1         0.305714191782829 0.306566440349176 0.0933333333333337 0.114997575169738 0.838135448165681 1031 6.96675718192228
+ 2         0.427463261652133 0.415340136054421 0.103356009070295 0.120535714285714 0.85734293717487   294  4.56252016477447
+ 3         0.509765433827703 0.371402439024389 0.323603368176539 0.558434959349594 0.859995217599231  492  18.7512162682813
+ 4         0.3816394266286 0.777139208173692 0.251070972450283 0.234594508301405 0.866877019006832    783  32.2577148011592
+ 5         0.333863472659545 0.593407407407406 0.137674074074075 0.131944444444444 0.846623093681913  675  12.2440968832223
+ 6         0.53893810202189 0.759645868465428 0.36271982654782 0.561129848229342 0.885031246900105    593  42.2744605421735
+ 7         0.404013881226436 0.32103386809269 0.195777947542653 0.247994652406417 0.854147006396138   561  7.9886712185662 
+ --------- ------------------------------------------------------------------------------------------ ---- ----------------
+           Converged : False                                                                                               
+           Number of Iterations : 10                                                                                       
+           Number of clusters : 8                                                                                          
+           Successfully created Output table                                                                               
+           Total_WithinSS : 136.94115656707123                                                                             
+           Between_SS : 395.39586320118275</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

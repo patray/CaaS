@@ -1,0 +1,986 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="tcr1515618233962"> </a>
+	  <h1>RandomizedPCA</h1>
+
+	
+		<p style="line-height: 1em;">The RandomizedPCA function uses a randomized algorithm to identify the principal components of an input table in sparse format.</p>
+
+	
+   <a name="gdh1515618237331"> </a>
+	  <h2>RandomizedPCA Syntax</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Version 1.0</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM RandomizedPCA (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  [ OUT TABLE MeanTable ('<i>mean_table</i>') ]
+  USING
+  [ TargetColumns ({ '<i>target_column</i>' | <i>target_column_range</i> }[,...]) ]
+  [ TargetRank ('<i>target_rank</i>') ]
+  [ OverSamples ('<i>oversamples</i>') ]
+  [ PowerIterationNum ('<i>power_iterations</i>') ]
+  RowIDColumn ('<i>row_id_column</i>')
+  ColumnIDColumn ('<i>column_id_column</i>')
+  ValueColumn ('<i>value_column</i>')
+  [ NullHandling ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ ZerosPadding ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ Transpose ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ Seed ('<i>seed</i>') ]
+) AS <i>alias</i> ORDER BY component_rank;
+</tt>
+   </pre>
+
+	
+   <a name="wwb1515618235096"> </a>
+	  <h2>RandomizedPCA Arguments</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumns</dt>
+      <dd>[Optional] Specify the columns that contain the attributes to transform.</dd>
+      <dd>Default behavior: The function transforms all attributes.</dd>
+      <dt>TargetRank</dt>
+      <dd>[Optional] Specify the approximate rank of the input matrix (the number of principal components to extract). The <i>target_rank</i> must be in the range [1, 1600].</dd>
+      <dd>Default: The smaller of the number of input table rows and the number of input table columns.</dd>
+      <dt>OverSamples</dt>
+      <dd>[Optional] Specify the number of "extra" samples that the algorithm uses. The algorithm is initialized with <i>target_rank</i> + <i>oversamples</i> random vectors. The <i>oversamples</i> must be in the range [0, 50].</dd>
+      <dd>Default: 10</dd>
+      <dt>PowerIterationNum</dt>
+      <dd>[Optional] Specify the number of power iterations to use to get an approximate basis for the input matrix. The <i>power_iterations</i> must be in the range [0, 10].</dd>
+      <dd>Default: 0</dd>
+      <dt>RowIDColumn</dt>
+      <dd>Specify the name of the input table column containing the observation identifiers (which corresponds to the row index for data in dense format).</dd>
+      <dt>ColumnIDColumn</dt>
+      <dd>Specify the name of the input table column containing the attributes of the observations (which corresponds to the column index for data in dense format).</dd>
+      <dt>ValueColumn</dt>
+      <dd>Specify the name of the input table column containing the attribute values.</dd>
+      <dt>NullHandling</dt>
+      <dd>[Optional] Specify whether to handle NULL values in the input table as specified by ZerosPadding. If NullHandling is 'false', the function reports an error if the input table has any NULL values.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>ZerosPadding</dt>
+      <dd>[Optional] Ignored if NullHandling is 'false'. Specify whether to replace each NULL value in the input table with zero. If NullHandling is 'true' and ZerosPadding is 'false', the function replaces each NULL value with the mean value of the attribute.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>Transpose</dt>
+      <dd>[Optional] Specify whether to transpose the input matrix. Consider specifying 'true' if there are more than one million observations or if memory is limited (see RandomizedPCA Troubleshooting).</dd>
+      <dd>Default: 'false'</dd>
+      <dt>Seed</dt>
+      <dd>[Optional] Specify the random seed for generating the random matrix, and for repeatable results. The <i>seed</i> must be a LONG value.</dd>
+      <dd>Default: 0</dd>
+   </div>
+
+
+	
+   <a name="ruz1515618236196"> </a>
+	  <h2>RandomizedPCA Input</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>InputTable Schema</h3>
+   <p style="line-height: 1em;">The input table has the data set whose principal components (eigenvectors) are to be returned.</p>
+   <a name="table_cbq_vjz_tcb"> </a>
+   <table class="introtable">
+      <a name="table_cbq_vjz_tcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>row_id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Observation identifier. Observation identifiers must be consecutive integers starting with zero; for example: 0, 1, 2, ...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>column_id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Observation attribute.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>value_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Attribute value.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+	
+   <a name="jiw1515618236773"> </a>
+	  <h2>RandomizedPCA Output</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">Both output tables are required input for the RandomizedPCATransform function.</p>
+
+   <a name="section_dnl_jnw_xcb"> </a>
+   <h3>Output Table Schema</h3>
+   <p style="line-height: 1em;">The function displays this table, but does not save it to the database. If you want to input this table to RandomizedPCATransform, create a database table, as in the input section of RandomizedPCA Example.</p>
+   <a name="table_y42_5lz_tcb"> </a>
+   <table class="introtable">
+      <a name="table_y42_5lz_tcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">component_rank</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Rank of principal component. Components are ranked in descending order of variance.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">attribute</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Attribute identifier, one of the following:<p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <a name="table_lsb_ykj_cdb"> </a>
+                  <table class="introtable">
+                     <a name="table_lsb_ykj_cdb"> </a>
+                     <tr>
+                        <th align="left">
+                           <div style="line-height: 1em;">Identifier</div>
+                        </th>
+                        <th align="left">
+                           <div style="line-height: 1em;">Description</div>
+                        </th>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">dimension_<i>i</i>
+                           </div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <p style="line-height: 1em; margin: 0px;">
+                                 <br/>Values of  <i>i</i>th dimension of data set.</p>
+                           </div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <i>var</i>
+                           </div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Variance of principal component.</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <i>var_proportion</i>
+                           </div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Proportion of variance of principal component.</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <i>cumulative_var_proportion</i>
+                           </div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Cumulative proportion of variance of principal component.</div>
+                        </td>
+                     </tr>
+                  </table>
+
+               </p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">value_col</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Attribute value.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_rkf_4nw_xcb"> </a>
+   <h3>MeanTable Schema</h3>
+   <p style="line-height: 1em;">The function saves this table to <i>mean_table</i>, whose default value is MeanValuesTable in the current schema.</p>
+   <a name="table_gdy_wlz_tcb"> </a>
+   <table class="introtable">
+      <a name="table_gdy_wlz_tcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>column_id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Observation attribute.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">mean</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Mean value of column.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+	
+   <a name="hio1515618235648"> </a>
+	  <h2>RandomizedPCA Example</h2>
+   <a name="section_xwc_x4g_n2b"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">The input table for this example, rpca_input, is a reformatted version of the table pca_scaled, from PCA Example.</p>
+   <p style="line-height: 1em;">Reformatting used these steps:</p>
+   <ol>
+      <li>Apply the Unpivoting function to pca_scaled to create the table pca_scaled_unpivot:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE pca_scaled_unpivot AS (
+  SELECT * FROM Unpivoting (
+    ON pca_scaled
+    USING
+    TargetColumns ('age','bmi','bloodpressure','glucose','strokes','cigarettes','insulin','hdl')
+    AttributeColumn ('attribute')
+    ValueColumn ('value_col')
+    InputTypes ('false')
+    Accumulate ('pid')
+  ) AS dt
+) WITH DATA;
+</tt>
+         </pre>
+      </li>
+      <li>Change the values in the column pid to start with 0 instead of 1:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+UPDATE pca_scaled_unpivot
+  SET pid = pid - 1;
+</tt>
+         </pre>
+      </li>
+      <li>Convert the attributes to integers:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+UPDATE pca_scaled_unpivot
+  SET attribute = '0'
+  WHERE attribute = 'age';
+UPDATE pca_scaled_unpivot
+  SET attribute = '1'
+  WHERE attribute = 'bmi';
+UPDATE pca_scaled_unpivot
+  SET attribute = '2'
+  WHERE attribute = 'bloodpressure';
+UPDATE pca_scaled_unpivot
+  SET attribute = '3'
+  WHERE attribute = 'glucose';
+UPDATE pca_scaled_unpivot
+  SET attribute = '4'
+  WHERE attribute = 'strokes';
+UPDATE pca_scaled_unpivot
+  SET attribute = '5'
+  WHERE attribute = 'cigarettes';
+UPDATE pca_scaled_unpivot
+  SET attribute = '6'
+  WHERE attribute = 'insulin';
+UPDATE pca_scaled_unpivot
+  SET attribute = '7'
+  WHERE attribute = 'hdl';
+</tt>
+         </pre>
+      </li>
+      <li>Create rpca_input:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE rpca_input AS (
+   SELECT pid,
+          CAST (attribute AS INTEGER) AS attribute,
+          CAST (value_col AS numeric) AS value_col
+   FROM pca_scaled_unpivot
+) WITH DATA;</tt>
+         </pre>
+      </li>
+   </ol>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM rpca_input ORDER BY pid, attribute;</tt>
+   </pre>
+   <a name="table_mvf_dpg_n2b"> </a>
+   <table class="introtable">
+      <a name="table_mvf_dpg_n2b"> </a>
+      <h4 style="text-align: center;">rpca_input</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">pid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">attribute</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">value_col</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.0694163902193035</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.18155283308068546</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.20318081294278664</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.490608219974121</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.24304199773308727</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.9181038062833852</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.5467919054079076</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2909658083842115</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.6070614492334003</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.595262806362141</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.03125858660658243</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.3105758044063935</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.1378784439321814</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.5822121698382442</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.5467919054079076</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.3026664110767116</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_gxq_x4g_n2b"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE meanvaluestable;
+
+CREATE MULTISET TABLE rpca_out AS (
+  SELECT * FROM RandomizedPCA (
+    ON rpca_input AS InputTable
+    USING
+    RowIdColumn ('pid')
+    ColumnIdColumn ('attribute')
+    ValueColumn ('value_col') 
+  ) AS dt
+) WITH DATA;
+</tt>
+   </pre>
+   <a name="section_ss1_y4g_n2b"> </a>
+   <h3>Output</h3>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM rpca_out ORDER BY 1,2;</tt>
+   </pre>
+   <a name="table_q4k_ppg_n2b"> </a>
+   <table class="introtable">
+      <a name="table_q4k_ppg_n2b"> </a>
+      <h4 style="text-align: center;">rpca_out</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">component_rank</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">attribute</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">value_col</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.082098</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.387006</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0934565</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0421627</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.553172</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.55565</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.436851</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.165499</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">cumulative_var_proportion</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.282176</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">var</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.16711</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">var_proportion</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.282176</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.602873</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.178612</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.319031</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.57002</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.118936</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.00519959</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.394365</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.090786</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">cumulative_var_proportion</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.546281</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">var</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.02833</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">var_proportion</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.264105</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM meanvaluestable;</tt>
+   </pre>
+   <a name="table_s1y_zpg_n2b"> </a>
+   <table class="introtable">
+      <a name="table_s1y_zpg_n2b"> </a>
+      <h4 style="text-align: center;">meanvaluestable</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">attribute</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">mean</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-5e-18</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-2.256e-16</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.352e-16</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.4e-18</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-6.08e-17</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.112e-16</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-9.68e-17</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.292e-17</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+   <a name="equ1517949828621"> </a>
+	  <h2>RandomizedPCA Troubleshooting</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Problem: Memory limitations</h3>
+
+			<p style="line-height: 1em;">The memory required by the algorithm is approximately <i>n</i> * <i>k</i>, where <i>n</i> is the number of observations in the input table, and <i>k</i> is the target rank.</p>
+
+		
+   <a name="section_ols_4w2_5cb"> </a>
+   <h3>Workaround</h3>
+   <p style="line-height: 1em;">Adjust these arguments as follows:</p>
+   <ul>
+      <li>TargetRank: Reduce <i>target_rank</i>.</li>
+      <li>Transpose: Specify 'true'.</li>
+   </ul>
+
+
+	
+</t:intro>

@@ -1,0 +1,825 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="hex1507839349965"> </a>
+	  <h1>IdentityMatch</h1>
+
+	
+		<p style="line-height: 1em;">The IdentityMatch function tries to match source data with reference data,
+			using specified attributes to calculate the similarity score of each source-reference
+			pair, and then computes the final similarity score.</p>
+
+		<p style="line-height: 1em;">Typically, the source data is about business customers and the reference data is from external sources, such as online forums and social networking services. The IdentityMatch function is designed to help determine if customers with similar identifiers are the same customer. The function supports both nominal (exact) matching and weighted fuzzy matching.</p>
+
+		<a name="fig_enc_rlr_pw"> </a>
+			<div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+		
+	
+   <a name="ggr1466004899391"> </a>
+   <h2>IdentityMatch Syntax</h2>
+   <a name="bak1507839408905"> </a>
+   <h3>When Reference Data Fits in Memory</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">Use this syntax when one input (SourceTable or ReferenceTable) fits in memory. The function compares each record from SourceTable and each record from ReferenceTable. The number of comparisons is |SourceTable|*|ReferenceTable|. In the syntax, a and b refer to the SourceTable and ReferenceTable, respectively.</p>
+
+   <a name="section_xxp_scj_4bb"> </a>
+   <h4>Version 1.10</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM IdentityMatch (
+  ON <i>source_input_table</i> AS SourceTable PARTITION BY ANY
+  ON <i>reference_input_table</i> AS ReferenceTable DIMENSION
+  USING
+  IDColumn ('a.<i>id_column</i>: b.<i>id_column</i>')
+  { NominalMatchColumns ('a.<i>columnX</i>: b.<i>columnY</i>' [,...]) |
+    FuzzyMatchColumns ('a.<i>columnX</i>: b.<i>columnY</i>, <i>match_metric</i>, <i>match_weight</i> [, <i>synonym_file</i> ]' [,...])
+  }
+  [ Accumulate ('{a|b}.<i>accumulate_column</i>' [,...]')]
+  [ ThresholdScore (<i>threshold</i>) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="ope1507839414916"> </a>
+   <h3>When Reference Data Does Not Fit in Memory</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">Use this syntax when neither input fits in memory. Partition the data by categorical attribute (for example, age range), thereby distributing the records to workers by the specified attribute and reducing the comparison times. If the categorical attribute has <i>n</i> values and each range has same size, the comparison times are reduced to 1/<i>n</i>. In the syntax, a and b refer to the SourceTable and ReferenceTable, respectively.</p>
+
+   <a name="section_s3n_vcj_4bb"> </a>
+   <h4>Version 1.10</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM IdentityMatch (
+  ON <i>source_input_table</i> AS SourceTable PARTITION BY <i>key</i> 
+  ON <i>reference_input_table</i> AS ReferenceTable PARTITION BY <i>key</i>
+  USING
+  IDColumn (a.<i>id_column</i>: b.<i>id_column</i>')
+  { NominalMatchColumns ('a.<i>columnX</i>: b.<i>columnY</i>' [,...]) |
+    FuzzyMatchColumns ('a.<i>columnX</i>: b.<i>columnY</i>, <i>match_metric</i>, <i>match_weight</i> [, <i>synonym_file</i> ]' [,...])
+  }
+  [ Accumulate ('{a|b}.<i>accumulate_column</i>' [,...]')]
+  [ ThresholdScore (<i>threshold</i>) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="aos1507839419073"> </a>
+	  <h2>IdentityMatch Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>IDColumn</dt>
+      <dd>Specify the names of the columns in SourceTable and ReferenceTable that contain row identifiers. The function copies these columns to the output table.</dd>
+      <dt>NominalMatchColumns</dt>
+      <dd>[Required if you omit FuzzyMatchColumns.] Specify pairs of columns (attributes) to check for exact matching (a.<i>columnX</i> and b.<i>columnY</i> are column names). If any pair matches exactly, their records are considered exact matches, and the function does not compare the fuzzy match attributes.</dd>
+      <dt>FuzzyMatchColumns</dt>
+      <dd>[Required if you omit NominalMatchColumns.] Specify pairs of columns (attributes) to check for fuzzy matching (a.<i>columnX</i> and b.<i>columnY</i> are column names) and fuzzy matching parameters. If any pair is a fuzzy match, their records are considered fuzzy matches, and the function reports the similarity score of these attributes.<p style="line-height: 1em;">Fuzzy matching parameters:<div style="border: 0px none #FFFFFF; border-radius: 0px;">
+               <dt>
+                  <i>match_metric</i>
+               </dt>
+               <dd>Specify the similarity metric, which is a function that returns the similarity score of two strings (a value between 0 and 1), as follows:<a name="table_wjk_xwf_5cb"> </a>
+                  <table class="introtable">
+                     <a name="table_wjk_xwf_5cb"> </a>
+                     <tr>
+                        <th align="left">
+                           <div style="line-height: 1em;">
+                              <i>match_metric</i>
+                           </div>
+                        </th>
+                        <th align="left">
+                           <div style="line-height: 1em;">Similarity Score</div>
+                        </th>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <tt style="font-family: monospace;">EQUAL</tt>
+                           </div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">1.0 if strings a and b are equal; otherwise 0.0.</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <tt style="font-family: monospace;">LD</tt>
+                           </div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">LD(a,b)/max(len(a),len(b)), where LD(a,b) is the Levenshtein distance between a and b.</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <tt style="font-family: monospace;">D-LD</tt>
+                           </div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">LD(a,b)/max(len(a),len(b)), where LD(a,b) is the Damerau-Levenshtein distance between a and b. </div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <tt style="font-family: monospace;">JARO</tt>
+                           </div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Jaro distance between a and b.</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <tt style="font-family: monospace;">JARO-WINKLER</tt>
+                           </div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Jaro-Winkler distance between a and b.</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <tt style="font-family: monospace;">NEEDLEMAN-WUNSCH</tt>
+                           </div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Needleman-Wunsch distance between a and b.</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <tt style="font-family: monospace;">JD</tt>
+                           </div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Jaccard distance between a and b. The function converts the strings a and b to sets s and t by splitting them by space and then uses the formula f(s,t)=|s∩t|/|s∪t|.</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">
+                              <tt style="font-family: monospace;">COSINE</tt>
+                           </div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Calculated with term frequency-inverse document frequency (TF-IDF) and cosine similarity of a and b.<p>
+                                 <b>Note:</b>  The function calculates IDF only on the input relation stored in memory.</p>
+                           </div>
+                        </td>
+                     </tr>
+                  </table>
+
+               </dd>
+               <dt>
+                  <i>match_weight</i>
+               </dt>
+               <dd>Specify the weight (relative importance) of the attribute represented by a.<i>columnX</i> and b.<i>columnY</i>. The <i>match_weight</i> must be a positive number.<p style="line-height: 1em;">The function normalizes each <i>match_weight</i> to a value in the range [0, 1]. Given <i>match_weight</i> values, <i>w</i>
+                     <sub>1</sub>, <i>w</i>
+                     <sub>2</sub>, ..., <i>w</i>
+                     <sub>n</sub>, this is the formula for the normalized value of <i>w</i>
+                     <sub>i</sub>:</p>
+                  <p style="line-height: 1em;">
+                     <i>w</i>
+                     <sub>i</sub>/(<i>w</i>
+                     <sub>1</sub>
+                     <i>+w</i>
+                     <sub>2</sub>
+                     <i>+ ...+ w</i>
+                     <sub>n</sub>)</p>
+                  <p style="line-height: 1em;">For example, given two pairs of columns, whose match weights are 3 and 7, the function uses the weights 3/(3+7)=0.3 and 7/(3+7)=0.7 to compute the similarity score.</p>
+               </dd>
+               <dt>
+                  <i>synonym_file</i>
+               </dt>
+               <dd>Specify the dictionary in which the function checks the two strings for semantic equality. In the dictionary, each line is a comma-separated list of synonyms.</dd>
+               <dd>Default behavior: The function does not use a dictionary.<p>
+                     <b>Note:</b>  You must install the dictionary on ML Engine before running the function.</p>
+               </dd>
+            </div>
+         </p>
+      </dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify SourceTable and ReferenceTable columns to copy to the output table.</dd>
+      <dt>ThresholdScore</dt>
+      <dd>[Optional] Specify the threshold similarity score, a DOUBLE PRECISION value between 0 and 1. The function outputs only the records whose similarity score exceeds <i>threshold</i>. The higher the <i>threshold</i>, the higher the matching accuracy.</dd>
+      <dd>Default: 0.5</dd>
+   </div>
+
+
+	
+   <a name="siq1507839423432"> </a>
+   <h2>IdentityMatch Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>SourceTable Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">a.<i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Row identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">a.<i>columnX</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">String.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">a.<i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified a.<i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_mqr_45r_ycb"> </a>
+   <h3>ReferenceTable Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N1006E_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1006E_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">b.<i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Row identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">b.<i>columnY</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">String.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">b.<i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified b.<i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="rvr1507839427788"> </a>
+   <h2>IdentityMatch Output</h2>
+   <a name="section_i15_j5r_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">a.<i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in SourceTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Row identifier from SourceTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">b.<i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in ReferenceTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Row identifier from ReferenceTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">a.<i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in SourceTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified a.<i>accumulate_column</i>.] Column copied from SourceTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">b.<i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in ReferenceTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified b.<i>accumulate_column</i>.] Column copied from ReferenceTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">score</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Final similarity score of records.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="vge1510710708110"> </a>
+   <h2>IdentityMatch Example</h2>
+   <a name="section_v42_z4h_xdb"> </a>
+   <p style="line-height: 1em;">The objective of the example is to find the credit scores of job applicants by matching the information in two tables.</p>
+   <p style="line-height: 1em;">The example looks for exact matches (NominalMatchColumns) to the email address and approximate matches (FuzzyMatchColumns) for lastname, firstname, zip code, city, and department, with different match metrics and match weights.</p>
+
+   <a name="section_ktw_s4h_xdb"> </a>
+   <h3>Input</h3>
+   <ul>
+      <li>SourceTable: applicant_reference, which has hypothetical information from job applicants</li>
+      <li>ReferenceTable: applicant_external, an external source table, which has missing and incomplete information, but includes credit scores</li>
+   </ul>
+   <a name="table_avl_2ph_xdb"> </a>
+   <table class="introtable">
+      <a name="table_avl_2ph_xdb"> </a>
+      <h4 style="text-align: center;">SourceTable: applicant_reference</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">firstname</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">lastname</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">email</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">city</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">zipcode</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">department</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">gender</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">John</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Dewey</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">john.dewey@corp-mark.com</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sugar Land</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">77459</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Marketing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Male</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sarah</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Anders</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sarah.anders@corp-sales.com</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Pearland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">77584</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sales</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Female</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Elizabeth</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Hall</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">elizabeth.hall@corp-eng.com</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Galveston</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">77550</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Engineering</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Female</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">James</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nickson</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">james.nick@corp-it.com</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Pasadena</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">77501</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">IT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Male</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Kim</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Lee</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">kim.lee@corp-sys.com</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Clear Lake City</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">77058</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Systems</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Female</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Jessica</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Right</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">jessica.right@corp-mark.com</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sugar Land</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">77459</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Marketing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Female</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_ksp_rph_xdb"> </a>
+   <table class="introtable">
+      <a name="table_ksp_rph_xdb"> </a>
+      <h4 style="text-align: center;">ReferenceTable: applicant_external</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">firstname</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">lastname</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">email</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">city</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">zipcode</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">department</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">creditscore</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">John</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Dewey</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">john.dewey@corp-mark.com</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sugar Land</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7774</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">market</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">700</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left">
+            <div style="line-height: 1em;">Hall</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left">
+            <div style="line-height: 1em;">Galveston</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">77550</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">eng</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">790</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sarah</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Anders</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sarah.anders@corp-sales.com</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">pear</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">77584</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sales</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">650</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Jessica</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">right</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sugar Land</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">77459</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Marketing</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">690</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">James</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nickson</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left">
+            <div style="line-height: 1em;">Pasadena</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7750</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">IT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">620</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Kim</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+         <td align="left">
+            <div style="line-height: 1em;">77058</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">system</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">570</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_lwg_t4h_xdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM IdentityMatch (
+  ON applicant_reference AS SourceTable PARTITION BY ANY
+  ON applicant_external AS ReferenceTable DIMENSION
+  USING
+  IDColumn ('a.id: b.id')
+  NominalMatchColumns ('a.email: b.email')
+  FuzzyMatchColumns ('a.lastname: b.lastname, JARO-WINKLER, 3',
+                     'a.firstname: b.firstname, JARO-WINKLER, 2',
+                     'a.zipcode: b.zipcode, JD, 2',
+                     'a.city: b.city, LD, 2',
+                     'a.department: b.department, COSINE, 1')
+  Accumulate ('a.firstname','a.lastname' ,'b.lastname', 'a.email',
+              'b.email','a.zipcode', 'b.zipcode', 'a.department',
+              'b.department','b.creditscore')
+  ThresholdScore (0.5)
+) AS dt;</tt>
+   </pre>
+   <a name="section_rpy_t4h_xdb"> </a>
+   <h3>Output</h3>
+   <p style="line-height: 1em;">The output table has the matching information from both input tables and the matching score. If multiple row entries exist for the same id, the higher scoring entry gives the best match. For example, the first row (with score 1) is a better match than the second (with score 0.6036). The creditscore column contains applicant credit scores.</p>
+   <pre>
+      <tt>
+ a.id a.firstname a.lastname a.email                     a.zipcode a.department b.id b.lastname b.email                     b.zipcode b.department b.creditscore score  
+ ---- ----------- ---------- --------------------------- --------- ------------ ---- ---------- --------------------------- --------- ------------ ------------- ------ 
+    6 jessica     right      jessica.right@corp-mark.com     77459 marketing       4 right                                      77459 marketing            690.0      1
+    4 james       nickson    james.nick@corp-it.com          77501 it              5 nickson                                     7750 it                   620.0    0.8
+    3 elizabeth   hall       elizabeth.hall@corp-eng.com     77550 engineering     2 hall                                       77550 eng                  790.0    0.7
+    1 john        dewey      john.dewey@corp-mark.com        77459 marketing       4 right                                      77459 marketing            690.0 0.6036
+    1 john        dewey      john.dewey@corp-mark.com        77459 marketing       1 dewey      john.dewey@corp-mark.com         7774 market               700.0      1
+    2 sarah       anders     sarah.anders@corp-sales.com     77584 sales           3 anders     sarah.anders@corp-sales.com     77584 sales                650.0      1</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

@@ -1,0 +1,1019 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="dgl1507650972185"> </a>
+	  <h1>Approximate Cardinality</h1>
+
+	  <p style="line-height: 1em;">The Approximate Cardinality function, which is composed of the ApproxCardinalityReduce and ApproxCardinalityMap functions, can estimate the cardinality (number of distinct values) in a column or combination of columns, scanning the table only once.</p>
+   <p style="line-height: 1em;">Teradata recommends this function when the column or combination of columns has a large cardinality. When the cardinality is small, Teradata recommends the SQL SELECT DISTINCT command.</p>
+   <p style="line-height: 1em;">The function uses the Flajolet-Martin algorithm. For more information, see <i>Probabilistic Counting Algorithms for Data Base Applications, by Philippe Flajolet and G. Nigel Martin</i> (http://portal.acm.org/citation.cfm?id=5215).</p>
+
+   <a name="cnp1507651078126"> </a>
+   <h2>Approximate Cardinality Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>ApproxCardinalityReduce version 1.3, ApproxCardinalityMap version 1.2</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ApproxCardinalityReduce (
+  ON ( [ SELECT * FROM ] ApproxCardinalityMap (
+    ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+    USING
+    TargetColumns ({ '<i>target_column</i>' | <i>target_column_range</i> [,...])
+    [ ErrorRate (<i>error_tolerance</i>) ]
+    ) AS <i>alias_1</i>
+  ) PARTITION BY <i>column_name</i>
+) AS <i>alias_2</i>;</tt>
+   </pre>
+   <a name="eos1507653339186"> </a>
+	  <h2>Approximate Cardinality Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumns</dt>
+      <dd>Specify the columns for which to estimate the number of distinct values.</dd>
+      <dt>ErrorRate</dt>
+      <dd>[Optional] Specify the acceptable error rate, expressed as a decimal (for example, if <i>error_tolerance</i> is 10, the acceptable error rate is 10%). The <i>error_tolerance</i> must be in the range (5.0e<sup>-4</sup>, 10].</dd>
+      <dd>Default: 10</dd>
+   </div>
+
+
+	
+   <a name="wqx1507653461005"> </a>
+   <h2>Approximate Cardinality Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>ApproxCardinalityMap Input Table Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>target_column</i>.] Column for which to estimate number of distinct values.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="kwe1507654107225"> </a>
+   <h2>Approximate Cardinality Output</h2>
+   <a name="section_vgh_gqt_wcb"> </a>
+   <h3>ApproxCardinalityReduce Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>target_column</i>.] Column for which number of distinct values was estimated.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cnt</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Approximate cardinality.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">method</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Method used to calculate approximate cardinality—'approx' (Flajolet-Martin algorithm) or 'nearExact' (counting).</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="dsc1507654852711"> </a>
+   <h2>Approximate Cardinality Example</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example calculates the number of distinct values for each specified column with a 1% error rate (accuracy).</p>
+
+   <a name="section_y2k_ldl_mdb"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">The input table, cracker, has more than 3000 rows of price and advertisement information for U.S. cracker brands Sunshine, Keebler, Nabisco, and a private label (such as a store brand). Input column names have these meanings:</p>
+   <a name="table_fhc_ydl_mdb"> </a>
+   <table class="introtable">
+      <a name="table_fhc_ydl_mdb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Meaning</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">disp<i>brand</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Seller displayed <i>brand</i> prominently.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">feat<i>brand</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Seller featured <i>brand</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">price<i>brand</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Price of <i>brand</i>.</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_hvy_h2l_mdb"> </a>
+   <table class="introtable">
+      <a name="table_hvy_h2l_mdb"> </a>
+      <h4 style="text-align: center;">cracker</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">sn</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">dispsunshine</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">dispkeebler</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">dispnabisco</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">dispprivate</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">featsunshine</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">featkeebler</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">featnabisco</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">featprivate</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">pricesunshine</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">pricekeebler</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">pricenabisco</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">priceprivate</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">choice</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">98</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">88</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">120</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">71</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">nabisco</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">99</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">109</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">99</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">71</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">nabisco</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">49</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">109</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">109</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">78</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sunshine</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">103</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">109</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">89</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">78</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">nabisco</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">109</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">109</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">119</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">64</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">nabisco</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">89</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">109</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">119</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">84</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">nabisco</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">109</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">109</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">129</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">78</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sunshine</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">109</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">119</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">129</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">78</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">nabisco</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">109</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">121</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">109</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">78</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">nabisco</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">79</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">121</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">109</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">78</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">nabisco</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">109</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">113</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">109</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">96</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">nabisco</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">109</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">121</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">99</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">86</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">nabisco</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">89</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">121</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">99</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">86</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">nabisco</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">109</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">109</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">129</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">96</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">nabisco</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_srs_ldl_mdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ApproxCardinalityReduce(
+	ON ApproxCardinalityMap(
+		ON cracker AS InputTable
+		USING
+		TargetColumns('sn', 'id', 
+          'dispsunshine', 'dispkeebler', 'dispnabisco', 'dispprivate',
+          'featsunshine', 'featkeebler','featnabisco', 'featprivate', 
+          'pricesunshine', 'pricekeebler', 'pricenabisco', 'priceprivate', 
+          'choice')
+		ErrorRate(1)
+	) PARTITION BY column_name
+) AS dt ORDER BY column_name;</tt>
+   </pre>
+   <a name="section_npd_mdl_mdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ column_name   cnt  method    
+ ------------- ---- --------- 
+ choice           4 nearExact
+ dispkeebler      2 nearExact
+ dispnabisco      2 nearExact
+ dispprivate      2 nearExact
+ dispsunshine     2 nearExact
+ featkeebler      2 nearExact
+ featnabisco      2 nearExact
+ featprivate      2 nearExact
+ featsunshine     2 nearExact
+ id             136 nearExact
+ pricekeebler    29 nearExact
+ pricenabisco    42 nearExact
+ priceprivate    39 nearExact
+ pricesunshine   27 nearExact
+ sn            3292 nearExact</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

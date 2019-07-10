@@ -1,0 +1,530 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="xbd1507818506662"> </a>
+	  <h1>AMLGenerator</h1>
+
+	
+		<p style="line-height: 1em;">The AMLGenerator function translates an ML Engine model into an XML-based format, which is accepted by the Teradata Scoring SDK functionality.</p>
+
+	
+   <a name="ral1507818531172"> </a>
+   <h2>AMLGenerator Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.8</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * from AMLGenerator (
+  [ ON (SELECT 1) AS InputTable PARTITION BY 1 ]
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS ModelTable
+  [ ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS ModelTable2 ]
+  USING
+  ModelType ('<i>function_name</i>')
+  [ ModelTableTag ('<i>model_table_tag</i>') ]
+  [ ModelTable2Tag ('<i>model_table_2_tag</i>') ]
+  [ InstalledFile ('<i>installed_file</i>') ]
+  [ InstalledFile2 ('<i>installed_file_2</i>') ]
+  [ InstalledFileTag ('<i>installed_file_tag</i>') ]
+  [ InstalledFile2Tag ('<i>installed_file_2_tag</i>') ]
+  RequestColNames ('<i>column_name</i>' [,...]) ]
+  RequestColTypes ('<i>column_type</i>' [,...])
+  [ AMLPrefix ('<i>aml_model_file</i>') ]
+  [ OverwriteOutput ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'})]
+  [ RequestArgName1 ('<i>arg_name</i>') ]
+  [ RequestArgVal1 ('<i>arg_value</i>') ]
+  ...
+  [ RequestArgName<i>n</i> ('<i>arg_name</i>') ]
+  [ RequestArgVal<i>n</i> ('<i>arg_value</i>') ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <p>
+      <b>Note:</b>  If you omit <tt style="font-family: monospace;">ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS ModelTable</tt>, you must include <tt style="font-family: monospace;">ON (SELECT 1) AS InputTable PARTITION BY 1</tt>.</p>
+   <a name="asu1507818535138"> </a>
+	  <h2>AMLGenerator Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>ModelType</dt>
+      <dd>Specify the function name for which this .aml file is to be used. For predictors, this represents the type of the model trained. For information about model types, see Teradata Scoring SDK Functions.</dd>
+      <dt>ModelTable</dt>
+      <dd>[Optional] Specify the name of the database table to use to create the .aml file for the input table.</dd>
+      <dt>ModelTable2</dt>
+      <dd>[Optional] Use only if the function can use two input tables. The functions that can use two input tables are TextTokenizer, TextTagger, TextParser, and SentimentExtractor. Specify the name of the database table to use to create the .aml file for the second input table.</dd>
+      <dt>ModelTableTag</dt>
+      <dd>[Optional] Specify the tag for <i>model_table</i>, which identifies the role of the table in the Teradata Scoring SDK context.</dd>
+      <dt>ModelTable2Tag</dt>
+      <dd>[Optional] Use only with ModelTable2. Specify the tag for <i>model_table_2</i>, which identifies the role of the table in the Teradata Scoring SDK context.</dd>
+      <dt>InstalledFile</dt>
+      <dd>[Optional] Specify the name of the file, installed on ML Engine, to use to create the .aml file.</dd>
+      <dt>InstalledFile2</dt>
+      <dd>[Optional] Use only if the function can use two input files. The functions that can use two input files are TextTokenizer, TextTagger, TextParser, and SentimentExtractor. Specify the name of the database file to use to create the .aml file.</dd>
+      <dt>InstalledFileTag</dt>
+      <dd>[Optional] Specify the tag for <i>installed_file</i>, which identifies the role of the file in the Teradata Scoring SDK context.</dd>
+      <dt>InstalledFile2Tag</dt>
+      <dd>[Optional] Use only with InstalledFile2. Specify the tag for <i>installed_file_2</i>, which identifies the role of the file in the Teradata Scoring SDK context.</dd>
+      <dt>RequestColNames</dt>
+      <dd>Specify the column names of the request to be scored. For a predictor, these column names typically match the column names of the training data used to train the model.</dd>
+      <dt>RequestColTypes</dt>
+      <dd>Specify the column types of the request to be scored. For a predictor, these column types typically match the columns types of the training data used to train the model. Specify one <i>column_type</i> for each <i>column_name</i>.</dd>
+      <dt>AMLPrefix</dt>
+      <dd>[Optional] Specify the name for the AML model file that the function outputs. The file suffix is ".aml". For example, if <i>aml_model_file</i> is 'model', the output file is model.aml.</dd>
+      <dd>Default: 'model'</dd>
+      <dt>OverwriteOutput</dt>
+      <dd>[Optional] Specifies whether to overwrite the output AML model file if it exists.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>RequestArgName<i>n</i>
+      </dt>
+      <dd>[Optional] Specify a syntax element for <i>function_name</i>. Typically, this syntax element is the same as it is in the corresponding SQL function. For supported clauses for each function, see Teradata Scoring SDK Functions. For syntax element descriptions, see the documentation for the corresponding SQL function.<p style="line-height: 1em;">The values of <i>n</i> must proceed sequentially from 1. For example: RequestArgName1, RequestArgName2, RequestArgName3. The maximum value of <i>n</i> is 30.</p>
+      </dd>
+      <dt>RequestArgVal<i>n</i>
+      </dt>
+      <dd>[Optional] Specify the value or values for the syntax element that RequestArgName<i>n</i> specifies. The valid values are the same as they are for the corresponding syntax element of the SQL function.</dd>
+   </div>
+
+
+	
+   <a name="khv1507818543569"> </a>
+   <h2>AMLGenerator Output</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">The function creates an AML file, installed on ML Engine, which conforms to a specific XSD (XML schema definition) format, and displays the statistics of created AML file on the screen.</p>
+   <p style="line-height: 1em;">To download the AML file from Teradata, use the command <tt style="font-family: monospace;">call pm.download_afile (</tt>
+      <i>aml_model_file</i>
+      <tt style="font-family: monospace;">)</tt>, where <i>aml_model_file</i> is specified in the AMLPrefix clause.</p>
+
+   <a name="section_rsb_jff_bcb"> </a>
+   <h3>Header</h3>
+   <p style="line-height: 1em;">The header consists of ModelType, AMLGenerator build version, and Teradata Copyright information.</p>
+
+   <a name="section_drm_jff_bcb"> </a>
+   <h3>Request Columns</h3>
+   <p style="line-height: 1em;">Request columns specify the names and data types of columns expected in the scoring request and are appended in the block columns with <tt style="font-family: monospace;">entity = "request"</tt>. These are extracted from syntax elements RequestColNames and RequestColTypes. The data type is converted from NewSQL Engine SQL type to Scoring data type.</p>
+
+   <a name="section_djn_jff_bcb"> </a>
+   <h3>Request Parameters</h3>
+   <p style="line-height: 1em;">The parameters specified by the user in the clauses RequestArgName and RequestArgVal are appended in the block params. These parameters are not validated by AMLGenerator (parameter parsing takes place inside Scorer) and are appended as specified by the user.</p>
+
+   <a name="section_obp_jff_bcb"> </a>
+   <h3>Model Columns</h3>
+   <p style="line-height: 1em;">Model columns are appended in the block columns with <tt style="font-family: monospace;">entity = "model"</tt>. They specify the names and data types of columns in Model data. Each block contains ModelTag information, if provided. Each block also contains InstalledFile information, if provided.</p>
+   <p style="line-height: 1em;">The behavior of Model Columns depends on whether the model is database table or installed file:<a name="table_csb_cx2_gdb"> </a>
+      <table class="introtable">
+         <a name="table_csb_cx2_gdb"> </a>
+         <tr>
+            <th align="left">
+               <div style="line-height: 1em;">Model</div>
+            </th>
+            <th align="left">
+               <div style="line-height: 1em;">Model Columns and Types</div>
+            </th>
+            <th align="left">
+               <div style="line-height: 1em;">AML File Model Column Header</div>
+            </th>
+         </tr>
+         <tr>
+            <td align="left">
+               <div style="line-height: 1em;">Database table</div>
+            </td>
+            <td align="left">
+               <div style="line-height: 1em;">Retrieved from NewSQL Engine and converted to Scoring data types.</div>
+            </td>
+            <td align="left">
+               <div style="line-height: 1em;">Database table name is appended in the AML file model column header.</div>
+            </td>
+         </tr>
+         <tr>
+            <td align="left">
+               <div style="line-height: 1em;">Installed file</div>
+            </td>
+            <td align="left">
+               <div style="line-height: 1em;">Model columns are empty.</div>
+            </td>
+            <td align="left">
+               <div style="line-height: 1em;">Installed file name is appended in the AML file model column header.</div>
+            </td>
+         </tr>
+      </table>
+
+   </p>
+
+   <a name="section_otp_jff_bcb"> </a>
+   <h3>Model Data</h3>
+   <p style="line-height: 1em;">Model data contains the data for the model that the ModelTable syntax element specifies and the checksum of the stored data, for data integrity.</p>
+   <p style="line-height: 1em;">How data is stored depends on whether the data is in a database table or an installed file:<a name="table_pzc_sx2_gdb"> </a>
+      <table class="introtable">
+         <a name="table_pzc_sx2_gdb"> </a>
+         <tr>
+            <th align="left">
+               <div style="line-height: 1em;">Model</div>
+            </th>
+            <th align="left">
+               <div style="line-height: 1em;">How Data Is Stored</div>
+            </th>
+         </tr>
+         <tr>
+            <td align="left">
+               <div style="line-height: 1em;">Database table</div>
+            </td>
+            <td align="left">
+               <div style="line-height: 1em;">
+                  <ul>
+                     <li>Time and timestamp SQLdata types are converted to acceptable scoring format.</li>
+                     <li>Binary data is stored using Base64 encoding.</li>
+                     <li>Special characters are transformed as follows:<a name="table_w3g_dy2_gdb"> </a>
+                        <table class="introtable">
+                           <a name="table_w3g_dy2_gdb"> </a>
+                           <tr>
+                              <th align="left">
+                                 <div style="line-height: 1em;">Character</div>
+                              </th>
+                              <th align="left">
+                                 <div style="line-height: 1em;">Transformation</div>
+                              </th>
+                           </tr>
+                           <tr>
+                              <td align="left">
+                                 <div style="line-height: 1em;">Backslash (\)</div>
+                              </td>
+                              <td align="left">
+                                 <div style="line-height: 1em;">\\</div>
+                              </td>
+                           </tr>
+                           <tr>
+                              <td align="left">
+                                 <div style="line-height: 1em;">Comma (,)</div>
+                              </td>
+                              <td align="left">
+                                 <div style="line-height: 1em;">\,</div>
+                              </td>
+                           </tr>
+                           <tr>
+                              <td align="left">
+                                 <div style="line-height: 1em;">Ampersand (&amp;)</div>
+                              </td>
+                              <td align="left">
+                                 <div style="line-height: 1em;">"&amp;"</div>
+                              </td>
+                           </tr>
+                           <tr>
+                              <td align="left">
+                                 <div style="line-height: 1em;">Less than (&lt;)</div>
+                              </td>
+                              <td align="left">
+                                 <div style="line-height: 1em;">"&amp;lt;"</div>
+                              </td>
+                           </tr>
+                           <tr>
+                              <td align="left">
+                                 <div style="line-height: 1em;">Greater than (&gt;)</div>
+                              </td>
+                              <td align="left">
+                                 <div style="line-height: 1em;">"&amp;gt;"</div>
+                              </td>
+                           </tr>
+                        </table>
+
+                     </li>
+                  </ul>
+               </div>
+            </td>
+         </tr>
+         <tr>
+            <td align="left">
+               <div style="line-height: 1em;">Installed file</div>
+            </td>
+            <td align="left">
+               <div style="line-height: 1em;">Data is captured in binary format (bytes) and stored using Base64 encoding in AML file. Because of binary encoded format, special character handling is unnecessary.</div>
+            </td>
+         </tr>
+      </table>
+
+   </p>
+   <p>
+      <b>Note:</b>  Scorer expects only AML files output by the AMLGenerator function. Third-party generation or manipulation of an AML file can cause scorer failure or incorrect scoring results.</p>
+   <a name="seo1510714607004"> </a>
+   <h2>AMLGenerator Example</h2>
+   <a name="section_w3h_zfp_xdb"> </a>
+   <h3>Input</h3>
+   <a name="table_tr4_mgp_xdb"> </a>
+   <table class="introtable">
+      <a name="table_tr4_mgp_xdb"> </a>
+      <h4 style="text-align: center;">ModelTable: glass_attribute_table_output</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">node_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">node_size</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">node_label</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">left_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">left_size</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">right_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">right_size</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">attribute</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">68</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Mg</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">21</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Na</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">68</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">28</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">40</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Ca</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Fe</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">21</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">K</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">28</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">24</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Al</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">40</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">29</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Na</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_bcr_zfp_xdb"> </a>
+   <h3>SQL Call</h3>
+   <p style="line-height: 1em;">RequestColNames specifies all the attributes on which the single decision tree function was trained.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM AMLGenerator (
+  ON glass_attribute_table_output AS ModelTable
+  USING
+  ModelType ('SDT')
+  RequestColNames ('pid','RI','Na','Mg','Al','Si','K','Ca','Ba','Fe')
+  RequestColTypes ('int','double','double','double','double',
+                   'double','double','double','double','double')
+  AMLPrefix ('glass_model')
+  RequestArgName1 ('ATTRTABLE_AttributeColumns')
+  RequestArgVal1 ('RI','Na','Mg','Al','Si','K','Ca','Ba','Fe')
+  RequestArgName2 ('ATTRTABLE_pidColumns')
+  RequestArgVal2 ('pid')
+  OverwriteOutput ('true')
+) AS dt;</tt>
+   </pre>
+   <a name="section_cjb_1gp_xdb"> </a>
+   <h3>Output</h3>
+   <p style="line-height: 1em;">The AML file glass_model.aml (shown below) is created and installed on ML Engine. To download the file, use the command <tt style="font-family: monospace;">call pm.download_afile ('glass_model.aml')</tt>.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;model xmlns:aml="Aster Model Language"&gt;
+  &lt;name&gt;SDT&lt;/name&gt;
+  &lt;version&gt;6.21_rel_1.0_r55243&lt;/version&gt;
+  &lt;copyright&gt;Copyright (c) 2015-2016 by Teradata Corporation. All rights              reserved.&lt;/copyright&gt;
+  &lt;columns entity="model" name="glass_attribute_table_output"&gt;
+    &lt;c type="long"&gt;node_id&lt;/c&gt;
+    &lt;c type="long"&gt;node_size&lt;/c&gt;
+    &lt;c type="string"&gt;node_label&lt;/c&gt;
+    &lt;c type="long"&gt;left_id&lt;/c&gt;
+    &lt;c type="long"&gt;left_size&lt;/c&gt;
+    &lt;c type="long"&gt;right_id&lt;/c&gt;
+    &lt;c type="long"&gt;right_size&lt;/c&gt;
+    &lt;c type="string"&gt;attribute&lt;/c&gt;
+  &lt;/columns&gt;
+  &lt;columns entity="request"&gt;
+    &lt;c type="int"&gt;pid&lt;/c&gt;
+    &lt;c type="double"&gt;RI&lt;/c&gt;
+    &lt;c type="double"&gt;Na&lt;/c&gt;
+    &lt;c type="double"&gt;Mg&lt;/c&gt;
+    &lt;c type="double"&gt;Al&lt;/c&gt;
+    &lt;c type="double"&gt;Si&lt;/c&gt;
+    &lt;c type="double"&gt;K&lt;/c&gt;
+    &lt;c type="double"&gt;Ca&lt;/c&gt;
+    &lt;c type="double"&gt;Ba&lt;/c&gt;
+    &lt;c type="double"&gt;Fe&lt;/c&gt;
+  &lt;/columns&gt;
+  &lt;data entity="model" name="glass_attribute_table_output"&gt;
+    &lt;d&gt;0,100,2,1,32,2,68,Mg&lt;/d&gt;
+    &lt;d&gt;1,32,2,3,11,4,21,Na&lt;/d&gt;
+    &lt;d&gt;2,68,1,5,28,6,40,Ca&lt;/d&gt;
+    &lt;d&gt;3,11,2,7,10,8,1,Fe&lt;/d&gt;
+    &lt;d&gt;4,21,7,9,14,10,7,K&lt;/d&gt;
+    &lt;d&gt;5,28,2,11,4,12,24,Al&lt;/d&gt;
+    &lt;d&gt;6,40,1,13,29,14,11,Na&lt;/d&gt;
+    &lt;checksum&gt;d49eed5708d45967b88444a88e99bdb0bc11e11d&lt;/checksum&gt;
+  &lt;/data&gt;
+  &lt;params&gt;
+      &lt;p name="AttrTableAttributeColumns"&gt;RI,Na,Mg,Al,Si,K,Ca,Ba,Fe&lt;/p&gt;
+      &lt;p name="AttrTablePidColumns"&gt;pid&lt;/p&gt;
+  &lt;/params&gt;
+&lt;/model&gt;</tt>
+   </pre>
+</t:intro>

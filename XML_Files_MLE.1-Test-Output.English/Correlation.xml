@@ -1,0 +1,646 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="rkc1507656722171"> </a>
+	  <h1>Correlation</h1>
+
+	  <p style="line-height: 1em;">The Correlation function, which is composed of the CorrelationReduce and CorrelationMap functions, computes global correlations between specified pairs of table columns. Measuring correlation lets you determine if the value of one variable is useful in predicting the value of another.</p>
+
+   <a name="cvz1507656787180"> </a>
+   <h2>Correlation Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>CorrelationReduce version 1.9, CorrelationMap version 1.9</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM CorrelationReduce (
+  ON CorrelationMap (
+    ON { <i>table</i> | <i>view</i> | (<i>query</i>) } [ PARTITION BY <i>group_column</i> [, <i>group_column</i> [,...]] ]
+    USING 
+    TargetColumns ({ '<i>target_column</i>' | <i>target_column_range</i> }[,...])
+    KeyName ('<i>key_name</i>')
+    [ GroupByColumns ({ '<i>group_column</i>' | <i>group_column_range</i> }[,...]) ]
+    ) PARTITION BY <i>key_name</i> [, <i>group_column</i> [,...]] 
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="bgd1507656863013"> </a>
+	  <h2>Correlation Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumns</dt>
+      <dd>Specify pairs of columns for which to calculate correlations. For each column pair, '<i>col_name1</i>:<i>col_name2</i>', the function calculates the correlation between <i>col_name1</i> and <i>col_name2</i>. For each column range, '[<i>col_index1</i>:<i>col_index2</i>]', the function calculates the correlation between every pair of columns in the range. For example, if you specify '[1:3]', the function calculates the correlation between the pairs (1,2), (1,3), (2,3),(1,1),(3,3). The minimum value of <i>col_index1</i> is 0, and <i>col_index1</i> must be less than <i>col_index2</i>.</dd>
+      <dt>KeyName</dt>
+      <dd>Specify the name for the CorrelationMap output table column that contains the correlations, and by which the CorrelationMap output table is partitioned.</dd>
+      <dt>GroupByColumns</dt>
+      <dd>[Optional] Specify the names of the input columns that define the group for correlation calculation. They must be the same as the columns in the input table PARTITION BY clause.</dd>
+      <dd>Default behavior: All input columns belong to a single group, for which the function calculates correlation.</dd>
+   </div>
+
+
+	
+   <a name="igz1507656929532"> </a>
+   <h2>Correlation Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>CorrelationMap Input Table Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>group_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>group_column</i>.] Defines a group for correlation calculation.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, BIGINT, NUMERIC, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears two or more times; that is, table has at least one column pair.] Values to correlate with corresponding values in another target column.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="clk1507657025572"> </a>
+   <h2>Correlation Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>CorrelationReduce Output Table Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>group_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR or INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>group_column</i>.] Defines a group of correlation calculations.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">corr_item1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">A <i>target_column</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">corr_item2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">A <i>target_column</i>.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">value_col</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Correlation between corr_item1 and corr_item2.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="tyl1510784327014"> </a>
+   <h2>Correlation Examples</h2>
+   <a name="vwh1507657165611"> </a>
+   <h3>Correlation Example: Include PARTITION BY</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example uses the PARTITION BY clause to group the data by state. The function calculates the correlations between columns separately for California (CA) and Texas (TX) data.</p>
+
+   <a name="section_bw5_cvw_q2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, corr_input, is sample macroeconomic data for the states of California and Texas over a period of 16 years (1947-1962). The GDP (gross domestic product) numbers are in millions of dollars ($M). GDPdeflator is GDP data normalized to the year 1954 that is, GDP is 100 for 1954). The other columns represent the number of people (in thousands) who were employed, unemployed, or in the armed forces.</p>
+   <a name="table_s2z_fvw_q2b"> </a>
+   <table class="introtable">
+      <a name="table_s2z_fvw_q2b"> </a>
+      <h4 style="text-align: center;">corr_input</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">year</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">state</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">gdpdeflator</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">gdp</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">unemployed</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">armedforces</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">employed</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1947</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">64.52</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">234.289</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">235.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">159</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60.323</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1948</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">71.45</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">259.426</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">232.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">145.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">61.122</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1949</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">71.07</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">258.054</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">368.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">161.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60.171</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1950</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">78.38</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">284.599</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">335.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">165</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">61.187</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1951</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">90.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">328.975</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">209.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">309.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">63.221</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1952</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">95.56</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">346.999</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">193.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">359.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">63.639</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1953</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100.63</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">365.385</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">187</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">354.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">64.989</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1954</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">363.112</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">357.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">335</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">63.761</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1955</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">TX</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">109.46</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">397.469</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">290.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">304.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66.019</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1956</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">TX</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">115.44</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">419.18</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">282.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">285.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">67.857</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1957</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">TX</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">121.94</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">442.769</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">293.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">279.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">68.169</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1958</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">TX</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">122.43</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">444.546</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">468.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">263.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66.513</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1959</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">TX</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">132.94</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">482.704</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">381.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">255.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">68.655</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1960</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">TX</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">138.41</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">502.601</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">393.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">251.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">69.564</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1961</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">TX</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">142.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">518.173</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">480.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">257.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">69.331</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1962</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">TX</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">152.82</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">554.894</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">400.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">282.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">70.551</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_zwj_23v_ndb"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">The function calculates the correlation between each pair of columns in the TargetColumns syntax element. This example compares GDP to GDPdeflator, the employed population to GDP, the number of people unemployed, and the number of people in the armed forces.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM CorrelationReduce (
+  ON CorrelationMap (
+    ON corr_input PARTITION BY state
+    USING
+    TargetColumns ('[2:3]','employed:gdp','employed:unemployed','employed:armedforces')
+    KeyName ('keys')
+    GroupByColumns('state')
+  ) PARTITION BY keys,state
+) AS dt ;</tt>
+   </pre>
+   <a name="section_fgv_23v_ndb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">Because GDP and GDPdeflator represent the same data but with different scaling, their correlation is 1. The correlation coefficients for all column pairs are shown below.</p>
+   <pre>
+      <tt>
+ state corr_item1  corr_item2  value_col            
+ ----- ----------- ----------- -------------------- 
+ ca    gdpdeflator gdp                          1.0
+ ca    employed    armedforces   0.9528257846832275
+ ca    employed    unemployed  -0.43761759996414185
+ tx    gdpdeflator gdp           0.9999999403953552
+ tx    employed    armedforces  -0.4519846439361572
+ tx    employed    unemployed    0.3207692801952362
+ ca    employed    gdp            0.967695415019989
+ tx    employed    gdp           0.9127569198608398
+ ca    gdp         gdp                          1.0
+ tx    gdp         gdp                          1.0
+ ca    gdpdeflator gdpdeflator                  1.0
+ tx    gdpdeflator gdpdeflator                  1.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="par1507657331988"> </a>
+   <h3>Correlation Example: Omit PARTITION BY</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example omits the PARTITION BY clause, so the function determines the
+                correlation values for the overall population and does not group the data by
+                state.</p>
+
+   <a name="section_ebv_xvw_q2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>corr_input, as in Correlation Example: Include PARTITION BY</li>
+   </ul>
+
+   <a name="section_zwj_23v_ndb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM CorrelationReduce (
+  ON CorrelationMap (
+    ON corr_input 
+    USING
+    TargetColumns ('[2:3]','employed:gdp','employed:unemployed','employed:armedforces')
+    KeyName ('keys')
+  ) PARTITION BY keys
+) AS dt ;</tt>
+   </pre>
+   <a name="section_fgv_23v_ndb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ corr_item1  corr_item2  value_col          
+ ----------- ----------- ------------------ 
+ gdpdeflator gdp                        1.0
+ employed    armedforces 0.4573073983192444
+ employed    unemployed  0.5024980902671814
+ employed    gdp         0.9835516214370728
+ gdp         gdp                        1.0
+ gdpdeflator gdpdeflator                1.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

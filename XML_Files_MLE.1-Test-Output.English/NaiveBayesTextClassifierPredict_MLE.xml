@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="erm1507322198819"> </a>
+	  <h1>NaiveBayesTextClassifierPredict_MLE</h1>
+
+	
+		<p style="line-height: 1em;">The NaiveBayesTextClassifierPredict_MLE function uses the model table output by the NaiveBayesTextClassifierTrainer function to predict outcomes for test data.</p>
+
+	
+   <a name="aya1507322270600"> </a>
+   <h2>NaiveBayesTextClassifierPredict_MLE Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.12</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NaiveBayesTextClassifierPredict_MLE (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS PredictorValues PARTITION BY <i>doc_id_column</i> 
+  ON <i>model_table</i> AS Model DIMENSION
+  USING
+  InputTokenColumn ('<i>token_column</i>')
+  [ ModelType ({ 'Multinomial' | 'Bernoulli' }) ]
+  DocIDColumns ({ '<i>doc_id_column</i>' | <i>doc_id_column_range</i> }[,...])
+  [ ModelTokenColumn ('<i>model_token_column</i>')
+    ModelCategoryColumn ('<i>model_category_column</i>')
+    ModelProbColumn ('<i>model_token_count_column</i>')
+  ]
+  [ TopK (<i>num_of_top_k_predictions</i>) ]
+  [ OutputProb {'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'} ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="blp1507322343522"> </a>
+	  <h2>NaiveBayesTextClassifierPredict_MLE Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>InputTokenColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the tokens.</dd>
+      <dt>ModelType</dt>
+      <dd>[Optional] Specify the model type of the text classifier.</dd>
+      <dd>Default: 'Multinomial'</dd>
+      <dt>DocIDColumns</dt>
+      <dd>Specify the names of the InputTable columns that contain the document identifier.</dd>
+      <dt>ModelTokenColumn</dt>
+      <dd>[Optional] Specify the name of the Model table column that contains the tokens.</dd>
+      <dd>Default: First column of Model table</dd>
+      <dt>ModelCategoryColumn</dt>
+      <dd>[Optional] Specify the name of the Model table column that contains the prediction categories.</dd>
+      <dd>Default: Second column of Model table</dd>
+      <dt>ModelProbColumn</dt>
+      <dd>[Optional] Specify the name of the Model table column that contains the token counts.</dd>
+      <dd>Default: Third column of Model table</dd>
+      <dt>TopK</dt>
+      <dd>[Optional] Specify the number of most likely prediction categories to output with their loglikelihood values (for example, the top 10 most likely prediction categories).</dd>
+      <dd>Default: All prediction categories</dd>
+      <dt>OutputProb</dt>
+      <dd>Specify whether to output the calculated probability for each selected response.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>Accumulate</dt>
+      <dd>Specify the names of the PredictorValues table columns to copy to the output table.</dd>
+   </div>
+   <p>
+      <b>Note:</b>  Specify either all or none of the syntax elements ModelTokenColumn, ModelCategoryColumn, and ModelProbColumn.</p>
+
+	
+   <a name="eux1507322416628"> </a>
+   <h2>NaiveBayesTextClassifierPredict_MLE Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_dnp_1lc_ycb"> </a>
+   <table class="introtable">
+      <a name="table_dnp_1lc_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains test data for which to predict outcomes, in document-token pairs. To transform input document into this form, input it to TextTokenizer or TextParser function.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Model</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NaiveBayesTextClassifierTrainer Output</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_bqq_plc_ycb"> </a>
+   <h3>InputTable Schema</h3>
+   <a name="table_N10029_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10029_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>doc_id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CHARACTER, VARCHAR, INTEGER, or SMALLINT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>doc_id_column</i>.] Identifier of document that contains classified training tokens.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>token_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CHARACTER or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Classified training token.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="fkc1507322481438"> </a>
+   <h2>NaiveBayesTextClassifierPredict_MLE Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">doc_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CHARACTER, VARCHAR, INTEGER, or SMALLINT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Single- or multiple-column document identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">prediction</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Prediction category.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">loglik</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Loglikelihood that document belongs to category.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">prob</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Probability that document belongs to category.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from InputTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="erl1510779135542"> </a>
+   <h2>NaiveBayesTextClassifierPredict_MLE Example</h2>
+   <a name="section_ejm_nwf_pdb"> </a>
+   <h3>Input</h3>
+   <ul>
+      <li>InputTable: predicts, created by applying the TextTokenizer function to complaints_with_docnames, a log of vehicle complaints</li>
+      <li>Model: complaints_tokens_model, output by NaiveBayesTextClassifierTrainer Example</li>
+   </ul>
+   <a name="table_flz_ywf_pdb"> </a>
+   <table class="introtable">
+      <a name="table_flz_ywf_pdb"> </a>
+      <h4 style="text-align: center;">InputTable: complaints_with_docnames</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">doc_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">doc_name</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">text_data</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">A</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">electrical control module is shortening out, causing the vehicle to stall. engine will become totally inoperative. consumer had to change alternator/ battery and starter, and module replaced 4 times, but defect still occurring cannot determine what is causing the problem.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">B</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">abs brakes fail to operate properly, and air bags failed to deploy during a crash at approx. 28 mph impact. manufacturer notified.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">C</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">while driving at 60 mph gas pedal got stuck due to the rubber that is around the gas pedal.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">D</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">there is a knocking noise coming from the catalyitc converter ,and the vehicle is stalling. also, has problem with the steering.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">E</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">consumer was making a turn ,driving at approx 5- 10 mph when consumer hit another vehicle. upon impact, dual airbags did not deploy . all damage was done from engine to transmission,to the front of vehicle, and the vehicle considered a total loss.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">F</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">wheel bearing and hubs cracked, causing the metal to grind when making a right turn. also when applying the brakes, pedal goes to the floor, cause unknown. was advised by midas not to drive vehicle- wheele could come off.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">G</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">driving about 5-10 mph, the vehicle had a low frontal impact in which the other vehicle had no damages. upon impact, driver's and the passenger's air bags did not deploy, resulting in injuries. please provide further information and vin#.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">H</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">the air bag warning light has come on. indicating airbags are inoperative.they were fixed one at the time, but problem has reoccurred.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">I</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">consumer was driving west when the other car was going east. the other car turned in front of consumer's vehicle, consumer hit other vehicle and started to spin around ,couldn't stop, resulting in a crash. upon impact, airbags didn't deploy.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">J</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">while driving about 65 mph and the transmisison made a strange noise, and the left front axle locked up. the dealer has repaired the vehicle.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_h5x_nwf_pdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM NaiveBayesTextClassifierPredict_MLE (
+  ON (
+    SELECT doc_id, doc_name, lower(token) AS token
+    FROM <b>TextTokenizer</b> (
+      ON <b>complaints_with_docnames</b> PARTITION BY ANY
+      USING
+      TextColumn ('text_data')
+      OutputByWord ('true')
+      Accumulate ('doc_id','doc_name')
+    ) AS dt1
+  ) AS <b>PredictorValues</b> PARTITION BY doc_id
+  ON complaints_tokens_model AS "model" DIMENSION
+  USING
+  InputTokenColumn ('token')
+  ModelType ('Bernoulli')
+  DocIDColumns ('doc_id')
+  Accumulate ('doc_name')
+  OutputProb('true')
+  TopK (1)
+) AS dt;</tt>
+   </pre>
+   <a name="section_c4h_4wf_pdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ doc_id prediction loglik              prob               doc_name 
+ ------ ---------- ------------------- ------------------ -------- 
+      4 no_crash    -80.04840368356992 0.9999999999998849 D       
+      1 no_crash    -98.37344066139619 0.9999999999999973 A       
+      3 no_crash    -74.45875519616708  0.999999999999917 C       
+      8 no_crash     -91.9733577040394 0.9999999948239724 H       
+      5 crash      -115.41886392381605 0.9164844344558424 E       
+      7 crash      -111.70603934552986  0.977567760977105 G       
+      9 no_crash   -108.85303741743412 0.9997172911016146 I       
+      2 no_crash    -93.41932479796594 0.9999976259267273 B       
+      6 no_crash   -116.11212602416647 0.9999998313326355 F       
+     10 no_crash    -82.65103082787691 0.9999999998244187 J</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

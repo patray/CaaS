@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="copyright" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.rights.owner" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="Comments in Queries" />
+<meta name="abstract" content="See the format for comments in queries that call Machine Learning Engine analytic functions." />
+<meta name="description" content="See the format for comments in queries that call Machine Learning Engine analytic functions." />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="fds1532101929996" />
+<meta name="DC.Language" content="en-us" />
+
+<link rel="stylesheet" type="text/css" href="css/normal_styles.css" />
+<title>Comments in Queries</title>
+</head>
+<body id="fds1532101929996">
+
+	<h1 class="title topictitle1" id="ariaid-title1">Comments in Queries</h1>
+
+	<div class="body refbody"><div class="section" id="fds1532101929996__section_hlt_nhh_sgb"><h2 class="title sectiontitle">Comments in nPath@coprocessor and NTree@coprocessor Queries</h2><p class="p">Comments in nPath@coprocessor and NTree@coprocessor queries must have the syntax <code class="ph codeph">/* <var class="keyword varname">comment</var> */</code>. For example:</p>
+<pre class="pre codeblock"><code>SELECT * FROM nPath@coprocessor (
+  ON aggregate_clicks PARTITION BY sessionid ORDER BY clicktime
+  USING
+  Mode (nonoverlapping) <span class="ph b">/* here is a comment */</span>
+  Pattern ('A*')
+  Symbols (TRUE AS A)
+  Result (FIRST (sessionid OF A) AS sessionid, Accumulate (pagetype OF A) AS path)
+) AS dt;</code></pre></div>
+<div class="section" id="fds1532101929996__section_bpl_g3h_sgb"><h2 class="title sectiontitle">Comments in All Other Queries</h2><p class="p">Comments in all other queries can have either the preceding syntax or the syntax -- <var class="keyword varname">comment</var>. For example:</p>
+<pre class="pre codeblock"><code>SELECT * FROM GLMPredict_MLE (
+  ON admissions_test PARTITION BY ANY
+  ON glm_admissions_model AS Model DIMENSION
+  USING
+  Accumulate ('id', 'masters', 'gpa', 'stats', 'programming', 'admitted')
+  Family ('LOGISTIC') <span class="ph b">/* Same as BINOMIAL */
+</span>
+  LinkFunction ('LOGIT') <span class="ph b">-- Default
+</span>
+) AS dt;</code></pre><div class="note note" id="fds1532101929996__note_N1004C_N10049_N10010_N10001"><span class="notetitle">Note</span><div class="notebody">In the syntax <code class="ph codeph">/* <var class="keyword varname">comment</var> */</code>, do not include "--" inside the comment delimiters.</div></div>
+</div>
+
+	</div>
+
+</body>
+</html>

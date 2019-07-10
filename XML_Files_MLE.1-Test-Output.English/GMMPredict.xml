@@ -1,0 +1,942 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="lnk1507728494086"> </a>
+	  <h1>GMMPredict</h1>
+
+	
+		<p style="line-height: 1em;">The GMMPredict function takes the output from the function GMM and predicts the cluster assignments for each [[σ<sub>11</sub> σ<sub>12</sub> … σ<sub>1D</sub>], [σ<sub>21</sub> ... σ<sub>D</sub>], [σ<sub>D-1</sub> … σ<sub>DD</sub>]] point in a specified data set. Because GMM functions do soft assignments of data points to clusters (that is, GMM functions give probabilities that each data point is in each cluster), you can specify the top <i>N</i> most likely clusters for a given point and the probability that the point is a member of each of those clusters.</p>
+
+		<p style="line-height: 1em;">The output table of the GMMPredict function can be input to the function GMMProfile.</p>
+
+	
+   <a name="doz1507728531703"> </a>
+   <h2>GMMPredict Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.5</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GMMPredict (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable PARTITION BY <i>key</i>
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS Model DIMENSION
+  [ USING
+    [ OutputFormat ({ 'sparse' | 'dense' }) ]
+    [ TopK (<i>n</i>) ]
+    [ OutputLogLikelihood
+      ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+    <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+    [ TargetColumns ({ '<i>target_column</i>' | <i>target_column_range</i> }[,...])]
+    [ IDColumn ('<i>testdata_column</i>')]
+  ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="two1507728581913"> </a>
+	  <h2>GMMPredict Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputFormat</dt>
+      <dd>[Optional] Specify how the function outputs the weights that it assigns to each of the top <i>N</i> clusters:<a name="table_qs1_snz_fdb"> </a>
+         <table class="introtable">
+            <a name="table_qs1_snz_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'sparse'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Function outputs each weight to separate output table row.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'dense'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Function outputs all weights to single output table row.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>TopK</dt>
+      <dd>[Optional] Specify the number of cluster weights that the function outputs. This value must be an INTEGER. For the value <i>n</i>, the function outputs for each data point the cluster with the greatest weight, the cluster with the second-greatest weight, and so on, ending with the cluster with the <i>k</i>th-greatest weight.</dd>
+      <dd>Default: 1</dd>
+      <dt>OutputLogLikelihood</dt>
+      <dd>[Optional] Specify whether to output the log likelihood of an observation, given the data.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of InputTable columns to copy to the output table.</dd>
+      <dt>TargetColumns</dt>
+      <dd>[Optional] Specify the names of InputTable columns that correspond to the attributes in the Model table.</dd>
+      <dd>Default: All InputTable columns except the first</dd>
+      <dt>IDColumn</dt>
+      <dd>[Optional] Specify the input table column that defines the row identifier.</dd>
+      <dd>Default: First input table column</dd>
+   </div>
+
+
+	
+   <a name="bny1507729088266"> </a>
+   <h2>GMMPredict Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_yk4_mnd_ycb"> </a>
+   <table class="introtable">
+      <a name="table_yk4_mnd_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Has same schema as GMM Input InputTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Model</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Has same schema as GMM Output OutputTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="dee1507729095383"> </a>
+   <h2>GMMPredict Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The OutputTable schema depends on the OutputFormat syntax element.</p>
+
+   <a name="section_axj_f4d_ycb"> </a>
+   <h3>OutputTable Schema, OutputFormat ('sparse') (Default)</h3>
+   <p style="line-height: 1em;">The table has <i>D</i>+3 columns, where <i>D</i> is the number of dimensions of the input data.</p>
+   <a name="table_N10017_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10017_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from InputTable. Typically, one <i>accumulate_column</i> contains unique data point identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">data_point</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any numeric SQL data type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears <i>D</i> times.] Input data point, copied from InputTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cluster_rank</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Cluster rank, from most probable to least probable. Most probable cluster is identified as "1", next most probable as "2", and so on.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cluster_id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Cluster identification number.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">prob</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Probability that cluster is assigned to data point.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_gz1_h4d_ycb"> </a>
+   <h3>OutputTable Schema, OutputFormat ('dense')</h3>
+   <p style="line-height: 1em;">The table has <i>D</i>+2<i>k</i> columns, where <i>D</i> is the number of dimensions of the input data and <i>n</i> is the the number of cluster weights that the function outputs (the value of the TopK syntax element).</p>
+   <a name="table_N100A1_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100A1_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from InputTable. Typically, one <i>accumulate_column</i> contains unique data point identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Data point identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">data_point</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any numeric SQL data type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears <i>D</i> times.] Input data point, copied from InputTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cluster_id_<i>i</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears <i>n</i> times.]  cluster_id_1 is most probable cluster for observation, cluster_id_2 is next most probable, and so on.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">prob_<i>i</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears <i>n</i> times.]  Probability that observation belongs to cluster_id_<i>i</i>.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="olm1507729560398"> </a>
+   <h2>GMMPredict Example</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The GMMPredict function applies the model created by the GMM function to the test input to cluster the test data.</p>
+
+   <a name="section_djq_xpm_zdb"> </a>
+   <h3>Input</h3>
+   <ul>
+      <li>InputTable: gmm_iris_test, as in GMM Examples Input</li>
+      <li>Model: gmm_output_ex1, output by GMM Example: Basic GMM, Spherical Covariance, Packed Output</li>
+   </ul>
+   <a name="table_wxx_hqm_zdb"> </a>
+   <table class="introtable">
+      <a name="table_wxx_hqm_zdb"> </a>
+      <h4 style="text-align: center;">InputTable: gmm_iris_test</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">sepal_length</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">sepal_width</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">petal_length</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">petal_width</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">20</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">35</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">40</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">45</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">55</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">60</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">65</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">70</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">75</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">80</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">85</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">90</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">95</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">100</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">105</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">110</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">115</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">120</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">125</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">130</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">135</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">140</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">145</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">150</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.8</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_sw1_ypm_zdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GMMPredict (
+  ON gmm_output_ex1 AS Model DIMENSION
+  ON gmm_iris_test AS InputTable PARTITION BY id
+  USING
+    TopK (3)
+) AS dt ORDER BY id, prob DESC;</tt>
+   </pre>
+   <a name="section_ghs_ypm_zdb"> </a>
+   <h3>Output</h3>
+   <p style="line-height: 1em;">The output table shows the dimensions and id of each sample, and the probability that it belongs to each of the three clusters.</p>
+   <pre>
+      <tt>
+ id  sepal_length sepal_width petal_length petal_width cluster_rank cluster_id prob                   
+ --- ------------ ----------- ------------ ----------- ------------ ---------- ---------------------- 
+   5          5.0         3.6          1.4         0.2            1          0     0.9999999999999989
+   5          5.0         3.6          1.4         0.2            2          2 1.0698003688064299E-15
+   5          5.0         3.6          1.4         0.2            3          1  8.212771939415291E-29
+  10          4.9         3.1          1.5         0.1            1          0     0.9999999999999949
+  10          4.9         3.1          1.5         0.1            2          2  5.215047489403572E-15
+  10          4.9         3.1          1.5         0.1            3          1  8.596087853138194E-24
+  15          5.8         4.0          1.2         0.2            1          0     0.9999999999998073
+  15          5.8         4.0          1.2         0.2            2          2 1.9283604401940617E-13
+  15          5.8         4.0          1.2         0.2            3          1  2.023083459936497E-35
+  20          5.1         3.8          1.5         0.3            1          0     0.9999999999999865
+  20          5.1         3.8          1.5         0.3            2          2 1.3581233688332843E-14
+  20          5.1         3.8          1.5         0.3            3          1 3.5015069719597627E-28
+  25          4.8         3.4          1.9         0.2            1          0     0.9999999999990372
+  25          4.8         3.4          1.9         0.2            2          2  9.628706763468497E-13
+  25          4.8         3.4          1.9         0.2            3          1  2.258612841490787E-19
+  30          4.7         3.2          1.6         0.2            1          0     0.9999999999999887
+  30          4.7         3.2          1.6         0.2            2          2 1.1240537970056623E-14
+  30          4.7         3.2          1.6         0.2            3          1  9.676416490528892E-23
+  35          4.9         3.1          1.5         0.2            1          0     0.9999999999999918
+  35          4.9         3.1          1.5         0.2            2          2   8.12474270733355E-15
+  35          4.9         3.1          1.5         0.2            3          1 4.1669847147126875E-23
+  40          5.1         3.4          1.5         0.2            1          0     0.9999999999999916
+  40          5.1         3.4          1.5         0.2            2          2  8.454813076593314E-15
+  40          5.1         3.4          1.5         0.2            3          1  3.446661810603676E-25
+  45          5.1         3.8          1.9         0.4            1          0      0.999999999988463
+  45          5.1         3.8          1.9         0.4            2          2 1.1536928120751568E-11
+  45          5.1         3.8          1.9         0.4            3          1  4.013220603920191E-21
+  50          5.0         3.3          1.4         0.2            1          0     0.9999999999999982
+  50          5.0         3.3          1.4         0.2            2          2 1.6654268270139521E-15
+  50          5.0         3.3          1.4         0.2            3          1  3.429446069942643E-26
+  55          6.5         2.8          4.6         1.5            1          2     0.9999999999990403
+  55          6.5         2.8          4.6         1.5            2          1   9.59569181252332E-13
+  55          6.5         2.8          4.6         1.5            3          0  5.569025600510225E-38
+  60          5.2         2.7          3.9         1.4            1          1     0.9442250899448984
+  60          5.2         2.7          3.9         1.4            2          2   0.055774910055101865
+  60          5.2         2.7          3.9         1.4            3          0 3.1599350623031505E-20
+  65          5.6         2.9          3.6         1.3            1          1      0.846860212056736
+  65          5.6         2.9          3.6         1.3            2          2     0.1531397879432626
+  65          5.6         2.9          3.6         1.3            3          0 1.2234934358485754E-15
+  70          5.6         2.5          3.9         1.1            1          1     0.9465447895583854
+  70          5.6         2.5          3.9         1.1            2          2   0.053455210441614366
+  70          5.6         2.5          3.9         1.1            3          0 1.1208865308842914E-20
+  75          6.4         2.9          4.3         1.3            1          2     0.9999999950777232
+  75          6.4         2.9          4.3         1.3            2          1  4.9222768050956666E-9
+  75          6.4         2.9          4.3         1.3            3          0 2.1848015795180576E-30
+  80          5.7         2.6          3.5         1.0            1          1     0.9917937569411431
+  80          5.7         2.6          3.5         1.0            2          2   0.008206243058854052
+  80          5.7         2.6          3.5         1.0            3          0 2.8538614115610594E-15
+  85          5.4         3.0          4.5         1.5            1          2      0.999987668251635
+  85          5.4         3.0          4.5         1.5            2          1  1.2331748365215967E-5
+  85          5.4         3.0          4.5         1.5            3          0  3.218903379735191E-29
+  90          5.5         2.5          4.0         1.3            1          1     0.8465631916397747
+  90          5.5         2.5          4.0         1.3            2          2    0.15343680836022525
+  90          5.5         2.5          4.0         1.3            3          0 1.6381671580627518E-22
+  95          5.6         2.7          4.2         1.3            1          2     0.9609392973181826
+  95          5.6         2.7          4.2         1.3            2          1    0.03906070268181772
+  95          5.6         2.7          4.2         1.3            3          0 1.5258770448488742E-24
+ 100          5.7         2.8          4.1         1.3            1          2     0.9726572812010832
+ 100          5.7         2.8          4.1         1.3            2          1   0.027342718798916598
+ 100          5.7         2.8          4.1         1.3            3          0  4.573488798874464E-23
+ 105          6.5         3.0          5.8         2.2            1          2                    1.0
+ 105          6.5         3.0          5.8         2.2            2          1  7.494570350886698E-34
+ 105          6.5         3.0          5.8         2.2            3          0 1.6339290393405167E-67
+ 110          7.2         3.6          6.1         2.5            1          2                    1.0
+ 110          7.2         3.6          6.1         2.5            2          1 5.6048659811737865E-55
+ 110          7.2         3.6          6.1         2.5            3          0 2.4584327163583323E-83
+ 115          5.8         2.8          5.1         2.4            1          2                    1.0
+ 115          5.8         2.8          5.1         2.4            2          1   6.91446024044145E-19
+ 115          5.8         2.8          5.1         2.4            3          0 1.0620275638612122E-50
+ 120          6.0         2.2          5.0         1.5            1          2     0.9999999999881917
+ 120          6.0         2.2          5.0         1.5            2          1 1.1808581767564222E-11
+ 120          6.0         2.2          5.0         1.5            3          0  1.736214062469676E-44
+ 125          6.7         3.3          5.7         2.1            1          2                    1.0
+ 125          6.7         3.3          5.7         2.1            2          1 2.4157753132451544E-35
+ 125          6.7         3.3          5.7         2.1            3          0  1.847134529156803E-65
+ 130          7.2         3.0          5.8         1.6            1          2                    1.0
+ 130          7.2         3.0          5.8         1.6            2          1  1.309602745870143E-38
+ 130          7.2         3.0          5.8         1.6            3          0  7.637564893228441E-69
+ 135          6.1         2.6          5.6         1.4            1          2                    1.0
+ 135          6.1         2.6          5.6         1.4            2          1  6.916995349512563E-21
+ 135          6.1         2.6          5.6         1.4            3          0  7.482737218326153E-55
+ 140          6.9         3.1          5.4         2.1            1          2                    1.0
+ 140          6.9         3.1          5.4         2.1            2          1  8.867700057480836E-32
+ 140          6.9         3.1          5.4         2.1            3          0 3.6438229003460426E-61
+ 145          6.7         3.3          5.7         2.5            1          2                    1.0
+ 145          6.7         3.3          5.7         2.5            2          1  5.998454220109692E-39
+ 145          6.7         3.3          5.7         2.5            3          0 1.5286168703203913E-69
+ 150          5.9         3.0          5.1         1.8            1          2     0.9999999999999991
+ 150          5.9         3.0          5.1         1.8            2          1  9.595729554874454E-16
+ 150          5.9         3.0          5.1         1.8            3          0  4.913952998440134E-45</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

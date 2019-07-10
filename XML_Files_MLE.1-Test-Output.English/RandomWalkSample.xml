@@ -1,0 +1,964 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="rwg1507829732576"> </a>
+	  <h1>RandomWalkSample</h1>
+
+	
+		<p style="line-height: 1em;">The RandomWalkSample function takes an input graph (which is typically
+			large) and outputs a sample graph.</p>
+
+		<p>
+      <b>Note:</b>  The sample graph is
+			not deterministic. The function can produce different results when running on a
+			different cluster.</p>
+	
+   <a name="mye1507829818923"> </a>
+   <h2>RandomWalkSample Background</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The goal of graph sampling is to identify a subgraph that preserves graph properties as well as possible. If the subgraph is a good representation of the graph, substituting the subgraph for the graph in ML Engine functions significantly decreases runtime without significantly decreasing accuracy.</p>
+   <p style="line-height: 1em;">Random walk sampling is a graph-sampling technique that randomly selects a starting vertex and then either explores a neighboring vertex or returns (flies back) to the starting vertex. If the sampling process reaches a sink vertex (an isolated component or a loop), it randomly selects another vertex and continues until it reaches the desired sample size (the desired number of vertices).</p>
+   <p style="line-height: 1em;">The resulting subset graph includes the edges between sampled vertices and their nearest neighbors (edges that exist in the original graph), even if the sampling process did not explore those edges. Including those edges makes the subset graph more representative of the original graph.</p>
+   <p>
+      <b>Note:</b>  For more information about sampling from large graphs, see: http://cs.stanford.edu/people/jure/pubs/sampling-kdd06.pdf</p>
+   <a name="tyq1507829965110"> </a>
+   <h2>RandomWalkSample Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.6</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM RandomWalkSample (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS Vertices PARTITION BY <i>vertex_key_column</i> [,...] 
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS Edges PARTITION BY <i>source_vertex_key_column</i> [,...]
+  OUT TABLE VertexOutputTable (<i>vertex_table</i>)
+  OUT TABLE EdgeOutputTable (<i>edge_table</i>)
+  USING 
+  TargetKey ({ '<i>target_vertex_column</i>' | <i>target_vertex_column_range</i> }[,...])
+  [ SampleRate (<i>sample_rate</i>) ]
+  [ FlyBackRate (<i>fly_back_rate</i>) ]
+  [ Seed (<i>seed</i>) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="oep1507830096048"> </a>
+	  <h2>RandomWalkSample Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>VertexOutputTable</dt>
+      <dd>Specify the name of the vertex output table.</dd>
+      <dt>EdgeOutputTable</dt>
+      <dd>Specify the name of the edge output table.</dd>
+      <dt>TargetKey</dt>
+      <dd>Specify the names of the columns in the Edges table that identify the target vertex of an edge. This set of columns must have the same schema as the sets <i>vertex_key_column</i> [,...] and <i>source_vertex_key_column</i> [,...].</dd>
+      <dt>SampleRate</dt>
+      <dd>[Optional] Specify the sampling rate. This value must be in the range (0, 1.0).</dd>
+      <dd>Default: 0.15 (15%)</dd>
+      <dt>FlyBackRate</dt>
+      <dd>[Optional] Specify the chance, when visiting a vertex, of flying back to the starting vertex. This value must be in the range (0, 1.0).</dd>
+      <dd>Default: 0.15 (15%)</dd>
+      <dt>Seed</dt>
+      <dd>[Optional] Specify the random seed the algorithm uses for repeatable results (for more information, see Nondeterministic Results and UniqueID Syntax Element). The algorithm uses the seed to create a series of random numbers, including <i>sample_rate</i> and <i>flyback_rate</i>. The <i>seed</i> must be a LONG value.</dd>
+      <dd>Default: 1000</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of columns in the input vertex table (vertices) to copy to the output vertex table (<i>vertex_table</i>).</dd>
+   </div>
+
+
+	
+   <a name="who1507831288868"> </a>
+   <h2>RandomWalkSample Input</h2>
+   <a name="section_avh_2lk_fdb"> </a>
+   <h3>Vertices Schema</h3>
+   <p style="line-height: 1em;">Each row represents a vertex of the graph.</p>
+   <a name="table_wbs_rlk_fdb"> </a>
+   <table class="introtable">
+      <a name="table_wbs_rlk_fdb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>vertex_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any allowed in PARTITION BY clause</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>vertex_key_column</i>.] All or part of unique vertex key. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column to copy to output vertex table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_rn3_glk_fdb"> </a>
+   <h3>Edges Schema</h3>
+   <p style="line-height: 1em;">Each row represents an edge of the graph.</p>
+   <a name="table_ugt_pmk_fdb"> </a>
+   <table class="introtable">
+      <a name="table_ugt_pmk_fdb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>source_vertex_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any allowed in PARTITION BY clause</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column appears once for each specified <i>source_vertex_key_column</i>.] All or part of key that identifies source vertex of edge. Must be a <i>vertex_key_column</i> in Vertices table. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_vertex_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as <i>source_vertex_key_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column appears once for each specified <i>target_vertex_key_column</i>.] All or part of key that identifies target vertex of edge. Must be a <i>vertex_key_column</i> in Vertices table. Cannot be NULL.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="gbm1507831372146"> </a>
+   <h2>RandomWalkSample Output</h2>
+   <a name="section_kqy_v3k_fdb"> </a>
+   <h3>Summary Table Schema</h3>
+   <p style="line-height: 1em;">This table of statistics is typically displayed on the screen.</p>
+   <a name="table_wgs_gjk_fdb"> </a>
+   <table class="introtable">
+      <a name="table_wgs_gjk_fdb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Date Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">name</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Statistic name; one of the following:<ul>
+                  <li>vertices (in original graph)</li>
+                  <li>edges (in original graph)</li>
+                  <li>sampled vertices</li>
+                  <li>sampled edges</li>
+               </ul>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">count</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Statistic count (for example, number of vertices in original graph or number of sampled edges).</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_nyc_fkk_fdb"> </a>
+   <h3>VertexOutputTable Schema</h3>
+   <p style="line-height: 1em;">This table is saved to the database.</p>
+   <a name="table_gq1_l4k_fdb"> </a>
+   <table class="introtable">
+      <a name="table_gq1_l4k_fdb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">id</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Vertices table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only if Vertices table has only one one source vertex attribute.] Vertex attribute.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">id_<i>i</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Vertices table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[If Vertices table has <i>n</i> vertex attributes (where <i>n</i> is at least 2), this column appears <i>n</i> times.] Vertex attribute<i>i</i>, where <i>i</i> is in range [1, <i>n</i>].</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Vertices table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column copied from Vertices table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_jxh_jkk_fdb"> </a>
+   <h3>EdgeOutputTable Schema</h3>
+   <p style="line-height: 1em;">This table is saved to the database.</p>
+   <a name="table_rhq_lqk_fdb"> </a>
+   <table class="introtable">
+      <a name="table_rhq_lqk_fdb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">source</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Edges table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only if Edges table has only one source vertex attribute.] Source vertex attribute.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">source_<i>i</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Edges table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[If Edges table has <i>n</i> source vertex attributes (where <i>n</i> is at least 2), this column appears <i>n</i> *2 times.] Source vertex attribute <i>i</i>, where <i>i</i> is in range [1, <i>n</i> *2].</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">target</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Edges table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only if Edges table has only one target vertex.] Target vertex.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">target_<i>i</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Edges table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[If Edges table has <i>n</i> target vertices (where <i>n</i> is at least 2), this column appears <i>n</i> *2 times.] Target vertex <i>i</i>, where <i>i</i> is in range [1, <i>n</i> *2].</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="oon1510708967750"> </a>
+   <h2>RandomWalkSample Example</h2>
+   <a name="section_czv_xrm_zdb"> </a>
+   <h3>Input</h3>
+   <a name="table_pm5_gsm_zdb"> </a>
+   <table class="introtable">
+      <a name="table_pm5_gsm_zdb"> </a>
+      <h4 style="text-align: center;">citvertices_2</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1001</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1002</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1003</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1004</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1005</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1006</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1007</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1008</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1009</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1010</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1011</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1013</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1014</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1015</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1016</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1017</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1018</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1019</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1020</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_nmb_qsm_zdb"> </a>
+   <table class="introtable">
+      <a name="table_nmb_qsm_zdb"> </a>
+      <h4 style="text-align: center;">citedges_2</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">from_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">to_id</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1057</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1003</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1076</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1046</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1080</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1035</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1110</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1092</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1129</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1101</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1134</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1001</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1134</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1054</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1152</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4015</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1155</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1046</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1160</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1005</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1161</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1080</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1161</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1035</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1172</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4210</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1178</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1177</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1195</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1046</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1196</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1119</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1204</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1073</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1209</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1189</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1222</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3283</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1225</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1072</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">....</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_cmf_yrm_zdb"> </a>
+   <h3>Call</h3>
+   <p style="line-height: 1em;">Specifying the Seed value in the SQL-GR call guarantees that the result is repeatable on the same cluster. However, the result can differ between clusters, as the sample graph is not deterministic.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM RandomWalkSample (
+  ON citvertices_2 AS Vertices PARTITION BY id
+  ON citedges_2 AS Edges PARTITION BY from_id
+  OUT TABLE VertexOutputTable (rw_vertices_15)
+  OUT TABLE EdgeOutputTable (rw_edges_15)
+  USING
+  TargetKey ('to_id')
+  FlyBackRate (0.15)
+  SampleRate (0.15)
+  Seed (1000)
+) AS dt;</tt>
+   </pre>
+   <a name="section_whr_yrm_zdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ name             count 
+ ---------------- ----- 
+ vertices          1209
+ edges              744
+ sampled vertices   181
+ sampled edges       99</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM rw_vertices_15;</tt>
+   </pre>
+   <pre>
+      <tt>
+ id_1 
+ ---- 
+ 2047
+ 2178
+ 4204
+ 2286
+ 3006
+ 1164
+ 3272
+ 2083
+ 1225
+ 3261
+ 1287
+ 3328
+ 2270
+ 2303
+ 4124
+ 2258
+ 1059
+ 1035
+ 1304
+ 1002
+ 2038
+ 1128
+ 2073
+ 1306
+ 3258
+ 2204
+ 1188
+ 1231
+ 2147
+ 4210
+ 1126
+ 4110
+ 1322
+ 4013
+ 2219
+ 3229
+ 4102
+ 1046
+ 4160
+ 3043
+ 3050
+ 2009
+ 3228
+ 1175
+ 2301
+ 4169
+ 4104
+ 3221
+ 1262
+ 1063
+ 1268
+ 1250
+ 1083
+ 1203
+ 4209
+ 3038
+ 3046
+ 2192
+ 2197
+ 2275
+ 1122
+ 1072
+ 1088
+ 2263
+ 1027
+ 3178
+ 4106
+ 3246
+ 4239
+ 2228
+ 3251
+ 2289
+ 4083
+ 2168
+ 3250
+ 2229
+ 3312
+ 3196
+ 4243
+ 1249
+ 2065
+ 2232
+ 1161
+ 3154
+ 4107
+ 1244
+ 3059
+ 1290
+ 3163
+ 1173
+ 3125
+ 3297
+ 4094
+ 2207
+ 3256
+ 3292
+ 3291
+ 2040
+ 3027
+ 2027
+ 2262
+ 3068
+ 2184
+ 1004
+ 1309
+ 4009
+ 1166
+ 1121
+ 4045
+ 2264
+ 2271
+ 4149
+ 1101
+ 1124
+ 1292
+ 2058
+ 1200
+ 3166
+ 4044
+ 2299
+ 2149
+ 1316
+ 1193
+ 2063
+ 2248
+ 1211
+ 1302
+ 1074
+ 4222
+ 1008
+ 1264
+ 4072
+ 3055
+ 3252
+ 2011
+ 1208
+ 2076
+ 3235
+ 3034
+ 2253
+ 1080
+ 3189
+ 2290
+ 2001
+ 3310
+ 1020
+ 3307
+ 2293
+ 1137
+ 4208
+ 3090
+ 2138
+ 1191
+ 4170
+ 1192
+ 3150
+ 2260
+ 3028
+ 2026
+ 2109
+ 3184
+ 2108
+ 2004
+ 3089
+ 1028
+ 1142
+ 2298
+ 1172
+ 2002
+ 1017
+ 2064
+ 3301
+ 3212
+ 4242
+ 1034
+ 1260
+ 4085
+ 3233
+ 3045
+ 3096
+ 2300</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM rw_edges_15;</tt>
+   </pre>
+   <pre>
+      <tt>
+ source_1 target_1 
+ -------- -------- 
+     4107     4110
+     2197     1292
+     2229     2009
+     2178     1166
+     4208     3184
+     4222     1101
+     2286     2262
+     3291     3292
+     3261     1192
+     3045     2004
+     2264     2147
+     3235     1260
+     2064     2063
+     1161     1080
+     2038     1290
+     1264     1101
+     4044     1268
+     4085     3184
+     3163     2064
+     3301     2293
+     3310     2260
+     1225     1072
+     2147     1124
+     1309     1203
+     3258     1188
+     4210     3154
+     3312     2001
+     2063     2064
+     1322     1304
+     4107     3212
+     4208     2149
+     3246     1002
+     2263     1083
+     4169     1002
+     3252     3068
+     2076     2004
+     2064     1101
+     1161     1035
+     4013     3261
+     4085     2149
+     3163     1101
+     3089     3328
+     2258     1002
+     1309     1121
+     4210     1172
+     2063     1101
+     3212     2064
+     4222     2293
+     4169     3154
+     3045     2076
+     3228     2232
+     2108     2064
+     3328     3089
+     1080     1035
+     4209     3028
+     2258     1080
+     2047     1008
+     4242     3292
+     4208     2064
+     4110     4107
+     2109     2073
+     4009     1287
+     3272     2253
+     4124     1002
+     3328     2229
+     3184     4208
+     2149     1264
+     3166     2197
+     4170     4110
+     3178     2258
+     3212     2149
+     4222     3250
+     2065     2204
+     1172     4210
+     3196     2192
+     2108     1124
+     3221     1175
+     3184     2108
+     2293     1101
+     4083     1128
+     4242     3291
+     3256     2147
+     2253     1175
+     2168     2064
+     4124     3246
+     3189     2264
+     2232     1002
+     2248     1306
+     2168     2063
+     2232     1172
+     4208     4085
+     2168     1101
+     4085     2108
+     3212     2108
+     4204     2063
+     3184     2064
+     4160     1208
+     1287     1046
+     3184     2149</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

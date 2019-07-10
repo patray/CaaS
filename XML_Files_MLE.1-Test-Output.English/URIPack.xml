@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="yxe1507821337957"> </a>
+	  <h1>URIPack</h1>
+
+	
+		<p style="line-height: 1em;">The URIPack function reconstructs hierarchical URI strings that were unpacked by the function URIUnpack.</p>
+
+	
+   <a name="pvy1507821360011"> </a>
+   <h2>URIPack Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.3</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM URIPack (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+  USING 
+  [ Queries ('<i>query_parameter</i>' [,...]) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+  [ SchemeColumn ('<i>scheme_column</i>') ]
+  [ HostColumn ('<i>host_column</i>') ]
+  [ PathColumn ('<i>path_column</i>') ]
+  [ FragmentColumn ('<i>fragment_column</i>') ]
+  [ IgnoreValues ('<i>string</i>' [,...]) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="yuz1507821363648"> </a>
+	  <h2>URIPack Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>Queries</dt>
+      <dd>[Optional] Specify the names of the query parameters whose values are to be included in the URIs.</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify names of the input table columns to copy to the output table.</dd>
+      <dt>SchemeColumn</dt>
+      <dd>[Optional] Specify the name of the input table column that contains the URI scheme. </dd>
+      <dt>HostColumn</dt>
+      <dd>[Optional] Specify the name of the input table column that contains the URI host.</dd>
+      <dt>PathColumn</dt>
+      <dd>[Optional] Specify the name of the input table column that contains the URI path.</dd>
+      <dt>FragmentColumn</dt>
+      <dd>[Optional] Specify the name of the input table column that contains the URI fragment. </dd>
+      <dt>IgnoreValues</dt>
+      <dd>[Optional] Specify a list of case-insensitive strings for the function to treat as null values. If you specify this syntax element, you must specify the string 'null' to have the function treat it as a null value.</dd>
+      <dd>Default behavior: The function treats only the string 'null' as a null value.</dd>
+   </div>
+
+
+	
+   <a name="psw1507821367427"> </a>
+   <h2>URIPack Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The input table is the URIUnpack Output table.</p>
+
+   <a name="rst1507821371514"> </a>
+   <h2>URIPack Output</h2>
+   <a name="section_lbl_fws_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">uri</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Reconstructed hierarchical URI.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="khw1510713078650"> </a>
+   <h2>URIPack Example</h2>
+   <a name="section_ev1_vq4_xdb"> </a>
+   <h3>Input</h3>
+   <ul>
+      <li>Output of URIUnpack Example</li>
+   </ul>
+
+   <a name="section_gcn_vq4_xdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM URIPack (
+  ON uripack_input
+  USING
+  Queries('p1','p2','p3')
+  Accumulate('id')
+  SchemeColumn('scheme')
+HostColumn('host')
+PathColumn('path')
+FragmentColumn('fragment')
+IgnoreValues('null','192.0.2.16')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_rnw_vq4_xdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ id uri                                                                                     
+ -- --------------------------------------------------------------------------------------- 
+  1 https://www.google.com/webhp?p1=chrome&amp;p2=hello+world&amp;p3=utf-8#fragment1               
+  2 http://www.ietf.org/rfc/rfc2396.txt                                                    
+  3 ldap://[2001:db8::7]/c=gb                                                              
+  4 telnet:///                                                                             
+  5 http://www.bar.com/baz/foo?p1=netscape&amp;p2=%7Bhello+world%7D&amp;p3=utf#this+is+fragment+too</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

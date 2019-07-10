@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="rop1507219165371"> </a>
+	  <h1>TextClassifierTrainer</h1>
+
+	
+		<p style="line-height: 1em;">The TextClassifierTrainer function trains a machine-learning classifier for text classification and installs the model file on ML Engine. The model file can then be input to the function TextClassifier.</p>
+   <p>
+      <b>Note:</b>  TextClassifierTrainer uses files that are preinstalled on ML Engine. For details, see Preinstalled Files That Functions Use.</p>
+	
+   <a name="tih1507219529782"> </a>
+   <h2>TextClassifierTrainer Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.10</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TextClassifierTrainer (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  USING
+  OutputModelFile ('<i>output_model_file</i>')
+  TextColumn ('<i>text_column</i>')
+  CategoryColumn ('<i>category_column</i>')
+  ModelType ({ 'KNN' | 'MaxEnt' })
+  [ KNNModelParameters ('compress:<i>value</i>' [,...]) ]
+  [ NLPParameters ('<i>name</i>:<i>value</i>' [,...]) ]
+  [ FeatureSelectionLimits ('DF:[{ <i>min</i>:<i>max</i> | <i>min</i>: | :<i>max</i>}]') ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="zkp1507219633827"> </a>
+	  <h2>TextClassifierTrainer Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputModelFile</dt>
+      <dd>Specify the name for the model file to create.</dd>
+      <dt>TextColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the text of the training documents.</dd>
+      <dt>CategoryColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the category of the training documents.</dd>
+      <dt>ModelType</dt>
+      <dd>Specify the classifier type of the model, KNN algorithm or maximum entropy model.</dd>
+      <dt>KNNModelParameters</dt>
+      <dd>[Optional] Applies only if the classifier type of the model is KNN. Specify parameters for the classifier.<p style="line-height: 1em;">The <i>name</i> must be 'compress' and <i>value</i> must be in the range (0, 1). The <i>n</i> training documents are clustered into <i>value</i>*<i>n</i> groups (for example, if there are 100 training documents, then KNNModelParameters('compress:0.6') clusters them into 60 groups), and the model uses the center of each group as the feature vector.</p>
+      </dd>
+      <dt>NLPParameters</dt>
+      <dd>[Optional] Specify natural language processing (NLP) parameters for preprocessing the text data and produce tokens:<a name="table_tlr_kgz_fdb"> </a>
+         <table class="introtable">
+            <a name="table_tlr_kgz_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">
+                     <i>name</i>:<i>value</i>
+                  </div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">tokenDictFile:<i>token_file</i>
+                     </tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <i>token_file</i> is name of ML Engine file in which each line contains a phrase, followed by a space, followed by the token for the phrase (and nothing else).</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">stopwordsFile:<i>stopword_file</i>
+                     </tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <i>stopword_file</i> is name of ML Engine file in which each line contains exactly one stop word (a word to ignore during tokenization, such as <i>a</i>, <i>an</i>, or <i>the</i>).</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">useStem:{ 'true' | 'false' }</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Specifies whether function stems tokens.<p style="line-height: 1em; margin: 0px;">
+                        <br/>Default: 'false'</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">stemIgnoreFile:<i>stem_ignore_file</i>
+                     </tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <i>stem_ignore_file</i> is name of ML Engine file in which each line contains exactly one word to ignore during stemming.<p>
+                        <b>Note:</b>  Specifying this parameter with <tt style="font-family: monospace;">useStem:'false'</tt> causes an exception.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">useBgram:{ 'true' | 'false' }</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Specifies whether function uses Bigram, which considers proximity of adjacent tokens when analyzing them.<p style="line-height: 1em; margin: 0px;">
+                        <br/>Default: 'false'</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">language:{ 'en' | 'zh_CN' | 'zh_TW' }</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Specifies input text language—English (Default), Simplified Chinese, or Traditional Chinese, respectively.<p style="line-height: 1em; margin: 0px;">
+                        <br/>Default: 'en'</p>
+                     <p>
+                        <b>Note:</b>  For <tt style="font-family: monospace;">zh_CN</tt> and <tt style="font-family: monospace;">zh_TW</tt>, function ignores <tt style="font-family: monospace;">useStem</tt> and <tt style="font-family: monospace;">stemIgnoreFile</tt>.</p>
+                  </div>
+               </td>
+            </tr>
+         </table>
+
+         <p style="line-height: 1em;">Example:</p>
+         <pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+NLPParameters ('tokenDictFile:token_dict.txt', 
+'stopwordsFile:fileName', 
+'useStem:true', 
+'stemIgnoreFile:fileName', 
+'useBgram:true', 
+'language:zh_CN')</tt>
+         </pre>
+      </dd>
+      <dt>FeatureSelectionLimits</dt>
+      <dd>[Optional] Specify the feature selection method, DF (document frequency). The values <i>min</i> and <i>max</i> must be in the range (0, 1). The function selects only the tokens that appear in at least <i>min</i>*<i>n</i> documents and at most <i>max</i>*<i>n</i> documents, where <i>n</i> is the number of training documents. For example, FeatureSelection ('DF:[0.1:0.9]') causes the function to select only the tokens that appear in at least 10% but no more than 90% of the training documents. If <i>min</i> exceeds <i>max</i>, the function uses <i>min</i> as <i>max</i> and <i>max</i> as <i>min</i>.</dd>
+   </div>
+
+
+	
+   <a name="urj1507219745716"> </a>
+   <h2>TextClassifierTrainer Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>InputTable Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>text_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Text of training document.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>category_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Category of training document.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="mnm1507219853352"> </a>
+   <h2>TextClassifierTrainer Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The function outputs a message and a model file (a binary file installed on ML Engine).</p>
+
+   <a name="section_l3d_cyc_ycb"> </a>
+   <h3>Output Message Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">train_result</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Reports information about model creation.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="bvk1507219920237"> </a>
+   <h2>TextClassifierTrainer Example</h2>
+   <a name="section_esx_31c_cdb"> </a>
+   <h3>Input</h3>
+   <ul>
+      <li>InputTable: texttrainer_input</li>
+      <li>Stop words file: stopwords.txt, which is preinstalled on ML Engine</li>
+   </ul>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <h4 style="text-align: center;">texttrainer_input</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">content</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">category</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Tennis star Roger Federer was born on August 8, 1981, in Basel, Switzerland, to Swiss father Robert Federer and South African mother Lynette Du Rand</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sports</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Federer took an interest in sports at an early age, playing tennis and soccer at the age of 8.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sports</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">At age 14, Federer became the national junior champion in Switzerland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sports</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Federer won the Wimbledon boys singles and doubles titles in 1998, and turned professional later that year.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sports</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">In 2003, following a successful season on grass, Federer became the first Swiss man to win a Grand Slam title when he emerged victorious at Wimbledon.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sports</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">A natural disaster is a major adverse event resulting from natural processes of the Earth. Examples include floods, volcanic eruptions, earthquakes, tsunamis, and other geologic processes.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">natural disaster</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">In a vulnerable area, however, such as San Francisco in 1906, an earthquake can have disastrous consequences and leave lasting damage, requiring years to repair.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">natural disaster</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">An earthquake is the result of a sudden release of energy in the Earth crust that creates seismic waves.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">natural disaster</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Volcanoes can cause widespread destruction and consequent disaster in several ways.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">natural disaster</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">A flood is an overflow of water that submerges land</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">natural disaster</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_xsy_y1c_cdb"> </a>
+   <table class="introtable">
+      <a name="table_xsy_y1c_cdb"> </a>
+      <h4 style="text-align: center;">stopwords.txt</h4>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+a
+an
+in
+is
+to
+into
+was
+the
+and
+this
+with
+they
+but
+will</tt>
+               </pre>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_iyh_cbc_cdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TextClassifierTrainer (
+  ON texttrainer_input AS InputTable
+  USING
+  TextColumn ('content')
+  CategoryColumn ('category')
+  OutputModelFile ('knn.bin')
+  ModelType ('knn')
+  KNNModelParameters ('compress:0.9')
+  NLPParameters ('useStem:true', 'stopwordsFile: stopwords.txt')
+  FeatureSelectionLimits ('DF:[0.1:0.99]')
+) AS dt;</tt>
+   </pre>
+   <a name="section_u25_cbc_cdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ train_result                 
+ ---------------------------- 
+ Model generated.            
+ Training time(s): 0.066     
+ File name: knn.bin          
+ File size(KB): 1            
+ Model successfully installed</tt>
+   </pre>
+   <p style="line-height: 1em;">The model file, knn.bin, is in binary format.</p>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

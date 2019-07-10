@@ -1,0 +1,669 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="afk1507830462798"> </a>
+	  <h1>Pivoting</h1>
+
+	
+		<p style="line-height: 1em;">The Pivoting function pivots data that is stored in rows into columns. It outputs a table whose columns are based on the individual values from an input table column. The output table schema depends on the function syntax elements. The function handles missing or NULL values automatically.</p>
+
+		<p style="line-height: 1em;">The reverse of this function is Unpivoting.</p>
+
+	
+   <a name="ytw1507830537293"> </a>
+   <h2>Pivoting Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.8</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Pivoting (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY <i>partition_column</i> [,...]
+  [ ORDER BY <i>order_column</i> ]
+  USING
+  PartitionColumns ({ '<i>partition_column</i>' | <i>partition_column_range</i> }[,...])
+  { NumberOfRows (<i>number_of_rows</i>) |
+    PivotColumn ('<i>pivot_column</i>')
+    [ PivotKeys ('<i>pivot_key</i>' [,...]) ]
+    [ NumericPivotKey ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  }
+  TargetColumns ({ '<i>target_column</i>' | '<i>target_column_range</i>' }[,...])
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="nbu1507830542133"> </a>
+	  <h2>Pivoting Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>PartitionColumns</dt>
+      <dd>Specify the same columns as the PARTITION BY clause (in any order).</dd>
+      <dt>NumberOfRows</dt>
+      <dd>[Required if you omit PivotColumn.] Use NumberOfRows when no column contains pivot keys, but you can specify a maximum number of rows in any partition. The function pivots the input rows into this number of columns in the output table.<p style="line-height: 1em;">If a partition has fewer than <i>number_of_rows</i> rows, the function adds NULL values; if a partition has more than <i>number_of_rows</i> rows, the function omits the extra rows.</p>
+         <p style="line-height: 1em;">If you use NumberOfRows, you must use the ORDER BY clause to order the input data; otherwise, the contents of the output table columns may vary from run to run.</p>
+      </dd>
+      <dt>PivotColumn</dt>
+      <dd>[Required if you omit NumberOfRows.] Specify the name of the input column that contains the pivot keys.<p style="line-height: 1em;">If <i>pivot_column</i> contains numeric values, the function casts them to VARCHAR; function performance improves slightly if you specify NumericPivotKey ('true').</p>
+      </dd>
+      <dt>PivotKeys</dt>
+      <dd>[Required if you specify PivotColumn.] Specify the values in <i>pivot_column</i> to use as pivot keys. The function ignores rows that contain other values in <i>pivot_column</i>.</dd>
+      <dt>NumericPivotKey</dt>
+      <dd>[Optional] Use this syntax element only with the PivotColumn syntax element. If <i>pivot_column</i> is numeric, NumericPivotKey ('true') improves function performance slightly.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>TargetColumns</dt>
+      <dd>[Optional] Specify the names of the target columns (input columns that contain the values to pivot).</dd>
+   </div>
+
+
+	
+   <a name="yee1507830546124"> </a>
+   <h2>Pivoting Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>partition_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>partition_column</i>.] Column by which to partition input data.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>target_column</i>.] Values to pivot.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ozq1507830554815"> </a>
+   <h2>Pivoting Output</h2>
+   <a name="section_irx_xls_ycb"> </a>
+   <p style="line-height: 1em;">The output table schema depends on whether you specify the syntax element NumberOfRows or PivotColumn.</p>
+
+   <a name="section_zdq_tls_ycb"> </a>
+   <h3>Output Table Schema, NumberOfRows</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>partition_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>partition_column</i>.] Column by which input data is partitioned.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">value_<i>i</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears <i>number_of_rows</i> times.] Value in <i>i</i>th target column, where <i>i</i> is in range [0, <i>number_of_rows</i>-1]. Columns appear in order specified by ORDER BY clause.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_hcm_vls_ycb"> </a>
+   <h3>Output Table Schema, PivotColumn</h3>
+   <a name="table_zpv_3c2_ny"> </a>
+   <table class="introtable">
+      <a name="table_zpv_3c2_ny"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>partition_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>partition_column</i>.] Column by which input data is partitioned.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">value_<i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each <i>pivot_key</i>.] Values for <i>pivot_key</i> that are associated with partitions in row.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="sjk1510711610951"> </a>
+   <h2>Pivoting Examples</h2>
+   <a name="zkq1507830593775"> </a>
+   <h3>Pivoting Example: Pivot Keys</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example specifies the PivotColumn syntax element and, with the PivotKeys syntax element, the values from the pivot column to use as pivot keys. Because PivotKeys does not include 'dewpoint', the function ignores rows that include 'dewpoint'.</p>
+
+   <a name="section_i3w_1wr_t2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, pivot_input, contains temperature, pressure, and dewpoint data for three cities, in sparse format.</p>
+   <a name="table_udj_zh3_jfb"> </a>
+   <table class="introtable">
+      <a name="table_udj_zh3_jfb"> </a>
+      <h4 style="text-align: center;">pivot_input</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">sn</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">city</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">week</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">attribute</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">value</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Asheville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">temp</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Asheville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">pressure</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Asheville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">dewpoint</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">27.6F</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Asheville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">temp</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Asheville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">pressure</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1021.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Asheville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">dewpoint</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">27.4F</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Asheville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">temp</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">34</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Asheville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">pressure</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1021.7</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Asheville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">dewpoint</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">28.2F</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">temp</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">42</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">pressure</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1021</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">dewpoint</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">29.4F</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">temp</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">44</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">pressure</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1019.8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">dewpoint</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">29.2F</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Brownsville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">temp</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">47</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Brownsville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">pressure</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1019</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Brownsville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">dewpoint</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">28.9F</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Brownsville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">temp</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">46</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Brownsville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">pressure</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1019.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Brownsville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">dewpoint</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">28.9F</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_xmg_ttn_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Pivoting (
+  ON pivot_input PARTITION BY sn,city,week
+  ORDER BY week,attribute
+  USING
+  PartitionColumns ('sn','city', 'week')
+  NumberOfRows (3)
+  TargetColumns ('value1')
+) AS dt ORDER BY 1,2,3;</tt>
+   </pre>
+   <p>
+      <b>Note:</b>  The ORDER BY clause is required. If omitted, the output table column content is nondeterministic (for more information, see Nondeterministic Results and UniqueID Syntax Element).</p>
+   <a name="section_epw_ttn_xdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The function outputs the input column contents in dense format in the output columns value_temp and value_pressure, which contain the temperature and pressure, respectively. Because these values are numeric, the function casts them to VARCHAR.</p>
+   <pre>
+      <tt>
+ sn city        week value1_0 value1_1 value1_2 
+ -- ----------- ---- -------- -------- -------- 
+  1 asheville      1 27.6f    1020.8   32      
+  2 asheville      2 27.4f    1021.3   32      
+  3 asheville      3 28.2f    1021.7   34      
+  4 nashville      1 29.4f    1021     42      
+  5 nashville      2 29.2f    1019.8   44      
+  6 brownsville    2 28.9f    1019     47      
+  7 brownsville    3 28.9f    1019.2   46</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="upi1507830608678"> </a>
+	  <h3>Pivoting Example: NumberOfRows</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: pivot_input, as in Pivoting Example: Pivot Keys</li>
+   </ul>
+
+   <a name="section_xmg_ttn_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Pivoting (
+  ON pivot_input PARTITION BY sn,city,week
+  ORDER BY week,attribute
+  USING
+  PartitionColumns ('sn','city', 'week')
+  PivotKeys ('temp','pressure')
+  PivotColumn ('attribute')
+  TargetColumns ('value1')
+) AS dt ORDER BY 1,2,3;</tt>
+   </pre>
+   <p>
+      <b>Note:</b>  The ORDER BY clause is optional. If omitted, the order of values can vary. The function always adds any NULL values at the end.</p>
+   <a name="section_epw_ttn_xdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">To create the output table, the function pivots the input table on the partition columns (sn, city, and week) and outputs the contents of the target column (value) in dense format in the output columns value_0, value_1, and value_2, which contain the temperature, pressure, and dewpoint, respectively.</p>
+   <pre>
+      <tt>
+ sn city        week value1_pressure value1_temp 
+ -- ----------- ---- --------------- ----------- 
+  1 asheville      1 1020.8          32         
+  2 asheville      2 1021.3          32         
+  3 asheville      3 1021.7          34         
+  4 nashville      1 1021            42         
+  5 nashville      2 1019.8          44         
+  6 brownsville    2 1019            47         
+  7 brownsville    3 1019.2          46</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

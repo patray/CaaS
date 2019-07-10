@@ -1,0 +1,1796 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="copyright" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.rights.owner" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="KNN" />
+<meta name="abstract" content="This Machine Learning Engine function uses the kNN algorithm to classify new objects based on their proximity to already-classified objects." />
+<meta name="description" content="This Machine Learning Engine function uses the kNN algorithm to classify new objects based on their proximity to already-classified objects." />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="yqt1507665743867" />
+<meta name="DC.Language" content="en-us" />
+
+<link rel="stylesheet" type="text/css" href="css/normal_styles.css" />
+<title>KNN</title>
+</head>
+<body>
+<div class="nested0" aria-labelledby="ariaid-title1" topicindex="1" topicid="yqt1507665743867" id="yqt1507665743867">
+	<h1 class="title topictitle1" id="ariaid-title1">KNN</h1>
+
+	<div class="body conbody"><p class="p">The KNN function uses training data objects to map test data objects to categories. The function is optimized for both small and large training sets. The function supports user-defined distance metrics and distance-weighted voting.</p>
+<div class="fig fignone" id="yqt1507665743867__fig_rl3_3pm_nw"><div class="caption"></div><br /><img class="image" id="yqt1507665743867__image_wzp_3pm_nw" src="qaf1466005396715.svg" alt="How Machine Learning Engine function KNN works" /><br /></div>
+</div>
+
+<div class="topic reference nested1" aria-labelledby="ariaid-title2" topicindex="2" topicid="fhn1507665778818" xml:lang="en-us" lang="en-us" id="fhn1507665778818"><h2 class="title topictitle2" id="ariaid-title2">KNN Syntax</h2>
+<div class="body refbody"><div class="section" id="fhn1507665778818__section_N1000E_N1000C_N10001"><h3 class="title sectiontitle">Version 2.3</h3><pre class="pre codeblock"><code>SELECT * FROM KNN (
+  ON <var class="keyword varname">training_table</var> AS TrainingData
+  ON <var class="keyword varname">test_table</var> AS TestData
+  [ OUT TABLE OutputTable (<var class="keyword varname">output_table</var>) ]
+  USING
+  K (<var class="keyword varname">k</var>)
+  ResponseColumn ('<var class="keyword varname">response_column</var>')
+  IDColumn ('<var class="keyword varname">test_id_column</var>')
+  DistanceFeatures ({ '<var class="keyword varname">df_column</var>' | <var class="keyword varname">df_column_range</var> }[,... ])
+  [ VotingWeight (<var class="keyword varname">voting_weight</var>) ]
+  [ CustomizedDistance ('<var class="keyword varname">jar</var>', '<var class="keyword varname">distance_class</var>') ]
+  [ ForceMapReduce (<span class="keyword">{'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}</span>) ]
+  [ PartitionColumn ('<var class="keyword varname">partition_column</var>') ]
+  [ PartitionBlockSize (<var class="keyword varname">partition_block_size</var>) ]
+  [ OutputProb (<span class="keyword">{'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}</span>) ]
+  <code class="ph codeph">[ Accumulate ({ '<var class="keyword varname">accumulate_column</var>' | <var class="keyword varname">accumulate_column_range</var> }[,...]) ]</code>
+) AS <var class="keyword varname">alias</var>;</code></pre></div>
+</div>
+<div class="related-links">
+<div class="linklistheader">Related Information</div>
+<ul class="linklist linklist relinfo">
+<div class="linklistmember"><a class="link" href="ndv1557782188375.html" title="See the syntax details for Machine Learning Engine analytic functions with syntax elements that specify ( {'column' | column_range }[,...] ).">Column Specification Syntax Elements</a></div></ul>
+</div></div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title3" topicindex="3" topicid="yhy1507665793670" xml:lang="en-us" lang="en-us" id="yhy1507665793670">
+	<h2 class="title topictitle2" id="ariaid-title3">KNN Syntax Elements</h2>
+
+	<div class="body refbody">
+		<div class="section" id="yhy1507665793670__section_N10011_N1000E_N10001"><dl class="dl parml"><dt class="dt pt dlterm">OutputTable</dt>
+<dd class="dd pd">[Optional] Specify the name of the output table.</dd>
+<dd class="dd pd ddexpand">Default behavior: The function displays the output to the screen.</dd>
+<dt class="dt pt dlterm">K</dt>
+<dd class="dd pd">Specify the number of nearest neighbors to use for classifying the test data. The choice of K presents a bias-variance trade-off. A higher value of K typically results in lower variance and smoother neighboring boundaries but increases bias, and the reverse. If there are more than K neighbors at the same distance, K nearest neighbors are randomly chosen. This adds nondeterminism to the algorithm and may result in variation in classification results. To ensure deterministic behavior, use the <a class="xref" href="fdw1549987717481.html" title="Learn how UniqueID and Seed syntax elements guarantee repeatable results from ML Engine analytic function with same input tables and syntax element values.">UniqueID Syntax Element</a>.</dd>
+<dt class="dt pt dlterm">ResponseColumn</dt>
+<dd class="dd pd">Specify the name of the TrainingData column that contains the class label or classification of the classified data objects.</dd>
+<dt class="dt pt dlterm">IDColumn</dt>
+<dd class="dd pd">Specify the name of the TestData column that uniquely identifies a data object.</dd>
+<dt class="dt pt dlterm">DistanceFeatures</dt>
+<dd class="dd pd">Specify the names of the TrainingData columns that the function uses to compute the distance between a test object and the training objects. The TestData table must also have these columns.<div class="note note" id="yhy1507665793670__note_N1005A_N10056_N1004F_N10018_N10014_N10010_N10001"><span class="notetitle">Note</span><div class="notebody"><ul class="ul" id="yhy1507665793670__ul_tmc_fym_bhb"><li class="li">A null value in a column is treated as infinite distance.</li>
+<li class="li">While computing nearest neighbors, the function considers only neighbors from training data, not the already predicted neighbors from testing data.</li>
+<li class="li">If different features have different units of measurement, Teradata recommends normalizing all data points to be in the range [0,1].</li>
+<li class="li">As the number of DistanceFeatures increases, the distances between all data points become small and the usefulness of the distance measure decreases. If necessary, reduce the number of features for distance computation by using feature selection or dimensionality reduction methods.</li>
+</ul>
+</div></div>
+</dd>
+<dt class="dt pt dlterm">VotingWeight</dt>
+<dd class="dd pd">[Optional] Specify the voting weight of the distance between a test object and the training objects. The <var class="keyword varname">voting_weight</var> must be a nonnegative integer.</dd>
+<dd class="dd pd ddexpand">The function calculates distance-weighted voting, <var class="keyword varname">w</var>, with this equation:<p class="p"><code class="ph codeph"><var class="keyword varname">w</var> = 1/POWER(<var class="keyword varname">distance</var>, <var class="keyword varname">voting_weight</var>)</code></p>
+</dd>
+<dd class="dd pd ddexpand">Where <var class="keyword varname">distance</var> is the distance between the test object and the training object.</dd>
+<dd class="dd pd ddexpand">Default: 0</dd>
+<dt class="dt pt dlterm">CustomizedDistance</dt>
+<dd class="dd pd">[Optional] Specify the distance function. The parameter jar is the name of the JAR file that contains the distance metric class. The parameter <var class="keyword varname">distance_class</var> is the distance metric class defined in the jar file. This JAR file must be installed on <span class="keyword">ML Engine</span>.</dd>
+<dd class="dd pd ddexpand">Default: Euclidean distance</dd>
+<dd class="dd pd ddexpand"><div class="note note" id="yhy1507665793670__note_N10015_N10011_N1000E_N10001"><span class="notetitle">Note</span><div class="notebody"><span class="keyword">ML Engine</span> does not support the creation of new customized distance classes. However, it does support existing JAR files—for installation instructions, see <span class="ph"><cite class="cite">Teradata Vantage™ User Guide</cite>, B700-4002</span>.</div></div>
+</dd>
+<dt class="dt pt dlterm">ForceMapReduce</dt>
+<dd class="dd pd">[Optional] Specify whether to partition the training data. If you specify 'true', the KNN function partitions the training data and uses the map-and reduce function.</dd>
+<dd class="dd pd ddexpand">Default: 'false' (The function loads all training data into memory and uses only the row function.)<div class="note note" id="yhy1507665793670__note_N100C7_N100C3_N100B8_N10018_N10014_N10010_N10001"><span class="notetitle">Note</span><div class="notebody">If you specify ForceMapReduce, you must also specify PartitionColumn.</div></div>
+</dd>
+<dt class="dt pt dlterm">PartitionColumn</dt>
+<dd class="dd pd">[Required if ForceMapReduce is true, ignored otherwise.] Specify name of column by which input table can be uniformly partitioned. The <var class="keyword varname">partition_column</var> must contain INTEGER, BIGINT, or BYTEINT values. A unique identifier for each row results in more uniformed partitioning, for better performance.</dd>
+<dt class="dt pt dlterm">PartitionBlockSize</dt>
+<dd class="dd pd">[Optional] Specify the partition block size to use with ForceMapReduce ('true'). Specifying an optimal value for this syntax element may improve performance. The optimal value depends on the size of the training data and the vworker configuration. Because rows in a partition are processed together, a higher value improves performance, but the maximum value is limited by the memory of the vworker. For example, if the training data set has 1024 rows, specifying PartitionBlockSize('16') partitions the input data into 64 partitions of 16 rows each. Similarly, PartitionBlockSize('128') creates 8 (1024/128) partitions of 128 rows each. The partitions are distributed evenly across the number of vworkers available.</dd>
+<dd class="dd pd ddexpand">If you omit this syntax element, the function calculates the partition block size that best fits available memory. The calculated value is optimal if <var class="keyword varname">partition_column</var> has a unique INTEGER for each row.</dd>
+<dt class="dt pt dlterm">OutputProb</dt>
+<dd class="dd pd">Specify whether to output the calculated probability for each selected response.</dd>
+<dd class="dd pd ddexpand">Default: 'false'</dd>
+<dt class="dt pt dlterm">Accumulate</dt>
+<dd class="dd pd">Specify the names of the TrainingTable columns to copy to OutputTable.</dd>
+</dl>
+</div>
+
+	</div>
+
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title4" topicindex="4" topicid="kgi1507666508410" xml:lang="en-us" lang="en-us" id="kgi1507666508410"><h2 class="title topictitle2" id="ariaid-title4">KNN Input</h2>
+<div class="body refbody"><div class="section" id="kgi1507666508410__section_N1000E_N1000C_N10001"><h3 class="title sectiontitle">TrainingData Schema</h3><p class="p"><span class="ph">The table can have additional columns, but the function ignores them.</span></p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="kgi1507666508410__table_N10017_N1000E_N1000C_N10001" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:23.076923076923077%" /><col style="width:15.384615384615385%" /><col style="width:61.53846153846154%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry nocellnorowborder" style="vertical-align:top;" id="d372586e325">Column</th>
+<th class="entry nocellnorowborder" style="vertical-align:top;" id="d372586e327">Data Type</th>
+<th class="entry cell-norowborder" style="vertical-align:top;" id="d372586e329">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d372586e325 "><var class="keyword varname">id_column</var></td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d372586e327 ">Any</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d372586e329 ">Unique row identifier.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d372586e325 "><var class="keyword varname">df_column</var></td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d372586e327 ">INTEGER, BIGINT, SMALLINT, or NUMERIC</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d372586e329 ">Column that function uses to compute distance between a test object and the training objects. TestData must have a column with the same name and data type.</td>
+</tr>
+<tr class="row"><td class="entry row-nocellborder" style="vertical-align:top;" headers="d372586e325 "><var class="keyword varname">response_column</var></td>
+<td class="entry row-nocellborder" style="vertical-align:top;" headers="d372586e327 ">VARCHAR</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e329 ">Class label or classification of classified data object.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="kgi1507666508410__section_s5x_mfw_xcb"><h3 class="title sectiontitle">TestData Schema</h3><p class="p"><span class="ph">The table can have additional columns, but the function ignores them.</span></p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="kgi1507666508410__table_N10071_N1000E_N1000C_N10001" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:23.076923076923077%" /><col style="width:15.384615384615385%" /><col style="width:61.53846153846154%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry nocellnorowborder" style="vertical-align:top;" id="d372586e369">Column</th>
+<th class="entry nocellnorowborder" style="vertical-align:top;" id="d372586e371">Data Type</th>
+<th class="entry cell-norowborder" style="vertical-align:top;" id="d372586e373">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d372586e369 "><var class="keyword varname">df_column</var></td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d372586e371 ">INTEGER, BIGINT, SMALLINT, or NUMERIC</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d372586e373 ">Column that function uses to compute distance between a test object and the training objects. TrainingData must have a column with the same name and data type.</td>
+</tr>
+<tr class="row"><td class="entry row-nocellborder" style="vertical-align:top;" headers="d372586e369 "><var class="keyword varname">test_id_column</var></td>
+<td class="entry row-nocellborder" style="vertical-align:top;" headers="d372586e371 ">Any</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e373 ">Unique test data object identifier.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title5" topicindex="5" topicid="sil1507666521245" xml:lang="en-us" lang="en-us" id="sil1507666521245"><h2 class="title topictitle2" id="ariaid-title5">KNN Output</h2>
+<div class="body refbody"><div class="section" id="sil1507666521245__section_N1000E_N1000C_N10001"><p class="p">By default, the KNN function outputs a table to the screen. If you specify an output table name, the function outputs a message to the screen and creates an output table with the specified name.</p>
+</div>
+<div class="section" id="sil1507666521245__section_dwv_tfw_xcb"><h3 class="title sectiontitle">Output Message Schema</h3>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="sil1507666521245__table_sfn_3ps_rcb" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /><col style="width:33.33333333333333%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d372586e414">Column</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d372586e416">Data Type</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d372586e418">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e414 ">message</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e416 ">VARCHAR</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e418 ">Reports that final result is stored in table specified in OutputTable syntax element.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="sil1507666521245__section_vyp_5fw_xcb"><h3 class="title sectiontitle">OutputTable Schema</h3>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="sil1507666521245__table_N10014_N1000E_N1000C_N10001" class="table" frame="border" border="1" rules="all"><div class="caption"></div><colgroup><col style="width:23.076923076923077%" /><col style="width:15.384615384615385%" /><col style="width:61.53846153846154%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry nocellnorowborder" style="vertical-align:top;" id="d372586e438">Column</th>
+<th class="entry nocellnorowborder" style="vertical-align:top;" id="d372586e440">Data Type</th>
+<th class="entry cell-norowborder" style="vertical-align:top;" id="d372586e442">Description</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d372586e438 "><var class="keyword varname">test_id_column</var></td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d372586e440 ">Same as in test table</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d372586e442 ">Unique test data object identifier.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d372586e438 ">category</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d372586e440 ">VARCHAR</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d372586e442 ">Category from TrainingData <var class="keyword varname">response_column</var> to which function mapped test data object.</td>
+</tr>
+<tr class="row"><td class="entry nocellnorowborder" style="vertical-align:top;" headers="d372586e438 ">prob</td>
+<td class="entry nocellnorowborder" style="vertical-align:top;" headers="d372586e440 ">DOUBLE PRECISION</td>
+<td class="entry cell-norowborder" style="vertical-align:top;" headers="d372586e442 ">Probability that document belongs to category.</td>
+</tr>
+<tr class="row"><td class="entry row-nocellborder" style="vertical-align:top;" headers="d372586e438 "><var class="keyword varname">accumulate_column</var></td>
+<td class="entry row-nocellborder" style="vertical-align:top;" headers="d372586e440 ">Same as in input table</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e442 ">Column copied from TrainingTable.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="topic reference nested1" aria-labelledby="ariaid-title6" topicindex="6" topicid="kfy1507666550824" xml:lang="en-us" lang="en-us" id="kfy1507666550824"><h2 class="title topictitle2" id="ariaid-title6">KNN Example</h2>
+<div class="body refbody"><div class="section" id="kfy1507666550824__section_olm_lyf_n2b"><h3 class="title sectiontitle">Input</h3><p class="p">The TrainingData table has as dimensions five attributes of personal computers—price, speed, hard disk size, RAM, and screen size. The table has 5008 rows, categorized into eight price categories.</p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="kfy1507666550824__table_vz4_xyf_n2b" class="table" frame="border" border="1" rules="all"><div class="caption"><span class="tablecap">TrainingTable: computers_train1_clustered</span></div><colgroup><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /><col style="width:14.285714285714285%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d372586e516">id</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d372586e518">price</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d372586e520">speed</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d372586e522">hd</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d372586e524">ram</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d372586e526">screen</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d372586e528">computer_category</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e516 ">1</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e518 ">1499</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e520 ">25</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e522 ">80</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e524 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e526 ">14</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e528 ">SPECIAL</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e516 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e518 ">1795</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e520 ">33</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e522 ">85</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e524 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e526 ">14</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e528 ">SUPER</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e516 ">3</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e518 ">1595</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e520 ">25</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e522 ">170</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e524 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e526 ">15</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e528 ">SPECIAL</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e516 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e518 ">1849</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e520 ">25</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e522 ">170</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e524 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e526 ">14</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e528 ">SUPER</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e516 ">5</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e518 ">3295</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e520 ">33</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e522 ">340</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e524 ">16</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e526 ">14</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e528 ">HYPER</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e516 ">6</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e518 ">3695</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e520 ">66</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e522 ">340</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e524 ">16</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e526 ">14</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e528 ">UBER</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e516 ">7</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e518 ">1720</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e520 ">25</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e522 ">170</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e524 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e526 ">14</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e528 ">SPECIAL</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e516 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e518 ">1995</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e520 ">50</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e522 ">85</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e524 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e526 ">14</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e528 ">SUPER</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e516 ">9</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e518 ">2225</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e520 ">50</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e522 ">210</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e524 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e526 ">14</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e528 ">SUPER</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e516 ">12</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e518 ">2605</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e520 ">66</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e522 ">210</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e524 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e526 ">14</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e528 ">MEGA</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e516 ">13</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e518 ">2045</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e520 ">50</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e522 ">130</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e524 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e526 ">14</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e528 ">SUPER</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e516 ">14</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e518 ">2295</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e520 ">25</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e522 ">245</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e524 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e526 ">14</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e528 ">MEGA</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e516 ">16</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e518 ">2225</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e520 ">50</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e522 ">130</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e524 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e526 ">14</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e528 ">SUPER</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e516 ">17</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e518 ">1595</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e520 ">33</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e522 ">85</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e524 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e526 ">14</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e528 ">SPECIAL</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e516 ">18</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e518 ">2325</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e520 ">33</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e522 ">210</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e524 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e526 ">15</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e528 ">MEGA</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e516 ">19</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e518 ">2095</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e520 ">33</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e522 ">250</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e524 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e526 ">15</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e528 ">SUPER</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e516 ">20</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e518 ">4395</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e520 ">66</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e522 ">452</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e524 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e526 ">14</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e528 ">UBER</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e516 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e518 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e520 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e522 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e524 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e526 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e528 ">...</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">The TestData table has more than 1000 rows.</p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="kfy1507666550824__table_wkw_bzf_n2b" class="table" frame="border" border="1" rules="all"><div class="caption"><span class="tablecap">TestData: computers_test1</span></div><colgroup><col style="width:16.666666666666664%" /><col style="width:16.666666666666664%" /><col style="width:16.666666666666664%" /><col style="width:16.666666666666664%" /><col style="width:16.666666666666664%" /><col style="width:16.666666666666664%" /></colgroup><thead class="thead" style="text-align:left;"><tr class="row"><th class="entry cellrowborder" style="vertical-align:top;" id="d372586e816">id</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d372586e818">price</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d372586e820">speed</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d372586e822">hd</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d372586e824">ram</th>
+<th class="entry cellrowborder" style="vertical-align:top;" id="d372586e826">screen</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e816 ">10</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e818 ">2575</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e820 ">50</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e822 ">210</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e824 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e826 ">15</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e816 ">11</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e818 ">2195</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e820 ">33</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e822 ">170</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e824 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e826 ">15</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e816 ">15</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e818 ">2699</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e820 ">50</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e822 ">212</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e824 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e826 ">14</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e816 ">29</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e818 ">3095</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e820 ">33</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e822 ">340</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e824 ">16</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e826 ">14</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e816 ">30</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e818 ">3244</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e820 ">66</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e822 ">245</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e824 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e826 ">14</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e816 ">38</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e818 ">3795</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e820 ">66</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e822 ">500</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e824 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e826 ">14</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e816 ">45</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e818 ">3495</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e820 ">50</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e822 ">340</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e824 ">16</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e826 ">14</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e816 ">46</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e818 ">2695</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e820 ">33</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e822 ">245</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e824 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e826 ">14</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e816 ">48</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e818 ">1749</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e820 ">25</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e822 ">120</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e824 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e826 ">14</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e816 ">51</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e818 ">2499</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e820 ">33</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e822 ">170</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e824 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e826 ">14</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e816 ">52</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e818 ">2395</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e820 ">33</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e822 ">130</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e824 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e826 ">14</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e816 ">59</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e818 ">2945</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e820 ">66</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e822 ">210</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e824 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e826 ">17</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e816 ">65</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e818 ">2195</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e820 ">66</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e822 ">85</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e824 ">2</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e826 ">14</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e816 ">66</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e818 ">1495</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e820 ">25</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e822 ">170</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e824 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e826 ">14</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e816 ">70</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e818 ">3095</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e820 ">66</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e822 ">245</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e824 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e826 ">14</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e816 ">86</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e818 ">1999</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e820 ">33</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e822 ">120</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e824 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e826 ">14</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e816 ">91</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e818 ">2975</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e820 ">50</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e822 ">210</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e824 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e826 ">17</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e816 ">92</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e818 ">2145</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e820 ">66</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e822 ">130</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e824 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e826 ">14</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e816 ">93</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e818 ">2420</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e820 ">33</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e822 ">170</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e824 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e826 ">15</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e816 ">94</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e818 ">2505</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e820 ">50</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e822 ">210</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e824 ">8</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e826 ">14</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e816 ">104</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e818 ">2999</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e820 ">66</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e822 ">330</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e824 ">4</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e826 ">15</td>
+</tr>
+<tr class="row"><td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e816 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e818 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e820 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e822 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e824 ">...</td>
+<td class="entry cellrowborder" style="vertical-align:top;" headers="d372586e826 ">...</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="kfy1507666550824__section_ttv_lyf_n2b"><h3 class="title sectiontitle">SQL Call</h3><pre class="pre codeblock"><code>SELECT * FROM KNN (
+  ON computers_train1_clustered AS TrainingData
+  ON computers_test1 AS TestData
+  OUT TABLE OutputTable (knn_output)
+  USING
+  K (50)
+  ResponseColumn ('computer_category')
+  DistanceFeatures ('price', 'speed', 'hd', 'ram', 'screen')
+  VotingWeight (1)
+  IDColumn ('id')
+  OutputProb ('t')
+  Accumulate ('price')
+) AS dt;</code></pre></div>
+<div class="section" id="kfy1507666550824__section_ijj_myf_n2b"><h3 class="title sectiontitle">Output</h3><pre class="pre screen"> message                                                                                 
+ --------------------------------------------------------------------------------------- 
+ Successful!                                                                            
+ The final result is successfully stored in the table specified in OutputTable argument.</pre>
+<pre class="pre codeblock"><code>SELECT * FROM knn_output;</code></pre><pre class="pre screen"> id   computer_category prob               price  
+ ---- ----------------- ------------------ ------ 
+ 3140 special                          1.0 1744.0
+ 2854 special                          1.0 1490.0
+ 5117 ultra                            1.0 1989.0
+ 2894 hyper                            1.0 2795.0
+ 3933 mega                             1.0 2625.0
+ 5420 ultra             0.7370506445661914 2148.0
+ 1710 hyper                            1.0 2794.0
+ 4930 hyper              0.743637424937478 2740.0
+ 3973 special                          1.0 1590.0
+ 5628 ultra                            1.0 1749.0
+ 1933 super                            1.0 1944.0
+  217 mega              0.9295850957858266 2295.0
+  463 uber                             1.0 3495.0
+ 2623 special                          1.0 1495.0
+ 4276 super                            1.0 1840.0
+ 5763 ultra                            1.0 1799.0
+ 3786 mega                             1.0 2399.0
+  978 super                            1.0 2095.0
+ 5212 ultra                            1.0 1898.0
+ 2038 mega                             1.0 2295.0
+ 3662 special                          1.0 1744.0
+ 4484 special                          1.0 1349.0
+ 1479 special                          1.0 1499.0
+  846 special                          1.0 1694.0
+ 3750 ultra                            1.0 2127.0
+ 2253 hyper                            1.0 2890.0
+  112 super                            1.0 2095.0
+ 5197 ultrasuper                       1.0 2090.0
+ 3435 super                            1.0 1995.0
+ 2293 super                            1.0 1990.0
+ 1546 mega                             1.0 2375.0
+ 2137 uber                             1.0 3544.0
+ 1782 ultra                            1.0 1795.0
+ 1647 special                          1.0 1299.0
+ 2116 super                            1.0 1890.0
+ 3269 mega                             1.0 2344.0
+ 4411 extreme                          1.0 3004.0
+ 3452 mega                             1.0 2429.0
+  953 special                          1.0 1595.0
+ 3073 hyper                            1.0 3019.0
+ 4909 special                          1.0 1499.0
+ 2085 hyper             0.7089358707927605 2743.0
+ 5479 ultra                            1.0 1659.0
+ 2093 super                            1.0 1944.0
+ 1929 mega                             1.0 2359.0
+ 1452 special                          1.0 1599.0
+ 3877 special                          1.0 1249.0
+ 2348 ultra             0.7370484028808403 1695.0
+ 3782 super                            1.0 2093.0
+ 6161 ultrasuper                       1.0 2154.0
+  152 super             0.9667780039121142 2225.0
+  623 mega                             1.0 2299.0
+ 4638 special           0.9639351713696613 1745.0
+ 6018 ultra                            1.0 1873.0
+ 3088 super                            1.0 1795.0
+ 3795 hyper                            1.0 2999.0
+ 5953 ultrasuper                       1.0 2404.0
+ 4161 hyper                            1.0 3208.0
+ 6085 ultra                            1.0 1595.0
+  918 super                            1.0 2109.0
+ 5850 super             0.9804432300013687 1881.0
+ 5229 mega                             1.0 2198.0
+ 6176 special                          1.0 1395.0
+ 4811 special                          1.0 1740.0
+ 6033 special            0.951884476896399 1499.0
+ 2731 mega                             1.0 2569.0
+ 3810 extreme           0.9142640958159833 3415.0
+ 3719 special                          1.0 1594.0
+ 4981 special                          1.0 1418.0
+ 5309 hyper                            1.0 2690.0
+ 2901 special                          1.0 1594.0
+ 1679 hyper                            1.0 2890.0
+ 6256 ultrasuper                       1.0 2223.0
+ 2739 mega                             1.0 2295.0
+ 2626 uber                             1.0 3799.0
+ 1587 hyper                            1.0 3015.0
+ 4001 mega                             1.0 2359.0
+ 2779 mega                             1.0 2595.0
+ 4897 ultra                            1.0 2094.0
+  209 mega              0.9685883812705868 2295.0
+  626 uber                             1.0 3595.0
+ 1269 mega                             1.0 2295.0
+ 2327 mega                             1.0 2644.0
+   45 uber              0.8872700371272975 3495.0
+  777 super                            1.0 2244.0
+  432 mega              0.7105468993099037 2695.0
+ 1307 hyper                            1.0 2690.0
+ 5480 ultra                            1.0 1754.0
+ 3774 super                            1.0 2099.0
+ 1707 hyper                            1.0 2834.0
+ 4100 extreme                          1.0 2943.0
+ 5663 ultra                            1.0 1799.0
+ 5049 special                          1.0 1195.0
+  125 mega                             1.0 2420.0
+  184 mega                             1.0 2644.0
+ 5488 special                          1.0 1699.0
+ 2794 mega                             1.0 2319.0
+ 4153 mega                             1.0 2345.0
+ 2590 special                          1.0 1559.0
+ 1368 special                          1.0 1644.0
+   92 super                            1.0 2145.0
+ 4193 extreme                          1.0 3190.0
+ 2355 special                          1.0 1558.0
+ 1408 hyper                            1.0 2744.0
+ 6248 ultra                            1.0 1654.0
+  420 super                            1.0 2195.0
+  618 mega              0.6594435849093744 2275.0
+  643 super                            1.0 1899.0
+ 1005 special                          1.0 1544.0
+ 5169 ultra                            1.0 1790.0
+  658 special                          1.0 1395.0
+  723 mega                             1.0 2648.0
+ 1650 super                            1.0 2194.0
+ 1324 super                            1.0 2044.0
+ 5224 ultra                            1.0 1695.0
+ 3249 mega                             1.0 2645.0
+ 4591 ultra                            1.0 1999.0
+  149 super                            1.0 1975.0
+ 1491 hyper                            1.0 3090.0
+ 4185 ultra                            1.0 1744.0
+ 1857 uber                             1.0 3714.0
+ 4042 hyper                            1.0 3044.0
+ 2387 hyper                            1.0 3090.0
+ 2818 mega                             1.0 2344.0
+ 3304 special                          1.0 1490.0
+ 2117 special                          1.0 1520.0
+ 5710 ultra                            1.0 1715.0
+ 3081 special                          1.0 1195.0
+  204 special                          1.0 1499.0
+ 5257 ultra                            1.0 1973.0
+ 2467 super             0.8899599376177142 1784.0
+ 4380 super                            1.0 2049.0
+ 4969 ultrasuper                       1.0 2040.0
+ 6118 extreme                          1.0 2790.0
+ 3806 ultra                            1.0 1899.0
+ 4568 ultra                            1.0 1945.0
+ 3220 special                          1.0 1259.0
+ 2563 special                          1.0 1744.0
+ 2770 special                          1.0 1295.0
+ 1930 super                            1.0 2049.0
+  526 hyper                            1.0 2999.0
+ 1691 mega                             1.0 2394.0
+ 3523 super                            1.0 2094.0
+ 4050 mega                             1.0 2599.0
+ 5929 extreme                          1.0 2994.0
+ 2301 super                            1.0 1804.0
+ 2156 mega                             1.0 2495.0
+ 5584 ultra                            1.0 1775.0
+ 2578 hyper                            1.0 2744.0
+ 2763 mega                             1.0 2190.0
+  885 hyper                            1.0 3144.0
+ 1117 mega              0.8014108362616686 2644.0
+ 4555 special                          1.0 1448.0
+ 2747 mega                             1.0 2389.0
+ 3826 extreme                          1.0 2945.0
+  763 special                          1.0 1695.0
+ 4152 extreme           0.9490290949188476 2740.0
+ 2930 hyper                            1.0 2890.0
+  236 mega                             1.0 2295.0
+ 5962 special                          1.0 1295.0
+  562 super                            1.0 2195.0
+ 5472 ultra                            1.0 2048.0
+ 2499 ultra             0.9684287042115245 1799.0
+   93 mega                             1.0 2420.0
+ 3268 hyper                            1.0 2995.0
+ 3273 hyper                            1.0 3129.0
+ 5878 ultra                            1.0 1799.0
+ 2492 mega                             1.0 2504.0
+ 1228 mega                             1.0 2290.0
+  539 uber                             1.0 3599.0
+ 2084 super                            1.0 2095.0
+ 3536 super              0.678745741118563 2244.0
+ 4734 ultra                            1.0 2004.0
+  579 hyper                            1.0 2790.0
+ 5208 special                          1.0 1499.0
+ 1496 hyper                            1.0 2690.0
+ 5065 ultrasuper                       1.0 2248.0
+ 5839 extreme           0.9559462674278717 2744.0
+  762 special                          1.0 1590.0
+ 1332 super                            1.0 1799.0
+ 4758 extreme                          1.0 3143.0
+  312 mega                             1.0 2599.0
+ 1801 uber                             1.0 3708.0
+ 3611 super                            1.0 1995.0
+ 3248 mega                             1.0 2395.0
+  739 mega                             1.0 2495.0
+ 5511 extreme            0.958693908614456 2740.0
+ 4775 ultrasuper                       1.0 2199.0
+ 5368 ultra                            1.0 1890.0
+ 1818 uber                             1.0 3544.0
+ 5061 special                          1.0 1399.0
+ 3448 mega                             1.0 2669.0
+ 3977 hyper                            1.0 3044.0
+ 1225 uber                             1.0 3609.0
+ 1754 mega                             1.0 2565.0
+ 5894 special                          1.0 1449.0
+ 3527 super                            1.0 1890.0
+ 5751 ultrasuper                       1.0 2204.0
+ 2144 super                            1.0 1999.0
+ 2121 super                            1.0 2195.0
+  594 special                          1.0 1599.0
+  484 super                            1.0 1999.0
+ 4770 extreme                          1.0 3193.0
+ 5871 ultra                            1.0 1908.0
+  634 special                          1.0 1399.0
+ 2440 super                            1.0 1894.0
+ 1180 super                            1.0 2199.0
+ 4544 special                          1.0 1499.0
+ 1363 super                            1.0 2099.0
+ 4870 ultrasuper                       1.0 2245.0
+ 1220 super                            1.0 2015.0
+ 5416 extreme                          1.0 2990.0
+ 4344 special                          1.0 1740.0
+ 3177 hyper                            1.0 2744.0
+  913 special                          1.0 1599.0
+ 3050 special                          1.0 1644.0
+  367 super                            1.0 2099.0
+ 3217 hyper                            1.0 3249.0
+ 3563 super                            1.0 2044.0
+ 4277 ultra                            1.0 1999.0
+ 4260 hyper                            1.0 2988.0
+  356 hyper                            1.0 2799.0
+  156 mega                             1.0 2575.0
+ 5902 ultrasuper                       1.0 2204.0
+ 2419 hyper                            1.0 2699.0
+ 3520 hyper                            1.0 2925.0
+ 2790 mega                             1.0 2620.0
+ 4580 mega                             1.0 2499.0
+ 1566 mega                             1.0 2329.0
+ 2026 mega                             1.0 2244.0
+ 5109 ultrasuper                       1.0 2390.0
+ 4432 ultrasuper                       1.0 2393.0
+ 1606 mega                             1.0 2494.0
+ 1862 mega                             1.0 2375.0
+ 1993 special                          1.0 1395.0
+ 3799 ultra                            1.0 1854.0
+ 3925 special                          1.0 1199.0
+ 3982 special                          1.0 1595.0
+ 2905 special                          1.0 1555.0
+ 2289 super                            1.0 2100.0
+ 6045 ultrasuper                       1.0 2390.0
+  866 super                            1.0 1895.0
+ 1538 special                          1.0 1699.0
+ 4245 extreme                          1.0 2890.0
+ 5152 extreme                          1.0 2754.0
+ 1288 special           0.9039290855124431 1749.0
+ 2455 special                          1.0 1399.0
+ 5779 ultrasuper                       1.0 2490.0
+ 3025 mega                             1.0 2544.0
+ 3408 special                          1.0 1599.0
+ 4599 super                            1.0 2049.0
+ 6145 special                          1.0 1345.0
+ 5638 ultra                            1.0 1704.0
+ 1169 super                            1.0 2145.0
+ 2758 ultra             0.7370484028808403 1695.0
+ 3615 uber                             1.0 3659.0
+ 5495 special                          1.0 1490.0
+ 1591 super                            1.0 1799.0
+ 1192 special                          1.0 1639.0
+ 3125 ultra                            1.0 1999.0
+ 1905 mega                             1.0 2595.0
+ 4424 ultrasuper                       1.0 2490.0
+  554 super                            1.0 1890.0
+ 3022 hyper                            1.0 2869.0
+ 5917 ultra                            1.0 2108.0
+  304 hyper                            1.0 2799.0
+ 1945 hyper                            1.0 3044.0
+  691 mega                             1.0 2299.0
+  104 hyper                            1.0 2999.0
+ 6237 extreme                          1.0 2790.0
+ 4595 mega                             1.0 2299.0
+ 2408 hyper                            1.0 2744.0
+ 4304 super                            1.0 2099.0
+ 4197 mega                             1.0 2449.0
+  128 mega              0.9295850957858266 2295.0
+ 5731 extreme                          1.0 2994.0
+ 3997 super                            1.0 2154.0
+ 1053 super                            1.0 1999.0
+ 2391 ultra                            1.0 1995.0
+ 5293 special                          1.0 1399.0
+ 3451 super             0.5980694987991642 1879.0
+ 4946 special                          1.0 1690.0
+ 2487 special                          1.0 1599.0
+  153 uber                             1.0 3599.0
+  447 super             0.9782903984864622 2220.0
+ 5596 ultra                            1.0 1795.0
+ 4300 super                            1.0 1918.0
+  496 super                            1.0 1999.0
+ 4957 mega                             1.0 2199.0
+ 4675 super                            1.0 2099.0
+ 5140 mega              0.9269541335944028 2199.0
+ 5285 special                          1.0 1295.0
+ 5874 ultra                            1.0 1699.0
+ 1165 super                            1.0 1975.0
+ 3447 special                          1.0 1644.0
+ 5018 extreme                          1.0 2993.0
+ 3630 mega                             1.0 2315.0
+ 5914 ultra                            1.0 1704.0
+ 5806 ultrasuper                       1.0 2323.0
+ 3996 extreme                          1.0 3299.0
+ 2399 super                            1.0 2090.0
+ 4892 ultra                            1.0 2004.0
+ 3459 mega                             1.0 2259.0
+ 4972 special                          1.0 1579.0
+ 5579 mega                             1.0 2308.0
+  749 special                          1.0 1690.0
+  746 uber                             1.0 4248.0
+ 3155 super                            1.0 2090.0
+ 3152 hyper                            1.0 2819.0
+ 3725 special                          1.0 1690.0
+ 2845 hyper                            1.0 2895.0
+ 5315 special                          1.0 1640.0
+ 4822 ultrasuper                       1.0 2544.0
+ 3609 special                          1.0 1695.0
+ 6208 ultrasuper                       1.0 2323.0
+  856 mega                             1.0 2590.0
+   48 special           0.6572238590173166 1749.0
+  848 super                            1.0 2225.0
+ 3941 ultra             0.5961557536542736 2165.0
+ 1765 super             0.8771260687419639 1895.0
+ 1758 super                            1.0 2024.0
+  255 special                          1.0 1495.0
+ 3491 super                            1.0 2090.0
+ 4741 special                          1.0 1595.0
+ 5611 ultra                            1.0 1940.0
+ 1016 super                            1.0 2109.0
+ 2654 hyper                            1.0 2744.0
+ 1872 super                            1.0 2044.0
+ 2307 mega                             1.0 2699.0
+ 3605 mega                             1.0 2190.0
+ 5344 special                          1.0 1345.0
+   15 mega              0.7515842570160138 2699.0
+ 3100 super                            1.0 1799.0
+ 5092 ultra                            1.0 1890.0
+  162 special                          1.0 1595.0
+  768 special                          1.0 1399.0
+ 4852 ultrasuper                       1.0 2540.0
+ 3765 special                          1.0 1618.0
+  528 special                          1.0 1590.0
+ 4335 special                          1.0 1399.0
+ 1668 super                            1.0 2049.0
+ 2785 hyper                            1.0 2927.0
+ 1544 hyper                            1.0 2899.0
+  573 special                          1.0 1699.0
+ 6091 ultra                            1.0 1844.0
+  653 mega                             1.0 2390.0
+ 4541 ultrasuper                       1.0 2340.0
+ 3589 mega                             1.0 2355.0
+ 4581 hyper             0.8528869447108385 2693.0
+  876 mega                             1.0 2444.0
+ 4907 special                          1.0 1540.0
+ 4769 ultra                            1.0 2090.0
+ 4091 special                          1.0 1399.0
+ 3219 special                          1.0 1295.0
+  461 mega                             1.0 2695.0
+ 3534 mega                             1.0 2558.0
+ 1182 mega                             1.0 2294.0
+  434 super                            1.0 1995.0
+  385 mega                             1.0 2395.0
+ 1179 hyper                            1.0 2945.0
+ 5931 ultra                            1.0 1873.0
+ 2840 hyper                            1.0 2799.0
+ 5923 ultrasuper                       1.0 2594.0
+ 4115 special                          1.0 1468.0
+ 1477 hyper                            1.0 2890.0
+ 1219 super                            1.0 1795.0
+ 4278 special                          1.0 1548.0
+ 2115 super                            1.0 2099.0
+ 4461 mega                             1.0 2218.0
+  565 mega              0.9580890114744917 2295.0
+ 1046 super                            1.0 1899.0
+ 2155 mega                             1.0 2559.0
+  230 hyper                            1.0 2915.0
+ 3888 super                            1.0 1938.0
+ 1258 special                          1.0 1695.0
+ 4275 special           0.8995542204404131 1698.0
+ 4083 mega                             1.0 2495.0
+ 3928 super                            1.0 2099.0
+ 1664 super                            1.0 1795.0
+ 4283 uber                             1.0 3984.0
+ 4449 extreme                          1.0 3044.0
+ 6088 ultra                            1.0 1694.0
+ 3620 hyper             0.6467355409865024 3349.0
+ 3099 special                          1.0 1644.0
+   30 hyper             0.9868332664440534 3244.0
+ 4761 ultra                            1.0 2004.0
+ 1509 super                            1.0 2025.0
+ 3139 mega                             1.0 2344.0
+ 5648 special                          1.0 1195.0
+  107 mega              0.7515842570160137 2699.0
+ 3282 super                            1.0 2094.0
+  147 mega              0.9685883812705869 2295.0
+ 5820 ultrasuper                       1.0 2594.0
+  330 mega                             1.0 2599.0
+ 2588 mega                             1.0 2594.0
+ 4952 ultra                            1.0 1904.0
+  823 hyper                            1.0 2945.0
+ 5869 ultra                            1.0 1999.0
+ 1353 mega                             1.0 2544.0
+ 4793 ultrasuper                       1.0 2290.0
+ 5768 ultrasuper                       1.0 2654.0
+ 2896 mega                             1.0 2299.0
+ 5095 ultra                            1.0 2098.0
+  673 uber                             1.0 3495.0
+ 5206 ultra                            1.0 2044.0
+ 5586 special                          1.0 1440.0
+  373 mega              0.8672746122357684 2690.0
+ 1426 super                            1.0 1799.0
+ 4258 ultra                            1.0 1995.0
+ 6151 ultra                            1.0 1795.0
+ 3166 mega                             1.0 2195.0
+ 5769 ultra                            1.0 1999.0
+ 2748 special                          1.0 1399.0
+ 4681 special                          1.0 1395.0
+ 1696 mega                             1.0 2690.0
+  772 mega                             1.0 2544.0
+ 3469 special                          1.0 1260.0
+ 1438 super                            1.0 2090.0
+   94 mega                             1.0 2505.0
+ 6215 special                          1.0 1554.0
+ 3875 mega                             1.0 2299.0
+ 1478 uber                             1.0 4048.0
+ 5465 mega                             1.0 2238.0
+ 4088 mega                             1.0 2634.0
+ 1907 special                          1.0 1495.0
+ 2334 hyper                            1.0 2790.0
+ 1019 super              0.985386896750034 1795.0
+ 4944 super                            1.0 1848.0
+ 5505 ultra                            1.0 1938.0
+ 4888 hyper             0.9152457354843775 2790.0
+ 5362 ultra                            1.0 2094.0
+ 5458 super                            1.0 2063.0
+  855 hyper                            1.0 2794.0
+  374 super                            1.0 2195.0
+ 5983 ultra                            1.0 1840.0
+ 2051 hyper                            1.0 3090.0
+ 2433 mega                             1.0 2595.0
+ 5048 special                          1.0 1590.0
+ 6218 extreme                          1.0 2744.0
+ 2330 special                          1.0 1644.0
+ 2553 super                            1.0 1999.0
+ 5618 ultra                            1.0 1740.0
+ 2302 super                            1.0 2095.0
+ 5327 mega                             1.0 2295.0
+  405 hyper                            1.0 2890.0
+ 1498 super                            1.0 2029.0
+ 3449 super             0.7431127583489534 1899.0
+  717 hyper                            1.0 2999.0
+ 5182 ultra                            1.0 1599.0
+ 4570 super                            1.0 2189.0
+ 5712 extreme                          1.0 2940.0
+ 3020 special                          1.0 1594.0
+  771 super                            1.0 2095.0
+ 5630 special                          1.0 1499.0
+ 1979 mega                             1.0 2490.0
+ 2554 super                            1.0 1799.0
+ 1688 super             0.7557481072007873 1899.0
+ 1330 super                            1.0 1999.0
+ 2162 hyper                            1.0 2795.0
+ 3386 super                            1.0 1995.0
+ 5302 ultrasuper                       1.0 2254.0
+ 5016 special           0.6640003858834288 1718.0
+ 2258 super                            1.0 2044.0
+ 2936 special                          1.0 1469.0
+ 4955 super                            1.0 1819.0
+ 5223 ultra                            1.0 1728.0
+ 4995 special                          1.0 1640.0
+  920 special                          1.0 1575.0
+ 3194 hyper                            1.0 2799.0
+ 5809 special                          1.0 1659.0
+ 4688 special                          1.0 1554.0
+ 3040 super                            1.0 1994.0
+ 2608 uber                             1.0 3439.0
+ 2402 super             0.5836909236934171 2259.0
+   38 uber                             1.0 3795.0
+  179 super                            1.0 1945.0
+  357 hyper                            1.0 3299.0
+ 3319 mega                             1.0 2499.0
+ 5481 hyper                            1.0 2940.0
+ 3115 hyper                            1.0 2970.0
+  254 special                          1.0 1720.0
+  892 hyper                            1.0 2994.0
+ 2660 mega                             1.0 2394.0
+ 2609 hyper                            1.0 3144.0
+ 2604 special                          1.0 1494.0
+ 3669 special                          1.0 1635.0
+  564 super                            1.0 1895.0
+ 5116 special                          1.0 1640.0
+ 2740 hyper                            1.0 3175.0
+ 1282 special                          1.0 1490.0
+ 1190 super                            1.0 2194.0
+  482 special                          1.0 1695.0
+ 5083 special                          1.0 1499.0
+ 6012 ultra                            1.0 1699.0
+   46 mega              0.8007186591491793 2695.0
+ 3972 mega                             1.0 2344.0
+ 3186 special                          1.0 1594.0
+ 3641 special                          1.0 1490.0
+ 4593 ultra             0.9124766667243072 2140.0
+   11 super                            1.0 2195.0
+ 2987 special                          1.0 1399.0
+ 5088 ultra                            1.0 1889.0
+   86 super                            1.0 1999.0
+ 2131 super                            1.0 1895.0
+ 3573 mega                             1.0 2435.0
+ 2502 super                            1.0 2039.0
+ 4577 special                          1.0 1568.0
+ 5438 special           0.8948781262249715 1694.0
+ 2680 uber                             1.0 3659.0
+ 6167 ultra                            1.0 1949.0
+ 4800 ultra                            1.0 1799.0
+ 4821 ultra                            1.0 1995.0
+ 3250 hyper             0.6467355409865024 3349.0
+ 1721 mega                             1.0 2390.0
+ 4493 special                          1.0 1740.0
+ 4127 hyper                            1.0 2749.0
+ 2106 mega                             1.0 2320.0
+ 3311 mega                             1.0 2669.0
+ 4202 hyper                            1.0 2744.0
+ 2434 ultra                            1.0 1795.0
+ 3736 super                            1.0 1790.0
+  521 super                            1.0 2095.0
+ 5999 ultra                            1.0 1829.0
+ 3677 special                          1.0 1499.0
+ 1839 mega                             1.0 2444.0
+ 5614 ultra                            1.0 1840.0
+ 4282 mega                             1.0 2299.0
+ 5964 ultra                            1.0 1773.0
+ 4489 ultra                            1.0 1999.0
+ 5000 ultrasuper                       1.0 2118.0
+  899 super                            1.0 1990.0
+ 3980 extreme                          1.0 3490.0
+ 4222 uber                             1.0 3644.0
+ 2960 mega                             1.0 2320.0
+ 3345 hyper                            1.0 2775.0
+ 4550 extreme           0.9948127494393272 3345.0
+ 5664 ultra             0.9018476170357554 1949.0
+ 4351 ultrasuper                       1.0 2554.0
+ 5158 ultra                            1.0 1758.0
+  721 extreme                          1.0 3025.0
+ 1218 hyper                            1.0 2799.0
+ 3127 super                            1.0 1894.0
+ 2114 ultra                            1.0 1799.0
+ 3167 special           0.9158301713169085 1739.0
+ 5911 super                            1.0 2090.0
+ 3406 hyper                            1.0 2999.0
+ 3015 mega                             1.0 2295.0
+ 4940 mega                             1.0 2539.0
+ 1481 super                            1.0 1795.0
+ 5857 special                          1.0 1299.0
+ 2321 super                            1.0 2144.0
+ 4307 ultra                            1.0 2095.0
+ 5461 special                          1.0 1399.0
+ 3430 super                            1.0 1795.0
+ 6150 special                          1.0 1454.0
+ 3613 hyper                            1.0 2849.0
+ 3784 extreme            0.739181518998542 3745.0
+ 1390 special                          1.0 1590.0
+ 3294 mega                             1.0 2690.0
+ 1777 special                          1.0 1579.0
+ 3951 super                            1.0 1854.0
+ 2000 hyper                            1.0 2975.0
+ 2600 hyper                            1.0 3229.0
+ 1322 super                            1.0 2144.0
+ 3991 uber                             1.0 3778.0
+ 4012 mega              0.9322227227180072 2195.0
+ 2441 super                            1.0 1890.0
+ 3135 super                            1.0 2195.0
+ 1130 hyper             0.8956856634307523 2694.0
+  816 special           0.8135512841149327 1744.0
+  971 hyper                            1.0 3299.0
+  912 mega                             1.0 2325.0
+ 2174 special                          1.0 1544.0
+ 2868 super                            1.0 1999.0
+ 4294 special                          1.0  999.0
+ 5518 ultrasuper                       1.0 2545.0
+ 4477 special                          1.0 1468.0
+ 3478 ultra                            1.0 1890.0
+ 5007 ultrasuper                       1.0 2404.0
+ 5108 extreme                          1.0 2790.0
+ 5190 special                          1.0 1488.0
+ 6004 ultra              0.977937021989727 1844.0
+ 2967 mega                             1.0 2395.0
+ 3964 mega                             1.0 2625.0
+ 6107 ultrasuper                       1.0 2199.0
+ 2597 special                          1.0 1695.0
+ 3349 ultra                            1.0 1795.0
+  944 super             0.9883342132811096 2194.0
+ 1600 special                          1.0 1469.0
+ 2757 special                          1.0 1495.0
+ 3720 special                          1.0 1290.0
+ 5916 special                          1.0 1545.0
+ 2557 super                            1.0 1995.0
+ 1163 hyper                            1.0 2890.0
+ 1007 special                          1.0 1509.0
+ 5649 ultra                            1.0 2058.0
+ 3270 uber                             1.0 3439.0
+ 5811 ultra                            1.0 1740.0
+ 1776 hyper                            1.0 3044.0
+ 4974 extreme                          1.0 2893.0
+ 3692 super                            1.0 1899.0
+ 1384 mega                             1.0 2344.0
+  592 super                            1.0 1945.0
+ 3197 hyper                            1.0 3239.0
+ 3385 special                          1.0 1595.0
+ 1727 mega                             1.0 2194.0
+ 1162 mega              0.9182809727954958 2675.0
+  360 mega              0.9295850957858266 2295.0
+ 2222 mega                             1.0 2620.0
+  591 super             0.8050005613608733 2245.0
+  473 mega                             1.0 2525.0
+ 5954 ultrasuper                       1.0 2345.0
+ 4612 uber              0.6846053195556595 3790.0
+ 2528 super                            1.0 2044.0
+ 4469 mega                             1.0 2629.0
+ 5803 ultra                            1.0 1580.0
+ 1465 special                          1.0 1690.0
+ 1874 super                            1.0 2095.0
+ 4605 ultra             0.9470162976050716 1599.0
+  324 mega                             1.0 2390.0
+ 1505 super                            1.0 1939.0
+ 2934 super                            1.0 1969.0
+ 3182 super              0.678745741118563 2244.0
+ 4341 extreme                          1.0 2795.0
+ 3461 super             0.9268728332913394 1795.0
+  703 super                            1.0 1999.0
+  584 mega                             1.0 2545.0
+ 3149 special                          1.0 1589.0
+ 3764 special                          1.0 1694.0
+ 4066 extreme                          1.0 3040.0
+ 4660 special                          1.0 1099.0
+ 2177 mega                             1.0 2344.0
+   10 mega                             1.0 2575.0
+ 2922 special                          1.0 1344.0
+ 3190 special                          1.0 1495.0
+ 3309 ultra                            1.0 1995.0
+ 2576 super                            1.0 2044.0
+ 4165 mega                             1.0 2444.0
+ 5899 ultrasuper                       1.0 2473.0
+ 5898 ultrasuper                       1.0 2204.0
+ 4246 super                            1.0 2189.0
+ 5082 extreme                          1.0 2745.0
+ 3226 mega                             1.0 2495.0
+ 4030 super                            1.0 1899.0
+  656 mega                             1.0 2398.0
+  440 hyper                            1.0 2990.0
+ 6202 extreme           0.9546076424538424 2885.0
+ 1532 special                          1.0 1539.0
+ 4589 special                          1.0 1588.0
+ 5986 ultrasuper          0.88579489217958 2495.0
+ 4915 ultrasuper        0.8058137119594753 2118.0
+ 6026 ultra                            1.0 1654.0
+ 5975 special            0.951884476896399 1499.0
+ 2285 ultra                            1.0 1819.0
+  734 super                            1.0 1879.0
+ 5189 ultra                            1.0 1923.0
+ 1630 super                            1.0 1990.0
+ 4058 mega                             1.0 2629.0
+ 1527 special                          1.0 1395.0
+ 3679 mega                             1.0 2290.0
+ 3790 special                          1.0 1554.0
+  926 super                            1.0 2044.0
+ 4116 special                          1.0 1499.0
+ 4464 ultra                            1.0 2054.0
+ 3830 ultra             0.9846012941509581 1999.0
+ 2771 ultra                            1.0 1795.0
+  240 uber                             1.0 3795.0
+ 3759 super                            1.0 2093.0
+ 2869 mega                             1.0 2294.0
+  129 special                          1.0 1495.0
+ 1319 hyper                            1.0 3094.0
+ 5145 special                          1.0 1438.0
+ 4989 ultra                            1.0 1908.0
+  914 mega                             1.0 2299.0
+ 4200 super                            1.0 2154.0
+ 1025 hyper                            1.0 2894.0
+ 6129 extreme                          1.0 2744.0
+ 4022 extreme                          1.0 3194.0
+ 2343 super                            1.0 2185.0
+ 2157 mega              0.8363141382030946 2268.0
+ 1662 super                            1.0 2059.0
+ 5297 ultrasuper        0.9643311397385032 2159.0
+ 3252 super                            1.0 1994.0
+ 2340 special                          1.0 1590.0
+ 5706 ultra                            1.0 1823.0
+ 4918 special                          1.0 1399.0
+ 4148 special                          1.0 1199.0
+  472 special                          1.0 1599.0
+ 4543 ultra                            1.0 1828.0
+ 2878 ultra                            1.0 1999.0
+ 4371 special                          1.0 1399.0
+ 4113 ultra             0.7754886153769788 1704.0
+ 2503 super                            1.0 2244.0
+ 1747 mega                             1.0 2345.0
+ 1311 super                            1.0 2199.0
+  838 mega                             1.0 2290.0
+ 4308 super                            1.0 2170.0
+  237 special                          1.0 1595.0
+ 3124 mega                             1.0 2425.0
+ 2113 super                            1.0 2024.0
+ 4714 mega                             1.0 2398.0
+ 2500 super                            1.0 2190.0
+ 1797 hyper                            1.0 3044.0
+ 2153 mega                             1.0 2295.0
+ 5547 mega                             1.0 2224.0
+ 3181 ultra                            1.0 1795.0
+ 4842 ultrasuper                       1.0 2390.0
+ 3221 special                          1.0 1444.0
+ 5730 ultra                            1.0 1885.0
+ 2456 hyper                            1.0 2999.0
+ 3822 mega                             1.0 2558.0
+ 1659 hyper                            1.0 3194.0
+ 2598 special                          1.0 1390.0
+ 5655 ultra                            1.0 1679.0
+ 1507 uber                             1.0 5399.0
+ 5369 super                            1.0 1794.0
+  283 mega                             1.0 2299.0
+ 1181 super                            1.0 1890.0
+  670 super             0.9121849825632613 2049.0
+ 1711 special                          1.0 1279.0
+ 4941 extreme                          1.0 3290.0
+ 2077 mega                             1.0 2444.0
+  638 special                          1.0 1499.0
+ 5604 mega                             1.0 2198.0
+ 4523 ultra                            1.0 1795.0
+ 4345 mega                             1.0 2568.0
+ 1770 mega                             1.0 2490.0
+ 4671 special                          1.0 1195.0
+ 2941 hyper                            1.0 2890.0
+ 2448 super                            1.0 1890.0
+ 4563 ultra                            1.0 1899.0
+ 5241 special                          1.0 1199.0
+ 4571 super                            1.0 2118.0
+  504 mega                             1.0 2695.0
+ 1299 hyper                            1.0 2995.0
+ 5994 ultra             0.9649746890760605 1515.0
+ 1013 super                            1.0 2175.0
+ 3771 ultra                            1.0 1995.0
+ 3734 mega                             1.0 2550.0
+ 4723 mega                             1.0 2199.0
+ 1196 hyper                            1.0 3044.0
+ 2587 mega                             1.0 2195.0
+ 2052 special                          1.0 1425.0
+ 5129 special           0.7857147172113486 1628.0
+ 6180 ultra             0.9522410697684253 1545.0
+ 5910 ultra                            1.0 1723.0
+ 4519 hyper             0.9908383568126086 2854.0
+ 3293 mega              0.9681398827529107 2220.0
+ 2264 special                          1.0 1695.0
+ 4257 mega                             1.0 2299.0
+ 5762 ultra                            1.0 1824.0
+   29 hyper                            1.0 3095.0
+   52 mega                             1.0 2395.0
+ 4719 mega                             1.0 2194.0
+ 3049 special                          1.0 1690.0
+ 5050 ultra                            1.0 1989.0
+  550 super                            1.0 1790.0
+ 1420 hyper                            1.0 3144.0
+ 3690 hyper             0.9603901616717719 2775.0
+ 1113 super                            1.0 2099.0
+ 4025 uber                             1.0 3928.0
+ 5353 ultra                            1.0 1823.0
+  475 super                            1.0 1895.0
+ 1763 mega                             1.0 2415.0
+ 2738 super                            1.0 1844.0
+ 3552 hyper                            1.0 3049.0
+ 3104 hyper                            1.0 3090.0
+ 1798 special                          1.0 1295.0
+  487 hyper                            1.0 2859.0
+ 2898 special                          1.0 1290.0
+ 1594 mega                             1.0 2395.0
+ 5799 ultra                            1.0 2124.0
+  961 mega                             1.0 2225.0
+ 1149 super                            1.0 1994.0
+ 1674 special           0.9252272841044896 1685.0
+ 4289 super                            1.0 1995.0
+ 2973 super                            1.0 2039.0
+ 2392 mega                             1.0 2354.0
+ 6113 ultra                            1.0 1994.0
+ 2249 hyper                            1.0 3090.0
+ 4033 special                          1.0 1395.0
+  715 super                            1.0 1995.0
+  933 mega                             1.0 2390.0
+ 3691 special                          1.0 1395.0
+ 3236 special                          1.0 1595.0
+ 3898 ultra                            1.0 1995.0
+ 2997 super                            1.0 2244.0
+ 5647 ultrasuper        0.6525067064289657 2640.0
+ 1339 super                            1.0 1899.0
+ 1771 super                            1.0 2144.0
+ 5682 ultra                            1.0 1823.0
+ 4177 hyper                            1.0 3199.0
+ 4953 super                            1.0 1844.0
+ 5094 hyper                            1.0 2699.0
+ 3483 mega                             1.0 2425.0
+ 2998 mega                             1.0 2495.0
+ 3762 mega                             1.0 2499.0
+ 5118 extreme                          1.0 2840.0
+ 4726 ultrasuper                       1.0 2240.0
+ 2874 special                          1.0 1525.0
+  662 mega                             1.0 2290.0
+ 2400 super                            1.0 2195.0
+ 2013 special                          1.0 1749.0
+  747 mega               0.643000969959256 2244.0
+  116 hyper                            1.0 3165.0
+ 2464 mega                             1.0 2590.0
+ 1068 uber                             1.0 3599.0
+ 3010 special                          1.0 1495.0
+ 3535 hyper             0.7684074709624376 2690.0
+ 3336 special                          1.0 1495.0
+ 1455 hyper                            1.0 2995.0
+ 4584 ultrasuper        0.7701709619810052 2640.0
+ 6089 ultra                            1.0 1690.0
+ 3360 special                          1.0 1694.0
+ 4778 ultra                            1.0 1795.0
+ 2743 mega                             1.0 2425.0
+  271 super                            1.0 2095.0
+ 5006 special                          1.0 1489.0
+  419 uber                             1.0 3495.0
+ 5173 ultrasuper        0.9643311397385032 2159.0
+ 4905 special                          1.0 1445.0
+ 1583 super                            1.0 1944.0
+ 1315 special                          1.0 1490.0
+ 3046 mega                             1.0 2444.0
+ 5184 ultrasuper                       1.0 2423.0
+ 1623 mega                             1.0 2559.0
+ 5168 special                          1.0 1199.0
+ 2010 hyper                            1.0 2848.0
+  614 mega                             1.0 2295.0
+  802 hyper                            1.0 2895.0
+ 5977 extreme                          1.0 2840.0
+  826 super             0.9906992910692192 1795.0
+  267 mega              0.9843902871082861 2645.0
+ 5516 super                            1.0 1899.0
+ 1618 hyper                            1.0 3144.0
+ 3089 special                          1.0 1195.0
+ 3881 mega                             1.0 2190.0
+ 3823 special                          1.0 1529.0
+ 1515 mega                             1.0 2344.0
+ 4735 special                          1.0 1590.0
+ 4610 ultrasuper                       1.0 2295.0
+ 2496 mega                             1.0 2344.0
+ 3264 super                            1.0 2039.0
+  416 special                          1.0 1699.0
+ 1184 mega                             1.0 2395.0
+ 4285 hyper                            1.0 2699.0
+ 4120 mega                             1.0 2618.0
+ 2536 mega                             1.0 2574.0
+ 4041 special                          1.0 1195.0
+ 1312 super             0.8702480413341764 1779.0
+ 1961 uber                             1.0 3678.0
+  735 special                          1.0 1590.0
+ 5101 ultrasuper                       1.0 2323.0
+ 2269 super                            1.0 2290.0
+ 4730 extreme                          1.0 3244.0
+ 2065 super                            1.0 1794.0
+  451 special                          1.0 1395.0
+ 3711 super                            1.0 1795.0
+ 2857 special                          1.0 1495.0
+ 2201 super             0.9361776150270235 2170.0
+ 1323 uber                             1.0 3789.0
+ 5341 extreme                          1.0 2695.0
+ 3917 super                            1.0 2079.0
+ 5524 ultra                            1.0 1898.0
+ 2407 mega                             1.0 2320.0
+ 4978 special                          1.0 1495.0
+ 2953 super                            1.0 2229.0
+ 1934 mega                             1.0 2495.0
+ 2993 super             0.7479034684339743 2249.0
+ 5548 ultrasuper                       1.0 2394.0
+ 4527 super                            1.0 2090.0
+ 2591 super                            1.0 1795.0
+ 5256 hyper                            1.0 2740.0
+ 1177 uber                             1.0 4395.0
+ 5969 ultra                            1.0 1704.0
+ 2990 special                          1.0 1390.0
+ 1833 ultra                            1.0 1995.0
+ 3743 mega                             1.0 2290.0
+ 1216 super                            1.0 1899.0
+ 6149 ultrasuper                       1.0 2223.0
+ 3622 mega                             1.0 2495.0
+  233 super                            1.0 1999.0
+ 3320 mega              0.9297243826412854 2199.0
+ 5125 ultra                            1.0 1828.0
+ 1786 special                          1.0 1495.0
+ 4145 ultra                            1.0 1818.0
+ 3686 super                            1.0 2115.0
+   65 super             0.9592087623618132 2195.0
+ 5623 extreme                          1.0 2794.0
+ 3388 special                          1.0 1494.0
+ 3053 super                            1.0 1890.0
+ 3958 extreme                          1.0 3490.0
+ 5862 mega                             1.0 2208.0
+  368 mega                             1.0 2645.0
+ 2359 special                          1.0 1744.0
+ 4343 special                          1.0 1588.0
+  809 mega                             1.0 2295.0
+ 4526 mega                             1.0 2443.0
+  666 uber                             1.0 3789.0
+  976 mega                             1.0 2644.0
+ 1395 uber                             1.0 3515.0
+ 4339 ultra                            1.0 1725.0
+ 4702 ultra                            1.0 1899.0
+ 1279 super                            1.0 1795.0
+  945 uber                             1.0 3609.0
+ 3685 ultra                            1.0 1995.0
+ 3375 special                          1.0 1395.0
+ 2175 super                            1.0 1790.0
+ 1009 super                            1.0 2090.0
+  278 mega                             1.0 2399.0
+ 3961 mega                             1.0 2404.0
+  135 special           0.6572238590173166 1749.0
+ 1881 super                            1.0 1890.0
+ 3805 mega                             1.0 2590.0
+ 3654 special                          1.0 1499.0
+ 1569 mega                             1.0 2495.0
+ 3108 super                            1.0 2144.0
+ 4354 ultrasuper        0.9815760595875285 2590.0
+ 5045 hyper             0.6971252766639479 2740.0
+   59 hyper                            1.0 2945.0
+ 3694 hyper                            1.0 2775.0
+ 4924 ultrasuper                       1.0 2190.0
+ 4264 ultra                            1.0 2015.0
+ 3422 super                            1.0 1995.0
+ 2041 super                            1.0 1894.0
+ 3597 hyper                            1.0 2743.0
+ 5798 ultra                            1.0 1908.0
+ 1374 mega                             1.0 2390.0
+ 2351 mega                             1.0 2385.0
+ 4358 super                            1.0 1840.0
+ 5491 ultra                            1.0 1989.0
+  127 hyper                            1.0 2945.0
+ 1917 mega                             1.0 2478.0
+ 1534 super                            1.0 2090.0
+ 5531 ultra                            1.0 1699.0
+ 2398 mega                             1.0 2499.0
+ 4037 special                          1.0 1299.0
+ 5896 special                          1.0 1640.0
+ 1024 super                            1.0 1894.0
+ 1111 super                            1.0 1944.0
+ 2853 mega                             1.0 2359.0
+ 4598 ultra                            1.0 1999.0
+ 4774 hyper                            1.0 2890.0
+   91 hyper                            1.0 2975.0
+ 3606 super                            1.0 1844.0
+ 2558 super                            1.0 2244.0
+ 5196 ultrasuper                       1.0 2595.0
+ 3036 special                          1.0 1399.0
+ 1953 mega                             1.0 2674.0
+ 2689 special                          1.0 1719.0
+  586 super             0.5829071330699832 2250.0
+ 1139 hyper                            1.0 2999.0
+ 1550 hyper             0.8210546775497818 2749.0
+ 1984 hyper                            1.0 2744.0
+ 3766 mega                             1.0 2345.0
+ 1852 super                            1.0 2095.0
+  176 hyper             0.7655220002082836 2745.0
+  964 special                          1.0 1544.0
+ 2296 hyper                            1.0 3199.0
+ 3585 ultra                            1.0 1945.0
+ 3499 ultra                            1.0 1915.0
+ 1004 uber                             1.0 3515.0
+ 1949 super                            1.0 2144.0
+ 1900 super                            1.0 1899.0
+ 3335 super                            1.0 2065.0
+ 4693 hyper                            1.0 2690.0
+ 5842 super                            1.0 1865.0
+ 3143 hyper                            1.0 3099.0
+ 3598 special                          1.0 1399.0
+ 3562 special           0.9158301713169085 1739.0
+ 3455 mega              0.7422330551170494 2265.0
+ 4418 special                          1.0 1704.0
+ 3188 super                            1.0 2029.0
+ 1522 uber                             1.0 3634.0
+ 6204 ultrasuper                       1.0 2195.0
+ 2163 super                            1.0 1988.0
+ 6244 extreme           0.8538305867705113 2745.0
+ 6048 special                          1.0 1445.0
+  391 mega                             1.0 2295.0
+  693 mega                             1.0 2390.0
+ 1451 hyper                            1.0 2944.0
+ 4904 ultra                            1.0 1899.0
+ 3857 special                          1.0 1468.0
+ 2681 mega                             1.0 2644.0
+ 2021 super                            1.0 1944.0
+ 1171 super                            1.0 1844.0
+ 2917 special                          1.0 1744.0
+ 5470 extreme           0.8035286030826931 2704.0
+ 3405 special                          1.0 1195.0
+ 4633 mega                             1.0 2318.0
+ 3445 super                            1.0 2144.0
+ 2546 mega                             1.0 2395.0
+ 2568 hyper                            1.0 2889.0
+ 1083 super                            1.0 1895.0
+ 2341 hyper                            1.0 2890.0
+ 4263 special                          1.0 1590.0
+ 2198 mega                             1.0 2395.0
+ 1749 mega                             1.0 2544.0
+ 4684 super                            1.0 2099.0
+  199 super                            1.0 2220.0
+ 4011 mega                             1.0 2549.0
+  326 special                          1.0 1495.0
+ 2461 mega                             1.0 2609.0
+ 3506 special                          1.0 1395.0
+  122 super                            1.0 2199.0
+ 1956 mega                             1.0 2390.0
+ 5485 extreme                          1.0 3090.0
+ 5912 ultrasuper        0.9298329356989631 2554.0
+ 2541 ultra                            1.0 1795.0
+ 2275 special                          1.0 1395.0
+  991 super                            1.0 1795.0
+ 2601 special                          1.0 1369.0
+ 5035 mega                             1.0 2244.0
+ 5598 special                          1.0 1299.0
+ 5067 extreme                          1.0 2804.0
+ 6128 ultra                            1.0 1599.0
+  425 mega                             1.0 2405.0
+ 1382 mega                             1.0 2579.0
+ 1281 super                            1.0 2090.0
+ 5434 ultra                            1.0 1823.0
+ 3210 super                            1.0 1999.0
+ 5582 special                          1.0 1440.0
+ 1700 super                            1.0 1894.0
+  545 mega                             1.0 2390.0
+ 1740 uber                             1.0 3515.0
+ 3924 mega                             1.0 2490.0
+  903 hyper                            1.0 2890.0
+ 2904 super                            1.0 1944.0
+ 2636 special                          1.0 1449.0
+ 1012 super                            1.0 1865.0
+ 1584 super                            1.0 1999.0
+ 1781 mega                             1.0 2444.0
+ 4939 ultrasuper                       1.0 2345.0
+ 3840 special                          1.0 1594.0
+ 5122 ultra                            1.0 1795.0
+ 2968 super                            1.0 1844.0
+ 5477 special                          1.0 1499.0
+ 5761 ultra                            1.0 1894.0
+ 5242 special                          1.0 1495.0
+  637 mega                             1.0 2595.0
+ 5282 ultra                            1.0 1854.0
+ 3247 super                            1.0 1999.0
+ 3027 mega                             1.0 2190.0
+ 2028 ultra                            1.0 1795.0
+   70 hyper                            1.0 3095.0
+  314 uber                             1.0 3895.0
+ 2405 hyper             0.5868053276668401 3354.0
+  844 mega               0.933614885759795 2644.0
+ 2058 super                            1.0 1914.0
+  924 special                          1.0 1695.0
+  497 hyper                            1.0 2990.0
+ 2697 special                          1.0 1590.0
+ 4310 extreme                          1.0 3045.0
+ 4960 special                          1.0 1395.0
+ 1078 hyper                            1.0 2890.0
+  980 super                            1.0 1845.0
+ 2270 hyper                            1.0 2815.0
+ 4510 ultrasuper                       1.0 2593.0
+ 4218 super                            1.0 1958.0
+ 3633 mega                             1.0 2275.0
+ 5951 ultra                            1.0 1844.0
+ 5382 ultrasuper                       1.0 2040.0
+ 4401 ultra                            1.0 1999.0
+ 3000 mega                             1.0 2290.0
+ 5246 ultra                            1.0 1599.0
+ 5239 ultrasuper                       1.0 2195.0
+ 5991 ultra                            1.0 1723.0
+ 4789 ultrasuper        0.9815760595875285 2590.0
+  668 hyper                            1.0 2799.0
+ 2362 mega                             1.0 2690.0
+ 5194 special                          1.0 1545.0
+  322 hyper                            1.0 2995.0
+  716 special                          1.0 1495.0
+ 1713 uber                             1.0 3595.0
+ 3549 super                            1.0 2259.0
+ 2569 special                          1.0 1544.0
+ 2325 special                          1.0 1744.0
+  346 super                            1.0 2199.0
+ 3987 special                          1.0 1395.0
+ 2095 super                            1.0 1999.0
+ 5720 ultrasuper                       1.0 2224.0
+  529 mega                             1.0 2499.0
+  815 super                            1.0 1849.0
+ 2665 special                          1.0 1495.0
+ 2130 super                            1.0 1790.0
+ 3582 mega                             1.0 2390.0
+ 3537 hyper             0.9671975518074823 2694.0
+  625 super                            1.0 2109.0
+ 2843 special                          1.0 1695.0
+  649 super                            1.0 1995.0
+ 4290 mega                             1.0 2298.0
+ 1195 super                            1.0 1790.0
+  883 special                          1.0 1649.0
+ 5175 mega                             1.0 2239.0
+ 1636 special                          1.0 1699.0
+ 1545 special                          1.0 1694.0
+  895 mega              0.9182809727954958 2675.0
+ 5231 ultra             0.9672432956397896 1718.0
+ 1955 hyper                            1.0 3205.0
+  928 super                            1.0 2015.0
+ 5529 ultra                            1.0 1938.0
+   51 mega                             1.0 2499.0
+ 2776 hyper                            1.0 2999.0
+ 1824 ultra             0.9020045004952728 1825.0
+ 2668 mega                             1.0 2590.0
+ 1681 mega                             1.0 2395.0
+ 1939 uber                             1.0 3589.0
+ 3215 mega                             1.0 2494.0
+ 1158 super                            1.0 1799.0
+ 6024 ultra                            1.0 1595.0
+ 3768 hyper             0.7160462663554396 2758.0
+  171 mega                             1.0 2425.0
+ 5119 ultra                            1.0 2094.0
+ 5661 ultra                            1.0 1794.0
+ 3604 mega                             1.0 2343.0
+ 3968 extreme                          1.0 3190.0
+ 5011 mega                             1.0 2408.0
+ 4151 mega                             1.0 2479.0
+ 3752 extreme                          1.0 3095.0
+ 4008 ultra                            1.0 1875.0
+  748 super                            1.0 2044.0
+ 4880 ultrasuper                       1.0 2598.0
+ 5947 ultra                            1.0 1690.0
+ 2024 mega                             1.0 2644.0
+ 4397 super                            1.0 1818.0
+ 5143 ultrasuper                       1.0 2544.0
+ 1644 mega                             1.0 2495.0
+  697 mega                             1.0 2690.0
+ 2031 mega                             1.0 2585.0
+ 5514 extreme                          1.0 2745.0
+ 2397 super                            1.0 1844.0
+ 1410 special                          1.0 1395.0
+  887 hyper                            1.0 2899.0
+ 2470 hyper                            1.0 2795.0
+ 1947 super               0.96042950465535 2145.0
+ 4876 ultrasuper                       1.0 2399.0
+ 1748 super                            1.0 2175.0
+ 6084 ultrasuper                       1.0 2199.0
+ 1987 special                          1.0 1539.0
+ 4916 special                          1.0 1640.0
+ 4250 special                          1.0 1445.0
+  123 mega                             1.0 2355.0
+ 5927 ultra                            1.0 1599.0
+ 1657 special                          1.0 1699.0
+ 3561 mega                             1.0 2575.0
+ 4119 ultra                            1.0 1854.0
+ 5043 ultra                            1.0 1990.0
+ 5653 ultra                            1.0 1799.0
+ 3003 hyper                            1.0 2744.0
+ 5510 extreme                          1.0 3340.0
+ 5409 mega              0.8892490027394728 2190.0
+ 4872 ultra                            1.0 1868.0
+ 3130 super                            1.0 1794.0
+ 5550 ultra                            1.0 2108.0
+ 1580 mega                             1.0 2595.0
+ 3709 mega                             1.0 2444.0
+ 2640 super             0.7479034684339743 2249.0
+ 4366 uber                             1.0 3872.0
+ 6127 ultrasuper                       1.0 2344.0
+ 5283 ultrasuper                       1.0 2440.0
+ 1493 uber                             1.0 3914.0
+ 3733 mega                             1.0 2349.0
+ 1003 mega                             1.0 2325.0
+ 5215 special                          1.0 1268.0
+ 1803 hyper                            1.0 2790.0
+ 3773 special                          1.0 1599.0
+ 1409 uber              0.9931477742560025 3499.0
+ 2992 uber                             1.0 3397.0
+ 3290 super                            1.0 2090.0
+ 4052 super                            1.0 1799.0
+ 2983 special                          1.0 1390.0
+ 4988 ultrasuper         0.974082293509096 2594.0
+ 3879 extreme                          1.0 3015.0
+ 1215 hyper                            1.0 2694.0
+ 3529 mega                             1.0 2309.0
+ 4191 mega                             1.0 2454.0
+  636 special           0.9577268427337302 1725.0
+ 3211 ultra                            1.0 1890.0
+ 3919 super                            1.0 1894.0
+ 6044 ultra                            1.0 1723.0
+ 2835 mega                             1.0 2495.0
+ 2414 super                            1.0 2095.0
+ 2385 hyper                            1.0 2799.0
+ 2454 special                          1.0 1595.0
+ 5178 special                          1.0 1499.0
+  984 super                            1.0 2045.0
+ 6119 ultrasuper                       1.0 2299.0
+ 5163 ultra                            1.0 1948.0
+  608 special                          1.0 1595.0
+ 1613 super                            1.0 1790.0
+  301 super                            1.0 1990.0
+  286 mega                             1.0 2595.0
+ 4975 special                          1.0 1295.0
+ 3298 mega                             1.0 2544.0
+ 3322 mega                             1.0 2290.0
+ 1425 special                          1.0 1519.0
+ 2485 super                            1.0 1790.0
+ 2138 special                          1.0 1649.0
+ 3887 ultra                            1.0 1795.0
+ 3055 special                          1.0 1295.0
+  787 mega                             1.0 2494.0
+ 6007 ultrasuper        0.5025288481555801 2604.0
+  811 mega                             1.0 2495.0
+ 6031 ultrasuper                       1.0 2204.0
+ 4680 ultrasuper                       1.0 2090.0
+ 4134 ultra                            1.0 1899.0
+ 1911 super             0.8877924314402361 2175.0
+ 5764 ultrasuper                       1.0 2145.0
+ 4887 ultrasuper                       1.0 2543.0
+ 2720 special                          1.0 1594.0
+ 4983 special                          1.0 1499.0
+  680 special                          1.0 1695.0
+ 5166 extreme           0.8142655700694883 2695.0
+ 5023 ultrasuper                       1.0 2440.0
+ 3110 special                          1.0 1395.0
+ 5919 ultra                            1.0 1895.0
+   66 special                          1.0 1495.0
+ 3680 hyper                            1.0 2690.0
+ 4597 special                          1.0 1399.0
+ 1640 mega                             1.0 2299.0
+ 3959 special                          1.0 1495.0
+ 1333 super                            1.0 2190.0
+  369 super                            1.0 1795.0
+  409 mega                             1.0 2590.0
+ 1943 super                            1.0 1854.0
+ 5812 ultra                            1.0 1645.0
+  576 hyper             0.7682502399196542 2755.0
+ 4919 ultra                            1.0 1895.0
+ 3078 mega                             1.0 2244.0
+ 3756 hyper                            1.0 2718.0
+ 5055 ultra                            1.0 1890.0
+  752 mega                             1.0 2395.0
+ 3871 mega                             1.0 2440.0
+ 4931 ultra             0.8601134042163359 2143.0
+ 6139 special                          1.0 1540.0
+ 5541 special                          1.0 1398.0
+ 1034 mega                             1.0 2495.0
+ 4071 special                          1.0 1488.0
+ 1684 super                            1.0 1895.0
+  214 super                            1.0 2125.0
+ 4557 special                          1.0 1395.0
+ 2923 hyper                            1.0 2944.0
+ 3493 super                            1.0 1890.0
+ 4389 special                          1.0 1379.0
+ 5306 hyper                            1.0 2898.0
+ 5632 ultrasuper                       1.0 2345.0
+  839 special                          1.0 1299.0
+  532 special                          1.0 1495.0
+ 2509 hyper             0.9222300249176308 3275.0
+ 4772 mega                             1.0 2445.0
+ 1142 super                            1.0 2095.0</pre>
+<p class="p">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img class="image" id="kfy1507666550824__d21e16" src="enx1538431836629.png" /> in the left pane.</p>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

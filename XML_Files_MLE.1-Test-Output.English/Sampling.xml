@@ -1,0 +1,764 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="nfy1507741780921"> </a>
+	  <h1>Sampling</h1>
+
+	  <p style="line-height: 1em;">The Sampling function draws rows randomly from the input table.</p>
+   <p style="line-height: 1em;">The function offers two sampling schemes:</p>
+   <ul>
+      <li>A simple Bernoulli (Binomial) sampling on a row-by-row basis with given sample rates</li>
+      <li>Sampling without replacement that selects a given number of rows</li>
+   </ul>
+   <p style="line-height: 1em;">Sampling can be either unconditional or conditional. Unconditional sampling applies to all input data and always uses the same random number generator. Conditional sampling applies only to input data that meets specified conditions and uses a different random number generator for each condition.</p>
+   <p>
+      <b>Note:</b>  The Sampling function does not guarantee the exact sizes of samples. If each sample must have an exact number of rows, use the RandomSample function.</p>
+   <a name="ojd1523287976538"> </a>
+	  <h2>Sampling Syntax</h2>
+
+   <a name="xjj1507743837669"> </a>
+   <h3>Unconditional Sampling, Single Sample Rate</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h4>Version 1.5</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Sampling (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY { ANY | <i>key</i> }
+  USING
+  SampleFraction (<i>fraction</i>)
+  [ Seed (<i>seed</i>) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="uar1507743911852"> </a>
+   <h3>Unconditional Sampling, Approximate Sample Size</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h4>Version 1.5</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Sampling (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable PARTITION BY { ANY | <i>key</i> }
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS SummaryTable DIMENSION
+  USING
+  ApproxSampleSize (<i>size</i>)
+  [ Seed (<i>seed</i>) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="suj1507743987256"> </a>
+   <h3>Conditional Simple Sampling, Single Sample Rate</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h4>Version 1.5</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Sampling (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY { ANY | <i>key</i> }
+  USING
+  StratumColumn ('<i>stratum_column</i>')
+  Strata ('<i>condition</i>' [,...])
+  SampleFraction (<i>fraction</i>)
+  [ Seed (<i>seed</i>) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="jlu1507747224405"> </a>
+   <h3>Conditional Sampling, Variable Sample Rates</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h4>Version 1.5</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Sampling (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY { ANY | <i>key</i> }
+  USING
+  StratumColumn ('<i>stratum_column</i>')
+  Strata ('<i>condition</i>' [,...])
+  SampleFraction (<i>fraction</i> [,...])
+  [ Seed (<i>seed</i>) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="pgz1507760498915"> </a>
+   <h3>Conditional Sampling, Approximate Sample Size</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Version 1.5</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Sampling (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable PARTITION BY { ANY | <i>key</i> }
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS SummaryTable DIMENSION
+  USING
+  StratumColumn ('<i>stratum_column</i>')
+  Strata ('<i>condition</i>' [,...])
+  ApproxSampleSize (<i>total_sample_size</i>)
+  [ Seed (<i>seed</i>) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="ijr1507760572667"> </a>
+   <h3>Conditional Sampling, Variable Approximate Sample Sizes</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h4>Version 1.5</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Sampling (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable PARTITION BY ANY { ANY | <i>key</i> }
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS SummaryTable DIMENSION
+  USING
+  StratumColumn ('<i>stratum_column</i>')
+  Strata ('<i>condition</i>' [,...])
+  ApproxSampleSize (<i>size</i> [,...])
+  [ Seed (<i>seed</i>) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="pgs1507741861051"> </a>
+	  <h2>Sampling Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>SampleFraction</dt>
+      <dd>Specify one or more fractions to use in sampling the data. (Syntax options that do not use SampleFraction require ApproxSampleSize.)<p style="line-height: 1em;">If you specify only one <i>fraction</i>, then the function uses <i>fraction</i> for all strata defined by the sample conditions.</p>
+         <p style="line-height: 1em;">If you specify more than one <i>fraction</i>, then the function uses each <i>fraction</i> for sampling a particular stratum defined by the condition syntax elements.</p>
+         <p>
+            <b>Note:</b>  For conditional sampling with variable sample sizes, specify one <i>fraction</i> for each condition that you specify with the Strata syntax element.</p>
+      </dd>
+      <dt>Seed</dt>
+      <dd>[Optional] Specify the random seed the algorithm uses for repeatable results. The <i>seed</i> must be a LONG value.</dd>
+      <dd>Default: 0</dd>
+      <dt>ApproxSampleSize</dt>
+      <dd>[Optional] Specify one or more approximate sample sizes to use in sampling the data. (Syntax options that do not use ApproxSampleSize require SampleFraction.) Each sample size is approximate because the function maps the size to the sample fractions and then creates the sample data.<p style="line-height: 1em;">If you specify only one size, it represents the total sample size for the entire population. If you also specify the Strata syntax element, the function proportionally creates sample units for each stratum.</p>
+         <p style="line-height: 1em;">If you specify more than one <i>size</i>, then each <i>size</i> corresponds to a stratum, and the function uses each <i>size</i> to create sample units for the corresponding stratum.</p>
+         <p>
+            <b>Note:</b>  For conditional sampling with variable approximate sample sizes, specify one size for each condition that you specify with the Strata syntax element.</p>
+      </dd>
+      <dt>StratumColumn</dt>
+      <dd>[Required for conditional sampling, disallowed otherwise.] Specify the name of the column that contains the sample conditions. If the function has only InputTable, <i>stratum_column</i> is in InputTable. If the function has both InputTable and SummaryTable, <i>stratum_column</i> is in SummaryTable.</dd>
+      <dt>Strata</dt>
+      <dd>[Required with StratumColumn.] Specify the sample conditions that appear in the <i>stratum_column</i>. If Strata specifies a <i>condition</i> that does not appear in <i>stratum_column</i>, the function issues an error message.</dd>
+   </div>
+
+
+	
+   <a name="usw1507741865496"> </a>
+   <h2>Sampling Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>InputTable Schema</h3>
+   <p style="line-height: 1em;">This table is always required.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>input_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Data to sample.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>stratum_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only when this is the only input table and you specify the StratumColumn syntax element.] Sampling conditions.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_cwp_2sw_xcb"> </a>
+   <h3>SummaryTable Schema</h3>
+   <p style="line-height: 1em;">This table is required for approximate sample sizes, disallowed otherwise.</p>
+   <a name="table_N1005B_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1005B_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>input_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Data to sample.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>stratum_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sampling conditions.</div>
+         </td>
+      </tr>
+   </table>
+
+   <p>
+      <b>Note:</b>  To approximate the target sample fractions well, SummaryTable must summarize the population statistics faithfully. That is, sum / stratum_count with a non-null stratum value must equal the total population size.</p>
+   <a name="nxe1507741869583"> </a>
+   <h2>Sampling Output</h2>
+   <a name="section_j5g_mfq_cdb"> </a>
+   <h3>Output Table Schema</h3>
+   <p style="line-height: 1em;">The output table has every data table row that meets a specified condition.</p>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>input_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Copied from InputTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="qxd1510788481436"> </a>
+   <h2>Sampling Examples</h2>
+   <a name="ysz1507743229601"> </a>
+   <h3>Sampling Example: Unconditional, Single Sample Rate</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example selects a sample of approximately 20% of the rows in the input table.</p>
+
+   <a name="section_mvl_ghq_t2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, score_category, categorizes the students (in the table students) by score in a given subject.</p>
+   <a name="table_dkm_jhq_t2b"> </a>
+   <table class="introtable">
+      <a name="table_dkm_jhq_t2b"> </a>
+      <h4 style="text-align: center;">students</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">score</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">83</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">95</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">95</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">90</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">55</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">40</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">57</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">65</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">27</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">This statement creates score_category from students:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE score_category AS (
+  SELECT *, CASE
+    WHEN score &lt;= 80 THEN 'fair'
+    WHEN score &gt; 80 AND score &lt; 90 THEN 'very good'
+    WHEN score &gt;= 90 THEN 'excellent'
+  END AS stratum FROM students
+) WITH DATA;</tt>
+   </pre>
+   <a name="table_z3z_nhq_t2b"> </a>
+   <table class="introtable">
+      <a name="table_z3z_nhq_t2b"> </a>
+      <h4 style="text-align: center;">score_category</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">score</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">stratum</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">fair</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">83</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">very good</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">95</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">excellent</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">95</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">excellent</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">90</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">excellent</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">55</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">fair</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">40</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">fair</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">57</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">fair</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">65</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">fair</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">27</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">fair</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_adw_mwd_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Sampling(
+  ON students PARTITION BY any
+  USING
+  <b>SampleFraction(0.2)</b>
+  Seed(2)
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_v3g_nwd_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id score 
+ -- ----- 
+  4  95.0
+ 10  27.0
+ 16  19.0
+ 23  14.0
+ 26  54.0
+ 27  44.0
+ 28  90.0
+ 33  85.0
+ 35  94.0
+ 42  39.0
+ 43  49.0
+ 57  75.0
+ 60  97.0
+ 71  59.0
+ 86   6.0
+ 87  18.0
+ 93  67.0</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="ell1507754448233"> </a>
+   <h3>Sampling Example: Conditional, Variable Sample Rates</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example applies sampling rates 20%, 30%, and 40% to categories fair, very good, and excellent, respectively, and rounds the number sampled to the nearest integer.</p>
+
+   <a name="section_qyc_mjq_t2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>score_category, as in Sampling Example: Unconditional, Single Sample Rate</li>
+   </ul>
+
+   <a name="section_adw_mwd_pdb"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">The syntax elements StratumColumn and Strata always appear together.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Sampling(
+  ON score_category PARTITION BY ANY
+  USING
+  SampleFraction(0.2, 0.3, 0.4)
+  StratumColumn('stratum')
+  Strata('fair', 'very good', 'excellent')
+  Seed(2)
+) AS dt ORDER BY stratum, id, score;</tt>
+   </pre>
+   <a name="section_v3g_nwd_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id  score stratum   
+ --- ----- --------- 
+   5  90.0 excellent
+  35  94.0 excellent
+  60  97.0 excellent
+  70  95.0 excellent
+  76 100.0 excellent
+  78  91.0 excellent
+  90 100.0 excellent
+  10  27.0 fair     
+  14  52.0 fair     
+  23  14.0 fair     
+  27  44.0 fair     
+  32   3.0 fair     
+  45  21.0 fair     
+  65  53.0 fair     
+  71  59.0 fair     
+  72  79.0 fair     
+ 100  18.0 fair     
+   2  83.0 very good
+  20  85.0 very good
+  53  87.0 very good
+  83  81.0 very good</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="jaa1507754701998"> </a>
+   <h3>Sampling Example: Unconditional, Approximate Sample Size</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">This example uses the ApproxSampleSize syntax element and a summary (DIMENSION) table as inputs.</p>
+
+   <a name="section_lty_pkq_t2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>data: score_category, as in Sampling Example: Unconditional, Single Sample Rate</li>
+      <li>summary: created from score_category by this query:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+SELECT stratum, COUNT(*) AS stratum_count FROM score_category GROUP BY stratum;</tt>
+         </pre>
+      </li>
+   </ul>
+   <a name="table_N10018_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10018_N1000E_N1000C_N10001"> </a>
+      <h4 style="text-align: center;">summary</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">stratum</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">stratum_count</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">very good</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">excellent</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">fair</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">77</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_adw_mwd_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Sampling (
+  ON (
+    SELECT stratum, COUNT(*) AS stratum_count FROM score_category GROUP BY stratum
+  ) AS SummaryTable DIMENSION
+  ON score_category PARTITION BY ANY
+  USING
+  ApproxSampleSize (10)
+  Seed (2)
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_v3g_nwd_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id score stratum   
+ -- ----- --------- 
+  9  65.0 fair     
+ 23  14.0 fair     
+ 59  89.0 very good
+ 61   6.0 fair     
+ 71  59.0 fair     
+ 72  79.0 fair     
+ 75  66.0 fair     
+ 77  51.0 fair     
+ 86   6.0 fair     
+ 89  31.0 fair     
+ 95  84.0 very good
+</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="dci1507754979323"> </a>
+   <h3>Sampling Example: Conditional, Variable Approximate Sample Sizes</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example applies approximate sample sizes 5, 10, and 15 to categories excellent, fair, and very good, respectively.</p>
+
+   <a name="section_qyc_mjq_t2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>data: score_category, as in Sampling Example: Unconditional, Single Sample Rate</li>
+      <li>summary: summary, as in Sampling Example: Unconditional, Approximate Sample Size</li>
+   </ul>
+
+   <a name="section_adw_mwd_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM Sampling (
+  ON score_category AS data PARTITION BY ANY
+  ON (
+    SELECT stratum, COUNT(*) AS stratum_count FROM score_category GROUP BY stratum
+  ) AS SummaryTable DIMENSION
+  USING
+  StratumColumn ('stratum')
+  Strata ('excellent', 'fair', 'very good')
+  ApproxSampleSize (5, 10, 5)
+  Seed (2)
+) AS dt ORDER BY stratum, id;</tt>
+   </pre>
+   <a name="section_v3g_nwd_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id score stratum   
+ -- ----- --------- 
+ 60  97.0 excellent
+ 70  95.0 excellent
+ 88  98.0 excellent
+ 90 100.0 excellent
+  7  40.0 fair     
+  8  57.0 fair     
+ 18  67.0 fair     
+ 22  25.0 fair     
+ 26  54.0 fair     
+ 34  34.0 fair     
+ 74   7.0 fair     
+ 93  67.0 fair     
+ 94  76.0 fair     
+ 96  71.0 fair     
+  2  83.0 very good
+ 20  85.0 very good
+ 33  85.0 very good
+ 83  81.0 very good
+</tt>
+   </pre>
+   <p>
+      <b>Note:</b>  In SummaryTable, the sum over stratum_count must equal the total population size. Otherwise, the final sample output might not approximate the target sample fractions well.</p>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

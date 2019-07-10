@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="jtk1507069294341"> </a>
+   <h1>ShapleySortCombinations</h1>
+   <p style="line-height: 1em;">The ShapleySortCombinations function takes a table of combinations, output by either the ShapleyGenerateCombination function or a SQL statement, and outputs a table of sorted combinations that can be input to ShapleyAddOnePlayer.</p>
+   <a name="too1507069351965"> </a>
+   <h2>ShapleySortCombinations Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.4</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ShapleySortCombinations (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+  USING
+  CombinationColumn ('<i>combination_column</i>')
+  ValueColumn ('<i>value_column</i>')
+  [ Delimiter ('<i>delimiter</i>') ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="lem1507069405716"> </a>
+	  <h2>ShapleySortCombinations Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>CombinationColumn</dt>
+      <dd>Specify the name of the input table column that contains the combinations.</dd>
+      <dt>ValueColumn</dt>
+      <dd>Specify the name of the input table column that contains the assigned value of each combination.</dd>
+      <dt>Delimiter</dt>
+      <dd>[Optional] Specify the character that separates player numbers in combinations:<ul>
+            <li>' ' (space) (Default)</li>
+            <li>'#' (pound sign)</li>
+            <li>'$' (dollar sign)</li>
+            <li>'%' (percent sign)</li>
+            <li>'&amp;' (ampersand)</li>
+         </ul>
+      </dd>
+   </div>
+
+
+	
+   <a name="lku1507069478586"> </a>
+   <h2>ShapleySortCombinations Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Input Table Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">comb</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Combination, represented by space-separated player numbers. For example, '1 2' or '2 3 4 5'. First player is number 1, second is number 2, and so on.<p>
+                  <b>Note:</b>  For correct Shapley values, the comb column values must be unique.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Assigned value of combination.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="pfc1507069540477"> </a>
+   <h2>ShapleySortCombinations Output</h2>
+   <a name="section_drc_vtw_xcb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">comb</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Combination, represented by space-separated player numbers. For example, '1 2' or '2 3 4 5'.<p>
+                  <b>Note:</b>  For correct Shapley values, the comb column values must be unique.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">size</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Combination size.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Assigned value of combination.</div>
+         </td>
+      </tr>
+   </table>
+
+
+</t:intro>

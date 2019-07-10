@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="mdp1507235149305"> </a>
+	  <h1>TextClassifier</h1>
+
+	
+		<p style="line-height: 1em;">The TextClassifier function classifies input text, using a model output by the function TextClassifierTrainer.</p>
+   <p>
+      <b>Note:</b>  TextClassifier uses files that are preinstalled on ML Engine. For details, see Preinstalled Files That Functions Use.</p>
+	
+   <a name="srb1507235254090"> </a>
+   <h2>TextClassifier Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.4</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TextClassifier (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+  USING
+  TextColumn ('<i>text_column</i>')
+  InputModelFile ('<i>input_model_file</i>')
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="tfh1507235310475"> </a>
+	  <h2>TextClassifier Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TextColumn</dt>
+      <dd>Specify the column of the input table that contains the text to use for predicting classification.</dd>
+      <dt>InputModelFile</dt>
+      <dd>Specify the model created by TextClassifierTrainer, which is installed on ML Engine when it is created.</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the input columns to copy to the output table.</dd>
+   </div>
+
+
+	
+   <a name="apg1507235387800"> </a>
+   <h2>TextClassifier Input</h2>
+   <a name="section_jpz_3zc_ycb"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>text_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Text to classify.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="bld1507235501974"> </a>
+   <h2>TextClassifier Output</h2>
+   <a name="section_m2b_hzc_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">out_category</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Predicted category of text. If text is empty or contains no model features, this value is NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from input table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="nid1510348931679"> </a>
+   <h2>TextClassifier Example</h2>
+   <a name="section_ahj_xsl_pdb"> </a>
+   <h3>Input</h3>
+   <ul>
+      <li>Input table: textclassifier_input</li>
+      <li>InputModelFile: knn.bin, output by TextClassifierTrainer Example</li>
+   </ul>
+   <a name="table_qkd_2tl_pdb"> </a>
+   <table class="introtable">
+      <a name="table_qkd_2tl_pdb"> </a>
+      <h4 style="text-align: center;">textclassifier_input</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">content</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">category</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">At the beginning of 2004, Federer had a world ranking of No. 2, and that same year, he won the Australian Open, the U.S. Open, the ATP Masters and retained the Wimbledon singles title.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sports</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">17</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Federer held on to his No. 1 ranking from 2004 into 2008. In 2006 and 2007, he won the singles championships at the Australian Open, Wimbledon and the U.S. Open.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sports</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">18</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">A paragon of graceful athleticism, Federer was named the Laureus World Sportsman of the Year from 2005-08.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">sports</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">19</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Cyclone, tropical cyclone, hurricane, and typhoon are different names for the same phenomenon, which is a cyclonic storm system that forms over the oceans.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">natural disaster</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">20</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Drought is the unusual dryness of soil, resulting in crop failure and shortage of water and for other uses which is caused by significant low rainfall than average over a prolonged period.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">natural disaster</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">21</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">A tornado is a violent, dangerous, rotating column of air that is in contact with both the surface of the earth and a cumulonimbus cloud or, in rare cases, the base of a cumulus cloud.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">natural disaster</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_vrv_xsl_pdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM TextClassifier (
+  ON textclassifier_input
+  USING
+  TextColumn ('content')
+  InputModelFile ('knn.bin')
+  Accumulate ('id', 'category')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_qlf_ysl_pdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ id category         out_category     
+ -- ---------------- ---------------- 
+ 16 sports           sports          
+ 17 sports           sports          
+ 18 sports           natural disaster
+ 19 natural disaster natural disaster
+ 20 natural disaster natural disaster
+ 21 natural disaster natural disaster</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

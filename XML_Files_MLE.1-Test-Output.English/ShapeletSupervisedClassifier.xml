@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="fzc1506627602124"> </a>
+	  <h1>ShapeletSupervisedClassifier</h1>
+
+	  <p style="line-height: 1em;">The ShapeletSupervisedClassifier function uses the model output by the function ShapeletSupervised to classify a set of time series.</p>
+
+   <a name="oqj1506627681696"> </a>
+   <h2>ShapeletSupervisedClassifier Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.6</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ShapeletSupervisedClassifier (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable PARTITION BY <i>id</i> ORDER BY <i>time_instant</i> 
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS Model DIMENSION ORDER BY shapelet_id, time_instant
+  [ USING
+    [ TargetColumn ('<i>value_column</i>') ]
+    [ TimeInterval (<i>num_data_points</i>) ]
+    <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+  ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="vqn1506627751855"> </a>
+	  <h2>ShapeletSupervisedClassifier Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumn</dt>
+      <dd>[Optional] Specify the name of the InputTable column that contains the data points in the time series.</dd>
+      <dd>Default: "value"</dd>
+      <dt>TimeInterval</dt>
+      <dd>[Optional] Specify the number of data points in a time series to skip between consecutive time series windows when calculating the distance of a shapelet from a time series.</dd>
+      <dd>Because a shapelet is typically much smaller than a complete time series, the function calculates the distance of a shapelet from a time series by sliding the shapelet across time series windows of shapelet length, calculating the distance between the shapelet and each window, and then selecting the smallest distance.</dd>
+      <dd>The <i>num_data_points</i> is the number of data points to skip when sliding from one time series window to the next. The <i>num_data_points</i> must be an INTEGER in the range [1, 1000000]. The value 1 gives optimal results at the cost of higher execution time.<p>
+            <b>Note:</b>  This syntax element must specify the same value as the ShapeletSupervised TimeInterval syntax element specified when it created the shapelets table.</p>
+      </dd>
+      <dd>Default: 10</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the InputTable columns to copy to the output table. Columns specified by this syntax element appear after the other output table columns.</dd>
+      <dd>Default: id and predicted_category</dd>
+   </div>
+
+
+	
+   <a name="qck1506627821241"> </a>
+   <h2>ShapeletSupervisedClassifier Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_if3_kys_wcb"> </a>
+   <table class="introtable">
+      <a name="table_if3_kys_wcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Has same schema as ShapeletUnsupervised Input InputTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Model</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Has same schema as ShapeletSupervised Output ModelTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="yvu1506627879544"> </a>
+   <h2>ShapeletSupervisedClassifier Output</h2>
+   <a name="section_d4w_5xs_wcb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Time series identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">predicted_category</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Predicted category of time series.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from InputTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="azy1510767584539"> </a>
+   <h2>ShapeletSupervisedClassifier Example</h2>
+   <a name="section_pnj_jkj_mdb"> </a>
+   <h3>Input</h3>
+   <ul>
+      <li>InputTable: shapelets_test, which has additional data from the data set used to train the model</li>
+      <li>Model: shapelets_model, output table of ShapeletSupervised Example</li>
+   </ul>
+   <a name="table_zzy_wkj_mdb"> </a>
+   <table class="introtable">
+      <a name="table_zzy_wkj_mdb"> </a>
+      <h4 style="text-align: center;">InputTable: shapelets_test</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">period</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">stockprice</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">stock_category</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22418</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">460</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22419</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">457</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22420</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">452</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22421</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">459</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22422</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">462</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22423</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">459</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22424</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">463</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22425</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">479</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22426</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">493</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22427</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">490</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Technology</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_zss_jkj_mdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE shapelets_predict AS (
+  SELECT * FROM ShapeletSupervisedClassifier (
+    ON shapelets_test AS InputTable PARTITION BY id ORDER BY period
+    ON shapelets_model AS Model DIMENSION ORDER BY shapelet_id, time_instant
+  USING
+  TimeInterval (1)
+  TargetColumn ('stockprice')
+  Accumulate ('stock_category')
+  ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_r3d_kkj_mdb"> </a>
+   <h3>Output</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM shapelets_predict ORDER BY 1;</tt>
+   </pre>
+   <p style="line-height: 1em;">The column stock_category contains the original category.</p>
+   <pre>
+      <tt>
+ id predicted_category stock_category 
+ -- ------------------ -------------- 
+  5 technology         technology    
+  5 technology         technology    
+  5 technology         technology    
+  5 technology         technology    
+  5 technology         technology    
+  5 technology         technology    
+  5 technology         technology    
+  5 technology         technology    
+  5 technology         technology    
+  5 technology         technology    
+  6 technology         technology    
+  6 technology         technology    
+  6 technology         technology    
+  6 technology         technology    
+  6 technology         technology    
+  6 technology         technology    
+  6 technology         technology    
+  6 technology         technology    
+  6 technology         technology    
+  6 technology         technology    
+  7 healthcare         healthcare    
+  7 healthcare         healthcare    
+  7 healthcare         healthcare    
+  7 healthcare         healthcare    
+  7 healthcare         healthcare    
+  7 healthcare         healthcare    
+  7 healthcare         healthcare    
+  7 healthcare         healthcare    
+  7 healthcare         healthcare    
+  7 healthcare         healthcare    
+  8 healthcare         healthcare    
+  8 healthcare         healthcare    
+  8 healthcare         healthcare    
+  8 healthcare         healthcare    
+  8 healthcare         healthcare    
+  8 healthcare         healthcare    
+  8 healthcare         healthcare    
+  8 healthcare         healthcare    
+  8 healthcare         healthcare    
+  8 healthcare         healthcare</tt>
+   </pre>
+   <a name="section_n5r_xlj_mdb"> </a>
+   <h3>Prediction Accuracy</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT (SELECT COUNT(id) FROM shapelets_predict
+  WHERE predicted_category = stock_category)/
+    (SELECT COUNT(id) FROM shapelets_predict) AS prediction_accuracy;</tt>
+   </pre>
+   <pre>
+      <tt>
+ prediction_accuracy 
+ ------------------- 
+                   1</tt>
+   </pre>
+   <p style="line-height: 1em;">The prediction accuracy is 100% because the predicted and original categories are the same.</p>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

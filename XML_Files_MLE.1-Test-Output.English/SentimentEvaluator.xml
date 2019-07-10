@@ -1,0 +1,502 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="tbc1507573737060"> </a>
+	  <h1>SentimentEvaluator</h1>
+
+	
+		<p style="line-height: 1em;">The SentimentEvaluator function uses test data to evaluate the precision and recall of the predictions output by the function SentimentExtractor. The precision and recall are affected by the model that SentimentExtractor uses; therefore, if you change the model, you must rerun SentimentEvaluator on the new predictions.</p>
+   <p>
+      <b>Note:</b>  SentimentEvaluator uses files that are preinstalled on ML Engine. For details, see Preinstalled Files That Functions Use.</p>
+	
+   <a name="qav1507573843904"> </a>
+   <h2>SentimentEvaluator Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.5</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SentimentEvaluator (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY 1
+  USING
+  ObservationColumn ('<i>observed_column</i>')
+  SentimentColumn ('<i>sentiment_column</i>')
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="slb1507574689381"> </a>
+	  <h2>SentimentEvaluator Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>ObservationColumn</dt>
+      <dd>Specify the name of the input column with the observed sentiment, which is one of the following:<a name="table_x3s_zdz_fdb"> </a>
+         <table class="introtable">
+            <a name="table_x3s_zdz_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'POS'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Positive</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'NEG'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Negative</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'NEU'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Neutral</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>SentimentColumn</dt>
+      <dd>Specify the name of the input column with the predicted sentiment (<tt style="font-family: monospace;">'POS'</tt>, <tt style="font-family: monospace;">'NEG'</tt>, or <tt style="font-family: monospace;">'NEU'</tt>).</dd>
+   </div>
+
+
+	
+   <a name="grp1507575175150"> </a>
+   <h2>SentimentEvaluator Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Input Table Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>observed_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Observed sentiment (POS (positive), NEG (negative), or NEU (neutral)).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>sentiment_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sentiment predicted by SentimentExtractor function (POS, NEG, or NEU).</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="zou1507575261430"> </a>
+   <h2>SentimentEvaluator Output</h2>
+   <a name="section_vt5_bxc_ycb"> </a>
+   <h3>Output Message Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">evaluation_result</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Reports these values:<ul>
+                  <li>Positive record (total relevant, relevant, total retrieved)</li>
+                  <li>Recall and precision</li>
+                  <li>Negative record (total relevant, relevant, total retrieved)</li>
+                  <li>Recall and precision</li>
+                  <li>Positive and negative record (total relevant, relevant, total retrieved)</li>
+                  <li>Recall and precision</li>
+               </ul>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_N10054_N1000C_N10001"> </a>
+   <h3>Calculation of Precision and Recall</h3>
+   <a name="table_agc_1dk_ycb"> </a>
+   <table class="introtable">
+      <a name="table_agc_1dk_ycb"> </a>
+      <h4 style="text-align: center;">Term Definitions</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Term</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Definition</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">POS_EXPECT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of rows in which observed sentiment is POS.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">POS_RETURN</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of rows in which actual sentiment is POS.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">POS_TRUE</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of rows in which both observed and actual sentiment are POS.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">NEG_EXPECT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of rows in which observed sentiment is NEG.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">NEG_RETURN</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of rows in which actual sentiment is NEG.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">NEG_TRUE</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of rows in which both observed and actual sentiment are NEG.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">NEU_EXPECT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of rows in which observed sentiment is NEU.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">NEU_RETURN</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of rows in which actual sentiment is NEU.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">NEU_TRUE</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of rows in which both observed and actual sentiment are NEU.</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_tvr_rdk_ycb"> </a>
+   <table class="introtable">
+      <a name="table_tvr_rdk_ycb"> </a>
+      <h4 style="text-align: center;">Calculations</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Sentiment</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Precision</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Recall</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Positive</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POS_TRUE / POS_RETURN</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POS_TRUE / POS_EXPECT</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Negative</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NEG_TRUE / NEG_RETURN</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NEG_TRUE / NEG_EXPECT</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Neutral</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NEU_TRUE / NEU_RETURN</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NEU_TRUE / NEU_EXPECT</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">All</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">(POS_TRUE + NEG_TRUE + NEU_TRUE) / (POS_RETURN + NEG_RETURN + NEU_RETURN)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">(POS_TRUE + NEG_TRUE + NEU_TRUE) / (POS_EXPECT + NEG_EXPECT + NEU_EXPECT)</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="duy1507575454330"> </a>
+   <h2>SentimentEvaluator Examples</h2>
+   <p style="line-height: 1em;">These examples also have the SentimentExtractor Examples Prerequisites.</p>
+   <a name="cdr1508187307291"> </a>
+   <h3>SentimentEvaluator Example: Model ('dictionary')</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example uses the dictionary model file default_sentiment_lexicon.txt.</p>
+
+   <a name="section_jkz_qn2_p2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: sentiment_extract_input, as in SentimentExtractor Example: InputModelFile ('dictionary'), AnalysisType ('document')</li>
+   </ul>
+
+   <a name="section_bwh_ppl_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SentimentEvaluator (
+  ON SentimentExtractor (
+    ON sentiment_extract_input
+    USING
+    TextColumn ('review')
+    Accumulate ('category')
+    ModelFile ('dictionary')
+  ) PARTITION BY 1
+  USING
+  ObservationColumn ('category')
+  SentimentColumn ('out_polarity')
+) AS dt;</tt>
+   </pre>
+   <a name="section_l1t_ppl_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ evaluation_result                                                                  
+ ---------------------------------------------------------------------------------- 
+ positive record (total relevant, relevant, total retrieved): 5 5 5                
+ recall and precision: 1.00 1.00                                                   
+ negative record (total relevant, relevant, total retrieved): 5 5 5                
+ recall and precision: 1.00 1.00                                                   
+ positive and negative record (total relevant, relevant, total retrieved): 10 10 10
+ recall and precision: 1.00 1.00</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="ewp1507579336765"> </a>
+   <h3>SentimentEvaluator Example: Model ('classification:default_sentiment_classification_model.bin')</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example uses the classification model file default_sentiment_classification_model.bin.</p>
+
+   <a name="section_jkz_qn2_p2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: sentiment_extract_input, as in SentimentExtractor Example: InputModelFile ('dictionary'), AnalysisType ('document')</li>
+   </ul>
+
+   <a name="section_bwh_ppl_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SentimentEvaluator (
+  ON SentimentExtractor (
+    ON sentiment_extract_input
+    USING
+    TextColumn ('review')
+    Accumulate ('category')
+    InputModelFile ('classification:default_sentiment_classification_model.bin')
+  ) PARTITION BY 1
+  USING
+  ObservationColumn ('category')
+  SentimentColumn ('out_polarity')
+) AS dt;</tt>
+   </pre>
+   <a name="section_l1t_ppl_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ evaluation_result                                                                 
+ --------------------------------------------------------------------------------- 
+ positive record (total relevant, relevant, total retrieved): 5 3 3               
+ recall and precision: 0.60 1.00                                                  
+ negative record (total relevant, relevant, total retrieved): 5 5 7               
+ recall and precision: 1.00 0.71                                                  
+ positive and negative record (total relevant, relevant, total retrieved): 10 8 10
+ recall and precision: 0.80 0.80</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="fek1507579553511"> </a>
+   <h3>SentimentEvaluator Example: Model ('classification:sentimentmodel1.bin')</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">This example uses the model file sentimentmodel1.bin, output by the SentimentTrainer Example.</p>
+
+   <a name="section_jkz_qn2_p2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: sentiment_extract_input, as in SentimentExtractor Example: InputModelFile ('dictionary'), AnalysisType ('document')</li>
+   </ul>
+
+   <a name="section_bwh_ppl_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SentimentEvaluator (
+  ON SentimentExtractor (
+    ON sentiment_extract_input
+    USING
+    TextColumn ('review')
+    Accumulate ('category')
+    InputModelFile ('classification:sentimentmodel1.bin')
+  ) PARTITION BY 1
+  USING
+  ObservationColumn ('category')
+  SentimentColumn ('out_polarity')
+) AS dt;</tt>
+   </pre>
+   <a name="section_l1t_ppl_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ evaluation_result                                                                  
+ ---------------------------------------------------------------------------------- 
+ positive record (total relevant, relevant, total retrieved): 5 5 5                
+ recall and precision: 1.00 1.00                                                   
+ negative record (total relevant, relevant, total retrieved): 5 5 5                
+ recall and precision: 1.00 1.00                                                   
+ positive and negative record (total relevant, relevant, total retrieved): 10 10 10
+ recall and precision: 1.00 1.00</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="rfe1507579769160"> </a>
+   <h3>SentimentEvaluator Example: Dictionary Table Instead of Model File</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">This example uses a dictionary table, sentiment_word, instead of a model file. See sentiment_word in SentimentExtractor Example: Dictionary Table Instead of Model File.</p>
+
+   <a name="section_jkz_qn2_p2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: sentiment_extract_input, as in SentimentExtractor Example: InputModelFile ('dictionary'), AnalysisType ('document')</li>
+   </ul>
+
+   <a name="section_bwh_ppl_pdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SentimentEvaluator (
+  ON SentimentExtractor (
+    ON sentiment_extract_input PARTITION BY ANY
+    ON sentiment_word AS dict DIMENSION
+    USING
+    TextColumn ('review')
+    Accumulate ('category')
+  ) PARTITION BY 1
+  USING
+  ObservationColumn ('category')
+  SentimentColumn ('out_polarity')
+) AS dt;</tt>
+   </pre>
+   <a name="section_l1t_ppl_pdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ evaluation_result                                                                
+ -------------------------------------------------------------------------------- 
+ positive record (total relevant, relevant, total retrieved): 5 5 6              
+ recall and precision: 1.00 0.83                                                 
+ negative record (total relevant, relevant, total retrieved): 5 3 3              
+ recall and precision: 0.60 1.00                                                 
+ positive and negative record (total relevant, relevant, total retrieved): 10 8 9
+ recall and precision: 0.80 0.89</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

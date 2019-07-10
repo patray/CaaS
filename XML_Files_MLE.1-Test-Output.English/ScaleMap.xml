@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="fna1507827820130"> </a>
+   <h1>ScaleMap</h1>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The ScaleMap function is designed for internal use only; its output is not intended for human interpretation. The ScaleMap function calculates and outputs statistical information for a data set at the vworker level. The output of the ScaleMap function is intended to be input to the functions Scale (which calculates scaled values for the data set) and ScaleSummary (which calculates global statistics for the data set).</p>
+
+   <a name="nzp1507827828139"> </a>
+   <h2>ScaleMap Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.6</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ScaleMap (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+  USING
+  TargetColumns ( { '<i>target_column</i>' | <i>target_column_range</i> }[,...] )
+  [ MissValue ({ 'KEEP' | 'OMIT' | 'ZERO' | 'LOCATION' })]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="nwg1507827832154"> </a>
+	  <h2>ScaleMap Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumns</dt>
+      <dd>Specify the names of input table columns for which to calculate statistics. The columns must contain numeric values between -1e308 and 1e308. If a value is outside this range, the function treats it as infinity.</dd>
+      <dt>MissValue</dt>
+      <dd>[Optional] Specify how the Scale, ScaleMap, and ScaleByPartition functions are to process NULL values in input, as follows:<a name="table_s3l_mv2_gdb"> </a>
+         <table class="introtable">
+            <a name="table_s3l_mv2_gdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">KEEP</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Keep NULL values.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">OMIT</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Ignore any row that has a NULL value.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">ZERO</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Replace each NULL value with zero.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">LOCATION</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Replace each NULL value with its location value.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+   </div>
+
+
+	
+   <a name="zsy1507827835796"> </a>
+   <h2>ScaleMap Input</h2>
+   <a name="section_ppz_dcf_bcb"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SMALLINT, INT, BIGINT, NUMERIC, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>target_column</i>.] Contains numeric values.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_lfn_2cf_bcb"> </a>
+   <h3>Invalid Input Data Handling</h3>
+   <ul>
+      <li>If the input table has infinity or NaN values, the input is invalid. The Scale and ScaleByPartition functions do not process these values, but the ScaleMap function counts the values in each column, including invalid values. The count of input values is available in the output of the ScaleSummary function.</li>
+      <li>If a column contains only invalid input values, the data in this column is not modified.</li>
+      <li>If a sequence has only one unique value, the result of the USTD, STD, RANGE, and MIDRANGE operations are NaN values because the function cannot calculate the scale.</li>
+   </ul>
+
+   <a name="npl1507827847321"> </a>
+   <h2>ScaleMap Output</h2>
+   <a name="section_k2y_jms_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">stattype</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Type of statistical information, a value from stattype column of following table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>stattype_value</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Value of stattype, described in Description column of following table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_plh_kms_ycb"> </a>
+   <h3>stattype Values (Supported Data Types)</h3>
+   <a name="table_N10057_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10057_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">stattype</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">min</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Minimum value in corresponding column in current vworker.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">max</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Maximum value in corresponding column in current vworker.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">sum</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sum value in corresponding column in current vworker.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">squaresum</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sum of squared values in corresponding column in current vworker.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">count</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of valid values in corresponding column in current vworker.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">infinity</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of infinite values in corresponding column in current vworker.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">nan</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of NaN values in corresponding column in current vworker.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">null</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of NULL values in corresponding column in current vworker.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ignorerow</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of ignored rows in corresponding column in current vworker.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">text_missvalue_<i>missvalue</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>missvalue</i> is value of MissValue syntax element—KEEP, OMIT, ZERO, or LOCATION.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ozk1527089228983"> </a>
+	  <h2>ScaleMap Examples</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <ul>
+      <li>Scale Example: ScaleMethod ('midrange')</li>
+      <li>Scale Example: Use Training Data to Scale Test Data</li>
+      <li>Scale Example: Use Scale Output in KMeans</li>
+   </ul>
+
+
+	
+</t:intro>

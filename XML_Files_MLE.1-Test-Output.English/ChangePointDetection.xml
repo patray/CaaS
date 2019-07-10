@@ -1,0 +1,1678 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="jks1506305286697"> </a>
+	  <h1>ChangePointDetection</h1>
+
+	  <p style="line-height: 1em;">The change-point search method for retrospective change-point detection, binary segmentation, uses this procedure:</p>
+   <ol>
+      <li>Search the data for the first change point.</li>
+      <li>At that change point, split the data into two parts.</li>
+      <li>In each part, select the change point with the minimum loss.</li>
+      <li>Repeat this procedure until there are either no new change points or the maximum number of change points.</li>
+   </ol>
+   <p style="line-height: 1em;">Binary segmentation is an approximation method, because the change point is decided with only part of the data. However, this method is efficient and has an O(<i>n</i> log <i>n</i>) computational cost, where <i>n</i> is the number of data points.</p>
+   <a name="fig_cvh_kfv_lw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <p style="line-height: 1em;">Taking normal distribution as an example, the change-point problem is to test the following null hypothesis:</p>
+   <p style="line-height: 1em;">
+      <i>H</i>
+      <sub>0</sub>:<i>μ</i> = <i>μ</i>
+      <sub>1</sub> = <i>μ</i>
+      <sub>2</sub> = … = <i>μ</i>
+      <sub>
+         <i>n</i>
+      </sub> and <i>σ</i>
+      <sup>2</sup> = <i>σ</i>
+      <sub>1</sub>
+      <sup>2</sup> = <i>σ</i>
+      <sub>2</sub>
+      <sup>2</sup> = … <i>σ</i>
+      <sub>
+         <i>n</i>
+      </sub>
+      <sup>2</sup>
+   </p>
+   <p style="line-height: 1em;">as opposed to the alternatives,</p>
+   <p style="line-height: 1em;">
+      <i>H</i>
+      <sub>1</sub>:<i>μ</i>
+      <sub>1</sub> = … = <i>μ</i>
+      <sub>
+         <i>k</i>
+         <sub>1</sub>
+      </sub> ≠ <i>μ</i>
+      <sub>
+         <i>k</i>
+         <sub>1</sub>+1</sub> = … <i>μ</i>
+      <sub>
+         <i>k</i>
+         <sub>2</sub>
+      </sub> ≠ ... ≠ <i>μ</i>
+      <sub>
+         <i>k</i>
+         <sub>
+            <i>q</i>+1</sub>
+      </sub> = ...= <i>μ</i>
+      <sub>
+         <i>n</i>
+      </sub>
+   </p>
+   <p style="line-height: 1em;">and</p>
+   <p style="line-height: 1em;">
+      <i>σ</i>
+      <sub>1</sub>
+      <sup>2</sup> = … = <i>σ</i>
+      <sub>
+         <i>k</i>
+         <sub>1</sub>
+      </sub>
+      <sup>2</sup> ≠ <i>σ</i>
+      <sub>
+         <i>k</i>
+         <sub>1</sub>+1</sub>
+      <sup>2</sup> = … = <i>σ</i>
+      <sub>
+         <i>k</i>
+         <sub>2</sub>
+      </sub>
+      <sup>2</sup> ≠ ... ≠ <i>σ</i>
+      <sub>
+         <i>k</i>
+         <sub>
+            <i>q</i>+1</sub>
+      </sub>
+      <sup>2</sup> = … = <i>σ</i>
+      <sub>
+         <i>n</i>
+      </sub>
+      <sup>2</sup>
+   </p>
+   <p style="line-height: 1em;">Binary segmentation performs the following tests in each iteration:</p>
+   <p style="line-height: 1em;">
+      <i>H</i>
+      <sub>1</sub>:<i>μ</i>
+      <sub>1</sub> = … = <i>μ</i>
+      <sub>
+         <i>k</i>
+         <sub>1</sub>
+      </sub> ≠ <i>μ</i>
+      <sub>
+         <i>k</i>
+         <sub>1</sub>+1</sub> = … = <i>μ</i>
+      <sub>
+         <i>n</i>
+      </sub>
+   </p>
+   <p style="line-height: 1em;">and</p>
+   <p style="line-height: 1em;">
+      <i>σ</i>
+      <sub>1</sub>
+      <sup>2</sup> = … = <i>σ</i>
+      <sub>
+         <i>k</i>
+         <sub>1</sub>
+      </sub>
+      <sup>2</sup> ≠ <i>σ</i>
+      <sub>
+         <i>k</i>
+         <sub>1</sub>+1</sub>
+      <sup>2</sup> = … <i>σ</i>
+      <sub>
+         <i>n</i>
+      </sub>
+      <sup>2</sup>
+   </p>
+   <p style="line-height: 1em;">These are the formulas for the log likelihood functions <i>H</i>
+      <sub>0</sub> and <i>H</i>
+      <sub>1</sub>:</p>
+   <a name="fig_qjk_r11_mw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <a name="fig_myj_3b1_mw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA3AAAABXCAYAAABFq6fEAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAABgjSURBVHhe7Z3rsey0EkZJgRhIgRwIgRhIgQzIgAyIgAhIgN9UkQE57FvrXL57tHXlt/zQzFpVqn3G47Gl7k+tbtsz55sPERERERERGQILOBERERERkUGwgBMRERERERkECzgREREREZFBsIATEREREREZBAs4ERERERGRQbCAExERERERGQQLOBEREZEV/PDDDx/ffPPNx88///zvFhGR67GAExEREVkJBdzvv//+7ysRkeuxgBMRERFZwT///POlgOPv33///eXftF9++eXfPUSeA7rMHeM///zTO8gvhAWciIiIyAq48/bdd9/9++rj4/vvv//48ccfvxR0Ik/ijz/++Pjtt9++FHGlTineKORkbCzgRERERFZA8vvTTz99uZvBv0mSRZ4MOv3222//d5HBAu41sIATERERWQF3MvLYJIWcyNNBsxRtgdc+8js+FnAiIiIiC+T7b9x1y10NkaeDZvOjO6WGZWws4EREREQWIAkm+QUeoUxizPeM+EETkadBoYZO8/hk+frXX3/9sk3GxAJOREREZIH6u0P8KAR34UyE5anwqGT5oztcaECzbOMihIyLBZyIiIiIiMggWMCJiMzA4yZpeQxFXps8ZkTjC/8iIiJPwgJORGQGijYeNzGRfy/yHafy19vkfpiPPBbmD4jIKHBBiEdv/eVH6YkFnIjIAiTy/mT4e5G7cPxAhdxPWbjl7qjIk0nhFr1awElPjIAiIjPkTow/VPBe4G/87hf9nwE/GJJiOv8Xm8hT4ddJuejHj4bk10st4KQnRkARkRlM5N+T/MKgPI/c1ehJ+b3HMxrHl/ck2updwKnZ98YCTmQg8ggRjSt7PFbEVT6CLdvyn3VKP2LfQCGXx7jKnxSXfWDPJOT5vhk65nuHd9qY85fn5u4P/aF5Jf1ezijgIMel4f8jP1qURz5zPJPh9+WsAg7U7PtiAScyCNwJIoksFwOKCxJgAi/b7kp2X5k6kcfWbOMxriOLpfzXltzp4i82pjBG40l0KOjuSCS4OJI5FphnbPO7kPeTpLU36DAXZ2ho8yjpq8nw+3JmAadm3xcLOJHByGJAAUGi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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <p style="line-height: 1em;">These are the formulas for the maximum likelihood estimation of <i>μ</i> and σ<sup>2</sup>:</p>
+   <a name="fig_zbw_3d1_mw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <a name="fig_ncb_b21_mw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <p style="line-height: 1em;">From the preceding formulas, the binary segmentation algorithm computes max <i>LogL</i>
+      <sub>1</sub> by giving <i>k</i> different values. Then, to check for a change point, the algorithm compares the difference between max <i>LogL</i>
+      <sub>1</sub> and <i>LogL</i>
+      <sub>0</sub> to the penalty value.</p>
+   <p style="line-height: 1em;">If the algorithm detects a change point, it adds that change point to its list of candidate change points and splits the data into two parts. From the candidate change points that the algorithm finds in the two parts, it selects the one with the minimum loss.</p>
+   <p style="line-height: 1em;">The ChangePointDetection function detects change points in a stochastic process or time series, using retrospective change-point detection, implemented with these algorithms:</p>
+   <ul>
+      <li>Search algorithm: binary search</li>
+      <li>Segmentation algorithm: normal distribution and linear regression</li>
+   </ul>
+   <p style="line-height: 1em;">Use this function when the input data can be stored in memory and the application does not require a real-time response. If the input data cannot be stored in memory, or the application requires a real-time response, use the function ChangePointDetectionRT.</p>
+
+   <a name="mkz1506305698423"> </a>
+   <h2>ChangePointDetection Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.2</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ChangePointDetection (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY <i>partition_expr</i> ORDER BY <i>order_by_expr</i>
+  USING
+  TargetColumn ('<i>target_column</i>')
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+  [ SegmentationMethod ({ 'normal_distribution' | 'linear_regression' }) ]
+  [ SearchMethod ('binary') ]
+  [ MaxChangeNum (<i>maximum_change_point_count</i>) ]
+  [ Cost ({ 'BIC' | 'AIC' | <i>threshold</i> }) ]
+  [ OutputType ({ 'CHANGEPOINT' | 'VERBOSE' | 'SEGMENT' }) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="yav1506305895469"> </a>
+	  <h2>ChangePointDetection Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumn</dt>
+      <dd>Specify the name of the input table column that contains the time series data.</dd>
+      <dt>Accumulate</dt>
+      <dd>Specify the names of the input table columns to copy to the output table.<p>
+            <b>Tip:</b>  To identify change points in the output table, specify the columns that appear in <i>partition_exp</i> and <i>order_by_exp</i>.</p>
+      </dd>
+      <dt>SegmentationMethod</dt>
+      <dd>[Optional] Specify the segmentation method:<a name="table_rmf_1by_fdb"> </a>
+         <table class="introtable">
+            <a name="table_rmf_1by_fdb"> </a>
+            <tr>
+               <th align="left"> </th>
+               <th align="left"> </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'normal_distribution'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">In each segment, data is in normal distribution.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'linear_regression'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">In each segment, data is in linear regression.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>SearchMethod</dt>
+      <dd>[Optional] Specify the search method, binary search.</dd>
+      <dt>MaxChangeNum</dt>
+      <dd>[Optional] Specify the maximum number of change points to detect.</dd>
+      <dd>Default: 10</dd>
+      <dt>Cost</dt>
+      <dd>[Optional] Specify the penalty function, which is used to avoid over-fitting:<a name="table_s4z_gby_fdb"> </a>
+         <table class="introtable">
+            <a name="table_s4z_gby_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Condition for Change Point Existence</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Condition for Normal Distribution and Linear Regression</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'BIC'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <i>ln</i>(<i>L</i>
+                     <sub>1</sub>)−<i>ln</i>(<i>L</i>
+                     <sub>0</sub>) &gt; (<i>p</i>
+                     <sub>1</sub>
+                     <i>-p</i>
+                     <sub>0</sub>)*<i>ln</i>(<i>n</i>)/2</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">(<i>p</i>
+                     <sub>1</sub>
+                     <i>-p</i>
+                     <sub>0</sub>)*<i>ln</i>(<i>n</i>)/2 = <i>ln</i>(<i>n</i>)</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'AIC'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <i>ln</i>(<i>L</i>
+                     <sub>1</sub>)−<i>ln</i>(<i>L</i>
+                     <sub>0</sub>) &gt; <i>p</i>
+                     <sub>1</sub>
+                     <i>-p</i>
+                     <sub>0</sub>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <p style="line-height: 1em; margin: 0px;">
+                        <br/>
+                        <i>p</i>
+                        <sub>1</sub>
+                        <i>-p</i>
+                        <sub>0</sub> = 2</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <i>threshold</i>, a DOUBLE PRECISION value<p style="line-height: 1em; margin: 0px;">
+                        <br/>Function compares specified value to <i>ln</i>(<i>L</i>
+                        <sub>1</sub>)−<i>ln</i>(<i>L</i>
+                        <sub>0</sub>).</p>
+                     <p style="line-height: 1em; margin: 0px;">
+                        <br/>
+                        <i>L</i>
+                        <sub>1</sub> and <i>L</i>
+                        <sub>0</sub> are the maximum likelihood estimation of hypotheses <i>H</i>
+                        <sub>1</sub> and <i>H</i>
+                        <sub>0</sub>.</p>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">For normal distribution, the definition of Log(<i>L</i>
+                     <sub>1</sub> ) and Log(<i>L</i>
+                     <sub>0</sub>) are in ChangePointDetection.</div>
+               </td>
+               <td align="left"> </td>
+            </tr>
+         </table>
+
+         <p style="line-height: 1em;">
+            <i>p</i> is the number of additional parameters introduced by adding a change point.  <i>p</i>
+            <sub>1</sub> and <i>p</i>
+            <sub>0</sub> represent this parameter in hypotheses <i>H</i>
+            <sub>1</sub> and <i>H</i>
+            <sub>0</sub>, respectively.</p>
+      </dd>
+      <dt>OutputType</dt>
+      <dd>[Optional] Specify the output table columns. See ChangePointDetection Output.</dd>
+      <dd>Default: 'CHANGEPOINT'</dd>
+   </div>
+
+
+	
+   <a name="iku1506306197309"> </a>
+   <h2>ChangePointDetection Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Input Table Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>partition_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each <i>partition_column</i> specified in <i>partition_expr</i>.] Column by which input table is partitioned.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>sort_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each <i>sort_column</i> specified in <i>order_by_expr</i>.] Column by which input table is sorted.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains time series data.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="otn1506306363759"> </a>
+   <h2>ChangePointDetection Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The output table schema depends on the OutputOption syntax element.</p>
+
+   <a name="section_ydj_hpm_wcb"> </a>
+   <h3>Output Table Schema, OutputOption ('CHANGEPOINT') (Default)</h3>
+   <p style="line-height: 1em;">The table has one row for each change point.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cptid</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Changepoint identifier of sequence. For each partition, identifiers range from 1 to <i>n</i>, where <i>n</i> is the number of changepoints for the partition.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_zbg_3pm_wcb"> </a>
+   <h3>Output Table Schema, OutputOption ('VERBOSE')</h3>
+   <p style="line-height: 1em;">The table has one row for each change point.</p>
+   <a name="table_N10064_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10064_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cptid</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Changepoint identifier of sequence. For each partition, identifiers range from 1 to <i>n</i>, where <i>n</i> is the number of changepoints for that partition.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">difference</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Difference <i>H</i>
+               <sub>1</sub>
+               <i>-H</i>
+               <sub>0</sub>.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_pxh_jpm_wcb"> </a>
+   <h3>Output Table Schema, OutputOption ('SEGMENT')</h3>
+   <p style="line-height: 1em;">The table has one row for each segment. For <i>k</i> changepoints, there are <i>k</i>+1 segments.</p>
+   <a name="table_N100CF_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100CF_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>#</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Segment starting point. </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">segid</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Segment identifier.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="evd1510717952132"> </a>
+   <h2>ChangePointDetection Examples</h2>
+   <a name="xgh1506306643100"> </a>
+   <h3>ChangePointDetection Example: Two Series, Default Options</h3>
+   <a name="section_kks_t2x_jdb"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">Input table finance_data2 contains two time series of finance data.</p>
+   <a name="table_jp2_z2x_jdb"> </a>
+   <table class="introtable">
+      <a name="table_jp2_z2x_jdb"> </a>
+      <h4 style="text-align: center;">finance_data2</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">sid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">start_time_column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">end_time_column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">expenditure</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">income</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">investment</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2007-03-31</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">415</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">451</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">180</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2007-03-31</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">421</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">465</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">179</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2007-03-31</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">434</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">485</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">185</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2007-03-31</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">448</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">493</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">192</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2007-03-31</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">459</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">509</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">211</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2007-03-31</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">458</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">520</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">202</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2007-03-31</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">479</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">521</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">207</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2007-03-31</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">487</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">540</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">214</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2007-03-31</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">497</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">548</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">231</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2007-03-31</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">510</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">558</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">229</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2007-03-31</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">516</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">574</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">234</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2007-03-31</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">525</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">583</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">237</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2007-03-31</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">591</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">206</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2007-03-31</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">538</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">599</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">250</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1967-06-30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2007-03-31</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">546</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">610</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">259</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_uqc_52x_jdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ChangePointDetection (
+  ON finance_data2 PARTITION BY sid ORDER BY id
+  USING
+  TargetColumn ('expenditure')
+  Accumulate ('sid', 'id', 'expenditure')
+) AS dt;</tt>
+   </pre>
+   <a name="section_lzt_52x_jdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ sid id expenditure cptid 
+ --- -- ----------- ----- 
+   1  3       434.0     1
+   1  5       459.0     2
+   1  7       479.0     3
+   1 10       510.0     4</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="wzl1522871312560"> </a>
+	  <h3>ChangePointDetection Example: One Series, Default Options</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The following diagram represents the input. The input signal is like a clock signal whose values can represent a cyclic recurrence of an event (for example, electric power consumption at certain periods or sequence, pulse rate, and so on).</p>
+   <a name="fig_g1v_ln1_mw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <a name="table_vtr_b3x_jdb"> </a>
+   <table class="introtable">
+      <a name="table_vtr_b3x_jdb"> </a>
+      <h4 style="text-align: center;">cpt</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">sid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">val</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10.8308</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10.07182</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10.30902</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10.01128</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10.83433</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10.0189</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10.8702</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10.70688</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10.72465</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10.76334</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100.9431</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100.245</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100.8667</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100.0768</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100.7646</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100.0001</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">17</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100.3316</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">18</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100.8994</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">19</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100.5965</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">20</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100.1943</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">21</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10.24228</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">22</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10.78137</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">23</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10.90752</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">24</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10.02013</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10.46117</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">26</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10.08672</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">27</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10.33539</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">28</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10.0157</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">29</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10.40867</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10.17071</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">31</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100.3789</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100.2254</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100.1049</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">34</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100.9242</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">35</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100.6543</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">36</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100.5676</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">37</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100.2341</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">38</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100.9213</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">39</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100.334</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">40</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100.8727</div>
+         </td>
+      </tr>
+   </table>
+
+
+		
+   <a name="section_fld_phx_jdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ChangePointDetection (
+  ON cpt PARTITION BY sid ORDER BY id
+  USING
+  TargetColumn ('val')
+  Accumulate ('sid', 'id')
+) AS dt;</tt>
+   </pre>
+   <a name="section_jw5_phx_jdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ sid id cptid 
+ --- -- ----- 
+   1  8     1
+   1 11     2
+   1 21     3
+   1 31     4
+   1 34     5</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="zih1522872733060"> </a>
+	  <h3>ChangePointDetection Example: One Series, VERBOSE Output</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Output table of ChangePointDetection Example: One Series, Default Options</li>
+   </ul>
+
+		
+   <a name="section_ghv_jkx_jdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ChangePointDetection (
+  ON cpt PARTITION BY sid ORDER BY id
+  USING
+  TargetColumn ('val')
+  Accumulate ('sid', 'id')
+  OutputType ('VERBOSE')
+) AS dt;</tt>
+   </pre>
+   <a name="section_qbf_kkx_jdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ sid id cptid difference         
+ --- -- ----- ------------------ 
+   1  8     1 7.4734790324760105
+   1 11     2  97.35746106876692
+   1 21     3  48.67501782818529
+   1 31     4  52.08839257625203
+   1 34     5 3.7188850706639904</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="izx1522873377638"> </a>
+	  <h3>ChangePointDetection Example: One Series, Cost 10</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Output table of ChangePointDetection Example: One Series, Default Options</li>
+   </ul>
+
+		
+   <a name="section_q5q_5lx_jdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ChangePointDetection (
+  ON cpt PARTITION BY sid ORDER BY id
+  USING
+  TargetColumn ('val')
+  Accumulate ('sid', 'id')
+  Cost (10)
+) AS dt;</tt>
+   </pre>
+   <a name="section_qlc_vlx_jdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ sid id cptid 
+ --- -- ----- 
+   1 11     1
+   1 21     2
+   1 31     3</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="iox1522874039525"> </a>
+	  <h3>ChangePointDetection Example: One Series, SEGMENT Output, Cost 10</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Output table of ChangePointDetection Example: One Series, Default Options</li>
+   </ul>
+
+		
+   <a name="section_tkw_nnx_jdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ChangePointDetection (
+  ON cpt PARTITION BY sid ORDER BY id
+  USING
+  TargetColumn ('val')
+  Accumulate ('sid', 'id')
+  Cost (10)
+  OutputType ('SEGMENT')
+) AS dt;</tt>
+   </pre>
+   <a name="section_dmh_4nx_jdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ sid_s id_s sid id segid 
+ ----- ---- --- -- ----- 
+     1    1   1 10     1
+     1   11   1 20     2
+     1   21   1 30     3
+     1   31   1 40     4</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="gts1522875039034"> </a>
+	  <h3>ChangePointDetection Example: One Series, Cost 20, Linear Regression</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Output table of ChangePointDetection Example: One Series, Default Options</li>
+   </ul>
+
+		
+   <a name="section_v4c_mpx_jdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ChangePointDetection (
+  ON cpt PARTITION BY sid ORDER BY id
+  USING
+  TargetColumn ('val')
+  Accumulate ('sid', 'id')
+  Cost (20)
+  SegmentationMethod ('linear_regression')
+) AS dt;</tt>
+   </pre>
+   <a name="section_sdq_mpx_jdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ sid id cptid 
+ --- -- ----- 
+   1 11     1
+   1 21     2
+   1 31     3</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

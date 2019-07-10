@@ -1,0 +1,3425 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="ynr1507159835395"> </a>
+	  <h1>GLM2</h1>
+
+	  <a name="section_fsk_ssm_sbb"> </a>
+   <p style="line-height: 1em;">The GLM2 function differs from the GLM function in these ways:<ul>
+         <li>GLM2 supports the regularization models ridge, LASSO, and elastic net.</li>
+         <li>GLM2 uses the coordinate descent method to minimize the loss function (GLM uses the Fisher scoring method).</li>
+         <li>GLM2 outputs a model table and, optionally, a regularization table (GLM outputs only a model table).</li>
+      </ul>
+   </p>
+   <p style="line-height: 1em;">You can input the model table and regularization table to the GLM2Predict function.</p>
+
+
+   <a name="wgz1507159928415"> </a>
+	  <h2>GLM2 Syntax</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Version 1.8</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GLM2 (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  OUT TABLE ModelTable (<i>model_table</i>)
+  [ OUT TABLE RegularizationTable (<i>regularization_table</i>) ]
+  USING
+  InputColumns ({ '<i>predictor_var_column</i>' | <i>predictor_var_column_range</i> }[,...])
+  [ CategoricalColumns (({ '<i>categorical_column_and_categories</i>' [,...])]
+  [ WeightColumn ('<i>weight_column</i>') ]
+  ResponseColumn ('<i>response_column</i>')
+  [ Family ({ 'BINOMIAL' | 'GAUSSIAN' | 'POISSON' }) ]
+  { Lambda (<i>lambda</i> [,...]) |
+    NumLambdas (<i>num_lambdas</i>) ]
+    MinLambdaRatio (<i>min_lambda_ratio</i>) ]
+  }
+  [ StopThreshold (<i>threshold</i>) ]
+  [ Alpha (<i>alpha</i>)]
+  [ MaxIterNum (<i>max_iterations</i>) ]
+  [ Intercept ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+
+	
+   <a name="mic1507159982725"> </a>
+	  <h2>GLM2 Arguments</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>ModelTable</dt>
+      <dd>Specify the name for the output table that contains the trained model. The trained model contains parameters, statistics, and the coefficients of the predictors for <i>lambda</i>. This table must not exist.</dd>
+      <dt>RegularizationTable</dt>
+      <dd>[Optional] Specify the name for the output table that contains the statistics and coefficients of each <i>lambda</i>. Recommended if you want predicted results for each <i>lambda</i> from GLM2Predict.</dd>
+      <dt>InputColumns</dt>
+      <dd>Specify the names of the <i>input_table</i> columns that contain the variables to use as predictors (independent variables).</dd>
+      <dt>CategoricalColumns</dt>
+      <dd>[Optional] Specify the names of the <i>input_table</i> columns that contain categorical variables, and which of their categories to use in the model.</dd>
+      <dd>
+         <a name="table_sxq_xqy_fdb"> </a>
+         <table class="introtable">
+            <a name="table_sxq_xqy_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">
+                     <i>categorical_column_and_categories</i>
+                  </div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'<i>categorical_column</i>:<i>max_cardinality</i>'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Uses most common categories in <i>categorical_column</i> and groups other categories into category 'others'. <p style="line-height: 1em; margin: 0px;">
+                        <br/>For example, 'column_a:3' specifies that for column_a, function uses 3 most common categories and sets category of rows that do not belong to those 3 categories to 'others'.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'<i>categorical_column</i>:(<i>category</i> [,...])'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Uses specified categories of <i>categorical_column</i> and groups other categories into category 'others'. <p style="line-height: 1em; margin: 0px;">
+                        <br/>For example, 'column_a : (red, yellow, blue)' specifies that for column_a, function uses categories red, yellow, and blue, and sets category of rows that do not belong to those categories to 'others'.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'<i>categorical_column</i>'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Uses all categories in <i>categorical_column</i>.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dd>If you use this argument, you must also specify each <i>categorical_column</i> in the InputColumns argument.</dd>
+      <dd>Default behavior: The function treats all variables as numerical.<p>
+            <b>Note:</b>  For information about columns that you must identify as categorical, see Identification of Categorical Columns.</p>
+      </dd>
+      <dt>WeightColumn</dt>
+      <dd>[Optional] Specify the name of the <i>input_table</i> column that contains the weights to assign to responses.</dd>
+      <dd>You can use non-NULL weights to indicate that different observations have different dispersions (with the weights being inversely proportional to the dispersions). Equivalently, when the weights are positive integers w<sub>i</sub>, each response y<sub>i</sub> is the mean of w<sub>i</sub> unit-weight observations. A binomial GLM uses prior weights to give the number of trials when the response is the proportion of successes. A Poisson GLM rarely uses weights.</dd>
+      <dd>If the weight is less than the response value, the function throws an exception. Therefore, if the response value is greater than 1 (the default weight), you must specify a weight that is greater than or equal to the response value.</dd>
+      <dd>Default: 1</dd>
+      <dt>ResponseColumn</dt>
+      <dd>Specify the name of the <i>input_table</i> column that contains the responses.</dd>
+      <dt>Family</dt>
+      <dd>[Optional] Specify the distribution exponential family.</dd>
+      <dd>Default: 'GAUSSIAN'</dd>
+      <dt>Lambda</dt>
+      <dd>[Optional. Disallowed if NumLambdas is specified.] Specify the regularization parameter sequence. Each <i>lambda</i> must be a nonnegative DOUBLE PRECISION value. A value of zero disables regularization.</dd>
+      <dd>Default behavior: The function computes the regularization parameter sequence using the NumLambdas and MinLambdaRatio argument values.</dd>
+      <dt>NumLambdas</dt>
+      <dd>[Required if Lambda is omitted, disallowed otherwise] Specify the number of lambda values in the regularization parameter sequence. The <i>num_lambdas</i> must be a positive INTEGER. The function uses <i>num_lambdas</i> and <i>min_lambda_ratio</i> to compute the regularization parameter sequence.</dd>
+      <dd>Default: 100</dd>
+      <dd>Maximum: 10,000</dd>
+      <dt>MinLambdaRatio</dt>
+      <dd>[Required if Lambda is omitted, disallowed otherwise] Specify the minimum lambda value in the regularization parameter sequence (MinLambda) as a fraction of the maximum lambda value in the regularization parameter sequence (MaxLambda). The <i>min_lambda_ratio</i> must be in [0, 1). </dd>
+      <dd>To calculate the value of MaxLambda, the function uses the input data set.</dd>
+      <dd>To calculate the value of MinLambda, the function uses this formula:<p style="line-height: 1em;">
+            <tt style="font-family: monospace;">MinLambda = MaxLambda * <i>min_lambda_ratio</i>
+            </tt>
+         </p>
+      </dd>
+      <dd>To calculate the step for decreasing the lambda value from MaxLambda to MinLambda, the function uses this formula:<p style="line-height: 1em;">
+            <tt style="font-family: monospace;">
+               <i>min_lambda_ratio</i>
+               <sup>(1/(<i>num_lambdas</i>-1))</sup>
+            </tt>
+         </p>
+      </dd>
+      <dd>Default: 0.05 if the number of rows (observations) in the input data set is less than the number of predictors (independent variables), otherwise 0.0001.</dd>
+      <dt>StopThreshold</dt>
+      <dd>[Optional] Specify the convergence threshold of coordinate descent. The <i>threshold</i> must be a nonnegative DOUBLE PRECISION value.</dd>
+      <dd>Default: 1.0e<sup>-7</sup>
+      </dd>
+      <dt>Alpha</dt>
+      <dd>[Optional] Specify the mixing parameter for penalty computation (see the following table). The <i>alpha</i> must be in [0, 1]. If <i>alpha</i> is in (0,1), it represents α in the elastic net regularization formula in GLM2.<a name="table_bdv_f35_lz"> </a>
+         <table class="introtable">
+            <a name="table_bdv_f35_lz"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">
+                     <i>alpha</i>
+                  </div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Regularization Type</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Parameter Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">0</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Ridge</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <img src="data:image/png;base64,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"
+                          width=""
+                          height=""/>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">(0,1)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Elastic net</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <img src="data:image/png;base64,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"
+                          width=""
+                          height=""/>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">1</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">LASSO</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEsAAAAsCAYAAAAtv0UIAAAACXBIWXMAABJ0AAASdAHeZh94AAAAB3RJTUUH4gYBES8mfVH2OwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAAD00lEQVRoge2aMUsrSxiGn72cP7CupViYFB4UDJgoaAwomF20tDBiK6ymsNPKWlCwNdk/YNKInRgFG6MQWcVFRUE3hbVrfkJuIVnQJJq9d8bDgX2qZWYy7+Rl9tvvG0ap1+t1Qjrinz+9gL+J0KwAhGYFIDQrAKFZAQjNCkBoVgBCswLQ1izDMFAUhXK5/KFdURQURZG6qD+p/RU/srOKxSKJRML/s9FolGw2i+d5PyEvDKlmeZ5HIpFgYWGBpaUlXl9fqdfrrK2tkcvlMAzjrzJMqlmLi4vYtk2hUMA0TTRNA8A0TeLxOLZtU6lUZC5BKNLMKhaLlEoldF0nk8k09TeMu7u7k7UE4Ugza2dnB4DV1dWW/aVSCYCxsTFZSxCOFLMcx8G2bVRVZWZmpqnfsiwAIpEIyWRSxhKkIMWsxq5Jp9NNfYeHhywvL6OqKvv7+zLkpSHFrNPTUwAmJyf9tnK5TDabZXZ2Fl3XsW2boaEhGfLS+CVj0svLSwAGBgYAiEajuK5LJBLBdV36+vpkyEpH+M5yHIdarQbgx6NKpUKhUODt7Y35+XkcxxEt+yMI31kPDw8A6Lrut2maRiaToaenh4mJCebm5nh+fhYtLR3hO+v29haA4eHhpr5kMomqqriuS7FYFC0tHeFmHR8fAzA+Pt6yf2RkBICXlxfR0nR1dfn1ZycFt+M4GIbB9vZ2R/MLN8u2bQD6+/tb9st8/Z6envznm5ubtuOq1SrZbJZYLOanOZ0g1KzGkYqqqi2/eJ7n4bouAL29vSKlP6Dretu0pFwuk06nSaVS5PP5QPMKDfAXFxdA62QU4OTkxH+enp4WKQ3gF+VTU1Ntx/z+/ZtKpYKmaU3nZd8h1Kzr62vgvYz5jOd5bGxsALC1teUX0iI5Pz8Hvq43/4+u0NewEdw3NzexLMs/qyqXyxiGgeu6rKyssL6+LlK2SV9WvSnMrGq1Sq1WQ1VV8vk8BwcHdHd3oygKExMTaJpGoVBgd3dXlOQHPM/Dtm3i8biU+UHga/j4+Ai8pwamaWKapqipO6IRr9rFSxEI21mNePFVcJVJQ/9zfuc4DtFoVIiGMLOurq4AGBwcFDVlIBrxanR09EO7ZVnCdpswsxrJXbtkVCaNw8ZIJPLha2dZFrlcjlQq1fQbz/PY29sD3o+UqtXqtzpCYtZ3yahMPM8jFosB4LpuyzKnUWI1+DymVCr56c7Z2Vnbr2lbs46Ojlq2t7ooeH9/D4gLrkG0NU1r2f4V//WyoxJek+yc8K5DAEKzAhCaFYDQrACEZgUgNCsAoVkBCM0KwL+FSU0j+qyHEAAAAABJRU5ErkJggg=="
+                          width=""
+                          height=""/>
+                  </div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dd>Default: 0.1</dd>
+      <dt>MaxIterNum</dt>
+      <dd>[Optional] Specify the maximum number of iterations over the data for all lambda values. The parameter <i>max_iterations</i> must be a positive INTEGER value.</dd>
+      <dd>Default: 10<sup>5</sup>
+      </dd>
+      <dt>Intercept</dt>
+      <dd>[Optional] Specify whether the function uses an intercept. For example, in β0+β1*X1+β2*X2+ ....+ βpXp, the intercept is β0.</dd>
+      <dd>Default: 'true'</dd>
+   </div>
+
+
+	
+   <a name="qul1507160018616"> </a>
+	  <h2>GLM2 Input</h2>
+
+	  <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>InputTable Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>response_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any numeric SQL data type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Dependent/response variable. Cannot be NULL. If Family is BINOMIAL, each value in this column must be either 0 or 1.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>predictor_variable_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears one or more times.] Independent/predictor variable. Cannot be NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>categorical_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CHARACTER, VARCHAR, INTEGER, BYTEINT, DATE, TIME (without TIME ZONE)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each categorical <i>predictor_variable_column</i>.] Categorical independent/predictor variable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>weight_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with WeightColumn argument.] Weight to assign to response variable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+   <a name="rkg1507160055925"> </a>
+	  <h2>GLM2 Output</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Onscreen Output</h3>
+   <a name="table_nyp_nv5_lz"> </a>
+   <table class="introtable">
+      <a name="table_nyp_nv5_lz"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">dfDevRatio</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of nonzero coefficients for DevRatio in each lambda value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">DevRatio</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Fraction of (null) deviance explained. Deviance calculations incorporate weights if present in the model. Therefore, this value is (1-deviance)/(null deviance). (For elastic net, this value is the R-square.)</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">dfDev</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of nonzero coefficients for deviance in each lambda value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">deviance</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Deviance, which is defined as 2*(<i>loglike_sat</i> - <i>loglike</i>), where <i>loglike_sat</i> is the log-likelihood for the saturated model (a model with a free parameter for each observation).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">lambda</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Lambda value.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_r32_1z5_lz"> </a>
+   <h3>ModelTable Schema</h3>
+   <a name="table_N10027_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10027_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">category</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Abstract category for output; one of the following:<p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <a name="table_jpg_y2n_bdb"> </a>
+                  <table class="introtable">
+                     <a name="table_jpg_y2n_bdb"> </a>
+                     <tr>
+                        <th align="left">
+                           <div style="line-height: 1em;">Category</div>
+                        </th>
+                        <th align="left">
+                           <div style="line-height: 1em;">Meaning</div>
+                        </th>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">A</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">global properties</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">B</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">regularization-specific properties</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">C</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">coefficients</div>
+                        </td>
+                     </tr>
+                  </table>
+
+               </p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">information</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Value provided in either this column or the value column (for example, FAMILY:POISSON).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR, INTEGER, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Value of each item specified in information column.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_vdc_bz5_lz"> </a>
+   <h3>RegularizationTable Schema</h3>
+   <p style="line-height: 1em;">This table appears only with the RegularizationTable argument.</p>
+   <a name="table_jhh_kbv_lz"> </a>
+   <table class="introtable">
+      <a name="table_jhh_kbv_lz"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">df_dev_ratio</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of nonzero coefficients for %dev in each lambda value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">deviance_ratio</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Fraction of (null) deviance explained. Deviance calculations incorporate weights if present in the model. Therefore, this value is (1-deviance)/(null deviance). (For elastic net, this value is the R-square.)</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">df_dev</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of nonzero coefficients for deviance in each lambda value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">deviance</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Deviance, which is defined as 2*(<i>loglike_sat</i> - <i>loglike</i>), where <i>loglike_sat</i> is the log-likelihood for the saturated model (a model with a free parameter for each observation).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">lambda</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Lambda value.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>predictor_variable_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Coefficients for all predictors for current lambda value.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+	
+   <a name="lst1510785803745"> </a>
+   <h2>GLM2 Examples</h2>
+   <a name="gec1507160107909"> </a>
+	  <h3>GLM2 Example 1: LASSO for Poisson Regression Analysis</h3>
+
+	
+		<a name="section_N10014_N10010_N10001"> </a>
+			<p style="line-height: 1em;">This example uses Poisson regression to predict the number of awards won by students, based on their programming levels and math scores.</p>
+
+		
+   <a name="section_msj_rnz_m2b"> </a>
+   <h4>Input</h4>
+   <a name="table_qbn_y4z_m2b"> </a>
+   <table class="introtable">
+      <a name="table_qbn_y4z_m2b"> </a>
+      <h4 style="text-align: center;">awards</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">num_awards</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">prog</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">math</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">45</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">41</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">108</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">41</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">44</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">67</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">42</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">196</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">49</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">36</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">44</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">155</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">46</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">46</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">38</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">182</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">43</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">115</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">43</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">54</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_imt_rnz_m2b"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">Because the response variable is a count value (number of awards), the Family is Poisson. The Alpha value, 1, specifies a LASSO model.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GLM2 (
+  ON awards AS InputTable
+  OUT TABLE ModelTable (glm2_lasso_model)
+  OUT TABLE RegularizationTable (glm2_regularization)
+  USING
+  InputColumns ('prog', 'math')
+  ResponseColumn ('num_awards')
+  <b>Family ('POISSON')</b>
+  Intercept ('TRUE')
+  NumLambdas (10)
+  <b>Alpha (1)</b>
+) AS dt;</tt>
+   </pre>
+   <a name="section_ggg_snz_m2b"> </a>
+   <h4>Output</h4>
+   <a name="table_a1g_lpz_m2b"> </a>
+   <table class="introtable">
+      <a name="table_a1g_lpz_m2b"> </a>
+      <h4 style="text-align: center;">Onscreen Output</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">dfDevRatio</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">devRatio</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">dfDev</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">deviance</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">lambda</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.3155999606359e-15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">199</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">287.672234452864</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.522060074545705</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;"> 0.252835382560055</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">198</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">214.938515003069</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.187618662922922</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.285724516586101</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">198</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">205.477224328577</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0674266514397151</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.291092364886125</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">197</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">203.933043413905</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.024231882124864</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.292547804908229</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">197</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">203.514353730634</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00870848690800394</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.292738550188869</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">197</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">203.459481609541</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00312966792410483</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.29276365104296 </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">197</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">203.452260790758</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0011247443348819</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.29276688972071 </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">197</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">203.451329113093</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.000404212155898542</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.292767310601548 </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">197</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">203.451208037361</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.000145266316894411</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.292767359699846 </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">197</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">203.451193913144</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.22060074545706e-05</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_bl3_2xz_m2b"> </a>
+   <table class="introtable">
+      <a name="table_bl3_2xz_m2b"> </a>
+      <h4 style="text-align: center;">glm2_lasso_model</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">category</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">information</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">value</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">A</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">FAMILY : POISSON</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">A</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">RESPONSE : num_awards</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">A</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">REGULARIZER : LASSO</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">A</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CONVERGED : true</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">A</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NUMOBSERVATIONS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">200</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">B</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">has_intercept</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">B</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">alpha </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">B</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">devnull </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">287.672234452865</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">B</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">maxNumLambdas </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">B</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">maxIterNum </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">B</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">threshold </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1e-07</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">B</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">minLambdaRatio </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0001</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">B</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">iterationNum </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">79</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">B</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">minLambda </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.22060074545706e-05</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">C</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">intercept</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-5.5766613646</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">C</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">math</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0861044506</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">C</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">prog</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1230769507</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_lcl_mxz_m2b"> </a>
+   <table class="introtable">
+      <a name="table_lcl_mxz_m2b"> </a>
+      <h4 style="text-align: center;">glm2_regularization</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">df_dev_ratio</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">deviance_ratio</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">df_dev</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">deviance</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">lambda</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">intercept</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">math</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">prog</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.3155999606359e-15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">199</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">287.672234452864</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.522060074545705</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.4620354596</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.252835382560055</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">198</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">214.938515003069</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.187618662922922</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-3.474053956</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0546564845</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.285724516586101</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">198</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">205.477224328577</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0674266514397151</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-4.6383122967</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0745575487</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.291092364886125</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">197</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">203.933043413905</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.024231882124864</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-5.1481338496</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0819282453</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0350038202</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.292547804908229 </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">197</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">203.514353730634</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00870848690800394</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-5.4215383741</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0846018544</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0911403822</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.292738550188869</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">197</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">203.459481609541</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00312966792410483</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-5.5210823104</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0855658029</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1116709262</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.29276365104296</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">197</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">203.452260790758</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0011247443348819</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-5.5575725933</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0859216969</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1190959763</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.29276688972071</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">197</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">203.451329113093</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.000404212155898542</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-5.5706478142</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0860486438</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1217705047</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.292767310601548</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">197 </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">203.451208037361</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.000145266316894411</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-5.5753457856</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0860942091</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1227324598</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.292767359699846</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">197</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">203.451193913144</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.22060074545706e-05</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-5.5766613646</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0861044506</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1230769507</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+	
+   <a name="jug1507160318039"> </a>
+   <h3>GLM2 Example 2: Ridge for Logistic Regression Analysis</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example uses logistic regression to predict which students are admitted to an academic program.</p>
+
+   <a name="section_msj_rnz_m2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: admissions_train, as in GLM Example: Logistic Regression Analysis with Intercept</li>
+   </ul>
+
+   <a name="section_imt_rnz_m2b"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">Because the example uses logistic regression, the Family is Binomial. The Alpha value, 0, specifies a Ridge model.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GLM2 ( 
+  ON admissions_train AS InputTable
+  OUT TABLE ModelTable (glm2_ridge_model)
+  OUT TABLE RegularizationTable (glm2_2regularization)
+  USING
+  InputColumns ('masters', 'gpa', 'stats', 'programming')
+  CategoricalColumns ('masters', 'stats', 'programming')
+  ResponseColumn ('admitted')
+  Family ('binomial')
+  Intercept ('TRUE')
+  NumLambdas (10)
+  Alpha(0)
+) AS dt;</tt>
+   </pre>
+   <a name="section_ggg_snz_m2b"> </a>
+   <h4>Output</h4>
+   <a name="table_a4j_jyz_m2b"> </a>
+   <table class="introtable">
+      <a name="table_a4j_jyz_m2b"> </a>
+      <h4 style="text-align: center;">Onscreen Output</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">dfDevRatio</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">devRatio</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">dfDev</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">deviance</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">lambda</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">39</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">51.7957311227706 </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">216.083130280731</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00164825659995313</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">51.7103584670981</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">77.6562506120565</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00453438694628144</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">51.5608692356944</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">27.9082094529445</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0122307765430854</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">51.1622291095222</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10.0296904464313</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0313506707268246</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">50.1719002112855</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.60448385701157</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0714771723905868</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">48.0935187202118</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.29538433362914</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.132326934855416</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">44.9417607846991</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.465536991807485</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.191442862387798</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">41.8798080971586</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.167305320216424</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.228448387997473</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">39.9630798426231</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0601264145820994</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2437883725835</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">39.1685341255778</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083130280731</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_u1b_fzz_m2b"> </a>
+   <table class="introtable">
+      <a name="table_u1b_fzz_m2b"> </a>
+      <h4 style="text-align: center;">glm2_2regularization</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">df_dev_ratio</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">deviance_ratio</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">df_dev</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">deviance</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">lambda</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">intercept</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">gpa</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">masters_yes</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">programming_beginner</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">programming_novice</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">stats_beginner</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">stats_novice</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">39</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">51.7957311227706</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">216.083130280731</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.6190392084</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00164825659995313</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">51.7103584670981</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;"> 77.6562506120565</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.6244703657</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0002657335</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0055716531</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0050407358</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0013575168</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.000727557</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0002425326</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00453438694628144</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">51.5608692356944</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">27.9082094529445</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.6340226614</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0007208063</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0153981003</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0139177768</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0037043543</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0019840785</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0006762965</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0122307765430854</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">51.1622291095222</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10.0296904464313</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.6597683095</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0018694488</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0420539111</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0379125023</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0097655079</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0052208953</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.001889708</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0313506707268246</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">50.1719002112855</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;"> 3.60448385701157</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.7256166026</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0042964122</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.1113489309</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0996760118</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0234260316</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0124548896</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0052622636</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0714771723905868</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">48.0935187202118</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.29538433362914</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.8750560357</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0072555821</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.2739921211</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.240858846</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.043509692</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0227188283</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.013970035</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.132326934855416</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">44.9417607846991</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.465536991807485</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.1529184558</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0062498019</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.5862205516</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.4961953742</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0348997352</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.016655652</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0306068568</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.191442862387798</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">41.8798080971586</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.167305320216424</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.5819520541</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0054173069</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.0345059039</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.8337267959</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0842809189</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0476614506</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0454722578</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.228448387997473</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">39.9630798426231</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0601264145820994</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.1411288741</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0253104343</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.5024463472</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.1771181428</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.3400969929</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1821811309</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0393956514</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.2437883725835</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">39.1685341255778</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0216083130280731</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.6727140074</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0610158153</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.8601449007</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.4574162679</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.6238441031</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.3326284335</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0126211852</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+	
+   <a name="zvx1507160526270"> </a>
+   <h3>GLM2 Example 3: Elastic Net for Gaussian Regression Analysis</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example uses elastic net, a combination of the ridge and LASSO methods.</p>
+
+   <a name="section_msj_rnz_m2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, glm2_elastic_net, contains a set of U. S. macroeconomic variables for the years 1947 through 1962. The response variable is the number of people employed (in millions).</p>
+   <a name="table_h3w_wzz_m2b"> </a>
+   <table class="introtable">
+      <a name="table_h3w_wzz_m2b"> </a>
+      <h4 style="text-align: center;">glm2_elastic_net</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">gnp_deflator</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">gnp</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">unemployed</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">armed_forces</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">population</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">year</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">employed</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">83</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">234.289</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">235.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">159</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">107.608</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1947</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60.323</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">88.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">259.426</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">232.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">145.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">108.632</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1948</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">61.122</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">88.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">258.054</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">368.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">161.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">109.773</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1949</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">60.171</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">89.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">284.599</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">335.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">165</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">110.929</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1950</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">61.187</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">96.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">328.975</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">209.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">309.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">112.075</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1951</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">63.221</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">98.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">346.999</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">193.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">359.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">113.27</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1952</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">63.639</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">99</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">365.385</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">187</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">354.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">115.094</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1953</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">64.989</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">363.112</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">357.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">335</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">116.219</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1954</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">63.761</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">101.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">397.469</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">290.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">304.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">117.388</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1955</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66.019</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">104.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">419.18</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">282.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">285.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">118.734</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1956</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">67.857</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">108.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">442.769</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">293.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">279.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">120.445</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1957</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">68.169</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">110.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">444.546</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">468.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">263.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">121.95</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1958</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">66.513</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">112.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">482.704</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">381.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">255.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">123.366</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1959</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">68.655</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">114.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">502.601</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">393.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">251.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">125.368</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1960</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">69.564</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">115.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">518.173</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">480.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">257.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">127.852</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1961</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">69.331</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">116.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">554.894</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">400.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">282.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">130.081</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1962</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">70.551</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_imt_rnz_m2b"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">Because the response variable has a normal distribution, the Family is Gaussian. The Alpha value, 0.1, specifies an elastic net model.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GLM2 (
+  ON glm2_elastic_net AS InputTable
+  OUT TABLE ModelTable (glm2_elastic_net_model)
+  OUT TABLE RegularizationTable (glm2_3regularization)
+  USING
+  InputColumns ('gnp_deflator','gnp','armed_forces','population')
+  ResponseColumn ('employed')
+  <b>Family ('GAUSSIAN')</b>
+  Intercept ('TRUE')
+  NumLambdas (10)
+  <b>Alpha (0.1)</b>
+) AS dt;</tt>
+   </pre>
+   <a name="section_ggg_snz_m2b"> </a>
+   <h4>Output</h4>
+   <a name="table_ell_g11_n2b"> </a>
+   <table class="introtable">
+      <a name="table_ell_g11_n2b"> </a>
+      <h4 style="text-align: center;">Onscreen Output</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">dfDevRatio</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">devRatio</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">dfDev</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">deviance</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">lambda</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">185.008826</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33.4451683575075</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.495555028370924</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">93.3267719826986</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12.0195703031457</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.825255933667388</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32.3291945626626</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.31960959885052</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.930305894169471</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12.8940246988259</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.55238719986506</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.951974575788374</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8.88512735154485</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.557899033039046</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.957608388774071</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7.84282222515759</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.200498516795911</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.963457573112318</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.76067149768095</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0720554309233708</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.971089487544852</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.34869996838526</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0258953792203741</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.980005044362085</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.69924326849269</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00930631676715827</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.984687706599481</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.83290942539757</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00334451683575075</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_gdb_p11_n2b"> </a>
+   <table class="introtable">
+      <a name="table_gdb_p11_n2b"> </a>
+      <h4 style="text-align: center;">glm2_3regularization</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">df_dev_ratio</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">deviance_ratio</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">df_dev</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">deviance</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">lambda</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">intercept</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">armed_forces</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">gnp</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">gnp_deflator</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">population</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">185.008826</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33.4451683575075</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">65.317</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.495555028370924</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">93.3267719826986</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12.0195703031457</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">54.8218575447</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0036713396</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0326415425</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0489911516</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.825255933667388</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32.3291945626626</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4.31960959885052</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">43.8369917073</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0017090903</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0074174574</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0652234077</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0981636428</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.930305894169471</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12.8940246988259</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.55238719986506</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">37.154679985</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0024827573</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0101765417</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0856518657</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.126554407</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.951974575788374</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8.88512735154485</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.557899033039046</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">35.1825736622</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0024452942</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0125438456</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.093815729</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1285468441</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.957608388774071</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7.84282222515759</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.200498516795911</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">37.4679867235</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0020860735</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0163287498</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0905074779</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.1002494791</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.963457573112318</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.76067149768095</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0720554309233708</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">45.5465937467</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0013152824</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0244413997</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0730722137</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0214742023</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.971089487544852</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.34869996838526</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0258953792203741</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">58.8296374248</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0002910015</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0379400515</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0279059919</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0948299091</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.980005044362085</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.69924326849269</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00930631676715827</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">81.0307817472</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0015741337</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0585698986</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0217865608</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.3048408138</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.984687706599481</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.83290942539757</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.00334451683575075</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">100.3707843847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0030991548</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0773443707</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0790919789</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.4785227208</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">The function also outputs a model table, which is not shown here.</p>
+
+
+	
+   <a name="otb1507160715516"> </a>
+	  <h3>GLM2 Example 4: Lambda</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example uses the same elastic net and Gaussian regression as GLM2 Example 3: Elastic Net for Gaussian Regression Analysis, but instead of specifying the number of lambdas to use, it specifies a set of specific lambda values. Teradata recommends this practice when the you have strong prior knowledge of the magnitude of lambda or want to test the results of predetermined lambda values.</p>
+
+   <a name="section_xdt_h5c_4db"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table is glm2_elastic_net, as in GLM2 Example 3: Elastic Net for Gaussian Regression Analysis.</p>
+
+   <a name="section_wnb_35c_4db"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">The function calculates predictions only for the three specified lambda values.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GLM2 (
+  ON glm2_elastic_net AS InputTable
+  OUT TABLE ModelTable (glm2_elastic_net_2model)
+  OUT TABLE RegularizationTable (glm2_4regularization)
+  USING
+  InputColumns ('gnp_deflator','gnp','armed_forces','population')
+  ResponseColumn ('employed')
+  Family ('GAUSSIAN')
+  Intercept ('TRUE')
+  <b>Lambda (0.03,0.05,0.08)</b>
+  Alpha(0.1)
+) AS dt;</tt>
+   </pre>
+   <a name="section_m4q_35c_4db"> </a>
+   <h4>Output</h4>
+   <a name="table_ep4_t5c_4db"> </a>
+   <table class="introtable">
+      <a name="table_ep4_t5c_4db"> </a>
+      <h4 style="text-align: center;">Onscreen Output</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">dfDevRatio</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">devRatio</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">dfDev</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">deviance</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">lambda</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.962764132079392</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.88896420908282</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.965249423725026</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.42916331945636</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.05</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.969563681197274</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.63098760945407</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.03</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_bvz_x5c_4db"> </a>
+   <table class="introtable">
+      <a name="table_bvz_x5c_4db"> </a>
+      <h4 style="text-align: center;">glm2_3regularization</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">df_dev_ratio</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">deviance_ratio</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">df_dev</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">deviance</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">lambda</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">intercept</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">armed_forces</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">gnp</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">gnp_deflator</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">population</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.962764132079392</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.88896420908282</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.08</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">44.5464394715</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0013604856</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0232838328</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0786912064</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0288475833</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.965249423725026</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6.42916331945636</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.05</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">48.2203770905</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0011161847</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0274548885</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0605957447</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.969563681197274</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5.63098760945407</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.03</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">55.8031821863</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0005469725</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0351076729</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.0348849624</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0663160626</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">The function also outputs a model table, which is not shown here.</p>
+
+
+	
+</t:intro>

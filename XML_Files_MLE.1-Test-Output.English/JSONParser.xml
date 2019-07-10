@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="obd1507836478638"> </a>
+	  <h1>JSONParser</h1>
+
+	
+		<p style="line-height: 1em;">The JSONParser function extracts the element name and text from a JSON string and outputs an equivalent relational table.</p>
+
+	
+   <a name="mxb1507836556226"> </a>
+   <h2>JSONParser Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.11</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM JSONParser (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+  USING
+  TextColumn ('<i>text_column</i>')
+  Nodes ('<i>parent_node</i>/<i>child_node</i>' [,...])
+  [ SearchPath ('<i>node_name</i>/...') ]
+  [ Delimiter ('<i>delimiter</i>') ]
+  [ MaxItemNum (<i>max_item_number</i>) ]
+  [ NodeIDOutputColumn ('<i>node_id_output_column</i>') ]
+  [ ParentNodeOutputColumn ('<i>parent_node_output_column</i>') ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+  [ ErrorHandler ('{'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}
+    [[; <i>output_column</i> :] <i>input_column</i> [,...]')]
+  ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="ohl1507836559867"> </a>
+	  <h2>JSONParser Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TextColumn</dt>
+      <dd>Specify the name of the input table column that contains the JSON string.</dd>
+      <dt>Nodes</dt>
+      <dd>Specify the parent/child pairs. All pairs must have the same format. You can specify a parent with multiple children with this syntax:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+               <i>parent_node</i>/{<i>child_node</i> [,…]}</tt>
+         </pre>
+      </dd>
+      <dd>JSON has two format types for arrays:<a name="table_qtx_15w_v1b"> </a>
+         <table class="introtable">
+            <a name="table_qtx_15w_v1b"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Array Format Type</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Nodes Syntax Element</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">parent:[key:value,key:value]</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">'parent/key'</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">parent[value,value]</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">'parent/parent'</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dd>Root sometimes has a key:value pair, as in JSONParser Example: Default Values. To get the value of such a pair, use Nodes syntax element '/key'.</dd>
+      <dt>SearchPath</dt>
+      <dd>[Optional] Specify the path to find the direct value of the child. To reach the grandparent, include it in this path. When you include the path to the grandparent, you can output all siblings of the parent by including them in the Nodes syntax element. If anything from root is to be parsed, represent it as either '/' or an empty string.</dd>
+      <dd>Default behavior: The function does not output the direct values of the children.</dd>
+      <dt>Delimiter</dt>
+      <dd>[Optional] Specify the delimiter that separates multiple children with the same name and the same parent node in the JSON String.<p>
+            <b>Note:</b>  The <i>delimiter</i> cannot include '#'.</p>
+      </dd>
+      <dd>Default: ',' (comma)</dd>
+      <dt>MaxItemNum</dt>
+      <dd>[Optional] Specify the maximum number of nodes with the same name to display in the output.</dd>
+      <dd>Default: 10</dd>
+      <dt>NodeIDOutputColumn</dt>
+      <dd>[Optional] Specify the name of the column to use in the result schema to contain the identifier (from the input table) of the each node extracted.</dd>
+      <dd>Default: 'out_nodeid'</dd>
+      <dt>ParentNodeOutputColumn</dt>
+      <dd>[Optional] Specify the name of column to use in the result schema to contain the tag name of the parent node extracted.</dd>
+      <dd>Default: 'out_parent_node'</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the input table columns to copy to the output table.</dd>
+      <dt>ErrorHandler</dt>
+      <dd>[Optional] Specify whether the function continues processing when the input table has bad data (for example, invalid UTF-8 characters) and adds an error column to the output table.</dd>
+      <dd>Default: 'false'. (The function aborts.)<p style="line-height: 1em;">The name of the error column is <i>output_column</i>.</p>
+         <p style="line-height: 1em;">Default: ERROR_HANDLER</p>
+         <p style="line-height: 1em;">The error column contains the data from each specified <i>input_column</i>, separated by semicolons. If you specify no <i>input_column</i>, the error column is empty.</p>
+      </dd>
+   </div>
+
+
+	
+   <a name="fgv1507836565210"> </a>
+   <h2>JSONParser Input</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_cc4_lyr_ycb"> </a>
+   <table class="introtable">
+      <a name="table_cc4_lyr_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>text_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">JSON string.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="lca1507836569609"> </a>
+   <h2>JSONParser Output</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Output Table Schema</h3>
+   <p style="line-height: 1em;">The table has a row for each node in the JSON string which is a <i>parent_node</i> in the Nodes syntax element.</p>
+   <a name="table_inx_nbs_ycb"> </a>
+   <table class="introtable">
+      <a name="table_inx_nbs_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>node_id_output_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Identifier of extracted node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>parent_node_output_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Tag name of extracted parent node.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>parent_node</i>:<i>child_node</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Value of node in JSON string.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="fsj1510710900161"> </a>
+   <h2>JSONParser Examples</h2>
+   <a name="ked1527013289568"> </a>
+	  <h3>JSONParser Example: Nondefault Values</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, json_parser_data, is a single JSON record with multiple fields.</p>
+   <a name="table_zgz_1yh_xdb"> </a>
+   <table class="introtable">
+      <a name="table_zgz_1yh_xdb"> </a>
+      <h4 style="text-align: center;">json_parser_data</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">data</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+{"menu": {
+  "id": "1",
+  "value": "File",
+  "popup": {
+     "menuitem": [
+       {"value": "New", "onclick": "CreateNewDoc()"},
+       {"value": "Open", "onclick": "OpenDoc()"},
+       {"value": "Close", "onclick": "CloseDoc()"}
+     ]
+   }
+}}</tt>
+               </pre>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+		
+   <a name="section_hm3_2xh_xdb"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">NodeIDOutputColumnName and ParentNodeOutputColumnName have nondefault values.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM JSONParser(
+  ON json_parser_data
+  USING
+  TextColumn('data1')
+  Nodes('menu/{id,value}','menuitem/value')
+  Delimiter('|')
+  
+  NodeIdOutputColumn('<b>Fieldnumber</b>')
+  
+  ParentNodeOutputColumn('<b>ParentName</b>')
+  Accumulate('id')
+) AS dt ;</tt>
+   </pre>
+   <a name="section_rv2_fxh_xdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id fieldnumber parentname menu_id menu_value menuitem_value 
+ -- ----------- ---------- ------- ---------- -------------- 
+  1           1 menu       1       File                     
+  1           2 menuitem                      New|Open|Close</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="plv1527013415877"> </a>
+	  <h3>JSONParser Example: Default Values</h3>
+   <a name="section_yp3_lxh_xdb"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, json_parser_data_2, is a single JSON record with multiple fields.</p>
+   <a name="table_jgh_fzh_xdb"> </a>
+   <table class="introtable">
+      <a name="table_jgh_fzh_xdb"> </a>
+      <h4 style="text-align: center;">json_parser_data_2</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">data</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+{
+    "email":"fred@glossary.com",
+    "glossary": {
+        "title": "example glossary",
+        "GlossDiv": {
+            "title": "S",
+            "GlossList": {
+                "GlossEntry": {
+                    "ID": "SGML",
+                    "SortAs": "SGML",
+                    "GlossTerm": "Standard Generalized Markup Language",
+                    "Acronym": "SGML",
+                    "Abbrev": "ISO 8879:1986",
+                    "GlossDef": {
+                        "para": "A meta-markup language",
+                        "GlossSeeAlso": ["GML", "XML"]
+                    },
+                    "GlossSee": "markup"
+                }
+            }
+        }
+    }
+}</tt>
+               </pre>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_hm3_2xh_xdb"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">NodeIDOutputColumnName and ParentNodeOutputColumnName have their default values.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM JSONParser (
+  ON json_parser_data_2
+  USING
+  TextColumn ('data1')
+  Nodes ('glossary/title','GlossDiv/title','GlossEntry/Abbrev',
+         'GlossSeeAlso/GlossSeeAlso','/email')
+  Delimiter (' , ')
+  Accumulate ('id')
+  NodeIdOutputColumn ('<b>out_nodeid</b>')
+  ParentNodeOutputColumn ('<b>out_parent_node</b>')
+) AS dt ;</tt>
+   </pre>
+   <a name="section_rv2_fxh_xdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id out_nodeid out_parent_node glossary_title   glossdiv_title glossentry_abbrev glossseealso_glossseealso _email            
+ -- ---------- --------------- ---------------- -------------- ----------------- ------------------------- ----------------- 
+  1          1 glossary        example glossary                                                                             
+  1          2 GlossDiv                         S                                                                           
+  1          3 GlossEntry                                      ISO 8879:1986                                                
+  1          4 GlossSeeAlso                                                      GML , XML                                  
+  1          5                                                                                             fred@glossary.com</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="fld1527013518980"> </a>
+	  <h3>JSONParser Example: Parse with Ancestor</h3>
+   <a name="section_yp3_lxh_xdb"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table is json_parser_data_2, as in JSONParser Example: Default Values.</p>
+
+   <a name="section_hm3_2xh_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM JSONParser(
+  ON json_parser_data_2
+  USING
+  TextColumn ('data1')
+  
+  Nodes ('GlossEntry/ID','GlossEntry/SortAs','GlossEntry/GlossTerm',
+        'GlossEntry/Acronym','/email')
+  <b>SearchPath('/glossary/GlossDiv/GlossList')
+</b>
+  Delimiter (' | ')
+  Accumulate ('id')
+  MaxItemNum (10)
+) AS dt ;</tt>
+   </pre>
+   <a name="section_rv2_fxh_xdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">Because the email field is not included in the specified search path, the email column is empty.</p>
+   <pre>
+      <tt>
+ id out_nodeid out_parent_node glossentry_id glossentry_sortas glossentry_glossterm                 glossentry_acronym _email 
+ -- ---------- --------------- ------------- ----------------- ------------------------------------ ------------------ ------ 
+  1          1 GlossEntry      SGML          NULL              NULL                                 NULL                     
+  1          2 GlossEntry      NULL          SGML              NULL                                 NULL                     
+  1          3 GlossEntry      NULL          NULL              Standard Generalized Markup Language NULL                     
+  1          4 GlossEntry      NULL          NULL              NULL                                 SGML</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="lsz1527013609065"> </a>
+	  <h3>JSONParser Example: ERROR_HANDLER</h3>
+   <a name="section_yp3_lxh_xdb"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, json_parser_data_3, is the same as json_parser_data in JSONParser Example: Nondefault Values, except for a formatting error: The data column is missing a closing quotation mark and a colon after the menuitem field.</p>
+   <a name="table_c32_xb3_xdb"> </a>
+   <table class="introtable">
+      <a name="table_c32_xb3_xdb"> </a>
+      <h4 style="text-align: center;">json_parser_data_3</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">data</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+{"menu": {
+  "id": "1",
+  "value": "File",
+  "popup": {
+    "menuitem [
+      {"value": "New", "onclick": "CreateNewDoc()"},
+      {"value": "Open", "onclick": "OpenDoc()"},
+      {"value": "Close", "onclick": "CloseDoc()"}
+    ]
+  }
+}}</tt>
+               </pre>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_hm3_2xh_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM JSONParser(
+  ON json_parser_data_3
+  USING
+  TextColumn('data1')
+  Nodes('menuitem/value')
+  <b>ErrorHandler('true; data1')</b>
+) AS dt ;</tt>
+   </pre>
+   <a name="section_rv2_fxh_xdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ out_nodeid out_parent_node menuitem_value errorhandler                                                                                                                                                                                                                        
+ ---------- --------------- -------------- ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 
+          0 NULL            NULL           {"menu": {  "id": "1",  "value": "File",  "popup": {    "menuitem [      {"value": "New", "onclick": "CreateNewDoc()"},      {"value": "Open", "onclick": "OpenDoc()"},      {"value": "Close", "onclick": "CloseDoc()"}    ]  }}};</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+</t:intro>

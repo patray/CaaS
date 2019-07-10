@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="gti1507904102802"> </a>
+	  <h1>FellegiSunterPredict</h1>
+
+	
+		<p style="line-height: 1em;">The FellegiSunterPredict function predicts whether a pair of objects are
+			duplicates.</p>
+
+	
+   <a name="gyi1507904138422"> </a>
+   <h2>FellegiSunterPredict Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.5</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM FellegiSunterPredict (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY ANY
+  ON <i>model_table</i> AS Model DIMENSION
+  [ USING Accumulate ({ '<i>accumulate_column</i>' | '<i>accumulate_column_range</i>' }[,...]) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="zap1507904142317"> </a>
+	  <h2>FellegiSunterPredict Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of input table columns to copy to the output table.</dd>
+   </div>
+
+
+	
+   <a name="xpu1507904145957"> </a>
+   <h2>FellegiSunterPredict Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_qjl_4qr_ycb"> </a>
+   <table class="introtable">
+      <a name="table_qjl_4qr_ycb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains object pairs whose duplicity the function is to predict. Must include comparison_field_name_<i>i</i> columns in Model.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Model</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">FellegiSunter Output.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="fev1507904149908"> </a>
+   <h2>FellegiSunterPredict Output</h2>
+   <a name="section_yyy_wqr_ycb"> </a>
+   <h3>Output (Model) Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">weight</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Weight of object pair.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">match_result</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Indicates whether objects match:<p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <a name="table_ygr_drr_ycb"> </a>
+                  <table class="introtable">
+                     <a name="table_ygr_drr_ycb"> </a>
+                     <tr>
+                        <th align="left">
+                           <div style="line-height: 1em;">Value</div>
+                        </th>
+                        <th align="left">
+                           <div style="line-height: 1em;">Meaning</div>
+                        </th>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">'M'</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Yes (weight &gt; upper bound)</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">'U'</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">No (weight &lt; lower bound)</div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">'P'</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Possibly (weight is in range [lower bound, upper bound])</div>
+                        </td>
+                     </tr>
+                  </table>
+
+               </p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="umv1510710169533"> </a>
+   <h2>FellegiSunterPredict Examples</h2>
+   <p style="line-height: 1em;">In these examples, the predictions are the same for both supervised and unsupervised models.</p>
+   <a name="lgn1526999345539"> </a>
+	  <h3>FellegiSunterPredict Example: Unsupervised Learning Model</h3>
+
+	  <a name="section_ekp_ysg_xdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: fspredict_input, created from the output of StringSimilarity_MLE Example: Compare src_text2 to tar_text with this SQL code:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE fspredict_input;
+
+CREATE MULTISET TABLE fspredict_input AS (
+  SELECT * FROM StringSimilarity_MLE (
+    ON strsimilarity_input PARTITION BY ANY
+    USING
+    ComparisonColumnPairs (
+                  'jaro (src_text2 , tar_text ) AS jaro1_sim',
+                  'LD (src_text2 , tar_text, 2) AS ld1_sim',
+                  'n_gram (src_text2 , tar_text, 2) AS ngram1_sim',
+                  'jaro_winkler (src_text2 , tar_text, 2) AS jw1_sim'
+    )
+    CaseSensitive ('true')
+    Accumulate ('id','src_text2','tar_text')
+  ) AS dt1
+) WITH DATA AS dt2 PARTITION BY id;
+
+SELECT * FROM fspredict_input ORDER BY 1;</tt>
+         </pre>
+      </li>
+      <li>Model: fg_unsupervised_model, output by FellegiSunter Example: Unsupervised Learning</li>
+   </ul>
+
+   <a name="section_vy4_tsg_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM FellegiSunterPredict (
+  ON fspredict_input PARTITION BY ANY
+  ON fg_unsupervised_model AS Model DIMENSION
+  USING
+  Accumulate ('id', 'src_text2', 'tar_text', 'jaro1_sim',
+              'ld1_sim','ngram1_sim', 'jw1_sim')
+) AS dt ORDER BY id;</tt>
+   </pre>
+   <a name="section_lhk_5sg_xdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The final column, match_result, contains the model prediction—M for match, U for no match. The weight column contains the weight of the object pair.</p>
+   <pre>
+      <tt>
+ id src_text2      tar_text       jaro1_sim          ld1_sim            ngram1_sim         jw1_sim            weight              match_result 
+ -- -------------- -------------- ------------------ ------------------ ------------------ ------------------ ------------------- ------------ 
+  5 allen          allies         0.8222222222222223 0.6666666666666666                0.4 0.8755555555555556 -14.113029607677364 U           
+  7 center         centre         0.9444444444444445 0.6666666666666666                0.6 0.9666666666666667  23.276190779622826 P           
+  3 acquire        acquiesce      0.8412698412698413 0.6666666666666666                0.5 0.9047619047619048 -14.113029607677364 U           
+ 12 bear           bear                          1.0                1.0                1.0                1.0  45.529567201568554 M           
+  8 cheap          chief          0.7333333333333334                0.4               0.25 0.7866666666666667  -56.22777957673824 U           
+  4 cccgggaaccaacc ccagggaaacccac 0.8754578754578755 0.7142857142857143 0.6923076923076923 0.9003663003663004  23.276190779622826 P           
+  2 fone           phone          0.7833333333333333                0.6                0.5 0.7833333333333333  -56.22777957673824 U           
+  6 angle          angels         0.8777777777777779 0.6666666666666666                0.4 0.9144444444444445 -14.113029607677364 U           
+ 11 dell           lead                          0.5               0.25                0.0                0.5  -56.22777957673824 U           
+  9 circle         circuit         0.746031746031746 0.5714285714285714                0.5 0.8476190476190476  -35.78160366254483 U           
+ 10 debut          debris         0.7000000000000001                0.5                0.4               0.79  -56.22777957673824 U</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="jor1526999395074"> </a>
+	  <h3>FellegiSunterPredict Example: Supervised Learning Model</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: fspredict_input, as in FellegiSunterPredict Example: Unsupervised Learning Model</li>
+      <li>Model: fg_supervised_model, output by FellegiSunter Example: Supervised Learning</li>
+   </ul>
+
+		
+   <a name="section_vy4_tsg_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM FellegiSunterPredict (
+  ON fspredict_input PARTITION BY ANY
+  ON fg_supervised_model AS Model DIMENSION
+  USING
+  Accumulate ('id', 'src_text2', 'tar_text', 'jaro1_sim',
+              'ld1_sim','ngram1_sim', 'jw1_sim')
+) AS dt ORDER BY id;
+</tt>
+   </pre>
+   <a name="section_lhk_5sg_xdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The final column, match_result, contains the model prediction—M for match, U for no match. The weight column contains the weight of the object pair.</p>
+   <pre>
+      <tt>
+ id src_text2      tar_text       jaro1_sim          ld1_sim            ngram1_sim         jw1_sim            weight              match_result 
+ -- -------------- -------------- ------------------ ------------------ ------------------ ------------------ ------------------- ------------ 
+  5 allen          allies         0.8222222222222223 0.6666666666666666                0.4 0.8755555555555556 -0.7958592832197748 M           
+  7 center         centre         0.9444444444444445 0.6666666666666666                0.6 0.9666666666666667  23.042599737443407 M           
+  3 acquire        acquiesce      0.8412698412698413 0.6666666666666666                0.5 0.9047619047619048 -0.7958592832197748 M           
+ 12 bear           bear                          1.0                1.0                1.0                1.0  44.296096257385436 M           
+  8 cheap          chief          0.7333333333333334                0.4               0.25 0.7866666666666667  -43.98092422973521 U           
+  4 cccgggaaccaacc ccagggaaacccac 0.8754578754578755 0.7142857142857143 0.6923076923076923 0.9003663003663004  23.042599737443407 M           
+  2 fone           phone          0.7833333333333333                0.6                0.5 0.7833333333333333  -43.98092422973521 U           
+  6 angle          angels         0.8777777777777779 0.6666666666666666                0.4 0.9144444444444445 -0.7958592832197748 M           
+ 11 dell           lead                          0.5               0.25                0.0                0.5  -43.98092422973521 U           
+  9 circle         circuit         0.746031746031746 0.5714285714285714                0.5 0.8476190476190476 -23.049355803921173 U           
+ 10 debut          debris         0.7000000000000001                0.5                0.4               0.79  -43.98092422973521 U</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>

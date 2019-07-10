@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="zsa1506633647588"> </a>
+	  <h1>IDWT2D</h1>
+
+	  <p style="line-height: 1em;">The IDWT2D function is the inverse of DWT2D; that is, IDWT2D applies inverse wavelet transforms on multiple sequences simultaneously. IDWT2D takes as input the output table and meta table output by DWT2D and outputs the sequences as 2-dimensional matrixes. (Because the IDWT2D output is comparable to the DWT2D input, the inverse transformation is also called the reconstruction.)</p>
+   <a name="fig_hry_jpb_mw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <p style="line-height: 1em;">This is a typical IDWT2D use case:</p>
+   <ol>
+      <li>Apply DWT2D to 2-dimensional sequences to create the coefficients of the matrixes and corresponding metadata.</li>
+      <li>Filter the coefficients by methods appropriate for the objects (for example, minimum threshold or top <i>n</i> coefficients), compressing the original matrixes.</li>
+      <li>Apply IDWT to the filtered coefficients to reconstruct the sequences.</li>
+      <li>Compare the reconstructed matrixes to their original counterparts.</li>
+   </ol>
+
+   <a name="atz1506633776385"> </a>
+   <h2>IDWT2D Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.6</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM IDWT2D (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS MetaTable
+  OUT TABLE OutputTable (<i>output_table</i>)
+  USING
+  TargetColumns ('<i>target_column</i>' [,...])
+  SortColumn ('<i>sort_column</i>')
+  [ PartitionColumns ('<i>partition_column</i>' [,...]) ]
+  [ VerboseFlag ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="iqc1506633863991"> </a>
+	  <h2>IDWT2D Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputTable</dt>
+      <dd>Specify the name for the table that the function creates to store the reconstructed result. This table must not exist.</dd>
+      <dt>TargetColumns</dt>
+      <dd>Specify the names of the InputTable columns that contain the data to transform. These columns must contain numeric values between -1e308 and 1e308. The function treats NULL as 0.</dd>
+      <dt>SortColumn</dt>
+      <dd>Specify the name of the InputTable column that represents the order of coefficients in each sequence (the waveletid column in the DWT2D output table). The column must contain a sequence of integer values that start from 1 for each sequence. If a value is missing from the sequence, the function treats the corresponding data column as 0.</dd>
+      <dt>PartitionColumns</dt>
+      <dd>[Optional] Specify the names of the InputTable partition columns, which identify the sequences. Rows with the same partition column values belong to the same sequence. If you specify multiple partition columns, the function treats the first one as the distribute key of the OutputTable and MetaTable.<p>
+            <b>Note:</b>  The IDWT2D input tables are the DWT2D output tables. If you specify this syntax element for DWT2D, you must also specify it for IDWT2D; otherwise, the results might not make sense.</p>
+      </dd>
+      <dd>Default behavior: All rows belong to one sequence, and the function creates a distribute key column named dwt_id_<i>random_name</i> in both the OutputTable and MetaTable. In both tables, every cell of dwt_id_<i>random_name</i> has the value 1.</dd>
+      <dt>VerboseFlag</dt>
+      <dd>[Optional] Specify whether to ignore (not output) rows in which all coefficient values have an absolute value less than 1e<sup>-12</sup>). For a sparse input matrix, ignoring such rows reduces the output table size.</dd>
+      <dd>Default: 'true'</dd>
+   </div>
+
+
+	
+   <a name="aro1507667813019"> </a>
+   <h2>IDWT2D Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <a name="table_gn5_dht_wcb"> </a>
+   <table class="introtable">
+      <a name="table_gn5_dht_wcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Has same schema as DWT Output OutputTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">MetaTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Has same schema as DWT Output MetaInformationTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="wfd1506634189357"> </a>
+   <h2>IDWT2D Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Message Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">messages</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Reports whether function succeeded.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_rqr_kjt_wcb"> </a>
+   <h3>IDWT2D Output Table Schema</h3>
+   <p style="line-height: 1em;">The table has reconstructed sequences.</p>
+   <a name="table_N10049_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10049_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>partition_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>partition_column</i>.] Identifier of sequence to which data belongs. Rows with same partition column values belong to same sequence.<p style="line-height: 1em; margin: 0px;">
+                  <br/>If InputTable has multiple partition columns, first one is distribution key in both InputTable and OutputTable.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>If InputTable has only one partition column, OutputTable has as its distribution key a function-created column named dwt_id_<i>random_name</i>. Every cell of dwt_id_<i>random_name</i> has the value 1.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">indexy</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Y index of reconstructed matrix.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">indexx</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">X index of reconstructed matrix.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, SMALLINT, BIGINT, DOUBLE PRECISION, or NUMERIC</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each <i>target_column</i>.] Reconstructed matrix.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="wpa1506634318009"> </a>
+   <h2>IDWT2D Example</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example reconstructs the DWT2D Example input table.</p>
+
+   <a name="section_t3v_xxy_m2b"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">Input tables are DWT2D Example output:</p>
+   <ul>
+      <li>InputTable: dwt_coef_table</li>
+      <li>MetaTable: dwt_meta_table</li>
+   </ul>
+
+   <a name="section_xld_yxy_m2b"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM IDWT2D (
+  ON dwt2d_coeftable AS InputTable
+  ON dwt2d_metatable AS MetaTable
+  OUT TABLE OutputTable (climate2d_reconstruct)
+  USING
+  TargetColumns ('temp_f', 'pressure_mbar', 'dewpoint_f')
+  SortColumn ('waveletid')
+  PartitionColumns ('state')
+) AS dt;</tt>
+   </pre>
+   <a name="section_wn4_yxy_m2b"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ messages                      
+ ----------------------------- 
+ IDwt2D finished successfully!</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM climate2d_reconstruct order by state, indexy, indexx;</tt>
+   </pre>
+   <pre>
+      <tt>
+ state indexy indexx temp_f             pressure_mbar      dewpoint_f         
+ ----- ------ ------ ------------------ ------------------ ------------------ 
+ ca        32   -117  34.90000000000003 1020.5000000000011  28.90000000000002
+ ca        32   -116 34.400000000000034 1020.2000000000014 28.700000000000024
+ ca        33   -118  33.90000000000003 1020.0000000000014 28.400000000000023
+ ca        33   -117  33.40000000000002 1020.2000000000011  28.30000000000002
+ ca        34   -121  33.10000000000004  1020.200000000001  28.00000000000002
+ ca        34   -120  32.70000000000005 1020.0000000000016  27.90000000000002
+ ca        34   -119 32.500000000000036 1020.3000000000013  27.70000000000003
+ ca        34   -118  32.30000000000003 1020.8000000000013 27.600000000000037
+ ca        35   -120  32.10000000000005 1021.3000000000012 27.400000000000034
+ ca        35   -119  33.80000000000004 1021.7000000000013  28.20000000000003
+ ca        35   -118 36.400000000000034 1022.1000000000015  28.90000000000005
+ ca        35   -117 39.400000000000034 1022.0000000000009 29.300000000000026
+ ca        36   -122 34.900000000000034 1020.5000000000009  28.90000000000002
+ ca        36   -121 34.400000000000034 1020.2000000000012  28.70000000000002
+ ca        36   -120 33.900000000000034  1020.000000000001 28.400000000000013
+ ca        36   -119 33.400000000000034  1020.200000000001 28.300000000000033
+ ca        36   -118  33.10000000000003 1020.2000000000012 28.000000000000032
+ ca        37   -123  32.70000000000004 1020.0000000000013 27.900000000000023
+ ca        37   -122  32.50000000000006 1020.3000000000013  27.70000000000003
+ ca        37   -121 32.300000000000026  1020.800000000001 27.600000000000026
+ ca        38   -124  32.10000000000003 1021.3000000000009 27.400000000000023
+ ca        38   -123  33.80000000000004  1021.700000000001 28.200000000000024
+ ca        38   -122  34.90000000000004 1020.6000000000013  28.80000000000004
+ ca        38   -121 34.400000000000034 1020.2000000000012  28.70000000000002
+ ca        38   -120  33.90000000000003 1020.1000000000009 28.400000000000013
+ ca        39   -124  33.50000000000004 1020.2000000000008 28.300000000000026
+ ca        39   -122  33.10000000000004 1020.2000000000014  28.00000000000003
+ ca        39   -121  32.70000000000004  1020.000000000001 27.900000000000016
+ ca        40   -125 32.500000000000036 1020.4000000000008  27.70000000000003
+ ca        40   -122  32.30000000000004 1020.8000000000013 27.600000000000033
+ ca        41   -125 32.100000000000044 1021.3000000000011 27.500000000000032
+ ca        41   -124  33.80000000000005 1021.7000000000012 28.300000000000033
+ ca        41   -123  34.60000000000005 1020.2000000000012 28.800000000000033
+ ca        41   -122  33.80000000000004 1021.7000000000015  28.30000000000004
+ ca        41   -121  36.60000000000004 1022.0000000000009 29.100000000000033
+ tx        26    -99 39.600000000000044  1021.900000000001  29.50000000000003
+ tx        26    -98 42.400000000000055 1021.1000000000013  29.50000000000002
+ tx        27    -99  44.50000000000005 1020.0000000000009  29.40000000000002
+ tx        27    -98 46.000000000000064 1019.3000000000011  29.10000000000003
+ tx        28   -100  46.50000000000005 1019.0000000000009  28.80000000000003
+ tx        28    -99  46.10000000000005 1019.2000000000014 28.800000000000033
+ tx        28    -98  44.40000000000005 1019.6000000000015  28.70000000000004
+ tx        29   -105  41.50000000000005  1020.100000000001  28.70000000000003
+ tx        29   -104  39.80000000000005  1020.600000000001  29.10000000000003
+ tx        29   -102 38.500000000000036 1020.9000000000012  29.20000000000002
+ tx        29   -101 37.400000000000034  1021.000000000001  29.20000000000003
+ tx        29    -99  36.50000000000005 1020.9000000000011  29.20000000000004
+ tx        29    -98 35.800000000000054 1020.9000000000011  29.10000000000005
+ tx        29    -97 35.100000000000044 1020.5000000000011 28.900000000000034
+ tx        29    -96  34.60000000000004 1020.2000000000013 28.800000000000026
+ tx        29    -95 34.100000000000044 1020.0000000000011  28.50000000000003
+ tx        30   -105  33.70000000000003 1020.1000000000008 28.400000000000027
+ tx        30   -104 33.300000000000026  1020.200000000001 28.200000000000024
+ tx        30   -103  32.90000000000004  1020.000000000001 28.100000000000037
+ tx        30   -102 32.700000000000045 1020.3000000000012 27.900000000000034
+ tx        30   -101 32.500000000000036 1020.8000000000012 27.800000000000033
+ tx        30   -100 32.300000000000026 1021.2000000000014 27.700000000000035
+ tx        30    -99 34.000000000000036 1021.6000000000013 28.500000000000043
+ tx        30    -98 36.700000000000045 1022.0000000000014 29.200000000000042
+ tx        30    -97 39.700000000000045 1021.9000000000015 29.600000000000033
+ tx        30    -96  42.50000000000004 1021.0000000000016 29.700000000000024
+ tx        31   -103  44.50000000000005 1019.9000000000011 29.500000000000032
+ tx        31   -102  45.90000000000007 1019.2000000000018 29.200000000000042
+ tx        31   -100 46.500000000000036 1019.0000000000016 28.900000000000034
+ tx        31    -99  46.00000000000005 1019.2000000000016 28.900000000000038
+ tx        31    -98  44.30000000000005 1019.6000000000015 28.900000000000038
+ tx        31    -97  41.50000000000004  1020.000000000002 28.800000000000036
+ tx        31    -96  39.80000000000004 1020.5000000000023 29.200000000000035
+ tx        31    -95  38.50000000000004 1020.8000000000013 29.300000000000033
+ tx        32   -103 37.400000000000034 1020.9000000000012 29.300000000000033
+ tx        32   -102  36.50000000000005 1020.9000000000017 29.300000000000047
+ tx        32   -101  35.70000000000005 1020.8000000000014 29.200000000000035
+ tx        32   -100  35.00000000000005 1020.4000000000015  29.00000000000003
+ tx        32    -99  34.50000000000004 1020.1000000000015  28.70000000000003
+ tx        32    -98  34.00000000000004 1019.9000000000011 28.500000000000036
+ tx        32    -97 33.600000000000044 1020.0000000000015 28.300000000000033
+ tx        32    -96 33.100000000000044 1020.1000000000017 28.100000000000033
+ tx        32    -95  32.80000000000004 1019.9000000000012 28.000000000000036
+ tx        33   -103 32.500000000000036 1020.2000000000012  27.80000000000003
+ tx        33   -102 32.400000000000034 1020.6000000000015 27.700000000000042
+ tx        33   -101 32.200000000000045 1021.1000000000013 27.600000000000037
+ tx        33   -100 33.800000000000054 1021.5000000000013 28.400000000000038
+ tx        33    -99  36.60000000000005 1021.9000000000012 29.000000000000032
+ tx        33    -98  39.60000000000005 1021.8000000000012 29.400000000000027
+ tx        33    -97  42.30000000000004 1021.0000000000011 29.400000000000027
+ tx        33    -95  44.30000000000005 1019.8000000000012 29.200000000000035
+ tx        34   -103 45.600000000000044 1019.2000000000012 28.900000000000027
+ tx        34   -102  46.20000000000006 1018.9000000000011 28.700000000000028
+ tx        34   -101  45.70000000000006  1019.100000000001  28.60000000000003
+ tx        34   -100  44.10000000000005 1019.5000000000009 28.700000000000024
+ tx        35   -104 41.300000000000026 1019.9000000000008  28.60000000000003
+ tx        35   -102  39.50000000000004  1020.400000000001  28.90000000000003
+ tx        35   -101  38.30000000000003 1020.7000000000007 29.000000000000025
+ tx        36   -102 37.200000000000045 1020.9000000000012  29.00000000000003
+ tx        36   -101  36.40000000000003 1020.8000000000009  29.00000000000003
+ wa        45   -122 29.900000000000038 1020.2000000000012 24.800000000000026
+ wa        45   -121  29.70000000000003 1020.7000000000013 24.700000000000024
+ wa        46   -125 29.700000000000045  1020.200000000001 24.600000000000026
+ wa        46   -124 29.500000000000046 1020.7000000000008 24.500000000000032
+ wa        46   -123 29.800000000000036 1020.0000000000011 24.600000000000026
+ wa        46   -122  29.60000000000003  1020.500000000001 24.600000000000023
+ wa        46   -121 29.700000000000035 1019.9000000000012 24.400000000000023
+ wa        46   -120 29.500000000000036 1020.4000000000012  24.40000000000002
+ wa        46   -118 29.900000000000027 1019.5000000000007  24.30000000000001
+ wa        47   -125 29.600000000000037 1019.9000000000008  24.20000000000002
+ wa        47   -124 29.400000000000027 1020.4000000000009 24.200000000000028
+ wa        47   -123 29.700000000000035  1019.500000000001  24.20000000000002
+ wa        47   -122 29.400000000000038 1020.0000000000011  24.10000000000003
+ wa        47   -121 29.300000000000033 1020.5000000000011 24.000000000000018
+ wa        47   -120 29.700000000000024 1019.3000000000011 24.100000000000016
+ wa        47   -118 29.400000000000027  1019.600000000001  23.90000000000002
+ wa        48   -123  29.20000000000004  1020.100000000001 23.700000000000017
+ wa        48   -122 29.000000000000053 1020.6000000000012 23.700000000000024
+ wa        48   -121 29.800000000000033 1019.4000000000009  24.10000000000002
+ wa        48   -119 29.500000000000036 1019.7000000000014 23.900000000000016
+ wa        48   -118 29.200000000000035 1020.2000000000016 23.800000000000026</tt>
+   </pre>
+   <p>
+      <b>Note:</b>  VerboseFlag is 'true' by default; therefore, rows in which all coefficient values have an absolute value less than 1e<sup>-12</sup> do not appear in climate2d_reconstruct.</p>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

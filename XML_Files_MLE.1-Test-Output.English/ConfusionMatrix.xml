@@ -1,0 +1,711 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="cpu1507655644292"> </a>
+	  <h1>ConfusionMatrix</h1>
+
+	  <p style="line-height: 1em;">The ConfusionMatrix function shows how often a classification algorithm correctly classifies items. The function takes an input table that includes two columns—one containing the observed class of an item and the other containing the class predicted by the algorithm—and outputs three tables:</p>
+   <ul>
+      <li>A confusion matrix (also called a contingency table), which shows the performance of the algorithm</li>
+      <li>A table of overall statistics</li>
+      <li>A table of statistics for each class</li>
+   </ul>
+
+   <a name="dox1507655858929"> </a>
+   <h2>ConfusionMatrix Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 2.7</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ConfusionMatrix (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } PARTITION BY 1
+  OUT TABLE CountTable (<i>count_table</i>)
+  OUT TABLE StatTable (<i>stat_table</i>)
+  OUT TABLE AccuracyTable (<i>accuracy_table</i>)
+  USING
+  ObservationColumn ('<i>observed_column</i>')
+  PredictColumn ('<i>predicted_column</i>')
+  [ Classes ('<i>class</i>' [,...] ) ]
+  [ Prevalence (<i>prevalence</i> [,...] ) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="tap1507655872979"> </a>
+	  <h2>ConfusionMatrix Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>CountTable</dt>
+      <dd>Specify the name of the confusion matrix, an output table.</dd>
+      <dt>StatTable</dt>
+      <dd>Specify the name of the output table of overall statistics.</dd>
+      <dt>AccuracyTable</dt>
+      <dd>Specify the name of the output table of statistics for each class.</dd>
+      <dt>ObservationColumn</dt>
+      <dd>Specify the name of the input column that contains the observed class.</dd>
+      <dt>PredictColumn</dt>
+      <dd>Specify the name of the input column that contains the predicted class.</dd>
+      <dt>Classes</dt>
+      <dd>[Optional] Specify the classes to output in the AccuracyTable. </dd>
+      <dd>Default: All classes</dd>
+      <dt>Prevalence</dt>
+      <dd>[Optional] Specify the prevalences for the classes to output in the AccuracyTable. Therefore, if you specify Prevalence, you must also specify Classes, and for every <i>class</i>, you must specify a <i>prevalence</i>. Each <i>prevalence</i> is a numeric value.</dd>
+   </div>
+
+
+	
+   <a name="zjf1507657625544"> </a>
+   <h2>ConfusionMatrix Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Input Table Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>observed_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Expected (observed) class.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>predicted_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Predicted class.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="oxf1507657641937"> </a>
+   <h2>ConfusionMatrix Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Message Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">message</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Reports whether function succeeded and output result to output tables.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_a3h_qrt_wcb"> </a>
+   <h3>CountTable Schema</h3>
+   <p style="line-height: 1em;">This table is a confusion matrix (also called a contingency table).</p>
+   <a name="table_N10028_N10022_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10028_N10022_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">observation</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Unique value of <i>observed_column</i> in input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>predicted_class</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>class</i>.] Number of times that items in <i>observed_column</i> were classified as <i>predicted_class</i>.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ayc_wrt_wcb"> </a>
+   <h3>StatTable Schema</h3>
+   <p style="line-height: 1em;">This table has overall statistics.</p>
+   <a name="table_N10079_N10022_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10079_N10022_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">key</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Statistic name from this list:<ul>
+                  <li>Accuracy</li>
+                  <li>95% CI</li>
+                  <li>Null Error Rate</li>
+                  <li>P-Value [Acc &gt; NIR]</li>
+                  <li>Kappa</li>
+                  <li>McNemar Test P-Value</li>
+               </ul>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Statistic value.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_kdd_1st_wcb"> </a>
+   <h3>AccuracyTable Schema</h3>
+   <a name="table_N1012C_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1012C_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">measure</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Each row contains one of these statistic names:<ul>
+                  <li>Sensitivity</li>
+                  <li>Specificity</li>
+                  <li>Pos Pred Value</li>
+                  <li>Neg Pred Value</li>
+                  <li>Prevalence</li>
+                  <li>Detection Rate</li>
+                  <li>Detection Prevalence</li>
+                  <li>Balanced Accuracy</li>
+               </ul>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>predicted_class</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Values of statistics for <i>class</i>.<p style="line-height: 1em; margin: 0px;">
+                  <br/>With Classes syntax element, column appears once for each specified <i>class</i>. Without Classes syntax element, column appears once for each unique <i>observed_column</i> value.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ivp1510769449047"> </a>
+   <h2>ConfusionMatrix Example</h2>
+   <a name="section_cxp_hk5_ndb"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">The input table, iris_category_expect_predict, contains 30 rows of expected and predicted values for different species of the flower iris. The predicted values can be derived from any of the classification functions, such as SVMSparsePredict_MLE. The raw iris data set has four prediction attributes - sepal_length, sepal_width, petal_length, petal_width grouped into 3 species - setosa, versicolor, virginica.</p>
+   <a name="table_zmb_pk5_ndb"> </a>
+   <table class="introtable">
+      <a name="table_zmb_pk5_ndb"> </a>
+      <h4 style="text-align: center;">iris_category_expect_predict</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">expected_value</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">predicted_value</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">20</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">35</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">40</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">45</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">50</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">setosa</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">55</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">60</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">65</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">70</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">75</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">80</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">85</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">90</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">95</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">100</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">105</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">110</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">115</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">120</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">125</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">130</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">135</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">versicolor</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">140</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">145</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">150</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">virginica</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_x1b_3k5_ndb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ConfusionMatrix(
+  ON iris_category_expect_predict PARTITION BY 1
+  OUT TABLE CountTable(count_output)
+  OUT TABLE StatTable(stat_output)
+  OUT TABLE AccuracyTable(acc_output)
+  USING
+  ObservationColumn('expected_value')
+  PredictColumn('predicted_value')
+) AS dt;</tt>
+   </pre>
+   <a name="section_mmm_3k5_ndb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ message                                        
+ ---------------------------------------------- 
+ Success !                                     
+ The result has been outputted to output tables
+</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM count_output;</tt>
+   </pre>
+   <pre>
+      <tt>
+ observation setosa versicolor virginica 
+ ----------- ------ ---------- --------- 
+ versicolor  0      9          3        
+ setosa      10     0          0        
+ virginica   0      1          7        </tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM stat_output;</tt>
+   </pre>
+   <pre>
+      <tt>
+ key                  value            
+ -------------------- ---------------- 
+ 95% CI               (0.6928, 0.9624)
+ P-Value [Acc &gt; NIR]  0               
+ Mcnemar Test P-Value NA              
+ Accuracy             0.8667          
+ Null Error Rate      0.6             
+ Kappa                0.8             
+</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM acc_output;</tt>
+   </pre>
+   <pre>
+      <tt>
+ measure              virginica setosa versicolor 
+ -------------------- --------- ------ ---------- 
+ Specificity          0.8636    1      0.9444    
+ Neg Pred Value       0.95      1      0.85      
+ Detection Rate       0.2333    0.3333 0.3       
+ Balanced Accuracy    0.8693    1      0.8472    
+ Sensitivity          0.875     1      0.75      
+ Pos Pred Value       0.7       1      0.9       
+ Prevalence           0.2667    0.3333 0.4       
+ Detection Prevalence 0.3333    0.3333 0.3333</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

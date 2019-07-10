@@ -1,0 +1,1259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="bgd1507744754025"> </a>
+	  <h1>Best-Match Mode</h1>
+
+	  <p style="line-height: 1em;">In best-match mode, the function uses the result of hypothesis-test mode to find the distribution that best matches the sample data. For each specified test, the function reports the best match, identifying the distribution type and parameters.</p>
+
+   <a name="zup1507745372496"> </a>
+   <h2>Best-Match Mode Syntax (DOUBLE PRECISION Input)</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>DistributionMatchReduce version 1.6, DistributionMatchMultiInput version 1.4</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM DistributionMatchReduce (
+  ON DistributionMatchMultiInput (
+    ON (SELECT RANK() OVER (PARTITION BY <i>column</i> [,...]
+      ORDER BY <i>column</i>) AS rank, *
+      FROM <i>input_table</i> WHERE <i>column</i> IS NOT NULL)
+      AS InputTable PARTITION BY ANY
+    ON (SELECT <i>column</i>[,...]
+      COUNT(*) AS group_size,
+      AVG (<i>column</i>) AS mean,
+      STDDEV (<i>column</i>) AS sd,
+      CASE
+        WHEN MIN (<i>column</i>) &gt; 0 THEN AVG (LN (
+          CASE
+            WHEN <i>column</i> &gt; 0 THEN <i>column</i> 
+            ELSE 1
+          END)
+        )
+        ELSE 0
+      END AS mean_of_ln,
+      CASE
+        WHEN MIN (<i>column</i>) &gt; 0 THEN STDDEV (LN (
+          CASE
+            WHEN <i>column</i> &gt; 0 THEN <i>column</i> 
+            ELSE 1
+          END)
+        )
+        ELSE -1
+      END AS sd_of_ln,
+      Max (<i>column</i>) AS maximum,
+      MIN (<i>column</i>) AS minimum
+      FROM <i>input_table</i> 
+      WHERE <i>column</i> IS NOT NULL
+      GROUP BY <i>column</i>[,...]
+    ) AS GroupStatistics DIMENSION
+    USING
+    TargetColumn ('<i>target_column</i>')
+    [ Tests ('<i>test</i>' [,...]) ]
+    [ Distributions ('<i>distribution1</i>:<i>parameter1</i>',...) ]
+    [ GroupByColumns
+    ({ '<i>group_column</i>' | <i>group_column_range</i> }[,...]) ]
+    MinGroupSize (<i>minGroupSize</i>)
+    [ NumCell (<i>cell_Size</i>) ]
+  ) AS <i>alias_1</i> PARTITION BY <i>column</i>[,...]   
+  [ USING NumTopMatches ('<i>num_top_matches</i>') ]
+) AS <i>alias_2</i>;</tt>
+   </pre>
+   <p style="line-height: 1em;">For continuous distributions, if your input table already includes a rank column, replace this clause:</p>
+   <p style="line-height: 1em;">
+      <tt style="font-family: monospace;">ON (SELECT RANK()...</tt>
+   </p>
+   <p style="line-height: 1em;">with this clause:</p>
+   <p style="line-height: 1em;">
+      <tt style="font-family: monospace;">ON SELECT * FROM <i>input_table</i>
+      </tt>.</p>
+
+   <a name="idv1507745677833"> </a>
+   <h2>Best-Match Mode Syntax (INTEGER Input)</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>DistributionMatchReduce version 1.6, DistributionMatchMultiInput version 1.4</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM DistributionMatchReduce (
+  ON DistributionMatchMultiInput (
+    ON (SELECT COUNT(1) AS counts,
+      SUM(COUNT(1)) OVER (PARTITION BY <i>column</i>[,...]
+      ORDER BY <i>column</i>) AS rank,
+      <i>column</i> [,...], <i>column</i> 
+      FROM <i>input_table</i> 
+      WHERE <i>column</i> IS NOT NULL
+      GROUP BY <i>column</i> [,...], <i>column</i> 
+    ) AS InputTable PARTITION BY ANY
+    ON (SELECT <i>column</i> [,...],
+      COUNT(*) AS group_size,
+      AVG (<i>column</i>) AS mean,
+      STDDEV (<i>column</i>) AS sd,
+      MAX (<i>column</i>) AS maximum,
+      MIN (<i>column</i>) AS minimum
+      FROM <i>input_table</i> 
+      WHERE <i>column</i> IS NOT NULL
+      GROUP BY <i>column</i>[,...]
+    ) AS GroupStatistics DIMENSION
+    USING
+    TargetColumn ('<i>target_column</i>')
+    [ Tests ('<i>test</i>' [,...]) ]
+    [ Distributions ('<i>distribution1</i>:<i>parameter1</i>' [,... ]) ]
+    [ GroupByColumns
+    ({ '<i>group_column</i>' | <i>group_column_range</i> }[,...]) ]
+    MinGroupSize (<i>minGroupSize</i>)
+    [ NumCell (<i>cell_Size</i>) ]
+  ) AS <i>alias_1</i> PARTITION BY <i>column</i>[,...]
+  [ USING NumTopMatches ('<i>num_top_matches</i>') ]
+) AS <i>alias_2</i>;</tt>
+   </pre>
+   <p style="line-height: 1em;">For continuous distributions, if your input table already includes a rank column, replace this clause:</p>
+   <p style="line-height: 1em;">
+      <tt style="font-family: monospace;">ON (SELECT RANK()...</tt>
+   </p>
+   <p style="line-height: 1em;">with this clause:</p>
+   <p style="line-height: 1em;">
+      <tt style="font-family: monospace;">ON SELECT * FROM <i>input_table</i>
+      </tt>.</p>
+
+   <a name="cbp1507745873055"> </a>
+	  <h2>Best-Match Mode Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the values of the sample data set.</dd>
+      <dt>Tests</dt>
+      <dd>[Optional] Specify one to three tests to perform:<a name="table_dtn_bpy_fdb"> </a>
+         <table class="introtable">
+            <a name="table_dtn_bpy_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">
+                     <i>test</i>
+                  </div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'KS'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Kolmogorov-Smirnov test.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'AD'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Anderson-Darling test.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'CHISQ'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Pearson's Chi-squared test.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dd>Default: All tests</dd>
+      <dt>Distributions</dt>
+      <dd>[Optional] Specify the reference distributions (which must be continuous) and their parameters. The possible <i>distribution</i> and <i>parameters</i> values for continuous distributions are in the table, Continuous Distributions and Parameters, in Hypothesis-Test Mode Syntax Elements.</dd>
+      <dd>Default: All of these distributions:<ul>
+            <li>Beta</li>
+            <li>Cauchy</li>
+            <li>CHISQ</li>
+            <li>Exponential</li>
+            <li>F</li>
+            <li>Gamma</li>
+            <li>Lognormal</li>
+            <li>Normal</li>
+            <li>T</li>
+            <li>Triangular</li>
+            <li>Uniformcontinuous</li>
+            <li>Weibull</li>
+         </ul>
+      </dd>
+      <dt>GroupByColumns</dt>
+      <dd>[Optional] Specify the names of the InputTable columns that contain the group identifications over which to run the test. The function can run multiple tests for different partitions of the data in parallel. If you omit this syntax element, specify PARTITION BY 1 and omit the GROUP BY clause in the second ON clause.</dd>
+      <dt>MinGroupSize</dt>
+      <dd>[Optional] Specify the minimum group size. The function ignores groups smaller than the minimum size when calculating statistics.</dd>
+      <dd>Default: 50</dd>
+      <dt>NumCell</dt>
+      <dd>[Optional] Specify the number of cells to make discrete in a continuous distribution. The <i>cell_size</i> must be greater than 3 if <i>distribution</i> is NORMAL; otherwise, it must be greater than 1. The quotient <i>min_group_size</i>/<i>cell_size</i> cannot be less than 5.<p>
+            <b>Note:</b>  If you specify NumCell, you must specify <tt style="font-family: monospace;">'CHISQ'</tt> in the Tests syntax element.</p>
+      </dd>
+      <dd>Default: 10</dd>
+      <dt>NumTopMatches</dt>
+      <dd>[Optional] Specify the number of the top matching distributions for the function to output.</dd>
+      <dd>Default: 1</dd>
+   </div>
+
+
+	
+   <a name="rfg1507746024216"> </a>
+   <h2>Best-Match Mode Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The <i>input_table</i> has an arbitrary number of grouping columns and a single value column that contains the data set to match to the specified distributions. The syntax includes clauses that create two tables from the input table, InputTable and GroupStatistics. One table ranks the data and the other table counts the number of points in each group.</p>
+
+   <a name="section_uzv_vgv_xcb"> </a>
+   <h3>
+      <i>input_table</i> Schema</h3>
+   <a name="table_N1002B_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1002B_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column can appear several times.] Partitions or identifies values.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, BIGINT, NUMERIC, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sample data set value.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="lns1507747134903"> </a>
+   <h2>Best-Match Mode Output</h2>
+   <a name="section_zsy_zgv_xcb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>group_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>group_column</i>.]</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">group_size</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of rows in group.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">best_match_ks</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with Tests ('KS') or if if you omit Tests syntax element.] Type and parameters of distribution identified as best match by Kalmogorov-Smirnov test.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">p_value_ks</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with Tests ('KS') or if if you omit Tests syntax element.] P-value for distribution identified as best match by Kalmogorov-Smirnov test.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">best_match_ad</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with Tests ('AD') or if if you omit Tests syntax element.] Type and parameters of distribution identified as best match by Anderson-Darling test.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">p_value_ad</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with Tests ('AD') or if if you omit Tests syntax element.] P-value for distribution identified as best match by Anderson-Darling test.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">best_match_chisq</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with Tests ('CHISQ') or if if you omit Tests syntax element.] Type and parameters of distribution identified as best match by Pearson's ChiSquared test.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">p_value_chisq</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with Tests ('CHISQ') or if if you omit Tests syntax element.] P-value for distribution identified as best match by Pearson's ChiSquared test.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="bpe1507747397868"> </a>
+   <h2>Best-Match Mode Examples</h2>
+   <a name="zor1524167590281"> </a>
+	  <h3>Best-Match Mode Example: DOUBLE PRECISION Input</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+
+			<p style="line-height: 1em;">The example creates input tables t1 and t2 from factory_7, the Hypothesis-Test Mode Example: Omit GroupByColumns input table.</p>
+   <p style="line-height: 1em;">The following statements create tables t1 and t2:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE t1 AS (
+  SELECT  product, 
+         COUNT(*) AS group_size, 
+         AVG(mttf) AS mean, 
+         STDDEV_SAMP(mttf) AS sd,
+         CASE
+           WHEN MIN(mttf) &gt; 0 
+           THEN AVG(
+             LN(
+               CASE WHEN mttf &gt; 0 
+               THEN mttf 
+               ELSE 1 
+               END
+             )
+         )
+         ELSE 0
+         END AS mean_of_ln,
+         CASE
+           WHEN MIN(mttf) &gt; 0 
+           THEN STDDEV_SAMP(
+             LN(
+               CASE WHEN mttf &gt; 0 
+               THEN mttf 
+               ELSE 1 
+               END
+             )
+         )
+         ELSE -1
+         END AS sd_of_ln,
+       MAX(mttf) AS "maximum", MIN(mttf) AS "minimum"
+  FROM factory_7
+  WHERE mttf IS NOT NULL
+GROUP BY product) WITH data;</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE t2 AS (
+  SELECT RANK() OVER (PARTITION BY product ORDER BY mttf) AS "rank", product, mttf
+  FROM factory_7 
+  WHERE mttf IS NOT NULL
+) WITH data;</tt>
+   </pre>
+		
+   <a name="section_jtz_xjc_4db"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM DistributionMatchReduce (
+  ON  DistributionMatchMultiInput(
+    ON t2 AS InputTable PARTITION BY ANY
+    ON t1 AS GroupStatistics DIMENSION
+    USING
+    TargetColumn('mttf')
+    TESTS('KS', 'AD')
+    GroupByColumns('product')
+    MINGROUPSIZE(50)
+  ) PARTITION BY product
+  USING "Top"(2)
+)AS dt ;</tt>
+   </pre>
+   <a name="section_erv_yjc_4db"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ product group_size best_match_ks_top1                                 p_value_ks_top1    best_match_ks_top2                              p_value_ks_top2       best_match_ad_top1                         p_value_ad_top1       best_match_ad_top2                              p_value_ad_top2       
+ ------- ---------- -------------------------------------------------- ------------------ ----------------------------------------------- --------------------- ------------------------------------------ --------------------- ----------------------------------------------- --------------------- 
+ A             2999 gamma:4508.589149512046,2.2181356024550047         0.7658938765525818 lognormal:9.210295677185059,0.01492296066135168    0.7159204483032227 gamma:4508.589149512046,2.2181356024550047    0.6876224875450134 lognormal:9.210295677185059,0.01492296066135168    0.6386105418205261
+ D             3000 uniformcontinuous:9500.6201171875,10499.7998046875 0.9964507818222046 beta:10,1                                       1.3535959908494988E-8 beta:10,1                                  2.0000000233721948E-7 weibull:1,1                                     2.0000000233721948E-7
+</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="nmt1507747947906"> </a>
+   <h3>Best-Match Mode Example: INTEGER Input</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example finds the best matching distribution for a data set that consists of integers that are from different sources and are output by different distributions.</p>
+
+   <a name="section_wcq_gmh_zdb"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, age_distribution, contains the ages of children visiting three amusement parks during a one-week period in spring and another one-week period in summer.</p>
+   <a name="table_kjg_pmh_zdb"> </a>
+   <table class="introtable">
+      <a name="table_kjg_pmh_zdb"> </a>
+      <h4 style="text-align: center;">age_distribution</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">season</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">park_name</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">age</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Funland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Funland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Funland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Funland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Funland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Funland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Funland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Funland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Funland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Funland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wonderland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wonderland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wonderland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wonderland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wonderland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wonderland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wonderland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wonderland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wonderland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wonderland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KidsWorld</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KidsWorld</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KidsWorld</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KidsWorld</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KidsWorld</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KidsWorld</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KidsWorld</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KidsWorld</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KidsWorld</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Spring</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KidsWorld</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Funland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Funland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Funland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Funland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Funland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Funland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Funland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Funland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Funland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Funland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wonderland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wonderland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wonderland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wonderland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wonderland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wonderland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wonderland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wonderland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wonderland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Wonderland</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KidsWorld</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KidsWorld</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KidsWorld</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KidsWorld</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KidsWorld</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KidsWorld</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KidsWorld</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KidsWorld</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KidsWorld</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Summer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KidsWorld</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_rjb_hmh_zdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM DistributionMatchReduce (
+  ON DistributionMatchMultiInput (
+    ON (
+      SELECT COUNT(1) AS counts,
+        SUM(counts) OVER (PARTITION BY park_name, season
+          
+          ORDER BY age ROWS UNBOUNDED PRECEDING) AS "rank", park_name, season, age
+      FROM age_distribution
+      WHERE age IS NOT NULL
+      GROUP BY park_name, season, age
+    ) AS InputTable PARTITION BY ANY
+    ON (
+      SELECT park_name, season, COUNT(*) AS group_size, AVG(age) AS mean, 
+        STDDEV_SAMP(age) AS sd, MAX(age) AS "maximum", MIN(age) AS "minimum"
+      FROM age_distribution
+      WHERE age IS NOT NULL
+      GROUP BY park_name, season
+    ) AS GroupStatistics DIMENSION
+    USING
+    TargetColumn('age')
+    TESTS('KS', 'AD', 'CHISQ')
+     GroupByColumns('park_name', 'season')
+    MINGROUPSIZE(50)
+    NumCell(10)
+  ) PARTITION BY park_name, season
+)AS dt;</tt>
+   </pre>
+   <a name="section_yhn_hmh_zdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The function has attempted to identify the best matching distribution for each partition of the data, based on each test specified in the SQL call. For each partition, the output shows the distribution and parameters identified by each test with the associated p-value.</p>
+   <pre>
+      <tt>
+ park_name  season group_size best_match_ks_top1             p_value_ks_top1      best_match_ad_top1                     p_value_ad_top1      best_match_chisq_top1            p_value_chisq_top1    
+ ---------- ------ ---------- ------------------------------ -------------------- -------------------------------------- -------------------- -------------------------------- --------------------- 
+ wonderland spring        400 binomial:16,0.5091542759742608  0.06241687387228012 binomial:16,0.5091542759742608         1.500000053056283E-6 binomial:16,0.5091542759742608                     0.0
+ funland    spring        400 uniformdiscrete:1,12             0.9992926716804504 negativebinomial:7,0.46705571565376613 1.500000053056283E-6 uniformdiscrete:1,12             8.948397578478762E-13
+ wonderland summer        400 poisson:7.005000114440918        0.9931338429450989 poisson:7.005000114440918               6.47109345663921E-6 binomial:110,0.06332936686652757                   0.0
+ funland    summer        400 poisson:7.065000057220459      6.726568099111319E-4 binomial:13,0.507505492077339          1.500000053056283E-6 binomial:13,0.507505492077339                      0.0
+ kidsworld  spring        400 uniformdiscrete:1,8              0.9639452695846558 binomial:100,0.5                       1.500000053056283E-6 binomial:100,0.5                                   0.0
+ kidsworld  summer        400 poisson:4.457499980926514        0.9960735440254211 binomial:100,0.5                       1.500000053056283E-6 binomial:100,0.5                                   0.0
+</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

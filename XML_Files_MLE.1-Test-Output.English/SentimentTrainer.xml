@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="qay1507218453121"> </a>
+	  <h1>SentimentTrainer</h1>
+
+	
+		<p style="line-height: 1em;">The SentimentTrainer function trains a model; that is, takes training documents and outputs a maximum entropy classification model, which it installs on ML Engine.</p>
+   <p>
+      <b>Note:</b>  SentimentTrainer uses files that are preinstalled on ML Engine. For details, see Preinstalled Files That Functions Use.</p>
+	
+   <a name="viz1507218493714"> </a>
+   <h2>SentimentTrainer Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 2.5</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SentimentTrainer (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  USING
+  OutputModelFile (<i>output_model_file</i>)
+  TextColumn ('<i>text_column</i>')
+  SentimentColumn ('<i>sentiment_column</i>')
+  [ InputLanguage ({ 'en' | 'zh_CN' | 'zh_TW' }) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="hyr1507218574464"> </a>
+	  <h2>SentimentTrainer Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputModelFile</dt>
+      <dd>Specify the name of the file to which the function outputs the model.</dd>
+      <dt>TextColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the training data.</dd>
+      <dt>SentimentColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the sentiment values, which are the following:<a name="table_pcv_pcz_fdb"> </a>
+         <table class="introtable">
+            <a name="table_pcv_pcz_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Sentiment Value</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'POS'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Positive</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'NEG'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Negative</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'NEU'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Neutral</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>InputLanguage</dt>
+      <dd>[Optional] Specify the language of the input text:<a name="d59e19"> </a>
+         <table class="introtable">
+            <a name="d59e19"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'en'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">English</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'zh_CN'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Simplified Chinese</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'zh_TW'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Traditional Chinese</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+   </div>
+
+
+	
+   <a name="par1507218641032"> </a>
+   <h2>SentimentTrainer Input</h2>
+   <a name="section_ryp_x5c_ycb"> </a>
+   <h3>InputTable Schema</h3>
+   <p style="line-height: 1em;">Each row contains a training document.</p>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>input_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>input_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>text_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Training document.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>sentiment_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sentiment value of document ('POS' (positive), 'NEG' (negative), or 'NEU' (neutral)).</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="juu1507218747957"> </a>
+   <h2>SentimentTrainer Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The function outputs a message and a maximum entropy classification model (a binary file installed on ML Engine).</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <h4 style="text-align: center;">Output Message Schema</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">train_result</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Message about model file.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="zvr1510348092883"> </a>
+   <h2>SentimentTrainer Example</h2>
+   <a name="section_jcl_xjl_pdb"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">The input table is a collection of user reviews for different products.</p>
+   <a name="table_kfw_2kl_pdb"> </a>
+   <table class="introtable">
+      <a name="table_kfw_2kl_pdb"> </a>
+      <h4 style="text-align: center;">InputTable: sentiment_train</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">product</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">category</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">review</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">camera</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">we primarily bought this camera for high image quality and excellent video capability without paying the price for a dslr. it has excelled in what we expected of it, and consequently represented excellent value for me. all my friends want my camera for their vacations. i would recommend this camera to anybody. definitely worth the price. plus, when you buy some accessories, it becomes even more powerful.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">office suite</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">it is the best office suite i have used to date. it is launched before office 2010 and it is ages ahead of it already. the fact that i could comfortable import xls, doc, ppt and modify them, and then export them back to the doc, xls, ppt is terrific. i needed the compatibility. it is a very intuitive suite and the drag drop functionality is terrific.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">camera</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">this is a nice camera, delivering good quality video images decent photos. light small, using easily obtainable, high quality minidv i love it. minor irritations include touchscreen based menu only digital photos can only be transferred via usb, requiring ilink and usb if you use ilink.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_orv_xjl_pdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM SentimentTrainer (
+  ON sentiment_train AS InputTable
+  USING
+  TextColumn ('review')
+  SentimentColumn ('category')
+  OutputModelFile ('sentimentmodel1.bin')
+) AS dt;</tt>
+   </pre>
+   <a name="section_ijg_yjl_pdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ train_result                   
+ ------------------------------ 
+ Model generated.              
+ Training time(s): 0.027       
+ File name: sentimentmodel1.bin
+ File size(KB): 3              
+ Model successfully installed</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

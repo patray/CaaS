@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="uif1507834592989"> </a>
+	  <h1>MurmurHash</h1>
+
+	
+		<p style="line-height: 1em;">The MurmurHash function computes the hash values of the input columns.</p>
+   <p style="line-height: 1em;">MurmurHash is a noncryptographic hash function suitable for hash-based searching. The function computes the MurmurHash value of each column value in each row of the input table.</p>
+
+	
+   <a name="iwu1507834640667"> </a>
+   <h2>MurmurHash Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.4</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM MurmurHash (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+  USING
+  TargetColumns ( { '<i>target_column</i>' | <i>target_column_range</i> }[,...] )
+  [ HashBits ({ 32 | 64 }) ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="zle1507834645332"> </a>
+	  <h2>MurmurHash Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>TargetColumns</dt>
+      <dd>Specify the names of the input table columns for which to calculate hash values.<p>
+            <b>Note:</b>  NULL values in the input columns are output as NULL.</p>
+      </dd>
+      <dt>HashBits</dt>
+      <dd>[Optional] Specify whether the function creates 32-bit or 64-bit hash values.</dd>
+      <dd>Default: 32-bit hash values</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of the input table columns to copy to the output table.</dd>
+   </div>
+
+
+	
+   <a name="vlj1507834655398"> </a>
+   <h2>MurmurHash Input</h2>
+   <a name="section_idf_tjs_ycb"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column for which to calculate hash values.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ohl1507834659964"> </a>
+   <h2>MurmurHash Output</h2>
+   <a name="section_cyk_rjs_ycb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>column</i>_murmurhash</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">For HashBits (32): INTEGER<p style="line-height: 1em; margin: 0px;">
+                  <br/>For HashBits (64): BIGINT</p>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Hash value for <i>target_column</i>.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="iap1510711076520"> </a>
+   <h2>MurmurHash Examples</h2>
+   <a name="tld1527017758167"> </a>
+	  <h3>MurmurHash Example: 32-Bit Hash Value (by Default)</h3>
+
+	  <a name="section_md3_srr_t2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table, murmurhash_input, is a log of midnight temperatures (in degrees Fahrenheit) for five consecutive nights in five cities. The rows of all columns except id and city_varchar are converted to hash values. Because the hash value depends on data type, the input table has three columns each, with different data types, for the time period and temperature:</p>
+   <a name="table_rh1_wrr_t2b"> </a>
+   <table class="introtable">
+      <a name="table_rh1_wrr_t2b"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Columns</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Content</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Types</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3-5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Time period</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">TIMESTAMP, VARCHAR, DATE</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6-8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Temperature</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION, INTEGER, VARCHAR</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_ypg_bsr_t2b"> </a>
+   <table class="introtable">
+      <a name="table_ypg_bsr_t2b"> </a>
+      <h4 style="text-align: center;">Input table: murmurhash_input</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">city_varchar</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">period_timestamp</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">period_text</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">period_date</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">temp_f_real</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">temp_f_integer</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">temp_f_text</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Asheville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2008-10-10 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10-10-2008 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2008-10-10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">34.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">35</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">34.9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Brownsville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2008-10-12 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10-12-2008 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2008-10-12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">34</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">34</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">34</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Knoxville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2008-10-14 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10-14-2008 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2008-10-14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Greenville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2008-10-11 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10-11-2008 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2008-10-11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">34.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">34</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">34.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Nashville</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2008-10-13 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10-13-2008 00:00:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2008-10-13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">35.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">36</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">35.6</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_lfl_yg3_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM MurmurHash (
+  ON murmurhash_input
+  USING
+  TargetColumns ('[2:7]')
+  Accumulate ('id')
+) AS dt ORDER BY 1;</tt>
+   </pre>
+   <p>
+      <b>Note:</b>  For the TargetColumns syntax element, columns are numbered 0, 1, 2, and so on (not 1, 2, 3 and so on, as in the id column of the table murmurhash_input.</p>
+   <a name="section_ugw_yg3_xdb"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The hash values for each time period are different for each data type. When the temperature value in the input table is an integer, the hash values are the same for INTEGER and VARCHAR, but different for REAL. When the temperature value in the input table is real, the hash values are the same for REAL and VARCHAR, but different for INTEGER.</p>
+   <pre>
+      <tt>
+ id period_timestamp_murmurhash period_text_murmurhash period_date_murmurhash temp_f_real_murmurhash temp_f_integer_murmurhash temp_f_text_murmurhash 
+ -- --------------------------- ---------------------- ---------------------- ---------------------- ------------------------- ---------------------- 
+  1                  1962681181             -463297848              557349452              491855154               -2026295078              491855154
+  2                 -1741097193             1584740227            -1509759604             -499861358               -2026295078             -499861358
+  3                  1530898040             1693067691             -122411470             -141326552               -2026295078            -2026295078
+  4                 -1426854377            -2116413651             1981218164              138771797                -392240485              138771797
+  5                 -1560585364             2011908706             1085005088             1047067045                -902858061             -902858061</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="xdv1507834685120"> </a>
+   <h3>MurmurHash Example: 64-Bit Value (Specified)</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example shows how specifying HashBits('64') affects the hash values. As in the 32-bit value example, when the temperature value in the input table is an integer, the hash values are the same for INTEGER and VARCHAR, but different for REAL. When the temperature value in the input table is real, the hash values are the same for REAL and VARCHAR, but different for INTEGER.</p>
+
+   <a name="section_md3_srr_t2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: murmurhash_input, as in MurmurHash Example: 32-Bit Hash Value (by Default)</li>
+   </ul>
+
+   <a name="section_lfl_yg3_xdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM MurmurHash(
+  ON murmurhash_input
+  USING
+  TargetColumns('[2:7]')
+  HashBits(64)
+  Accumulate('id')
+) AS dt ORDER BY 1;</tt>
+   </pre>
+   <a name="section_ugw_yg3_xdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id period_timestamp_murmurhash period_text_murmurhash period_date_murmurhash temp_f_real_murmurhash temp_f_integer_murmurhash temp_f_text_murmurhash 
+ -- --------------------------- ---------------------- ---------------------- ---------------------- ------------------------- ---------------------- 
+  1         2081499398607021206    1892844779878238375   -3374208292985920001    1293995461165576289       2118418006307321788    1293995461165576289
+  2          515846716270079702   -7113059074592314425    7968959960480043948   -3815305352492785825       2118418006307321788   -3815305352492785825
+  3        -1513387057007090709    5003897662396662390    1794743325310104289    1044130231958811690       2118418006307321788    2118418006307321788
+  4         5181116076770007143   -3056768082299206123    6786124399480028630    1386486412937455134       6315281623848420264    1386486412937455134
+  5         7275307893407845346    2474048315384364200    1414589266172155885    8029796110320680006      -5952800379241158136   -5952800379241158136
+</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="aay1507660157006"> </a>
+	  <h1>PathAnalyzer</h1>
+
+	  <p style="line-height: 1em;">The PathAnalyzer function:</p>
+   <ol>
+      <li>Inputs a set of paths to the function PathGenerator.</li>
+      <li>Inputs the  output to the function PathSummarizer.</li>
+      <li>Inputs the  output to the function PathStart, which outputs, for each parent, all children and the number of times that the user traveled each child.</li>
+   </ol>
+   <p>
+      <b>Note:</b>  For the definitions of the terms that this section uses, see Path Analysis Functions.</p>
+   <a name="blv1507660203172"> </a>
+   <h2>PathAnalyzer Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.9</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM PathAnalyzer (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  OUT TABLE OutputTable (<i>output_table</i>)
+  USING
+  SeqColumn ('<i>sequence_column</i>')
+  [ CountColumn ('<i>count_column</i>') ]
+  [ HashCode ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  Delimiter ('<i>delimiter</i>')
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="bwg1507660298322"> </a>
+	  <h2>PathAnalyzer Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputTable</dt>
+      <dd>Specify the name of the output table.</dd>
+      <dt>SeqColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the paths.</dd>
+      <dt>CountColumn</dt>
+      <dd>[Optional] Specify the name of the InputTable column that contains the number of times a path was traveled.</dd>
+      <dd>Default: 1</dd>
+      <dt>HashCode</dt>
+      <dd>[Optional] Specify whether to include the hash code of the output column node.</dd>
+      <dd>Default: 'false'</dd>
+      <dt>Delimiter</dt>
+      <dd>Specify the single-character delimiter that separates symbols in the path string.<p>
+            <b>Note:</b>  
+            <p style="line-height: 1em;">Do not use any of the following characters as <i>delimiter</i> (they cause the function to fail):<ul>
+                  <li>Asterisk (<tt style="font-family: monospace;">*</tt>)</li>
+                  <li>Plus (<tt style="font-family: monospace;">+</tt>)</li>
+                  <li>Left parenthesis (<tt style="font-family: monospace;">(</tt>)</li>
+                  <li>Right parenthesis (<tt style="font-family: monospace;">)</tt>)</li>
+                  <li>Single quotation mark (<tt style="font-family: monospace;">'</tt>)</li>
+                  <li>Escaped single quotation mark (<tt style="font-family: monospace;">\'</tt>)</li>
+                  <li>Backslash (<tt style="font-family: monospace;">\</tt>)</li>
+               </ul>
+            </p>
+         </p>
+      </dd>
+      <dd>Default: ',' (comma)</dd>
+   </div>
+
+
+	
+   <a name="dlq1507660356290"> </a>
+   <h2>PathAnalyzer Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The InputTable has the same schema as the PathGenerator Input table.</p>
+
+   <a name="ahz1507660396606"> </a>
+   <h2>PathAnalyzer Output</h2>
+   <a name="section_s1p_12v_l2b"> </a>
+   <h3>Output Message Schema</h3>
+   <a name="table_yw1_d2v_l2b"> </a>
+   <table class="introtable">
+      <a name="table_yw1_d2v_l2b"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">message</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Reports whether query executed successfully and where to find output.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Table Schema</h3>
+   <p style="line-height: 1em;">The output table has the same schema as the PathStart Output table.</p>
+
+   <a name="wfn1507660482707"> </a>
+   <h2>PathAnalyzer Example</h2>
+   <a name="section_e4j_dmd_mdb"> </a>
+   <h3>Input</h3>
+   <ul>
+      <li>InputTable: clickstream1, as in PathGenerator Example</li>
+   </ul>
+
+   <a name="section_lzw_dmd_mdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM PathAnalyzer(
+  ON clickstream1 AS InputTable
+  OUT TABLE OutputTable(path_output)
+  USING
+  SeqColumn('path')
+  CountColumn('cnt')
+  HashCode('false')
+  Delimiter(',')
+) AS dt ;</tt>
+   </pre>
+   <a name="section_g3h_2md_mdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ message                                                                                
+ -------------------------------------------------------------------------------------- 
+Query executed successfully.
+ Output is stored in the table specified in OutputTable argument.
+
+SELECT * FROM path_output ORDER BY node;
+ node              parent          children                  subpath_cnt depth partitioned       
+ ----------------- --------------- ------------------------- ----------- ----- ----------------- 
+ ^                                 [(^,a),(^,c),(^,h),(^,p)]          34     0 ^                
+ ^,a               ^               [(^,a,h),(^,a,p)]                  11     1 ^,a              
+ ^,a,h             ^,a             [(^,a,h,c),(^,a,h,p)]               5     2 ^,a,h            
+ ^,a,h,c           ^,a,h           [(^,a,h,c,$)]                       3     3 ^,a,h,c          
+ ^,a,h,p           ^,a,h           [(^,a,h,p,$)]                       2     3 ^,a,h,p          
+ ^,a,p             ^,a             [(^,a,p,s)]                         6     2 ^,a,p            
+ ^,a,p,s           ^,a,p           [(^,a,p,s,o)]                       6     3 ^,a,p,s          
+ ^,c               ^               [(^,c,s)]                           1     1 ^,c              
+ ^,c,s             ^,c             [(^,c,s,o)]                         1     2 ^,c,s            
+ ^,c,s,o           ^,c,s           [(^,c,s,o,e)]                       1     3 ^,c,s,o          
+ ^,c,s,o,e         ^,c,s,o         [(^,c,s,o,e,$)]                     1     4 ^,c,s,o,e        
+ ^,h               ^               [(^,h,a),(^,h,c),(^,h,e)]          20     1 ^,h              
+ ^,h,a             ^,h             [(^,h,a,c),(^,h,a,p)]               6     2 ^,h,a            
+ ^,h,a,c           ^,h,a           [(^,h,a,c,p)]                       4     3 ^,h,a,c          
+ ^,h,a,c,p         ^,h,a,c         [(^,h,a,c,p,i)]                     4     4 ^,h,a,c,p        
+ ^,h,a,c,p,i       ^,h,a,c,p       [(^,h,a,c,p,i,s)]                   4     5 ^,h,a,c,p,i      
+ ^,h,a,c,p,i,s     ^,h,a,c,p,i     [(^,h,a,c,p,i,s,o)]                 4     6 ^,h,a,c,p,i,s    
+ ^,h,a,c,p,i,s,o   ^,h,a,c,p,i,s   [(^,h,a,c,p,i,s,o,e)]               4     7 ^,h,a,c,p,i,s,o  
+ ^,h,a,c,p,i,s,o,e ^,h,a,c,p,i,s,o [(^,h,a,c,p,i,s,o,e,$)]             4     8 ^,h,a,c,p,i,s,o,e
+ ^,h,a,p           ^,h,a           [(^,h,a,p,i)]                       2     3 ^,h,a,p          
+ ^,h,a,p,i         ^,h,a,p         [(^,h,a,p,i,s)]                     2     4 ^,h,a,p,i        
+ ^,h,a,p,i,s       ^,h,a,p,i       [(^,h,a,p,i,s,o)]                   2     5 ^,h,a,p,i,s      
+ ^,h,a,p,i,s,o     ^,h,a,p,i,s     [(^,h,a,p,i,s,o,$)]                 2     6 ^,h,a,p,i,s,o    
+ ^,h,c             ^,h             [(^,h,c,h),(^,h,c,p)]              12     2 ^,h,c            
+ ^,h,c,h           ^,h,c           [(^,h,c,h,p)]                       7     3 ^,h,c,h          
+ ^,h,c,h,p         ^,h,c,h         [(^,h,c,h,p,$)]                     7     4 ^,h,c,h,p        
+ ^,h,c,p           ^,h,c           [(^,h,c,p,e)]                       5     3 ^,h,c,p          
+ ^,h,c,p,e         ^,h,c,p         [(^,h,c,p,e,$)]                     5     4 ^,h,c,p,e        
+ ^,h,e             ^,h             [(^,h,e,$)]                         2     2 ^,h,e            
+ ^,p               ^               [(^,p,c)]                           2     1 ^,p              
+ ^,p,c             ^,p             [(^,p,c,p)]                         2     2 ^,p,c            
+ ^,p,c,p           ^,p,c           [(^,p,c,p,s)]                       2     3 ^,p,c,p          
+ ^,p,c,p,s         ^,p,c,p         [(^,p,c,p,s,o)]                     2     4 ^,p,c,p,s        
+ ^,p,c,p,s,o       ^,p,c,p,s       [(^,p,c,p,s,o,e)]                   2     5 ^,p,c,p,s,o      
+ ^,p,c,p,s,o,e     ^,p,c,p,s,o     [(^,p,c,p,s,o,e,$)]                 2     6 ^,p,c,p,s,o,e</tt>
+   </pre>
+   <p style="line-height: 1em;">The output table is the same as the PathStart Example output.</p>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="copyright" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.rights.owner" content="(C) Copyright 2019, Teradata. All Rights Reserved." />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="UniqueID Syntax Element" />
+<meta name="abstract" content="Learn how UniqueID and Seed syntax elements guarantee repeatable results from ML Engine analytic function with same input tables and syntax element values." />
+<meta name="description" content="Learn how UniqueID and Seed syntax elements guarantee repeatable results from ML Engine analytic function with same input tables and syntax element values." />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="fdw1549987717481" />
+<meta name="DC.Language" content="en-us" />
+
+<link rel="stylesheet" type="text/css" href="css/normal_styles.css" />
+<title>UniqueID Syntax Element</title>
+</head>
+<body id="fdw1549987717481">
+
+	<h1 class="title topictitle1" id="ariaid-title1">UniqueID Syntax Element</h1>
+
+	<div class="body refbody">
+		<div class="section" id="fdw1549987717481__section_N10011_N1000E_N10001">
+			<p class="p">To address the issue of nondeterministic data transfer and its impact on the repeatability and performance of the its functions, <span class="keyword">ML Engine</span> provides the UniqueID syntax element, which is available for every function except nPath.</p>
+<p class="p">When used with a Seed syntax element, the UniqueID syntax element guarantees repeatable results.</p>
+<p class="p">When nonuniform distribution of rows across workers affects function performance, the UniqueID syntax element improves performance by guaranteeing uniform distribution. (See <a class="xref" href="hrf1550170185805.html" title="Learn how data skew slows down Machine Learning Engine analytic functions, how to tell if you have it, and what to do about it.">Determining if Data Skew Might Impact Performance</a>.)</p>
+
+		</div>
+<div class="section" id="fdw1549987717481__section_wc4_xsr_tgb"><h2 class="title sectiontitle">UniqueID Syntax Element Syntax</h2><pre class="pre codeblock"><code>[ UniqueID ('[<var class="keyword varname">input_table_alias</var>:]<var class="keyword varname">column</var>' [,...]) ]</code></pre><dl class="dl parml"><dt class="dt pt dlterm"><var class="keyword varname">input_table_alias</var></dt>
+<dd class="dd pd">[Required if function has multiple input tables, optional otherwise.] Alias of an input table for the function.</dd>
+<dt class="dt pt dlterm"><var class="keyword varname">column</var> [,...]</dt>
+<dd class="dd pd">One or more columns that form a unique row identifier in the input table whose alias is <var class="keyword varname">input_table_alias</var>. The data type of a <var class="keyword varname">column</var> can be any DISTRIBUTIONTYPE; that is, any of the following:<ul class="ul" id="fdw1549987717481__ul_n2h_1cm_r2b"><li class="li">SMALLINT</li>
+<li class="li">INTEGER</li>
+<li class="li">BIGINT</li>
+<li class="li">NUMERIC</li>
+<li class="li">VARCHAR</li>
+</ul>
+</dd>
+<dd class="dd pd ddexpand">If the table whose alias is <var class="keyword varname">input_table_alias</var> does not have a unique row identifier, you must create one. See <a class="xref" href="nlc1549996180499.html" title="">Ways to Create Unique Identifier Column</a>.</dd>
+</dl>
+</div>
+<div class="section" id="fdw1549987717481__section_f2n_fxr_tgb"><h2 class="title sectiontitle">Examples: Single Input Table</h2><p class="p">Omit optional <var class="keyword varname">input_table_alias</var>:</p>
+<pre class="pre codeblock"><code>SELECT * FROM Sampling (
+  ON students AS InputTable PARTITION BY ANY
+  USING
+  <span class="ph b">UniqueID ('id')</span>
+  SampleFraction('0.2')
+  Seed('2')
+) as dt;
+</code></pre><p class="p">Specify optional <var class="keyword varname">input_table_alias</var>:</p>
+<pre class="pre codeblock"><code>SELECT * FROM Canopy (
+  ON computers_train1 AS <span class="ph b">InputTable</span>
+  USING
+  <span class="ph b">UniqueID ('InputTable:id')</span>
+  LooseDistance ('1000')
+  TightDistance ('500')
+) AS dt;
+</code></pre></div>
+<div class="section" id="fdw1549987717481__section_N100B4_N10010_N10001"><h2 class="title sectiontitle">Examples: Multiple Input Tables</h2><p class="p">Columns from multiple input tables:</p>
+<pre class="pre codeblock"><code>SELECT * FROM Modularity (
+  ON friends AS <span class="ph b">vertices</span> PARTITION BY friends_name
+  ON followers_leaders AS <span class="ph b">edges</span> PARTITION BY follower
+  OUT TABLE CommunityEdgeTable (community_edges)
+  USING
+  <span class="ph b">UniqueID ('vertices:friends_name','edges:id_col')</span>
+  TargetKey ('leader')
+  CommunityAssociation ('group_id')
+  Accumulate ('friends_name','location')
+) as dt ORDER BY friends_name;
+</code></pre><p class="p">Column from only one of multiple input tables:</p>
+<pre class="pre codeblock"><code>SELECT * FROM GMM (
+  ON (SELECT 1) AS init_params PARTITION BY 1
+  ON gmm_iris_train AS <span class="ph b">InputTable</span>
+  OUT TABLE OutputTable (gmm_output_ex1)
+  USING
+  <span class="ph b">UniqueID ('InputTable:id')</span>
+  ClusterNum (3)
+  CovarianceType ('spherical')
+  MaxIterNum (10)
+  PackOutput (1)
+) AS dt;
+</code></pre></div>
+<div class="section" id="fdw1549987717481__section_epg_jxr_tgb"><h2 class="title sectiontitle">Example: Nested Functions</h2><p class="p"></p>
+<pre class="pre codeblock"><code>SELECT * FROM NaiveBayesReduce (
+  ON NaiveBayesMap (
+    ON nb_iris_input_train AS <span class="ph b">input1</span>
+    USING
+    <span class="ph b">UniqueID ('input1:id')</span>
+    ResponseColumn ('species')
+    NumericInputs ('[1:4]')
+  ) PARTITION BY class_nb
+) AS dt;
+</code></pre></div>
+<div class="section" id="fdw1549987717481__section_mz4_jxr_tgb"><h2 class="title sectiontitle">Example: Input Table without Unique Row Identifier</h2><p class="p">Input table iris_attribute_train does not have a unique row identifier. The following two statements create a new table, iris_attr_uniqueid, which is identical to iris_attribute_train but has an additional unique id column named global_id. </p>
+<pre class="pre codeblock"><code>CREATE MULTISET TABLE iris_attr_uniqueid (
+  <span class="ph b">global_id INTEGER GENERATED ALWAYS AS IDENTITY(START WITH 1 NO CYCLE)</span>,
+  pid INTEGER,
+  attribute VARCHAR(30),
+  attrvalue FLOAT
+);
+
+INSERT INTO iris_attr_uniqueid
+  SELECT null, pid, attribute, attrvalue FROM iris_attribute_train;
+</code></pre><p class="p">Use iris_attr_uniqueid in the function call:</p>
+<pre class="pre codeblock"><code>SELECT * FROM DecisionTree (
+  ON <span class="ph b">iris_attr_uniqueid</span> AS AttributeTable
+  ON iris_response_train AS ResponseTable
+  OUT TABLE OutputTable (iris_attribute_output)
+  OUT TABLE IntermediateSplitsTable (splits_small)
+  USING
+  <span class="ph b">UniqueID ('responsetable:pid','attributetable:global_id')
+</span>
+  NumSplits ('3')
+  SplitMeasure ('gini')
+  MaxDepth ('10')
+  IdColumns ('pid')
+  AttributeNameColumns ('attribute')
+  AttributeValueColumn ('attrvalue')
+  ResponseColumn ('response')
+  MinNodeSize ('10')
+  ApproxSplits ('false')
+) AS dt;
+</code></pre><p class="p">For more examples of creating unique row identifiers, see <a class="xref" href="nlc1549996180499.html" title="">Ways to Create Unique Identifier Column</a>.</p>
+</div>
+
+	</div>
+
+</body>
+</html>

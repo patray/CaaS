@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="cuu1507837727412"> </a>
+	  <h1>IPGeo</h1>
+
+	
+		<p style="line-height: 1em;">IPGeo lets you map IP addresses to location information (country, region,
+			city, latitude, longitude, ZIP code, and ISP).</p>
+
+		<p style="line-height: 1em;">You can use the locations of web site visitors to improve the
+			effectiveness of online applications. For example:</p>
+
+		<ul>
+			   <li>Targeted online advertising</li>
+
+			   <li>Content localization</li>
+
+			   <li>Geographic rights management</li>
+
+			   <li>Enhanced analytics</li>
+
+			   <li>Online security and fraud prevention</li>
+
+		</ul>
+
+		<p style="line-height: 1em;">For general information about IP databases, see:</p>
+
+		<p style="line-height: 1em;">http://dev.maxmind.com/geoip/geoip2/geolite2/</p>
+   <p>
+      <b>Note:</b>  IPGeo uses files that are preinstalled on ML Engine. For details, see Preinstalled Files That Functions Use.</p>
+	
+   <a name="fdo1507837763672"> </a>
+   <h2>IPGeo Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 2.4</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM IPGeo (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+  USING
+  IPAddressColumn ('<i>ip_address_column</i>')
+  [ Converter ('<i>file</i>', '<i>class</i>') ]
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="jlz1507837770702"> </a>
+	  <h2>IPGeo Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>IPAddressColumn</dt>
+      <dd>Specify the name of the input table column that contains the IP addresses.</dd>
+      <dt>Converter</dt>
+      <dd>[Optional] Specify the JAR filename and the name of the class that converts the IP address to location information.<p>
+            <b>Note:</b>  ML Engine does not support the creation of new Converter classes. However, it does support existing JAR files—for installation instructions, see <i>Teradata Vantage<sup>™</sup> User Guide</i>, B700-4002.</p>
+      </dd>
+      <dd>The JAR file must be installed on ML Engine and the class name must be the full name, including the package information. The file and class parameters are case-sensitive. The JAR file must contain all the classes that the user-defined converter needs.</dd>
+      <dd>Default: Converter class that ships with IPGeo function (geolite 1.2.8)</dd>
+      <dt>Accumulate</dt>
+      <dd>[Optional] Specify the names of input table columns to copy to the output table.</dd>
+   </div>
+
+
+	
+   <a name="bgt1507837775181"> </a>
+   <h2>IPGeo Input</h2>
+   <a name="section_ybn_tdr_fdb"> </a>
+   <h3>Input Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>ip_address_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">IP address.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column to copy to output table. Typically, one such column is user identifier.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="ykh1507837780669"> </a>
+   <h2>IPGeo Output</h2>
+   <a name="section_k55_vg5_pdb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">country_code</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Country code.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">country_name</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Country name.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">state</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">State or region name.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">city</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">City name.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">postal_code</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Postal code.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">latitude</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NUMERIC(6.4)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Latitude.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">longitude</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NUMERIC(7,4)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Longitude.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">isp</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ISP name.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">organization</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Name of organization that owns IP address.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">organization_type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Organization type.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">area_code</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Area code.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">metro_code</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Metro code.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">dma_code</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DMA code.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>accumulate_column</i>.] Column copied from input table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="xxp1507837785588"> </a>
+   <h2>IPGeo Examples</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The examples have the same input and output, but different SQL calls.</p>
+
+   <a name="yni1507837803257"> </a>
+   <h3>IPGeo Example: IP Database Stored as ML Engine File</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example requires that the files MaxMindLite.jar, GeoLiteCity.dat, and GeoLiteCityv6.dat are installed on ML Engine.</p>
+
+   <a name="section_kfy_zpr_t2b"> </a>
+   <h4>Input</h4>
+   <a name="table_d5k_2qr_t2b"> </a>
+   <table class="introtable">
+      <a name="table_d5k_2qr_t2b"> </a>
+      <h4 style="text-align: center;">ipgeo_1</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">ip</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">159.41.1.23</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">153.65.16.10</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">75.36.209.106</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">202.106.0.20</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">69.236.77.51</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">168.187.7.114</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_kmz_sxj_1cb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM IPGeo (
+  ON ipgeo_1
+  USING
+  IpAddressColumn ('ip')
+  Converter ('MaxMindLite.jar',
+            'com.asterdata.sqlmr.analytics.location.ipgeo.MaxMindLite')
+  Accumulate ('id', 'ip')
+) AS dt ;</tt>
+   </pre>
+   <a name="section_f5y_qqr_t2b"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ id ip            country_code country_name  state      city          postal_code latitude longitude isp  organization organization_type area_code metro_code dma_code 
+ -- ------------- ------------ ------------- ---------- ------------- ----------- -------- --------- ---- ------------ ----------------- --------- ---------- -------- 
+  4 202.106.0.20  CN           China         Beijing    Beijing       NULL         39.9289  116.3883 NULL NULL         NULL                      0          0        0
+  6 168.187.7.114 KW           Kuwait        Al Kuwayt  Kuwait        NULL         29.3697   47.9783 NULL NULL         NULL                      0          0        0
+  5 69.236.77.51  US           United States California San Francisco NULL         37.7749 -122.4194 NULL NULL         NULL                    415        807      807
+  3 75.36.209.106 US           United States California San Francisco NULL         37.7749 -122.4194 NULL NULL         NULL                    415        807      807
+  1  159.41.1.23  US           United States Michigan   Saint Joseph  49085        42.0569  -86.4563 NULL NULL         NULL                    269        588      588
+  2 153.65.16.10  US           United States Ohio       Miamisburg    45342        39.6182  -84.2488 NULL NULL         NULL                    937        542      542</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="tpi1507837810931"> </a>
+   <h3>IPGeo Example: Default Maxmind Geolite Database</h3>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example uses the default Converter class that ships with the IPGeo function (geolite 1.2.8), and requires that the files GeoLiteCity.dat and GeoLiteCityv6.dat are installed on ML Engine.</p>
+
+   <a name="section_x5r_3qr_t2b"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>Input table: ipgeo_1, as in IPGeo Example: IP Database Stored as ML Engine File</li>
+   </ul>
+
+   <a name="section_hk1_wxj_1cb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM IPGeo(
+  ON ipgeo_1
+  USING
+  IpAddressColumn('ip')
+  Accumulate('id', 'ip')
+) AS dt ;</tt>
+   </pre>
+   <a name="section_f5y_qqr_t2b"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The output is the same as in IPGeo Example: IP Database Stored as ML Engine File.</p>
+   <pre>
+      <tt>
+ id ip            country_code country_name  state      city          postal_code latitude longitude isp  organization organization_type area_code metro_code dma_code 
+ -- ------------- ------------ ------------- ---------- ------------- ----------- -------- --------- ---- ------------ ----------------- --------- ---------- -------- 
+  4 202.106.0.20  CN           China         Beijing    Beijing       NULL         39.9289  116.3883 NULL NULL         NULL                      0          0        0
+  6 168.187.7.114 KW           Kuwait        Al Kuwayt  Kuwait        NULL         29.3697   47.9783 NULL NULL         NULL                      0          0        0
+  5 69.236.77.51  US           United States California San Francisco NULL         37.7749 -122.4194 NULL NULL         NULL                    415        807      807
+  3 75.36.209.106 US           United States California San Francisco NULL         37.7749 -122.4194 NULL NULL         NULL                    415        807      807
+  1  159.41.1.23  US           United States Michigan   Saint Joseph  49085        42.0569  -86.4563 NULL NULL         NULL                    269        588      588
+  2 153.65.16.10  US           United States Ohio       Miamisburg    45342        39.6182  -84.2488 NULL NULL         NULL                    937        542      542</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

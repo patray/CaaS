@@ -1,0 +1,913 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="udx1507212896537"> </a>
+	  <h1>LDA</h1>
+
+	
+		<p style="line-height: 1em;">The LDA function uses training data and parameters to build a topic model, using an unsupervised method to estimate the correlation between the topics and words according to the topic number and other parameters. Optionally, the function creates the topic distributions for each training document.</p>
+
+		<p style="line-height: 1em;">The function uses an iterative algorithm; therefore, applying it to large
+			data sets with a large number of topics can be time-consuming.</p>
+
+		<p style="line-height: 1em;">The function assumes that the model table can be fitted into the memory of
+			the vworkers.</p>
+
+	
+   <a name="dil1507212961708"> </a>
+   <h2>LDA Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.8</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM LDA (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  OUT TABLE ModelTable (<i>model_table</i>)
+  [ OUT TABLE OutputTable (<i>output_table</i>) ]
+  USING
+  TopicNum ('<i>topic_number</i>')
+  [ Alpha (<i>alpha</i>) ]
+  [ Eta (<i>eta</i>) ]
+  DocIDColumn ('<i>doc_id_column</i>')
+  WordColumn ('<i>word_column</i>')
+  [ CountColumn ('<i>count_column</i>') ]
+  [ MaxIterNum (<i>max_iterate</i>) ]
+  [ ConvergenceDelta (<i>convergence_delta</i>) ]
+  [ Seed (<i>seed</i>) ]
+  [ OutputTopicNum ({ 'all' | <i>num_topics</i> }) ]
+  [ OutputTopicWordNum ({ 'none' | 'all' | '<i>num_topic_words</i>' }) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="cgh1507213004499"> </a>
+	  <h2>LDA Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>ModelTable</dt>
+      <dd>Specify the name for the model table that the function creates in the database. This table must not already exist.</dd>
+      <dt>OutputTable</dt>
+      <dd>[Optional] Specify the name of the output table that contains the topic distribution of each document in the InputTable, which the function creates in the database. This table must not already exist. If you omit this syntax element, the function does not create this table.</dd>
+      <dt>TopicNum</dt>
+      <dd>Specify the number of topics for all the documents in the InputTable, an INTEGER value in the range [2, 1000].</dd>
+      <dt>Alpha</dt>
+      <dd>[Optional] Specify a hyperparameter of the model, the prior smooth parameter for the topic distribution over documents. As <i>alpha</i> decreases, fewer topics are associated with each document.</dd>
+      <dd>Default: 0.1</dd>
+      <dt>Eta</dt>
+      <dd>[Optional] Specify a hyperparameter of the model, the prior smooth parameter for the word distribution over topics. As <i>eta</i> decreases, fewer words are associated with each topic.</dd>
+      <dd>Default: 0.1</dd>
+      <dt>DocIDColumn</dt>
+      <dd>Specify the name of the input column that contains the document identifiers.</dd>
+      <dt>WordColumn</dt>
+      <dd>Specify the name of the InputTable column that contains the words (one word in each row).</dd>
+      <dt>CountColumn</dt>
+      <dd>[Optional] Specify the InputTable of the input column that contains the count of the corresponding word in the row, a positive value.</dd>
+      <dd>Default behavior: The count of each word is 1.</dd>
+      <dt>MaxIterNum</dt>
+      <dd>[Optional] Specify the maximum number of iterations to perform if the model does not converge, a positive INTEGER value.</dd>
+      <dd>Default: 50</dd>
+      <dt>ConvergenceDelta</dt>
+      <dd>[Optional] Specify the convergence delta of log perplexity, a NUMERIC value in the range [0.0, 1.0].</dd>
+      <dd>Default: 1e<sup>-4</sup>
+      </dd>
+      <dt>Seed</dt>
+      <dd>[Optional] Specify the random seed the algorithm uses for repeatable results (for more information, see Nondeterministic Results and UniqueID Syntax Element). The <i>seed</i> must be a LONG value.</dd>
+      <dt>OutputTopicNum</dt>
+      <dd>[Optional] Ignored unless OutputTable is specified. Specify the number of top-weighted topics to include, with their weights, in the output table for each training document:<a name="table_jwz_tyy_fdb"> </a>
+         <table class="introtable">
+            <a name="table_jwz_tyy_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'all'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">All topics and their weights.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <i>num_topics</i>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Positive integer.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>OutputTopicWordNum</dt>
+      <dd>[Optional] Ignored unless OutputTable is specified. Specify the number of top topic words to include, with their topic identifiers, in the output table for each training document:<a name="table_g3x_czy_fdb"> </a>
+         <table class="introtable">
+            <a name="table_g3x_czy_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Option</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'none'</tt> (Default)</div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">No topic words or identifiers.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'all'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">All topic words and their identifiers.</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <i>num_topic_words</i>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Positive integer.</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+   </div>
+   <p>
+      <b>Note:</b>  Seed settings and cluster configurations affect function results.</p>
+
+	
+   <a name="hfp1507213048846"> </a>
+   <h2>LDA Input</h2>
+   <a name="section_myt_vjx_xcb"> </a>
+   <h3>InputTable Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>doc_id_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, SMALLINT, BIGINT, NUMERIC, VARCHAR, VARBYTE(<i>n</i>), or BLOB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Document identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>word_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, SMALLINT, BIGINT, or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Word.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>count_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, SMALLINT, BIGINT, NUMERIC, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears only with CountColumn syntax element.] Number of times word appears in document.</div>
+         </td>
+      </tr>
+   </table>
+
+   <p>
+      <b>Note:</b>  You can use TextParser Output as input to the LDA function. Teradata recommends filtering out words with low and high frequency, which impact topics that consist of common words that are not meaningful in the topic model.</p>
+   <a name="oys1507213091332"> </a>
+   <h2>LDA Output</h2>
+   <a name="section_xr4_hkx_xcb"> </a>
+   <h3>Output Message Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">message</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;"> VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Reports iteration steps and perplexity of model.<p style="line-height: 1em; margin: 0px;">
+                  <br/>Perplexity formula:</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <i>perplexity</i> = 2<sup>
+                     <i>H</i> (<i>p</i>)</sup> = 2<sup>-Σ<sub>
+                        <i>x</i>
+                     </sub> 
+                     <i>p</i> (<i>x</i>) log<sub>2</sub> 
+                     <i>p</i> (<i>x</i>)</sup>
+               </p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>where <i>H</i> (<i>p</i>) is the entropy of the distribution.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>Although perplexity varies with training documents, you can use perplexity to find the best model for a specified set of training documents: Create models for several subsets of the training documents and then choose the model with the lowest perplexity.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_xfw_1kx_xcb"> </a>
+   <h3>ModelTable Schema</h3>
+   <a name="table_N10058_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10058_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">topicid</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Internally created topic identifier.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">value_col</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BLOB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Model in binary format, which is not readable. To see binary contents, use LDATopicSummary function.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_s4s_bkx_xcb"> </a>
+   <h3>OutputTable Schema</h3>
+   <p style="line-height: 1em;">This table appears only with the OutputTable syntax element.</p>
+   <a name="table_N1009B_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1009B_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">docid</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as <i>doc_id_column</i> in input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Document identifier from input table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">topicid</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Topic identifier from ModelTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">topicweight</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears number of times specified by OutputTopicNum syntax element.] Topic weight.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">topicwords</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears number of times specified by OutputTopicWordNum syntax element.] Topic words in document, separated by commas.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="gll1510345837270"> </a>
+   <h2>LDA Example</h2>
+   <a name="section_oyb_xvg_n2b"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">The input (training) table is log of vehicle complaints. The category column indicates whether the car has been in a crash.</p>
+   <a name="table_ebl_cwg_n2b"> </a>
+   <table class="introtable">
+      <a name="table_ebl_cwg_n2b"> </a>
+      <h4 style="text-align: center;">InputTable: complaints</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">doc_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">text_data</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">category</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">consumer was driving approximately 45 mph hit a deer with the front bumper and then ran into an embankment head-on passenger's side air bag did deploy hit windshield and deployed outward. driver's side airbag cover opened but did not inflate it was still folded causing injuries.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">crash</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">when vehicle was involved in a crash totalling vehicle driver's side/ passenger's side air bags did not deploy. vehicle was making a left turn and was hit by a ford f350 traveling about 35 mph on the front passenger's side. driver hit his head-on the steering wheel. hurt his knee and received neck and back injuries.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">crash</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">consumer has experienced following problems; 1.) both lower ball joints wear out excessively; 2.) head gasket leaks; and 3.) cruise control would shut itself off while driving without foot pressing on brake pedal.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no_crash</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">The stop words table, stopwords.text, contains:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+a
+an
+in
+is
+to
+into
+was
+the
+and
+this
+with
+they
+but
+will</tt>
+   </pre>
+   <p style="line-height: 1em;">To create a tokenized, filtered input file for the LDA function, apply the function TextParser to the training table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE complaints_traintoken AS (
+  SELECT * FROM TextParser (
+    ON complaints
+    USING
+    TextColumn ('text_data')
+    ConvertToLowerCase ('true')
+    StemTokens ('false')
+    ListPositions ('true')
+    StopWords ('stopwords.txt')
+    RemoveStopWords ('true')
+    Accumulate ('doc_id', 'category')
+  ) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM complaints_traintoken ORDER BY doc_id;</tt>
+   </pre>
+   <a name="table_qsh_nwg_n2b"> </a>
+   <table class="introtable">
+      <a name="table_qsh_nwg_n2b"> </a>
+      <h4 style="text-align: center;">complaints_traintoken</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">doc_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">category</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">token</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">frequency</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">position</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">crash</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">consumer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">crash</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">driving</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">crash</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">approximately</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">crash</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">45</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">crash</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">mph</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">crash</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">hit</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6,26</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">crash</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">deer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">crash</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">front</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">crash</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">bumper</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">crash</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">then</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">crash</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ran</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">crash</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">embankment</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">18</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">crash</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">head-on</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">19</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">crash</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">passenger's</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">20</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">crash</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">side</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">21,32</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ovn_xvg_n2b"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM LDA (
+  ON complaints_traintoken AS InputTable
+  OUT TABLE ModelTable (ldamodel)
+  OUT TABLE OutputTable (ldaout1)
+  USING
+  TopicNum (5)
+  DocIDColumn ('doc_id')
+  WordColumn ('token')
+  CountColumn ('frequency')
+  MaxIterNum (30)
+  ConvergenceDelta (1e-3)
+  Seed (2)
+) AS dt;</tt>
+   </pre>
+   <a name="section_ygx_xvg_n2b"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ message                                                                                
+ -------------------------------------------------------------------------------------- 
+ Outputtable  is created successfully.                                                 
+ Training converged after 7 iterate steps with delta 2.1420824926263047E-4             
+ There are 20 documents with 520 words in the training set, the perplexity is 92.016370</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ldaout1 ORDER BY docid, topicid;</tt>
+   </pre>
+   <pre>
+      <tt>
+ docid topicid topicweight           
+ ----- ------- --------------------- 
+     1       0  0.004426429226493859
+     1       1  0.003656317158244291
+     1       2   0.00313758179610592
+     1       3    0.9850922760656984
+     1       4  0.003687395753457743
+     2       0  0.003333337974833768
+     2       1 0.0026715880002218914
+     2       2  0.003225645026950738
+     2       3    0.9867880696484165
+     2       4  0.003981359349576945
+     3       0  0.006268581445977316
+     3       1    0.9815551630033772
+     3       2  0.004417571386232821
+     3       3  0.003794628444713808
+     3       4  0.003964055719699033
+     4       0  0.010128051883887499
+     4       1 0.0046614669429246676
+     4       2    0.9758978544852696
+     4       3  0.004290931289345636
+     4       4  0.005021695398572808
+     5       0 0.0034977306955634277
+     5       1  0.002731383851625112
+     5       2    0.9884815205074873
+     5       3 0.0026545373864259193
+     5       4  0.002634827558898238
+     6       0  0.004910519510246177
+     6       1    0.9818335529855468
+     6       2 0.0047878536635098294
+     6       3 0.0040427451392959415
+     6       4   0.00442532870140121
+     7       0    0.9820521861311798
+     7       1  0.004062894585215896
+     7       2  0.005145745286342357
+     7       3  0.004845509758029061
+     7       4 0.0038936642392328386
+     8       0    0.9531957714532828
+     8       1   0.01266691837738069
+     8       2   0.01103344176680826
+     8       3  0.012735425645888912
+     8       4  0.010368442756639208
+     9       0  0.007084998039507431
+     9       1    0.9674762748316937
+     9       2  0.009365407141105342
+     9       3  0.009745662251613264
+     9       4  0.006327657736080222
+    10       0  0.007116616036670699
+    10       1  0.004744801805922887
+    10       2    0.9776204960574149
+    10       3  0.005743722972250647
+    10       4  0.004774363127740984
+    11       0  0.004760046611134511
+    11       1  0.004469826914975781
+    11       2 0.0045464562180395195
+    11       3  0.004484861188135865
+    11       4    0.9817388090677145
+    12       0  0.007265823196617461
+    12       1  0.007964358825664323
+    12       2  0.008114234945516906
+    12       3  0.015620513156623533
+    12       4    0.9610350698755779
+    13       0   0.00426428406119381
+    13       1  0.003902223649627741
+    13       2  0.004234437785553248
+    13       3  0.004507123835691691
+    13       4    0.9830919306679337
+    14       0    0.9650541555578738
+    14       1    0.0074391614441562
+    14       2  0.011274607436926492
+    14       3  0.006893717562493168
+    14       4  0.009338357998550267
+    15       0  0.003897590296516705
+    15       1    0.9832303090018338
+    15       2  0.004202391731834754
+    15       3  0.004037833753883089
+    15       4  0.004631875215931837
+    16       0  0.005524228354277319
+    16       1  0.011413630319077005
+    16       2    0.9701109801988259
+    16       3  0.006336964722200615
+    16       4  0.006614196405619184
+    17       0 0.0030109395355278363
+    17       1  0.003122351795972726
+    17       2 0.0031409531638286127
+    17       3    0.9876271092587618
+    17       4 0.0030986462459095198
+    18       0   0.03489774179008564
+    18       1  0.031696122828725706
+    18       2    0.8692684529329384
+    18       3   0.03166369087468641
+    18       4   0.03247399157356371
+    19       0   0.02324181954633177
+    19       1  0.013579883713331695
+    19       2   0.02394012985969003
+    19       3   0.01381761167230265
+    19       4    0.9254205552083438
+    20       0  0.007582282026547196
+    20       1    0.2972918395246684
+    20       2  0.009009173996895745
+    20       3  0.008822007937856105
+    20       4    0.6772946965140326</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

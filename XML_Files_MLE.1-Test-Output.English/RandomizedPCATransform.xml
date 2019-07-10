@@ -1,0 +1,617 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="dhe1515618570904"> </a>
+	  <h1>RandomizedPCATransform</h1>
+
+	
+		<p style="line-height: 1em;">The RandomizedPCATransform function takes data in sparse format and projects it onto a specified subset of the principal components identified by RandomizedPCA.</p>
+
+	
+   <a name="cve1515618572555"> </a>
+	  <h2>RandomizedPCATransform Syntax</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Version 1.0</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM RandomizedPCATransform (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS PCATable
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS MeanTable
+  OUT TABLE OutputTable (<i>output_table</i>)
+  USING
+  RowIdColumn ('<i>row_id_column</i>')
+  ColumnIdColumn ('<i>column_id_column</i>')
+  ValueColumn ('<i>value_column</i>')
+  Components ('<i>num_components</i>')  
+  <tt style="font-family: monospace;">[ Accumulate ({ '<i>accumulate_column</i>' | <i>accumulate_column_range</i> }[,...]) ]</tt>
+  [ PartitionKey ('<i>partition_name</i>') ]
+  [ NullHandling ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+ ) AS <i>alias</i>;
+</tt>
+   </pre>
+
+	
+   <a name="rly1515618571447"> </a>
+	  <h2>RandomizedPCATransform Arguments</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputTable</dt>
+      <dd>Specify the name of the table to contain the transformed data.</dd>
+      <dt>RowIDColumn</dt>
+      <dd>Specify the name of the input table column containing the observation identifiers (which corresponds to the row index for data in dense format).</dd>
+      <dt>ColumnIDColumn</dt>
+      <dd>Specify the name of the input table column containing the attributes of the observations (which corresponds to the column index for data in dense format).</dd>
+      <dt>ValueColumn</dt>
+      <dd>Specify the name of the input table column containing the attribute values.</dd>
+      <dt>Components</dt>
+      <dd>Specify the number of principal components to return. The <i>num_components</i> must be in the range [1, 1600].</dd>
+      <dt>Accumulate</dt>
+      <dd>Specify the names of the input table columns to copy to the output table.</dd>
+      <dt>PartitionKey</dt>
+      <dd>Specify the name of a column to add to an internal table to partition the data. Use this argument if the function reports an error saying that columns must be uniquely named.</dd>
+      <dd>Default: rowid_partitionkey</dd>
+      <dt>NullHandling</dt>
+      <dd>Specify whether to remove NULL values in the input matrix.</dd>
+      <dd>Default: 'false'</dd>
+   </div>
+
+
+	
+   <a name="llf1515618572016"> </a>
+	  <h2>RandomizedPCATransform Input</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <a name="table_tyr_24w_xcb"> </a>
+   <table class="introtable">
+      <a name="table_tyr_24w_xcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Has same schema as RandomizedPCA Input InputTable.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">PCATable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">RandomizedPCA Output output table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">MeanTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">RandomizedPCA Output MeanTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+	
+   <a name="knd1515618570270"> </a>
+	  <h2>RandomizedPCATransform Output</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <h3>Output Message Schema</h3>
+   <a name="table_q1z_smf_5cb"> </a>
+   <table class="introtable">
+      <a name="table_q1z_smf_5cb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">message</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Reports whether function succeeded.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ugg_lqw_xcb"> </a>
+   <h3>OutputTable Schema</h3>
+   <a name="table_nd1_gcf_5cb"> </a>
+   <table class="introtable">
+      <a name="table_nd1_gcf_5cb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">dimension_<i>i</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>i</i>th score of data point projected to <i>i</i>th principal component.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>accumulate_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Column copied from input table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+   <a name="uth1515618568058"> </a>
+	  <h2>RandomizedPCATransform Example</h2>
+
+	
+		<a name="section_N10014_N10011_N10001"> </a>
+			<p style="line-height: 1em;">This example transforms the input data for the RandomizedPCA Example.</p>
+
+		
+   <a name="section_cpb_jjf_5cb"> </a>
+   <h3>Input</h3>
+   <p style="line-height: 1em;">The input table is table rpca_input (from RandomizedPCA Example), and the PCA and mean values tables are the output tables tables rpca_out and meanvaluestable from RandomizedPCA Example.</p>
+
+   <a name="section_grk_jjf_5cb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM RandomizedPCATransform ( 
+  ON rpca_input AS InputTable
+  ON rpca_out AS PCATable
+  ON meanvaluestable AS MeanTable
+  OUT TABLE OutputTable (transformed_rpca_input)
+  USING
+  Accumulate ('pid')
+  RowIdColumn ('pid')
+  ColumnIdColumn ('attribute')
+  ValueColumn ('value')
+  Components ('3')
+) AS dt;
+</tt>
+   </pre>
+   <a name="section_bbw_jjf_5cb"> </a>
+   <h3>Output</h3>
+   <a name="table_gb5_1nf_5cb"> </a>
+   <table class="introtable">
+      <a name="table_gb5_1nf_5cb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">message</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <pre>
+                  <tt>
+RandomizedPCATransform completed successfully. The output table is saved.</tt>
+               </pre>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM transformed_rpca_input ORDER BY pid;</tt>
+   </pre>
+   <a name="table_ud2_jnf_5cb"> </a>
+   <table class="introtable">
+      <a name="table_ud2_jnf_5cb"> </a>
+      <h4 style="text-align: center;">transformed_rpca_input</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">pid</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">principal_components_1</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">principal_components_2</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">principal_components_3</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.169150205254975</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.801232501587535</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.348620180557272</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.431123244867033</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.39210772012412</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.03562367568115</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.44967283232888</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.582848740832215</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.77542386693049</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.528265617119381</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.73887095362468</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.28896354227985</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.68282914249316</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.40736313234694</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-3.21410449337832</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.16301285930899</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.726888261104962</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.650660148938211</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.651744821751005</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.83692338813066</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.877288788181039</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.25789780771726</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.75994016635536</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.837901058785677</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.03506923226805</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-2.65838692250499</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.06444060537588</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-2.95310823332606</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.58272665707466</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.68482206571219</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;"> -0.571387722508264</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.872945595460979</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.461088187184496</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.24104025271145</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.317402685895275</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.09766316065168</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.61085715215934</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.53563819944391</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.8745064460101</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.22432967738165</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-3.34214769316473</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.725737682769555</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.124069424041563</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.60595543721972</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0148609710928608</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.942414348248406</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.76995940522478</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.90134344438772</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.52159396434022</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.54050492802602</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.347771566160046</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">17</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.29600447208405</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.823605702026513</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.329462747187166</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">18</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.69047302206616</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.6368572761529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.205808400545086</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">19</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.09549511222274</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.732269337853558</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.344051517238833</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">20</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.68698252236977</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.30756596467911</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.141832251127347</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">21</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.33578286793461</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.125428040828795</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.0668069533457708</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">22</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.811397468927038</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.19451638936108</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.869632995133319</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">23</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.528357822406666</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.570103577061339</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.600633615551118</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">24</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-0.432053298431574</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-1.369622140259</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0.24267877634124</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+	
+</t:intro>

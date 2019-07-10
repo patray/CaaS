@@ -1,0 +1,1455 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="mld1506629675211"> </a>
+	  <h1>DWT2D</h1>
+
+	  <p style="line-height: 1em;">The DWT2D function implements the Mallat algorithm (an iterate algorithm in the Discrete Wavelet Transform field) on 2-dimensional matrixes and applies wavelet transform on multiple sequences simultaneously.</p>
+   <p style="line-height: 1em;">The input is a set of sequences. Typically, each sequence is a matrix that contains a position in 2-dimensional space (y and x indexes or coordinates) and its corresponding values. You specify the wavelet name or wavelet filter table, transform level, and (optionally) extension mode. The function returns the transformed sequences in Hilbert space with the corresponding component identifiers and indices. (The transformation is also called the decomposition.)</p>
+   <a name="fig_tl4_bz1_mw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <p>
+      <b>Note:</b>  The wavelet filter table does not appear in the preceding diagram because it is seldom used.</p>
+   <p style="line-height: 1em;">This is a typical DWT2D use case:</p>
+   <ol>
+      <li>Apply DWT2D to the original data to create the approximate coefficients of the matrixes and the corresponding metadata.</li>
+      <li>If desired, filter the coefficients by methods appropriate for the objects (for example, minimum threshold or top <i>n</i> coefficients).</li>
+      <li>From the approximate or filtered coefficients, reconstruct the matrixes and compare them with their original counterparts.</li>
+   </ol>
+
+   <a name="dcn1506630779396"> </a>
+   <h2>DWT2D Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.6</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM DWT2D (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  [ ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS WaveletFilterTable ]
+  OUT TABLE OutputTable (<i>output_table</i>)
+  OUT TABLE MetaInformationTable (<i>meta_info_table</i>)
+  USING
+  TargetColumns ('<i>target_column</i>' [,...])
+  [ PartitionColumns ('<i>partition_column</i>' [,...]) ]
+  IndexColumns ('<i>indexy_column</i>', '<i>indexx_column</i>')
+  [ Range ('(<i>starty</i>, <i>startx</i>), (<i>endy</i>, <i>endx</i>)') ]
+  [ Wavelet ('<i>wavelet</i>') ]
+  WaveletTransformLevel (<i>level</i>)
+  [ ExtensionMode ('<i>extension_mode</i>') ]
+  [ CompactOutput ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="jvt1506630894806"> </a>
+	  <h2>DWT2D Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputTable</dt>
+      <dd>Specify the name for the table that the function creates to store the coefficients output by the wavelet transform. This table must not exist.</dd>
+      <dt>MetaInformationTable</dt>
+      <dd>Specify the name for the table that the function creates to store the meta information for the wavelet transform. This table must not exist.</dd>
+      <dt>TargetColumns</dt>
+      <dd>Specify the names of the InputTable columns that contain the data to transform. These columns must contain numeric values between -1e<sup>308</sup> and 1e<sup>308</sup>. The function treats NULL as 0.</dd>
+      <dt>PartitionColumns</dt>
+      <dd>[Optional] Specify the names of the InputTable partition columns, which identify the sequences. Rows with the same partition column values belong to the same sequence. If you specify multiple partition columns, the function treats the first one as the distribute key of the OutputTable and MetaInformationTable.<p>
+            <b>Note:</b>  The DWT2D output tables are the IDWT2D input tables. If you specify this syntax element for DWT2D, you must also specify it for IDWT2D; otherwise, the results might not make sense.</p>
+      </dd>
+      <dd>Default behavior: All rows belong to one sequence, and the function creates a distribute key column named dwt_id_<i>random_name</i> in both the OutputTable and MetaInformationTable. In both tables, every cell of dwt_id_<i>random_name</i> has the value 1.</dd>
+      <dt>IndexColumns</dt>
+      <dd>Specify the columns that contain the indexes of the input sequences. For a matrix, <i>indexy_column</i> contains the y coordinates and <i>indexx_column</i> contains the x coordinates.</dd>
+      <dt>Range</dt>
+      <dd>[Optional] Specify the start and end indexes of the input data, all of which must be integers. The range can specify a maximum of 1,000,000 cells. The function treats any NULL value as 0.<a name="table_cb5_4zf_bcb"> </a>
+         <table class="introtable">
+            <a name="table_cb5_4zf_bcb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">Index</div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Default</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <i>starty</i>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">minimum y index</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <i>startx</i>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">minimum x index</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <i>endy</i>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">maximum y index</div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <i>endx</i>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">maximum x index</div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dt>Wavelet</dt>
+      <dd>[Required if you omit WaveletFilterTable] Specify a wavelet filter name from the table Supported Wavelet Filter Names in DWT Syntax Elements.</dd>
+      <dt>WaveletTransformLevel</dt>
+      <dd>Specify the wavelet transform level. The value level must be an integer in the range [1, 1000].</dd>
+      <dt>ExtensionMode</dt>
+      <dd>[Optional] Specify the method for handling border distortion, an <i>extension_mode</i> from the table Supported Extension Modes in DWT syntax elements.</dd>
+      <dd>Default: 'sym'</dd>
+      <dt>CompactOutput</dt>
+      <dd>[Optional] Specify whether to ignore rows in which all coefficient values have an absolute value less than 1e<sup>-12</sup>).</dd>
+      <dd>Default: 'true'. For a sparse input matrix, ignoring such rows reduces the output table size.</dd>
+   </div>
+
+
+	
+   <a name="zpr1506630959919"> </a>
+   <h2>DWT2D Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The DWT2D input is the same as the DWT Input.</p>
+
+   <a name="qok1506631067581"> </a>
+   <h2>DWT2D Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Message Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">messages</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Reports whether function succeeded.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_zgd_vgt_wcb"> </a>
+   <h3>OutputTable Schema</h3>
+   <p style="line-height: 1em;">The table has decomposed sequences.</p>
+   <a name="table_N10049_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10049_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>partition_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>partition_column</i>.] Identifier of sequence to which data belongs. Rows with same partition column values belong to same sequence.<p style="line-height: 1em; margin: 0px;">
+                  <br/>If InputTable has multiple partition columns, first one is distribution key in both InputTable and OutputTable.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>If InputTable has only one partition column, OutputTable has as its distribution key a function-created column named dwt_id_<i>random_name</i>. Every cell of dwt_id_<i>random_name</i> has the value 1.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">waveletid</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Index of each wavelet coefficient (starting from 1 for each sequence).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">waveletcomponent</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Component to which coefficient belongs. Possible values are <i>A</i>
+               <sub>n</sub>
+               <i>, H</i>
+               <sub>n</sub>
+               <i>, V</i>
+               <sub>n</sub>
+               <i>, D</i>
+               <sub>n</sub>
+               <i>, H</i>
+               <sub>n-1</sub>
+               <i>, ..., H</i>
+               <sub>1</sub>
+               <i>, V</i>
+               <sub>1</sub>
+               <i>, D</i>
+               <sub>1</sub>
+               <i>,</i> where <i>n</i> is wavelet transform level.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>target_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each <i>target_column</i>.] Coefficient of input column after wavelet transform.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_cdb_xgt_wcb"> </a>
+   <h3>MetaInformationTable Schema</h3>
+   <a name="table_N10106_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10106_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>partition_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>partition_column</i>.] Identifier of sequence to which data belongs. Rows with same partition column values belong to same sequence.<p style="line-height: 1em; margin: 0px;">
+                  <br/>If InputTable has multiple partition columns, first one is distribution key in both input and output tables.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>If InputTable has only one partition column, output table has as its distribution key a function-created column named dwt_id_<i>random_name</i>. Every cell of dwt_id_<i>random_name</i> has the value 1.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">meta</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Name from meta column of following table.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">content</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Content from content column of following table.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_fcb_ygt_wcb"> </a>
+   <h3>Meta Information for Each Sequence</h3>
+   <a name="table_N10179_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10179_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">meta</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">content</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">blocklength</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Pairs that represent length of each block of coefficients. <p style="line-height: 1em; margin: 0px;">
+                  <br/>Format: (<i>row_number</i>, <i>column_number</i>)</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>Example: (5, 5), (5, 5), (5, 6)</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Pair that represents length of original sequence in each dimension.<p style="line-height: 1em; margin: 0px;">
+                  <br/>Format: (<i>row_number</i>, <i>column_number</i>)</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>Example: (5, 8)</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">range</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Minimum and maximum indexes of original sequence.<p style="line-height: 1em; margin: 0px;">
+                  <br/>Format: (<i>min_y_index</i>, <i>min_x_index</i>), (<i>max_y_index</i>, <i>max_x_index</i>)</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>Example: (1, 1), (5, 8)</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">lowpassfilter</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Low-pass filter coefficients used in wavelet decomposition.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">highpassfilter</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">High-pass filter coefficients used in wavelet decomposition.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ilowpassfilter</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Low-pass filter coefficients used in wavelet reconstruction.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ihighpassfilter</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">High-pass filter coefficients used in wavelet reconstruction.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">level</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Level of wavelet transform.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">extensionmode</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Extension mode used in wavelet transform.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="vme1506631169343"> </a>
+   <h2>DWT2D Example</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example uses climate data in cities in California (CA), Texas (TX), and Washington (WA). The cities are represented by two-dimensional coordinates (latitude and longitude). The data are temperature (in degrees Fahrenheit), pressure (in Mbars), and dew point (in degrees Fahrenheit). The function outputs a coefficient model table and a meta table, which are used as input to the function IDWT2D.</p>
+
+   <a name="section_ibb_bsy_m2b"> </a>
+   <h3>Input</h3>
+   <a name="table_k2d_gsy_m2b"> </a>
+   <table class="introtable">
+      <a name="table_k2d_gsy_m2b"> </a>
+      <h4 style="text-align: center;">InputTable: twod_climate_data</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">state</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">city</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">longitude</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">latitude</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">temp_f</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">pressure_mbar</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">dewpoint_f</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ALPINE</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-117</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">34.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">28.9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ALTURAS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-121</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">41</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">36.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1022</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">29.1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ANAHEIM</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-118</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">28.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">AUBURN</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-122</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">38</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">34.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">28.8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BAKER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-117</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">35</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">39.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1022</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">29.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BARSTOW</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-118</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">34</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">27.6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BRIDGEPORT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-120</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">38</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">28.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BURNEY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-122</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">40</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">27.6</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BUTTONWILLOW</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-120</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">35</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1021.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">27.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CALISTOGA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-123</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">38</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1021.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">28.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CALLAHAN</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-123</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">41</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">34.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">28.8</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CECILVILLE</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-124</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">41</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1021.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">28.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CLOVERDALE</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-124</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">38</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1021.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">27.4</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">COVELO</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-124</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">39</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">28.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">GLENNVILLE</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-119</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">35</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33.8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1021.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">28.2</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">HAIWEE</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-118</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">36</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">28</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">HEMET</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-117</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">33.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">28.3</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">IMPERIAL</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-116</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">34.4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020.2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">28.7</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KENTFIELD</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-123</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">37</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1020</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">27.9</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">CA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">KLAMATH</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">-125</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">41</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">32.1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1021.3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">27.5</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_jbk_bsy_m2b"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM DWT2D (
+  ON twod_climate_data AS InputTable
+  OUT TABLE OutputTable (dwt2d_coeftable)
+  OUT TABLE MetaInformationTable (dwt2d_metatable)
+  USING
+  TargetColumns ('temp_f','pressure_mbar','dewpoint_f')
+  PartitionColumns ('state')
+  IndexColumns ('latitude', 'longitude')
+  Wavelet ('db2')
+  CompactOutput ('true')
+  WaveletTransformLevel (2)
+) AS dt;</tt>
+   </pre>
+   <a name="section_zzz_bsy_m2b"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ messages                     
+ ---------------------------- 
+ Dwt2D finished successfully!</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM dwt2d_coeftable ORDER BY state, waveletid, waveletcomponent;</tt>
+   </pre>
+   <pre>
+      <tt>
+ state waveletid waveletcomponent temp_f                pressure_mbar        dewpoint_f            
+ ----- --------- ---------------- --------------------- -------------------- --------------------- 
+ ca            2 A2                 0.17966670080766614    5.367577820865212   0.14864598865259468
+ ca            3 A2                 -2.8794432544680917   -80.83794342982637   -2.3434013863320886
+ ca            4 A2                   85.17099422732936    2535.209096707586     71.20340790342276
+ ca            5 A2                -0.43698818294264186  -14.301367416569166  -0.37656963780789143
+ ca            6 A2                 -3.5518013494034726  -112.24731824224867   -3.0373591313812405
+ ca            7 A2                   7.607131707178469   243.03773964415961     6.527150195494035
+ ca            8 A2                   77.48362490347102   2309.1677654492873     64.67758744765001
+ ca            9 A2                  -2.467185519590279   -72.80570197561599   -2.0559702715297323
+ ca           10 A2                   4.307237263004058    138.9649861032441     3.698570590257976
+ ca           11 A2                   96.50531996123284     2957.68801705595     81.48185672872138
+ ca           12 A2                  25.370520234669588    735.0222361438787     20.50035015962585
+ ca           13 A2                   99.16507200788503    3095.433064555778     84.26975519157844
+ ca           14 A2                  107.00420996021352    3304.814118880512      90.5346307507991
+ ca           15 A2                   68.97049679171954   2042.4299319821741     57.02584919790869
+ ca           18 V2                 0.18046579430940513     5.49632148319755    0.1544277787471566
+ ca           19 V2                   -7.00925352158613  -214.81750761860604    -5.942701108598715
+ ca           20 V2                  11.945783771427791    336.4440627449957     9.659743299863678
+ ca           21 V2                 -1.6308621010491429   -53.37342981634618   -1.4053770208868608
+ ca           22 V2                 -13.328794656202321  -420.75523559976887   -11.379269523873589
+ ca           23 V2                  15.939999402634157   497.80321354859825    13.438567746885042
+ ca           24 V2                  10.843736782701713    269.8306106508145     7.613271375763391
+ ca           25 V2                   -16.6364986522845   -526.4753672061356   -14.175866455536596
+ ca           26 V2                  -9.024757184959903   -276.9268227911848    -7.585360835293443
+ ca           27 V2                 -3.4457986488593413    -75.5457049434084   -2.3259037791329895
+ ca           28 V2                 -6.7980104084371735  -196.94861459367024   -5.4930522698269835
+ ca           29 V2                   33.50293562483016   1050.4057240674388    28.491480220684018
+ ca           30 V2                  27.907666132947487    859.3345165586352    23.562691047718715
+ ca           31 V2                 -3.0030027108880404  -129.59891574112646   -3.2282421053922334
+ ca           34 H2                  0.6705252558424862   20.032073141048805    0.5547543819927901
+ ca           35 H2                  -9.521289374805471  -268.83316416053947    -7.788159278383294
+ ca           36 H2                  25.289679059403692    740.6446146569434     20.99812496070666
+ ca           37 H2                   0.436382512538786   13.911536766764735    0.3743831231010831
+ ca           38 H2                 -10.180476236441876  -319.50041012178195    -8.691217667550264
+ ca           39 H2                  14.452215342660532   451.41903013714614    12.210234913982088
+ ca           40 H2                   3.261899394323352    78.05006697262817    2.5745570605419124
+ ca           41 H2                 -3.5601113445095605  -118.68671971361057    -3.109985606504172
+ ca           42 H2                  13.500653699694105    397.5570094469698    11.184049155554575
+ ca           43 H2                  20.428100953198165     603.219722508092    16.730512047255065
+ ca           44 H2                 -30.157767390444455   -915.5187396938936   -25.256170987383953
+ ca           45 H2                  1.5223354447054285    73.75304792478482    1.5912357406934534
+ ca           46 H2                   34.29407968552716   1025.4991490987506    28.646871163735508
+ ca           47 H2                 -18.480588916914588   -547.2674508717763   -15.280030240278618
+ ca           50 D2                  0.6735075133909741   20.512551030025584    0.5763323163843935
+ ca           51 D2                 -15.568047106866421  -476.12183439154796   -13.186959590192775
+ ca           52 D2                  15.768303851669517    476.4253963599289      13.2637908106707
+ ca           53 D2                  1.6286017083293123    51.91856202492846    1.3972168369095557
+ ca           54 D2                  -38.26758239218992  -1199.2682198910838     -32.5991226658432
+ ca           55 D2                   37.94942578258445   1112.3396719783116    30.994084928743142
+ ca           56 D2                 -30.025151142642027   -896.1537970673385    -24.86248786937674
+ ca           57 D2                  -8.706454990642477   -282.4650476159756    -7.527626152621532
+ ca           58 D2                 -0.4057456306474059   -3.462286015494783  -0.31583227260546565
+ ca           59 D2                 -11.479164422513723    -353.742272350795    -9.709837257005946
+ ca           60 D2                    8.08074941779524   245.31250695653804     6.767370619971881
+ ca           61 D2                  7.6892349350371845   255.10069746790245     6.710941950495862
+ ca           62 D2                   4.564932347714967    131.1430685957282    3.8147069037329215
+ ca           63 D2                  0.8046521512509228      34.725924812784    0.8650048651119944
+ ca           68 V1                  2.6864673514634423     80.8317610174841    2.2506098165652433
+ ca           69 V1                 -19.885799419707844   -603.3111494720117   -16.740198698376105
+ ca           70 V1                   22.66821494405769    662.7042896109474     18.77110062702771
+ ca           73 V1                   4.672621162031108    144.7005110174841     3.942236404301771
+ ca           74 V1                  25.482673263157004    776.9771770228251    21.548947773135414
+ ca           75 V1                 0.40696278812935205   109.61659651741411     1.974542637576075
+ ca           76 V1                 -15.693032585667206   -442.0806401389357   -12.507368354874362
+ ca           78 V1                  -5.286664661978508   -157.1218545527684    -4.417530366869515
+ ca           79 V1                   3.466276823080154    51.45676535604025     2.293215563851419
+ ca           80 V1                  20.093449098127092    568.8069541110173       16.478001293557
+ ca           81 V1                   18.66459288822057    598.1965731847247    16.364073404196578
+ ca           82 V1                 -3.1223248863616404   -80.99025466653796   -2.3219319586394938
+ ca           83 V1                  3.7734455543377248   127.85032849302044    3.2713221420742515
+ ca           84 V1                  13.440589312996526   442.78521545648294    11.545589775616872
+ ca           85 V1                   8.480217351463441    209.2279307054174     6.434431958639504
+ ca           86 V1                  20.261435134112556    590.8809837946533    16.752492755247886
+ ca           87 V1                  -5.670680108158116   -174.2023896176106    -4.799838913245536
+ ca           89 V1                  2.4975009252406934    80.15511855238219    2.1613148973221357
+ ca           90 V1                  -22.33428983041933   -680.6333260322158   -18.789474964531873
+ ca           91 V1                 -17.255558483506668  -476.43946661956613   -13.876648784613234
+ ca           92 V1                 -17.896727708819263   -522.9945486160414   -14.676071185398886
+ ca           95 V1                   7.058107040843176   221.78910590919486    5.9972259212072405
+ ca           96 V1                  21.826380100091225    663.6025827111437     18.33539554627083
+ ca           97 V1                   16.02514782793787   442.46765919177415    12.870525340915082
+ ca           98 V1                  10.824566222313813   302.25974533346215     8.606417406265898
+ ca          104 H1                   -5.78853264853656  -174.16823898251596    -4.849390183434759
+ ca          105 H1                   20.53531847254618    603.7368064580522    17.059156954606053
+ ca          106 H1                  -7.556071648019228  -221.07463495107257    -6.257033542342571
+ ca          109 H1                   4.672621162031108    144.7005110174841    3.9422364043017715
+ ca          110 H1                 -14.154470032881479    -429.219464935158   -11.933420581738954
+ ca          111 H1                  17.882855621547467    552.2104816618302    15.408224964531874
+ ca          112 H1                 -14.135019883774982  -441.70564013893573   -12.234163274117476
+ ca          114 H1                  -5.286664661978508  -157.12185455276844    -4.417530366869515
+ ca          115 H1                  -8.202797663530502  -272.59168887540983    -7.127524972598774
+ ca          116 H1                   3.434062615655089   127.54297277716893    3.3809215069796417
+ ca          117 H1                   8.926968645020445   157.78701471428224      5.08481394064677
+ ca          118 H1                 -20.183025340915087   -523.5292360003862   -15.009204124081524
+ ca          119 H1                 -1.7512621764025171   -59.33554394950323   -1.5182258897725585
+ ca          120 H1                   5.598602014888747   186.64191418629383    4.9553973967522005
+ ca          121 H1                  12.647745405231234     395.487970123021    10.775293962567751
+ ca          122 H1                  -5.696577567779672   -174.2440162053471   -4.7457123255090075
+ ca          123 H1                  -5.670680108158116  -174.20238961761058    -4.799838913245536
+ ca          125 H1                  -22.05871685740843   -684.5685674755366   -18.735095264191653
+ ca          126 H1                 -22.168264426634888   -679.2458904669176     -18.7680648030181
+ ca          127 H1                  12.750907785542703   407.15416937415694    11.130075223243272
+ ca          128 H1                  -8.746727708819263  -267.49454861604124    -7.401071185398883
+ ca          131 H1                   5.932274015923415   220.66327288427505      5.47761067893658
+ ca          132 H1                  -6.059156954606036  -222.26736725466066    -5.426713219315017
+ ca          133 H1                   17.12921861358577    442.9524668129094    12.950910098644425
+ ca          134 H1                 -5.0236986669414225  -140.27923600038616    -3.994252218797688
+ ca          140 D1                  10.026032648536562     301.668238982516      8.39939018343476
+ ca          141 D1                  -4.752422001034665  -161.56899481213708    -4.282589869920905
+ ca          142 D1                             12.3375   382.46250000000015    10.537500000000003
+ ca          145 D1                  17.438459581221625    540.0296589984308    14.712626556301856
+ ca          146 D1                   1.958059871367699    46.47706112459021    1.3589895483401482
+ ca          147 D1                 -25.626796612551104    -726.995467468873   -20.334169593628914
+ ca          148 D1                  16.276766708301928    442.3156882336518    12.565862003928252
+ ca          150 D1                  -19.73010112108274   -586.3867441703792   -16.486447773135414
+ ca          151 D1                 -1.7197676964119735    -63.8754487298107   -1.5388461894323386
+ ca          152 D1                  1.1569328838801827    34.24578973138013    1.0063316999280971
+ ca          153 D1                 -12.919061227794057   -365.6693446983675    -10.27292375721201
+ ca          154 D1                   5.408025340915081    140.2792360003861      4.02170412408152
+ ca          155 D1                  -6.535799419707844  -221.44326471428218    -5.666096157997655
+ ca          156 D1                  14.448690034328273    442.5084205372399    12.128602477509087
+ ca          157 D1                 -13.522387007961704   -429.4856427930837   -11.551754069279069
+ ca          158 D1                  -7.087004100713745  -208.35475784201105    -5.896691485058659
+ ca          159 D1                  1.5194541555161987    46.67738961761055     1.286112960603619
+ ca          161 D1                  24.293232209283996    743.7948727705057     20.48199901188996
+ ca          162 D1                 -12.277455911693547   -377.7855761668543   -10.406262639022867
+ ca          163 D1                 -19.516510357355827   -569.8939173617669   -15.916759463549813
+ ca          164 D1                   4.795413736737819   140.13596694754781     3.932441422189301
+ ca          167 D1                 -12.825000000000003   -382.8000000000001   -10.687500000000004
+ ca          168 D1                  12.672876587736535    382.0316107103714    10.677451905283837
+ ca          169 D1                  15.800869248680378    442.5580920442195    12.528362003928255
+ ca          170 D1                  -2.900433777686194     -80.990254666538   -2.3060825937341054
+ tx            1 A2                 -3.6011517287761174   -89.66062613652628    -2.533400946695857
+ tx            2 A2                  -4.892774826100907  -122.68985857717036   -3.4903463430079986
+ tx            3 A2                   32.55414532700897    781.9783426823088    22.511340139411953
+ tx            4 A2                   52.65077802036848   1237.3018397594763     35.65115873239475
+ tx            5 A2                 -18.081617481567218   -449.8871020273652   -12.869485244673767
+ tx            6 A2                   5.199579156036784    125.1711586833209    3.5429928486997295
+ tx            7 A2                  0.7131422719011882   22.194219313520705    0.5933788322995257
+ tx            8 A2                  34.490654091515125    824.5284208268199    23.648074260046357
+ tx            9 A2                   50.07836808898107   1177.1087409858105      33.8303478810003
+ tx           10 A2                 -21.489198057562923   -517.9621336089269   -14.920617758952584
+ tx           11 A2                   64.00488249741338   1784.1235754416327     49.95286300160137
+ tx           12 A2                    66.6917365657005   1861.9789694017607     52.31592082398497
+ tx           13 A2                  126.03747100393714    3339.573766288215      93.7940012304274
+ tx           14 A2                  148.60112564206838   3927.8236795344856    111.50129480391969
+ tx           15 A2                  104.91263265098907   2933.3694315219213     82.96652215732313
+ tx           16 A2                  18.197314828819074    449.0418314228853    12.586025279418504
+ tx           17 A2                   35.86168477224649    897.0857071119738    25.155001061654943
+ tx           18 A2                  116.34385083620603   3075.2363894571554     86.41766158254956
+ tx           19 A2                   37.75918703178163   1029.3180636351435     29.07765679769296
+ tx           20 A2                    42.5843800751068   1093.6317588596773    30.728994643649855
+ tx           21 A2                   9.611585006773577   227.43405568340285    6.3403568861550355
+ tx           22 A2                  21.503287168612317    540.4498996829727    15.216752106480048
+ tx           23 A2                  57.511727080314685   1585.4269727609355     45.24943279380146
+ tx           24 A2                  -10.11754367202161  -275.80494390580367    -7.791334656731174
+ tx           25 A2                 -11.410450251304859  -293.03774660347887    -8.233809298986275
+ tx           26 V2                   6.237377760004732    155.2967599069015     4.387979155620318
+ tx           27 V2                   6.884349912858625    169.0819813607831     4.789354720143077
+ tx           28 V2                 -2.6727683833360096  -27.768975119433833   -0.7222256320695228
+ tx           29 V2                  2.3924709533406308   110.67384454784417     3.212416268509523
+ tx           30 V2                   6.241908383725095    175.3385688661892     4.884077616896358
+ tx           31 V2                  53.486759480971564   1315.7024004813807     37.19899331361637
+ tx           32 V2                   43.70464244715954    1100.274831071663    31.090565506215725
+ tx           33 V2                 -1.6181134672988264    66.90037734060706    1.8522152084712573
+ tx           34 V2                 -1.6827186127335736   141.62043742730702    3.8358152496251563
+ tx           35 V2                   7.939714485626979   326.20617201381776      8.50844096798387
+ tx           36 V2                 -29.977317098177537    -786.983289351754   -22.047482405230163
+ tx           37 V2                  -31.06334930652162   -781.2168948198291   -22.065937490176672
+ tx           38 V2                   25.78937912039609    977.3471381730748    26.807770211945765
+ tx           39 V2                  30.278847140805624    858.3755203510383    24.103268039187626
+ tx           40 V2                  50.942663095332776   1244.2310923324385     34.81469157183565
+ tx           41 V2                  -3.601096928289912   -91.21001691343321   -2.5666783910138307
+ tx           42 V2                  -5.595173436083371  -136.23035369469363   -3.8102851761186365
+ tx           43 V2                 -15.277753527219847  -366.20318896076776   -10.130687497479094
+ tx           44 V2                  -10.11754367202161  -275.80494390580367    -7.791334656731174
+ tx           45 V2                 -11.410450251304859  -293.03774660347887    -8.233809298986275
+ tx           46 V2                   18.11442995320969   443.34017379508657    12.440066485910855
+ tx           47 V2                  24.344443354370185    566.4610992686262    15.980376259305473
+ tx           48 V2                  -6.772818944989844  -459.49199728428425   -12.539647169927605
+ tx           49 V2                  -37.75918703178163  -1029.3180636351435    -29.07765679769296
+ tx           50 V2                   -42.5843800751068  -1093.6317588596773   -30.728994643649855
+ tx           51 H2                 -0.2727488748838178    -6.40242319910384  -0.17663793713172685
+ tx           52 H2                  -5.723038443670769  -144.45495983246377    -4.155934618446184
+ tx           53 H2                   94.06019355487328   2235.7042363875053     64.33593281151911
+ tx           54 H2                  -14.94353256123901   -356.5431180504938   -10.251760572096467
+ tx           55 H2                  -55.84033526310387  -1330.6698441534709     -38.2929038220954
+ tx           56 H2                   0.843001778048976   19.945475494706834    0.5655303435537975
+ tx           57 H2                 -13.953779404560446  -318.30759165739045    -9.136542644026315
+ tx           58 H2                   95.94758551858197   2256.7413138997504     64.80630348620573
+ tx           59 H2                  -14.99136814406306   -355.7795704994948   -10.239264983855216
+ tx           60 H2                  -58.29097082256014  -1370.7204633206763   -39.326517062569636
+ tx           61 H2                  1.3400360732620862   26.627140309786924      0.69317839520346
+ tx           62 H2                  14.462192719119429    378.6801727146978    11.113057181830715
+ tx           63 H2                    21.8664496634664    511.3425432972661    14.529118293377792
+ tx           64 H2                 -11.675389006385036  -266.16096661431044    -7.660123637679645
+ tx           65 H2                -0.43048467536948287   -4.209744414896107   0.19853749511435792
+ tx           66 H2                  -7.966430815581013  -196.14262109343534    -5.489849519593534
+ tx           67 H2                   39.56021139355781   1023.0079066469028     28.73994230702418
+ tx           68 H2                  -10.05408587956014  -248.57656139216652    -6.692978931352286
+ tx           69 H2                   2.089954708807192    37.46046099295468    1.0232435892616802
+ tx           70 H2                 -11.101448332320413   -281.7349356092199    -8.089067923740755
+ tx           71 H2                  1.2356710151495793    47.70231484477182    1.4023430091777591
+ tx           72 H2                  48.469767644514114   1326.0571254916103     37.76807341487211
+ tx           73 H2                 -21.069349301775752   -579.0000270297058   -16.535679624222382
+ tx           74 H2                 -0.5600016764425094  -10.037500271159779   -0.2741772934029907
+ tx           75 H2                  2.9746241154610886    75.49064847612483    2.1674592176868335
+ tx           76 D2                 0.47241490900601923   11.089322272405521    0.3059458816563081
+ tx           77 D2                  3.9779433540742346    88.14616192829538     2.510451629898791
+ tx           78 D2                 -3.5750995510282237  -43.966080386085764   -1.0911933108515477
+ tx           79 D2                  0.8065858632509055   13.662046037352724    0.3500454837658702
+ tx           80 D2                   3.132004244726371      51.044282863869    1.3632204474976106
+ tx           81 D2                   5.727448533864626       135.0307116668     3.782307361467632
+ tx           82 D2                 -17.552933430720948  -357.11585180256213    -10.27979087691316
+ tx           83 D2                 -4.7875956013335745   -66.98995165210184    -1.855749061562873
+ tx           84 D2                  2.4907912988317236    48.06278812106257    1.2050750710760298
+ tx           85 D2                  1.2191618011838576   19.455059065450797    0.6539460879820416
+ tx           86 D2                  2.2210422434587906    43.00267014416359    1.2196636250120654
+ tx           87 D2                  3.2971922118322823   163.83356024821688     3.967480799219727
+ tx           88 D2                  17.389168063423988   429.56917602490205      12.7509174121599
+ tx           89 D2                   7.008216479268773     140.859457863532    3.9520799524616104
+ tx           90 D2                 -20.493452384473716   -521.8865570115682   -15.069795914951541
+ tx           91 D2                   2.964388989815508    77.15654711825152     2.179158198454459
+ tx           92 D2                   2.368357273561781    87.32377587058397     2.570504781743777
+ tx           93 D2                 -1.5654667555060078  -56.062301272153974   -1.6966211154353292
+ tx           94 D2                 -0.5600016764425094  -10.037500271159779   -0.2741772934029907
+ tx           95 D2                  2.9746241154610886    75.49064847612483    2.1674592176868335
+ tx           96 D2                  -6.945900735032359  -164.61037871956827    -4.629745566073671
+ tx           97 D2                  0.2639551733921994   -85.26821523801283    -2.109069012640738
+ tx           98 D2                 -19.305383629536024   -452.3100360967921   -13.102575368924615
+ tx           99 D2                  -2.089954708807192   -37.46046099295468   -1.0232435892616802
+ tx          100 D2                  11.101448332320413    281.7349356092199     8.089067923740755
+ tx          104 V1                -0.38728311115690284  0.11814881604791339 -0.017972777168861143
+ tx          105 V1                 -3.2933248549269614   1.4839981809533356   0.23447912811497318
+ tx          108 V1                 -28.054746730222917   -696.8266337879896   -19.670765814495926
+ tx          109 V1                 -23.353209549786946   -586.4641960756628    -16.62595094860847
+ tx          110 V1                  -24.63668593361453   -633.2865616459154   -18.075669625063586
+ tx          111 V1                  24.598722251679174   474.69859366992324    13.298331637058745
+ tx          112 V1                   4.572460075276648   -47.99308652837442   -1.8537250274012322
+ tx          113 V1                 -23.725989485470798   -696.8703837879897    -19.68036517940131
+ tx          114 V1                 -23.282359722261216   -696.6633565651586   -19.473337956570173
+ tx          115 V1                  26.728973513801485    883.4224663057903    24.409175913140338
+ tx          116 V1                  26.759098839415696    887.9344382336521    24.370886051286337
+ tx          117 V1                    4.43469370385635   395.28303409510227     9.758338881810861
+ tx          118 V1                   6.665931064833487    494.6276536759293    12.543052163995243
+ tx          119 V1                  -7.483006382380783   14.985902512845882   0.43187245558811327
+ tx          120 V1                   7.246605158927132   106.97833420220832     3.752511713782173
+ tx          121 V1                  -33.38349996856533   -939.7458991440299   -26.705848439664706
+ tx          122 V1                 -6.1492267835785706  -186.69583251780034    -5.188410098644419
+ tx          123 V1                  -5.454047200910157   -174.1221250966717   -4.7669464481437345
+ tx          124 V1                   3.439529073312521      52.127222255844     2.838608028953228
+ tx          125 V1                  3.4052535752240516   110.11842365400844    4.0664332836311665
+ tx          126 V1                   -9.42209073229224   -65.24781215303472   -2.4729646071760527
+ tx          127 V1                   7.587944103607345   424.09140316880985    10.841926869815708
+ tx          128 V1                   0.435391539861115   284.42589312106566    6.6771619491257965
+ tx          129 V1                  -7.052106147037166   -174.1511636649687   -4.8835408185293705
+ tx          130 V1                 -11.834597051803666   -301.6374377123268    -8.388861141556921
+ tx          131 V1                   17.47333163705876   172.40720540873872     5.068949623616788
+ tx          132 V1                  23.424048431597814    376.5047426793143     10.63682343563125
+ tx          133 V1                  -19.76938972081442   -540.1736494720117   -15.358171475544964
+ tx          134 V1                 -11.605073529935288   -318.8636057158516    -8.956610710371255
+ tx          135 V1                 -17.873018096162962   -458.6523852790545    -12.90543824671625
+ tx          136 V1                 -3.2728938529628357    -80.8238363350314   -2.2664591814706325
+ tx          137 V1                  -8.849003575224044  -220.84251970880194    -6.208708224795265
+ tx          138 V1                 -3.8822095812216197   -46.26202119986681   -1.2627876430563134
+ tx          139 V1                 -5.5608960717605225  -110.24703707723208    -3.081866136076674
+ tx          143 V1                  12.214606147037168   301.63866366496876     8.458540818529372
+ tx          144 V1                  24.277241335952173    603.2822311405051     16.87668100196413
+ tx          145 V1                 -10.557209581221628   -173.3894731051506   -4.8527395483401445
+ tx          146 V1                 -19.218322541825245  -411.52834502634926   -11.501681001964126
+ tx          153 H1                  18.722043562816765    511.2418348439667    14.788725952641922
+ tx          154 H1                 -21.197043562816763   -510.4668348439666    -14.71372595264192
+ tx          157 H1                -0.13471960169580752  0.03962341226346306   0.03169872981077804
+ tx          158 H1                   4.255695985523389   110.49356747553632    3.1497186764551177
+ tx          159 H1                 -7.9656969107640805  -191.22389428414854     -5.43169872981078
+ tx          160 H1                  19.077440959568964    476.5494266948429    13.846536717815628
+ tx          161 H1                 -24.062570754213223   -556.7319649351579   -15.948821216833565
+ tx          162 H1                 0.03124999999999993 0.014174682452683954  0.015400635094610567
+ tx          163 H1                0.008373412263472326  0.00959936490537917 -0.007475952641917036
+ tx          164 H1                  0.9257450054802521  -0.2698557158514211  -0.17745190528383215
+ tx          165 H1                  -29.47941823720255   -760.9944863283681   -21.720645577705504
+ tx          166 H1                  13.088858828455201    395.6866239335886    11.384652853892304
+ tx          167 H1                   9.238139720814422   237.98710921930655      6.83946232550901
+ tx          168 H1                  -7.705215038361717  -173.96468136138063    -4.865688278150924
+ tx          169 H1                   -3.40082670540834   -81.05083951050436    -2.461555370902964
+ tx          170 H1                  3.6637432178682263    80.73400466653806     2.392356641092192
+ tx          171 H1                  0.1183012701892261 -0.02957531754727092   0.05915063509461219
+ tx          172 H1                  14.116787674490995   336.07428506484223      9.90673957977483
+ tx          173 H1                  -32.11271226263966    -713.148258691318   -20.280526266155775
+ tx          174 H1                  5.2474986121389735   110.16255794911731    3.0718180413605105
+ tx          175 H1                  -3.107027222831135   -63.60547277716873   -1.9466506350946051
+ tx          176 H1                  -9.007271702821678  -203.82591885283162    -5.849604759176128
+ tx          177 H1                  12.248050313513861   284.74060455276856      8.38648862309946
+ tx          178 H1                  3.2728938529628357    80.82383633503139     2.266459181470633
+ tx          179 H1                  23.463891045806097    650.0471207581157    18.213122455588113
+ tx          180 H1                 -3.5953217108885793   -80.82628824031524    -2.659640214869433
+ tx          181 H1                 -3.1229968245269437   -63.51462341226339    -1.700448729810776
+ tx          182 H1                   18.22983706276416   412.22430645805247     11.92108798800485
+ tx          183 H1                   8.440280398304196   191.05469555433783     5.423774047358088
+ tx          184 H1                  -30.25673495357138   -714.0420967107575   -20.543354759176136
+ tx          185 H1                 -21.156318441111498    -522.453490994906   -14.650622455588111
+ tx          186 H1                  -17.75762609368151   -476.0871349510725   -13.383708224795265
+ tx          187 H1                   21.81454340564337    582.0588906602609    16.503743985935525
+ tx          188 H1                  -12.22255842063731  -297.06640316880964    -8.389234490951036
+ tx          192 H1                  -5.668818441111494  -139.99099099490587   -3.9256224555881056
+ tx          193 H1                   -32.1058311744384   -858.9304362212619    -24.38068735291024
+ tx          194 H1                    34.2846395950757    964.9265349444095     27.43209335084092
+ tx          195 H1                  -5.281848870850368  -157.27296026861995    -4.481584812531793
+ tx          202 D1                  -1.445360247750905   0.4409373843448634  -0.06707531754730311
+ tx          203 D1                  0.8824437352910239  -0.3976361141557163  -0.06282849302036286
+ tx          206 D1                  -0.502780398304196  0.14787658773649187    0.1183012701892218
+ tx          207 D1                  15.882473639540196    412.3676077282416    11.754910130079098
+ tx          208 D1                    -29.728385588666   -713.6572890896223    -20.27137563106117
+ tx          209 D1                 -3.4569156186538743  -128.01459119491255    -3.738277222831137
+ tx          210 D1                  -7.773932821010829   -173.9797535034549    -4.817362960603622
+ tx          211 D1                 0.11662658773652715 0.052900635094571546   0.05747595264191496
+ tx          212 D1                0.031249999999999035  0.03582531754726867 -0.027900635094613154
+ tx          213 D1               -0.028437384344907862 0.017403810567709163   0.15735571585150077
+ tx          214 D1                0.018318535415529524    16.89650466653808   0.37785346561913524
+ tx          215 D1                  16.424351646572443    335.3196217278554      9.52695600599758
+ tx          216 D1                  -6.577216057906449  -131.96511303653753     -3.82968291531486
+ tx          217 D1                  2.3177150383617207    47.04311874572551    1.5867699466443403
+ tx          218 D1                 -11.884045350428785   -302.1193446983675    -8.788444629097038
+ tx          219 D1                  13.889782185916216   301.55161239477945     8.735095264191648
+ tx          220 D1                -0.03169872981077918 0.007924682452685256 -0.015849364905389362
+ tx          221 D1                  2.4895417123353774    46.95194088779982    1.5204718519281748
+ tx          222 D1                   8.992972777168868   191.21070508075695     5.714054445662278
+ tx          223 D1                 -1.2988833384336247  -29.697872249180374   -0.9181873529102371
+ tx          224 D1                 -10.405872024402443   -238.0886636649687    -6.855191453623981
+ tx          225 D1                 -3.0135176964119785  -63.679126587736576   -1.8620512701892222
+ tx          226 D1                  15.279197341949747   365.69703707723227    10.391914230792842
+ tx          227 D1                  12.214606147037166    301.6386636649687     8.458540818529372
+ tx          228 D1                  22.574531691861196    522.4580663124534    14.910670550304275
+ tx          229 D1                  -10.43407756777967  -302.07101938082025     -8.58979081852937
+ tx          230 D1                 -10.762362497983279  -237.72951302987414   -6.6876674062658985
+ tx          231 D1                  -4.884670119118606   -110.4551700159148    -3.194245899286257
+ tx          232 D1                  -2.261566316617844  -51.192951383958814   -1.4532958759184813
+ tx          233 D1                   8.107267696411975   191.32700317547307     5.504575317547306
+ tx          234 D1                   5.668818441111494   139.99099099490587    3.9256224555881056
+ tx          235 D1                 -2.0499309390947698   -59.27050402477994   -1.7212145443066964
+ tx          236 D1                   2.533510914280198     80.9067610174842    2.3073085463760243
+ tx          237 D1                  1.4900376116216347    29.54060455276838     0.825783542342569
+ tx          241 D1                 -21.156318441111498    -522.453490994906   -14.650622455588111
+ tx          242 D1                  -24.99637563106117   -603.2590260597482    -17.06785885988988
+ tx          243 D1                  11.251777654016808       301.9956908878     8.648492723813204
+ tx          244 D1                  5.1495340049629155   110.26868771232672     3.081866136076674
+ wa            1 A2                    42.6254931061425   1468.4366999990582     35.28539169480957
+ wa            2 A2                   47.21635578657956   1624.9053300999767     39.10397731411011
+ wa            3 A2                   73.03586814995711   2509.1676792770127    60.485928056688806
+ wa            4 A2                  29.612765080680177   1012.0954617994031    24.068537871549648
+ wa            5 A2                   63.39836472182281    2184.274991658562    52.422101734722204
+ wa            6 A2                   67.34481712227416   2319.5128100909124     55.70701016166999
+ wa            7 A2                   82.16956338227835   2826.8562365727303      67.8884826575598
+ wa            8 A2                  46.981578273758515   1609.3291255609581    38.192760986972914
+ wa            9 A2                   40.32603519406097   1391.6270194096492     33.09817180508851
+ wa           10 A2                   53.39390787028372   1851.1134440137755     43.76464770186756
+ wa           11 A2                   88.74960947045221   3072.5292326601075     72.25857924955997
+ wa           12 A2                  101.02713155167382   3507.0144156966653      82.1507601976259
+ wa           13 V2                 -26.047183393131974   -897.3753221204671   -21.513712115549893
+ wa           14 V2                 -24.488390096989413   -843.8993750663284    -20.23817976008039
+ wa           15 V2                  -9.958976790324758  -344.89252117837646    -8.157412498783394
+ wa           16 V2                 -15.228623826619328    -520.131619423586    -12.38307790577378
+ wa           17 V2                  -8.675164478932832  -298.22998280540565    -7.242429496743631
+ wa           18 V2                  -5.921464172061054  -200.49109387678004    -5.012891742813757
+ wa           19 V2                  1.1291661545588099    44.24215585719833    0.6305601692162703
+ wa           20 V2                  14.423669214376787    507.5822357720717    11.731746929246224
+ wa           21 V2                  34.722347872064816   1195.6053049258728    28.756141612293533
+ wa           22 V2                   30.40985426905047   1044.3904689431085    25.251071502894153
+ wa           23 V2                    8.82981063576596   300.65036532117847     7.526852329567138
+ wa           24 V2                  0.8049546122425548   12.549383651514546    0.6513309765275599
+ wa           25 H2                  3.1759880038263053    107.3927825360765    2.6286870688143353
+ wa           26 H2                  27.643950893597797    939.3546674883121    22.950535360276817
+ wa           27 H2                 -11.290481792703188   -390.0165641482422    -9.479001435604953
+ wa           28 H2                  -4.801101900346139  -154.91960959574138    -3.886092034820383
+ wa           29 H2                  2.2235430170884887     74.4346188155517    1.8354372276921036
+ wa           30 H2                  22.086956523108036     751.048417150603     18.33364308522716
+ wa           31 H2                  -9.066412675343184  -314.43663884494026    -7.664959698841376
+ wa           32 H2                 -5.0445099292472975  -164.33562901141562     -4.06682560472035
+ wa           33 H2                 -2.3914618971401937    -83.4536764487386   -1.9412289770958713
+ wa           34 H2                   40.85565819708171    1438.644995311855     33.38352471745231
+ wa           35 H2                   5.530414866043628   195.76399642334292     4.485039800357422
+ wa           36 H2                 -31.208406003824688  -1105.1199491269476   -25.550423939405494
+ wa           37 D2                  0.6875931256850304   23.954795655283775    0.5786477987281464
+ wa           38 D2                   8.093017210215635    278.8509779240344     6.675329205485082
+ wa           39 D2                 -1.2643977566179432   -41.70289770572562   -1.0094807854670478
+ wa           40 D2                  -2.055801559326942   -73.15478358693811   -1.7101444576311362
+ wa           41 D2                 -1.2790516514060148   -43.72551499404588   -1.0454710619892433
+ wa           42 D2                   6.044054541670693   220.06123295384657    4.8608651167922385
+ wa           43 D2                   4.115939648329953   144.05650669290537     3.429319130260491
+ wa           44 D2                 -7.7118830248677135   -277.2395824369993    -6.334060774997049
+ wa           45 D2                  0.5914585257209843   19.770719338762113    0.4668232632610969
+ wa           46 D2                 -14.137071751886323    -498.912210877881    -11.53619432227732
+ wa           47 D2                   -2.85154189171201  -102.35360898717977    -2.419838344793444
+ wa           48 D2                   9.767684584194658    350.3943660239374     8.044205232628183
+ wa           49 V1                 -25.677653222208612   -883.6273701163577   -21.282574298002586
+ wa           50 V1                 -28.009633275564273   -964.5716311338418    -23.21832022872352
+ wa           51 V1                    -6.3219854476264  -220.84864947201152    -5.198275834970104
+ wa           52 V1                 -12.742175976009694   -441.6808806125166   -10.484708655980933
+ wa           53 V1                 -19.420619679866043   -662.1846743686766   -15.783312983971399
+ wa           54 V1                    25.5593519520194    883.2724663057897    20.838944534793008
+ wa           55 V1                  24.684914599109163    853.7968136583055     20.19156615944446
+ wa           56 V1                -0.41323005335566165  -17.434092685977248  -0.37447188336284754
+ wa           57 V1                  11.382857934649195    394.8226897247168     9.196680539343786
+ wa           58 V1                 -1.0182069312382644   -34.45078156138743   -0.8443684491783969
+ wa           59 V1                 -25.591050681830176   -883.3675624952223   -20.957814771583422
+ wa           60 V1                  -23.85165510412467    -824.313476801949    -19.59083841919052
+ wa           61 V1                  2.0694800533556617    81.11011038238928    1.5707940254371024
+ wa           62 V1                  -11.00122595264192    -382.555472777169    -9.027451905283833
+ wa           63 V1                   6.257033542342571    221.1612374914513     5.109549882328192
+ wa           64 H1                0.043301270189222835 -0.10825317547304891  0.021650635094611417
+ wa           65 H1                 -15.254059839933023   -522.7571688528318   -12.696111572742588
+ wa           66 H1                  19.280667774582213    662.9454674688732     15.99434655774865
+ wa           67 H1                 -12.878778516388138   -441.7107844230842   -10.589612466548598
+ wa           68 H1                   6.473539893288681    220.7282247895589     5.261104327990467
+ wa           69 H1                 0.12990381056766928   -0.324759526419134   0.05122595264191751
+ wa           70 H1                  -8.124437352910235   -285.0723032825792    -6.839453692895855
+ wa           71 H1                  6.8952635956982355    238.1221250966718     5.688925576258708
+ wa           72 H1                   -29.0764940173702   -998.1482221354111    -23.76783296205042
+ wa           73 H1                  19.375763964014542    662.1587769090551    15.736333855856431
+ wa           74 H1                0.043301270189224084 -0.10825317547302882                   0.0
+ wa           75 H1                  11.132027222831145    382.1063702367906     8.904575317547307
+ wa           76 H1                  15.443354759176136    522.1062713932102     12.46130395160726
+ wa           77 H1                 -1.5884981180839408   -59.35833251780022   -1.3831542103186534
+ wa           78 H1                   6.170431001964127    221.0746349510727     5.109549882328194
+ wa           79 D1                -0.07500000000000155  0.18749999999998973 -0.037500000000000776
+ wa           80 D1                  -8.951273122117398  -301.46758199647536     -7.34840470437368
+ wa           81 D1                   11.04509618943234   383.06928674925047     9.292075317547308
+ wa           82 D1                  12.892175976009694    441.5165856932734    10.512160561264764
+ wa           83 D1                 -11.212500000000002   -382.3125000000001    -9.112500000000004
+ wa           84 D1                 0.07500000000000452  -0.1874999999999422 -0.013725952641916733
+ wa           85 D1                 -3.0152395483401446  -110.62514596855665    -2.461473670974874
+ wa           86 D1                  -9.670304445662277  -317.73238793320246    -7.709150635094614
+ wa           87 D1                  -17.78531615944446   -615.4973246757894   -14.392832962050413
+ wa           88 D1                  11.045096189432337    382.2158493649055      8.93717150697964
+ wa           89 D1                -0.07500000000000373  0.18749999999995492                   0.0
+ wa           90 D1                   6.243307589700653   221.01336090371456     5.101625199875497
+ wa           91 D1                   9.134526297590451   300.76782247005616      7.27340470437368
+ wa           92 D1                  19.207791186845682    662.1693939703724    15.572607903214507
+ wa           93 D1                 -11.137500000000001  -382.16250000000014                  -9.0</tt>
+   </pre>
+   <p>
+      <b>Note:</b>  CompactOutput('true') prevents rows in which all coefficient values have an absolute value less than 1e<sup>-12</sup>) from appearing in dwt2d_coeftable.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM dwt2d_metatable ORDER BY state;</tt>
+   </pre>
+   <pre>
+      <tt>
+ state meta            content                                                                          
+ ----- --------------- -------------------------------------------------------------------------------- 
+ ca    range           (32,-125),(41,-116)                                                             
+ ca    extensionmode   sym                                                                             
+ ca    ilowpassfilter  0.4829629131445342, 0.836516303737808, 0.2241438680420134, -0.1294095225512604  
+ ca    waveletname     db2                                                                             
+ ca    length          (10, 10)                                                                        
+ ca    highpassfilter  -0.4829629131445342, 0.836516303737808, -0.2241438680420134, -0.1294095225512604
+ ca    ihighpassfilter -0.1294095225512604, -0.2241438680420134, 0.836516303737808, -0.4829629131445342
+ ca    lowpassfilter   -0.1294095225512604, 0.2241438680420134, 0.836516303737808, 0.4829629131445342  
+ ca    blocklength     (4, 4),(4, 4),(4, 4),(4, 4),(6, 6),(6, 6),(6, 6)                                
+ ca    level           2                                                                               
+ tx    highpassfilter  -0.4829629131445342, 0.836516303737808, -0.2241438680420134, -0.1294095225512604
+ tx    extensionmode   sym                                                                             
+ tx    lowpassfilter   -0.1294095225512604, 0.2241438680420134, 0.836516303737808, 0.4829629131445342  
+ tx    ihighpassfilter -0.1294095225512604, -0.2241438680420134, 0.836516303737808, -0.4829629131445342
+ tx    length          (11, 11)                                                                        
+ tx    waveletname     db2                                                                             
+ tx    blocklength     (5, 5),(5, 5),(5, 5),(5, 5),(7, 7),(7, 7),(7, 7)                                
+ tx    range           (26,-105),(36,-95)                                                              
+ tx    level           2                                                                               
+ tx    ilowpassfilter  0.4829629131445342, 0.836516303737808, 0.2241438680420134, -0.1294095225512604  
+ wa    range           (45,-125),(48,-118)                                                             
+ wa    highpassfilter  -0.4829629131445342, 0.836516303737808, -0.2241438680420134, -0.1294095225512604
+ wa    level           2                                                                               
+ wa    ihighpassfilter -0.1294095225512604, -0.2241438680420134, 0.836516303737808, -0.4829629131445342
+ wa    extensionmode   sym                                                                             
+ wa    waveletname     db2                                                                             
+ wa    blocklength     (3, 4),(3, 4),(3, 4),(3, 4),(3, 5),(3, 5),(3, 5)                                
+ wa    ilowpassfilter  0.4829629131445342, 0.836516303737808, 0.2241438680420134, -0.1294095225512604  
+ wa    lowpassfilter   -0.1294095225512604, 0.2241438680420134, 0.836516303737808, 0.4829629131445342  
+ wa    length          (4, 8)</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

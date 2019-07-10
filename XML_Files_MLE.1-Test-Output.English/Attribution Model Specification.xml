@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="odk1518466216313"> </a>
+	  <h1>Attribution Model Specification</h1>
+   <a name="section_e14_dgx_zgb"> </a>
+   <p style="line-height: 1em;">You can specify attribution models with either tables (using multiple-input syntax) or syntax elements (using single-input syntax). The following tables show the information you must specify, which is the same for both syntaxes.</p>
+
+   <a name="section_rwp_4m5_3cb"> </a>
+   <h2>Attribution Model Types and Distribution Model Formats</h2>
+   <a name="table_N101A3_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N101A3_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Attribution Model Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Distribution Model Format</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Additional Information</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">SIMPLE</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>MODEL</i>:<i>PARAMETERS</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Distribution model applies to all eligible events. </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">EVENT_REGULAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>EVENT</i>:<i>WEIGHT</i>:<i>MODEL</i>:<i>PARAMETERS</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Distribution model applies to all regular events.<p style="line-height: 1em; margin: 0px;">
+                  <br/>EVENT cannot be a conversion, excluded, or optional event.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>Sum of WEIGHT values must be 1.0.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>For example, suppose model is specified as follows:</p>
+               <pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+email:0.20:LAST_CLICK:NA
+impression:0.80:UNIFORM:NA</tt>
+               </pre>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>Within WindowSize of a conversion event, 20% of conversion event is attributed to most recent email event and 80% is attributed uniformly to all impression events.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">EVENT_OPTIONAL</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>EVENT</i>:<i>WEIGHT</i>:<i>MODEL</i>:<i>PARAMETERS</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Distribution model applies to optional events only if no regular event received attribution.<p style="line-height: 1em; margin: 0px;">
+                  <br/>EVENT must be an optional event.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>Sum of WEIGHT values must be 1.0.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">SEGMENT_ROWS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>K</i>
+               <sub>i</sub>:<i>WEIGHT</i>:<i>MODEL</i>:<i>PARAMETERS</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Distribution model applies to all rows within <i>K</i> rows of conversion event. <i>K</i> is specified by 'rows:<i>K</i>' in WindowSize syntax element.<p style="line-height: 1em; margin: 0px;">
+                  <br/>Sum of <i>K</i>
+                  <sub>i</sub> values must equal <i>K</i>.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>For example, suppose WindowSize is ('rows:10') and model is specified as follows:</p>
+               <pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+3:0.5:UNIFORM:NA
+4:0.3:LAST_CLICK:NA
+3:0.2:FIRST_CLICK:NA</tt>
+               </pre>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>Attribution for a conversion event is divided among attributable events in 10 rows immediately preceding conversion event. If conversion event is in row 11, first model specification applies to rows 10, 9, and 8; second applies to rows 7, 6, 5, and 4; and third applies to rows 3, 2, and 1.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>Half attribution (5/10) is uniformly divided among rows 10, 9, and 8; 3/10 to last click in rows 7, 6, 5, and 4 (that is, in row 7), and 2/10 to first click in rows 3, 2, and 1 (that is, in row 1).</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">SEGMENT_SECONDS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>K</i>
+               <sub>i</sub>:<i>WEIGHT</i>:<i>MODEL</i>:<i>PARAMETERS</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Distribution model applies to all rows within <i>K</i> seconds of conversion event. <i>K</i> is specified by 'seconds:<i>K</i>' in WindowSize syntax element.<p style="line-height: 1em; margin: 0px;">
+                  <br/>Sum of <i>K</i>
+                  <sub>i</sub> values must equal <i>K</i>.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>For example, suppose WindowSize is ('seconds:10') and model is specified as follows:</p>
+               <pre style="margin-left: 2em; font-family: monospace;">
+                  <tt style="font-family: monospace; font-size: larger;">
+6:0.5:UNIFORM:NA
+8:0.3:LAST_CLICK:NA
+6:0.2:FIRST_CLICK:NA</tt>
+               </pre>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>Attribution for a conversion event is divided among attributable events in 20 seconds immediately preceding conversion event. If conversion event is at second 21, first model specification applies to seconds 20-15 (counting backward); second applies to seconds 14-7; and third applies to seconds 6-1.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>Half attribution (5/10) is uniformly divided among seconds 20-15; 3/10 to last click in seconds 14-7, and 2/10 to first click in seconds 6-1.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_nbd_qm5_3cb"> </a>
+   <h2>Distribution Model Parameters</h2>
+   <a name="table_N102C3_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N102C3_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Distribution Model</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Parameters</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">'LAST_CLICK'</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Conversion event is attributed entirely to most recent attributable event.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">'NA'</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">'FIRST_CLICK'</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Conversion event is attributed entirely to first attributable event.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">'NA'</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">'UNIFORM'</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Conversion event is attributed uniformly to preceding attributable events.</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">'NA'</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">'EXPONENTIAL'</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Conversion event is attributed exponentially to preceding attributable events (the more recent the event, the higher the attribution).</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">'<i>alpha</i>,<i>type</i>' where <i>alpha</i> is a decay factor in range (0, 1) and <i>type</i> is ROW, MILLISECOND, SECOND, MINUTE, HOUR, DAY, MONTH, or YEAR.<p style="line-height: 1em; margin: 0px;">
+                  <br/>When <i>alpha</i> is in range (0, 1), sum of series <i>w</i>
+                  <sub>i</sub>=(1-<i>alpha</i>)*<i>alpha</i>
+                  <sup>i</sup> is 1. Function uses <i>w</i>
+                  <sub>i</sub> as exponential weights.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">'WEIGHTED'</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Conversion event is attributed to preceding attributable events with weights specified by PARAMETERS.SEGMENT_SECONDS (when you specify 'rows:K&amp;seconds:K' in Window syntax element)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">You can specify any number of weights. If there are more attributable events than weights, extra (least recent) events are assigned zero weight. If there are more weights than attributable events, then function renormalizes weights. See Attribution_MLE Example (Single Input): Dynamic Weighted Distribution Models.</div>
+         </td>
+      </tr>
+   </table>
+
+
+
+</t:intro>

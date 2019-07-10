@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="uly1507825400157"> </a>
+   <h1>ScaleSummary</h1>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The ScaleSummary function takes as input ScaleMap Output (statistics assembled at the vworker level) and outputs global statistical information for the entire input data set.</p>
+
+   <a name="ejy1507825404484"> </a>
+   <h2>ScaleSummary Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.5</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ScaleSummary (
+  ON (
+    SELECT * FROM ScaleMap (
+     ...
+    ) AS <i>alias_1</i>
+  ) PARTITION BY 1
+) AS <i>alias_2</i>;</tt>
+   </pre>
+   <a name="qqy1507825408422"> </a>
+   <h2>ScaleSummary Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The input table is the ScaleMap Output.</p>
+
+   <a name="dvm1507825412021"> </a>
+   <h2>ScaleSummary Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Table Schema</h3>
+   <p style="line-height: 1em;">The table has the same schema as the ScaleMap Output table; however, its stattype column values are different.</p>
+
+   <a name="section_ofm_dts_ycb"> </a>
+   <h3>stattype Values (Supported Data Types)</h3>
+   <a name="table_N1001A_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1001A_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">stattype</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">min</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Minimum value in corresponding column.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">max</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Maximum value in corresponding column.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">sum</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sum value of corresponding column.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">squaresum</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sum of squared values in corresponding column.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">count</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of valid values in corresponding column.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">avg</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Average of valid values in corresponding column.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">variance</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Variance of values in corresponding column. Variance is calculated according to N-1 degrees of freedom (number of valid values minus one).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">std</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Standard deviation of values in corresponding column. Standard deviation is calculated according to N-1 degrees of freedom (number of valid values minus one).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">infinity</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of infinite values in corresponding column.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">nan</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of NaN values in corresponding column.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">null</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of NULL values in corresponding column.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ignorerow</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Count of ignored rows in corresponding column.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="uag1510712182015"> </a>
+   <h2>ScaleSummary Example</h2>
+   <a name="section_uc3_c24_xdb"> </a>
+   <h3>Input</h3>
+   <ul>
+      <li>scale_stat, created in Scale Example: Use Training Data to Scale Test Data</li>
+   </ul>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE scale_stat AS (                                            
+  SELECT * FROM ScaleMap (
+    ON scale_housing
+    USING
+    TargetColumns ('[2:6]')
+    MissValue ('omit')
+  ) AS dt 
+) WITH DATA;</tt>
+   </pre>
+   <a name="section_bpv_c24_xdb"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM ScaleSummary (
+  ON scale_stat AS "input" PARTITION BY 1
+) AS dt ORDER BY 1;</tt>
+   </pre>
+   <a name="section_b5g_d24_xdb"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ stattype  price                lotsize          bedrooms           bathrms            stories            
+ --------- -------------------- ---------------- ------------------ ------------------ ------------------ 
+ avg                    65037.5           5067.5              2.875              1.125              1.875
+ count                      8.0              8.0                8.0                8.0                8.0
+ ignorerow                  2.0              2.0                2.0                2.0                2.0
+ infinity                   0.0              0.0                0.0                0.0                0.0
+ max                    88500.0           6650.0                3.0                2.0                4.0
+ min                    42000.0           3060.0                2.0                1.0                1.0
+ nan                        0.0              0.0                0.0                0.0                0.0
+ null                       1.0              0.0                1.0                0.0                0.0
+ squaresum          3.556719E10       2.161594E8               67.0               11.0               37.0
+ std         15712.500710307973 1237.67927994291 0.3535533905932738 0.3535533905932738 1.1259916264596033
+ sum                   520300.0          40540.0               23.0                9.0               15.0
+ variance  2.4688267857142857E8        1531850.0              0.125              0.125 1.2678571428571428</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

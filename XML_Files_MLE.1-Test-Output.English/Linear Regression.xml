@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="usr1507669357350"> </a>
+	  <h1>Linear Regression</h1>
+
+	  <p style="line-height: 1em;">The Linear Regression function is composed of the functions LinReg and LinRegInternal. LinRegInternal takes a data set and outputs a linear regression model. LinReg takes the linear regression model and outputs its coefficients. The 0th coefficient corresponds to the slope intercept.</p>
+   <p style="line-height: 1em;">The output of the Linear Regression function can be input to the LinRegPredict function (as the model table).</p>
+
+   <a name="lzg1507669513896"> </a>
+   <h2>Linear Regression Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>LinReg version 1.5, LinRegInternal version 2.4</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM LinReg (
+  ON LinRegInternal (
+    ON { <i>table</i> | <i>view</i> | (<i>query</i>) }
+  ) AS <i>alias_1</i> PARTITION BY 1
+) AS <i>alias_2</i>;</tt>
+   </pre>
+   <p>
+      <b>Note:</b>  PARTITION BY 1 is required because all input data must be submitted to one worker.</p>
+   <a name="jmr1507669528089"> </a>
+   <h2>Linear Regression Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>LinRegInternal Input Table Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>x_component_i</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SMALLINT, INTEGER, BIGINT, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each x component.] Value of <i>i</i>th data point component.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>y_component</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SMALLINT, INTEGER, BIGINT, or DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Values of y component of data point. This column must be last.</div>
+         </td>
+      </tr>
+   </table>
+
+   <p>
+      <b>Note:</b>  The function ignores input rows with NULL values.</p>
+   <a name="yrs1507669547158"> </a>
+   <h2>Linear Regression Output</h2>
+   <a name="section_f4v_f3w_xcb"> </a>
+   <h3>LinReg Output Table Schema</h3>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">coefficient_name</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Name of created coefficient of linear regression model.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">value_col</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Value of created coefficient of linear regression model.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="dpf1507669699844"> </a>
+   <h2>Linear Regression Example</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">This example uses the LinRegInternal and LinReg functions to find the coefficients of the variables that determine the selling price of a home in a given neighborhood. The response variable, SellingPrice (the selling price of the house in dollars) is modeled on these independent (predictor) variables:</p>
+   <ul>
+      <li>House size (in square feet)</li>
+      <li>Lot size (in square feet)</li>
+      <li>Number of bedrooms</li>
+      <li>Whether the kitchen counter is granite (0 or 1)</li>
+      <li>Whether the bathrooms are upgraded (0 or 1)</li>
+   </ul>
+
+   <a name="section_jsq_khj_4db"> </a>
+   <h3>Input</h3>
+   <a name="table_mcf_shj_4db"> </a>
+   <table class="introtable">
+      <a name="table_mcf_shj_4db"> </a>
+      <h4 style="text-align: center;">housing_data</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">housesize</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">lotsize</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">bedrooms</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">granite</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">upgradedbathroom</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">sellingprice</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2397</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">14156</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">189900</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2200</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9600</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">195000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4032</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10150</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">197900</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9191</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">205000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3247</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">10061</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">224900</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2983</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9365</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">230000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3536</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">19994</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">325000</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3198</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">9669</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+   </table>
+
+   <p>
+      <b>Note:</b>  The LinRegInternal function skips the last row of housing_data because it contains a NULL value.</p>
+   <a name="section_hr1_lhj_4db"> </a>
+   <h3>SQL Call</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM LinReg (
+  ON LinRegInternal (
+  ON housing_data
+  ) PARTITION BY 1
+) AS dt;</tt>
+   </pre>
+   <a name="section_b1n_lhj_4db"> </a>
+   <h3>Output</h3>
+   <pre>
+      <tt>
+ coefficient_name value_col           
+ ---------------- ------------------- 
+ Intercept        -21739.296665036818
+ housesize        -26.930783509145726
+ lotsize             6.33452410459345
+ bedrooms           44293.76058418322
+ granite            7140.676293495372
+ upgradedbathroom   43179.19988882635</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+</t:intro>

@@ -1,0 +1,3054 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="hrv1507149150084"> </a>
+	  <h1>GLM</h1>
+
+	  <p style="line-height: 1em;">The generalized linear model (GLM) is an extension of the linear regression model that enables the linear equation to relate to the dependent variables by a link function. The GLM function supports several distribution families and associated link functions.</p>
+   <p style="line-height: 1em;">You can input the output table to the function GLMPredict_MLE.</p>
+   <p style="line-height: 1em;">For more information about generalized linear models, see:<ul>
+         <li>Dobson, A.J.; Barnett, A.G. (2008). <i>Introduction to Generalized Linear Models</i> (3rd ed.). Boca Raton, FL: Chapman and Hall/CRC. ISBN 1-58488-165-8.</li>
+         <li>Hardin, James; Hilbe, Joseph (2007). <i>Generalized Linear Models and Extensions</i> (2nd ed.). College Station: Stata Press. ISBN 1-59718-014-9.</li>
+      </ul>
+   </p>
+   <p>
+      <b>Note:</b>  The GLM function
+			implementation uses the Fisher Scoring Algorithm, which scales better than the
+			least-squares algorithm that the glm() function in the R package stats uses. The results
+			of the two algorithms usually match closely. However, when the input data is highly
+			skewed or has a large variance, the Fisher Scoring Algorithm can diverge, and you must
+			use data set knowledge and trial and error to select the optimal family and link
+			functions.</p>
+   <a name="blr1507149321203"> </a>
+   <h2>GLM Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 1.19</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM GLM (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  OUT TABLE OutputTable (<i>output_table</i>)
+  USING
+  [ TargetColumns ('<i>target_column</i>'[,...]) ]
+  [ CategoricalColumns ('<i>columnname_value_pair</i>'[,...]) ]
+  [ Family ('<i>family</i>') ]
+  [ LinkFunction ('<i>link</i>') ]
+  [ WeightColumn ('<i>weight_column</i>') ]
+  [ StopThreshold (<i>threshold</i>) ]
+  [ MaxIterNum (<i>max_iterations</i>) ]
+  [ Intercept ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+  [ Step ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'}) ]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <a name="cws1507149433550"> </a>
+	  <h2>GLM Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputTable</dt>
+      <dd>Specify the name for the output table of coefficients. This table must not exist.</dd>
+      <dt>TargetColumns</dt>
+      <dd>[Optional] Specify the name of the column that contains the dependent variable (Y) followed by the names of the columns that contain the predictor variables (X<sub>i</sub>), in this format: 'Y,X<sub>1</sub>,X<sub>2</sub>,...,X<sub>p</sub>'.</dd>
+      <dd>Default behavior: The first column of the InputTable is Y and the remaining InputTable columns are X<sub>i</sub>, except for the column specified by the WeightColumn syntax element.</dd>
+      <dt>CategoricalColumns</dt>
+      <dd>[Optional] Specify columnname-value pairs, each of which contains the name of a categorical input column and the category values in that column that the function is to include in the model that it creates.<a name="table_igz_wpy_fdb"> </a>
+         <table class="introtable">
+            <a name="table_igz_wpy_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">
+                     <i>columnname_value_pair</i>
+                  </div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'<i>columnname</i>:<i>max_cardinality</i>'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Limits categories in column to <i>max_cardinality</i> to most common ones and groups others together as 'others'.<p style="line-height: 1em; margin: 0px;">
+                        <br/>For example, 'column_a:3' specifies that for column_a, function uses 3 most common categories and sets category of rows that do not belong to those 3 categories to 'others'.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'<i>columnname</i>:(<i>category</i> [,...])'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Limits categories in column to those that you specify and groups others together as 'others'.<p style="line-height: 1em; margin: 0px;">
+                        <br/>For example, 'column_a : (red, yellow, blue)' specifies that for column_a, function uses categories red, yellow, and blue, and sets category of rows that do not belong to those categories to 'others'.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">'<i>columnname</i>'</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">All category values appear in model.</div>
+               </td>
+            </tr>
+         </table>
+
+         <p style="line-height: 1em;">If you specify the TargetColumns syntax element, the columns that you specify in the CategoricalColumns syntax element must also appear in the TargetColumns syntax element.</p>
+         <p>
+            <b>Note:</b>  For information about columns that you must identify as categorical, see Identification of Categorical Columns.</p>
+      </dd>
+      <dt>Family</dt>
+      <dd>[Optional] Specify the distribution exponential family, which is one of the following:<ul>
+            <li>'BINOMIAL' (Default)</li>
+            <li>'LOGISTIC' (equivalent to 'BINOMIAL')</li>
+            <li>'POISSON'</li>
+            <li>'GAUSSIAN'</li>
+            <li>'GAMMA'</li>
+            <li>'INVERSE_GAUSSIAN'</li>
+            <li>'NEGATIVE_BINOMIAL'</li>
+         </ul>
+         <p>
+            <b>Note:</b>  For Binomial/Logistic and Gaussian applications, Teradata recommends using GLML1L2 instead of GLM. GLML1L2 is expected to provide better performance and accuracy. </p>
+      </dd>
+      <dt>LinkFunction</dt>
+      <dd>[Optional] Specify the link function.</dd>
+      <dd>Default: 'CANONICAL'. The canonical link functions (default link functions) and the link functions that are allowed for each exponential family are listed in the tables in Supported Family/Link Function Combinations.</dd>
+      <dt>WeightColumn</dt>
+      <dd>[Optional] Specify the name of an InputTable column that contains the weights to assign to responses.</dd>
+      <dd>You can use non-NULL weights to indicate that different observations have different dispersions (with the weights being inversely proportional to the dispersions). Equivalently, when the weights are positive integers w<sub>i</sub>, each response y<sub>i</sub> is the mean of w<sub>i</sub> unit-weight observations. A binomial GLM uses prior weights to give the number of trials when the response is the proportion of successes. A Poisson GLM rarely uses weights.</dd>
+      <dd>If the weight is less than the response value, the function throws an exception. Therefore, if the response value is greater than 1, you must specify a weight that is greater than or equal to the response value.</dd>
+      <dd>Default behavior: All observations have equal weight.</dd>
+      <dt>StopThreshold</dt>
+      <dd>[Optional] Specify the convergence threshold.</dd>
+      <dd>Default: 0.01</dd>
+      <dt>MaxIterNum</dt>
+      <dd>[Optional] Specify the maximum number of iterations that the algorithm runs before quitting if the convergence threshold has not been met. The parameter <i>max_iterations</i> must be a positive INTEGER value.</dd>
+      <dd>Default: 25</dd>
+      <dt>Intercept</dt>
+      <dd>[Optional] Specify whether the function uses an intercept. For example, in ß0+ß1*X1+ß2*X2+ ....+ ßpXp, the intercept is ß0.</dd>
+      <dd>Default: 'true'</dd>
+      <dt>Step</dt>
+      <dd>[Optional] Specify whether the function uses a step. If the function uses a step, it runs with the GLM model that has the lowest Akaike information criterion (AIC) score, drops one predictor from the current predictor group, and repeats this process until no predictor remains.</dd>
+      <dd>Default: 'false'</dd>
+   </div>
+
+
+	
+   <a name="miq1507149222649"> </a>
+   <h2>Supported Family/Link Function Combinations</h2>
+   <a name="table_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Family Name</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Family Function Name</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Link</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Link Function Expression</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Used</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Binomial or Logistic</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">BINOMIAL or LOGISTIC</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">logit (default)<p style="line-height: 1em; margin: 0px;">
+                  <br/>probit</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>cloglog</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>log</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>cauchit</p>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">log(μ/(1-μ))<p style="line-height: 1em; margin: 0px;">
+                  <br/>Φ<sup>-μ</sup>
+               </p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>log[-log(1-μ)]</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>log(μ)</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>tan(π(μ - 1/2))</p>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">When the dependent variable (Y) has only two possible values (0 and 1, 'yes' and 'no', or 'true' and 'false').<p style="line-height: 1em; margin: 0px;">
+                  <br/>The algorithm applies the model to the data, predicts the most likely outcome for each input, and supplies a logit (logarithm of odds) for each outcome.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Gamma</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">GAMMA</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">inverse (default)<p style="line-height: 1em; margin: 0px;">
+                  <br/>identity</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>log</p>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">μ<sup>-1</sup>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>μ</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>log(μ)</p>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">When data is continuous with constant response variance and appears to be right-skewed.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Gaussian</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">GAUSSIAN</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">identity (default)<p style="line-height: 1em; margin: 0px;">
+                  <br/>inverse</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>log</p>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">μ<p style="line-height: 1em; margin: 0px;">
+                  <br/>μ<sup>-1</sup>
+               </p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>log(μ)</p>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">When the data is grouped around a single mean and can be graphed in a normal or bell curve distribution.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Inverse Gaussian</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INVERSE_GAUSSIAN</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">inverse_mu_squared (default)<p style="line-height: 1em; margin: 0px;">
+                  <br/>identity</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>inverse</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>log</p>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">μ<sup>-2</sup>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>μ</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>μ<sup>-1</sup>
+               </p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>log(μ)</p>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">When the data is grouped around a single mean but the graph appears to have a right-skewed curve distribution.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Poisson</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">POISSON</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">log (default)<p style="line-height: 1em; margin: 0px;">
+                  <br/>identity</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>square_root</p>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">log(μ)<p style="line-height: 1em; margin: 0px;">
+                  <br/>μ</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>μ<sup>1/2</sup>
+               </p>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">To model count data (nonnegative integers) and contingency models (matrixes of the frequency distribution of variables).<p style="line-height: 1em; margin: 0px;">
+                  <br/>The algorithm assumes that the dependent variable (Y) has a Poisson distribution (that is, that Y is segmented into intervals of, for example, time or geographic location) and then calculates the discrete probability of one or more events occurring within these segments.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Negative Binomial</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">NEGATIVE_BINOMIAL</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">log (default)<p style="line-height: 1em; margin: 0px;">
+                  <br/>identity</p>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">log(μ)<p style="line-height: 1em; margin: 0px;">
+                  <br/>μ</p>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">To model count data (nonnegative integers), usually over-dispersed response variables.</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="section_N10134_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The following table shows the common link functions for the common distribution exponential families. D identifies the default link for each family.</p>
+   <a name="table_fhm_dkt_wx"> </a>
+   <table class="introtable">
+      <a name="table_fhm_dkt_wx"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Link</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Link Descriptive</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Binomial (Logistic)</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Gamma</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Gaussian</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Inverse_Gaussian</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Poisson</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Negative_Binomial</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">logit</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">LOGIT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">D</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">probit</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">PROBIT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">*</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cloglog</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">COMPLEMENTARY_LOG_LOG</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">*</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">identity</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">IDENTITY</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left">
+            <div style="line-height: 1em;">*</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">D</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">*</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">*</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">*</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">inverse</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INVERSE</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left">
+            <div style="line-height: 1em;">D</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">*</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">*</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">log</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">LOG</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">*</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">*</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">*</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">*</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">D</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">D</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1/μ<sup>2</sup>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INVERSE_MU_SQUARED</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+         <td align="left">
+            <div style="line-height: 1em;">D</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">sqrt</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">SQUARE_ROOT</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+         <td align="left">
+            <div style="line-height: 1em;">*</div>
+         </td>
+         <td align="left"> </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">cauchit</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CAUCHIT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">*</div>
+         </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+         <td align="left"> </td>
+      </tr>
+   </table>
+
+
+   <a name="gpy1507149486046"> </a>
+   <h2>GLM Input</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>InputTable Schema</h3>
+   <p style="line-height: 1em;">The table can have additional columns, but the function ignores them.</p>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>dependent_variable_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any numeric SQL data type</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Dependent/response variable. Cannot be NULL. Must be first in TargetColumns syntax element. If Family is BINOMIAL or LOGISTIC, each value in this column must be either 0 or 1.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>predictor_variable_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears one or more times.] Independent/predictor variable. Cannot be NULL. Must follow <i>dependent_variable_column</i> in TargetColumns syntax element.<p>
+                  <b>Note:</b>  Teradata recommends using Scale function on numeric predictors before calling function.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>categorical_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CHARACTER, VARCHAR, INTEGER, BYTEINT, DATE, TIME (without TIME ZONE)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with CategoricalColumns syntax element.] Categorical variable. Must also appear in TargetColumns syntax element.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>weight_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with WeightColumn syntax element.] Weight to assign to response variable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="qmx1507149564629"> </a>
+   <h2>GLM Onscreen Output</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">The onscreen output of the GLM function is a table containing information about the regression analysis of the data, in two sections:<ul>
+         <li>Information about the model intercept and coefficients</li>
+         <li>Information about the regression (number of iterations and number of rows processed) and several goodness-of-fit measures</li>
+      </ul>
+   </p>
+
+   <a name="section_swr_qnt_ndb"> </a>
+   <h3>Columns</h3>
+   <a name="table_nm2_vnt_ndb"> </a>
+   <table class="introtable">
+      <a name="table_nm2_vnt_ndb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">predictor</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>Name of predictor or other reported result.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>For categorical predictors, the function selects one category as the reference category, and outputs one row for each other category for the column, in the format <i>predictor</i>.<i>level</i>.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>For example, if column color has categories 'red', 'blue', and 'green', and green is the reference category, the function outputs these rows:</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>color.red</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>color.blue</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">estimate</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">For predictors, estimated value of coefficient.<p style="line-height: 1em; margin: 0px;">
+                  <br/>For other reported results, calculated value.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">std_error</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">For predictors, standard deviation of the mean (standard error).<p style="line-height: 1em; margin: 0px;">
+                  <br/>For other reported results, not applicable (value 0).</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">z_score</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">For predictors, calculated z-score.<p style="line-height: 1em; margin: 0px;">
+                  <br/>For other reported results, calculated value.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">p_value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">For predictors, calculated p-value.<p style="line-height: 1em; margin: 0px;">
+                  <br/>For other reported results, not applicable (value 0).</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">significance</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">For predictors, indicator of predictor significance. For key to significance codes, see CoxPH Output.<p style="line-height: 1em; margin: 0px;">
+                  <br/>For other reported results, description of result.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_xvf_rnt_ndb"> </a>
+   <h3>Rows</h3>
+   <p style="line-height: 1em;">The onscreen output includes a row for each estimated parameter of the model and additional information about the model and the regression.</p>
+   <p style="line-height: 1em;">For Step ('true'), the rows of the following tables appear for the model at each step and describe the model at that step. For each step, the description includes only the predictors included in the model.</p>
+   <a name="table_bfh_k4t_ndb"> </a>
+   <table class="introtable">
+      <a name="table_bfh_k4t_ndb"> </a>
+      <h4 style="text-align: center;">Estimated Parameters of the Model</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Parameter</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">(Intercept)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Value of link function (Y) when all predictors are 0.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>predictor</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only for numerical predictor.] Predictor name.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>predictor</i>.<i>level</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only for categorical predictor.] Predictor name and level. Table has a row for each level of the predictor except one, which serves as the reference level.</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_s5z_p4t_ndb"> </a>
+   <table class="introtable">
+      <a name="table_s5z_p4t_ndb"> </a>
+      <h4 style="text-align: center;">Model and Regression Information</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Value</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ITERATIONS#</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of Fisher Scoring iterations performed on function.<p>
+                  <b>Note:</b>  With Step ('true'), function reports this number for each step.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">ROWS#</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Number of rows of data received as input.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Residual deviance</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Deviance, with degrees of freedom reported in significance column.<p>
+                  <b>Note:</b>  Residual deviance is not displayed when Family is GAMMA, NEGATIVE_BINOMIAL, or INVERSE_GAUSSIAN.</p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Pearson goodness of fit</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sum of squared Pearson residual.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">AIC</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Akaike information criterion, a measure of relative quality of model for given data set.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">BIC</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Bayesian information criterion, partly based on likelihood function and closely related to AIC. BIC is a criterion for model selection among a finite set of models; the model with the lowest BIC is preferred.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Wald Test</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Tests goodness of fit.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Dispersion parameter</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">For GAUSSIAN, the value of this parameter is estimated from the data. For all other families, this parameter value is 1.</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">The coefficients are also stored in the table <i>output_table</i> for later use.</p>
+   <p>
+      <b>Note:</b>  For the Gamma distribution density, AIC and BIC might have the value NaN when the dispersion parameter is very small and goodness-of-fit is poor.</p>
+   <a name="mbl1507149903431"> </a>
+   <h2>GLM Output Table</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The output table specified by the OutputTable syntax element stores the estimated coefficients and statistics, which are used by the functions GLMPredict_MLE and LikelihoodRatioTest.</p>
+
+   <a name="section_igy_yhv_xcb"> </a>
+   <h3>Columns</h3>
+   <a name="table_N10027_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10027_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">attribute</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Numeric index of predictor.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">predictor</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Predictor name.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">category</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">For categorical predictor, its level. For numeric predictor, NULL.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">estimate</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Estimated coefficient.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">std_error</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Standard error of coefficient.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;"> t_score</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with Family ('GAUSSIAN').] The t_score follows a t(N-p-1) distribution.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">z_score</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only without Family ('GAUSSIAN').] The z-score follows the N(0,1) distribution.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">p_value</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">p-value for z_score. (p-value represents significance of each coefficient.)</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">significance</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Indicator of predictor significance. For key to symbols in this column, see CoxPH Output.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">family</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Distribution exponential family, specified by Family syntax element.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_qfs_b3v_xcb"> </a>
+   <h3>Rows</h3>
+   <p style="line-height: 1em;">The OutputTable includes a row for each of the following parameters.</p>
+   <a name="table_N100AD_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100AD_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Parameter</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Loglik</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Log likelihood of model.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">(Intercept)</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Value of link function (Y) when all predictors are 0.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">Predictors</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Predictor name. For categorical predictor, table has a row for each level of the predictor.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="gtt1507149962123"> </a>
+   <h2>Odds Ratio and Confidence Intervals</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <p style="line-height: 1em;">You can exponentiate the coefficients (the estimate column in the output table coefficient estimates) and interpret them as odds ratios (ORs). To perform this type of computation, you can run the following SQL queries on the output of the GLM function.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+-- odds ratios only
+SELECT predictor, category,
+  EXP(estimate) AS odds_ratio
+  FROM glm_output;
+-- odds ratios and 95% CI
+SELECT predictor, category,
+  EXP(estimate) AS odds_ratio,
+  EXP(estimate - 1.96 * std_err) AS lower_bound,
+  EXP(estimate + 1.96 * std_err) AS upper_bound
+FROM glm_output;</tt>
+   </pre>
+   <a name="fev1507150032780"> </a>
+   <h2>Goodness-of-Fit Tests</h2>
+   <a name="section_N10011_N1000E_N10001"> </a>
+   <ul>
+      <li>Deviance</li>
+      <li>Wald Test</li>
+      <li>Pearson’s Chi-squared Statistic</li>
+   </ul>
+
+   <a name="rrb1507150140924"> </a>
+   <h3>Deviance</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The deviance for a model <i>M</i>
+      <sub>0</sub>, based on a data set <i>y</i>, is defined as
+                follows:</p>
+   <a name="fig_hvk_1nl_nw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWUAAAAeCAYAAAD0Fw8NAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAABpfSURBVHhe7d0FuC1V+QbwRQlKSUmIgFJKg6RIKyVIlwhySYuQUBHpVJBSQEpS4goIKAJS0p0GKB0iShiEQcx/fuvOOv85c2b22fvcfQ6Xe/f7PPMc7uzZMyu+7/3e71trNhNlOUIP4wSeffbZ8Pe//z0ssMACYdJJJy3O9tBDD+ML3nzzzfDkk0+G97///eEjH/lIcbY/Ji7+9vAuAyF///vfD9dff32YaKKJirM9dBt//etfw09+8pPw+9//vjjTQw8h0KYXXXRRuPrqq8N///vf4mz3QWzdfffd4YQTTgiPPvpocbY/eqQ8DuCf//xnOO2008KLL74YNtpoozDJJJMUn/TQTchCzjzzzPCrX/0qnHXWWeHhhx8uPulhQsfPfvaz8Mtf/jKcc845URhRtMMBgmuVVVaJPn766acXZ/tjkgNyFP/dw7sERHH77beHvfbaK5Yueug+XnnllXDBBReE//3vf2HUqFHROR544IEw66yzhummm664qocJDW+99Va47rrrov8RRIsuumi47777op189KMfHZasdeqppw4f/vCHw69//evwxhtvhIUXXrj4ZAx6pPwuQwpz5JFHhk9+8pPhi1/8YnG2h26D8plsssnCpz/96TDffPOFueeeOzrHjDPOGKaccsriqh4mNChbIMYlllgi+iC7mH766WOg9nfiiYenmMDuXnrppSgUCDHiIGFYFvpEH53ppEOa4XtqLhNSTfV73/te+M1vfhNOPfXUMPvssxdnxz0gNSnXUI30nXfeiYd7dGt+tWkk7OXtt9+O9tm0+MputcHYTEi2C6nvQy25ddvvzRWMRAmwlf2xdW1p1S/Z27bbbhvmmWeecNRRRxVnh6GmrEg+evTouJBisNuFeqqo8ac//ak4M/7jkUceCbfddltYZpllxmlCfuGFF8K5554bFyOHijvuuCNcccUVsX7eDUgvtemxxx4rzgwf2PJll10W/va3vxVn+iP17V//+ldxZsKBWuxdd9015Bos2zrvvPPCn//850hkYwv14GuuuSb+9zDozT68+uqrse/33ntvcaY/9MfCYdNiHlDiSy21VPjt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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <p style="line-height: 1em;">In the preceding equation:</p>
+   <a name="fig_gnc_hnl_nw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAeCAYAAAAo5+5WAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAOrSURBVEhLpVZbK21RGB3b/Zp7CMkLCbkLJS9ILkW5vClP4g/I2/kJPHj1KLfyKHnwpNxyJw+EouR+v3OOMc6em90+21nOGbWsZc61xvy+8Y1vzm37+Q64wfPzs+7e3t66fwduiU9PTzE0NIT7+3uUlZUhIyMDNpvNPvt3eNjvTnh6esLg4CCWl5cxNzeH8fFx7Ozs2GetwSXis7MzTE1NYXJyEtnZ2fD19cX29jaioqJQWVmJuLg4S5G7RHx1dSUZSFJVVYWmpiaUl5fDz88Pl5eXeH19tb/5NVwifnl5UdFYMC8vL42RjGP839PT01LEX7rif+CWmMOM8u3tTRF6eHh8y3ZuiY+OjlREak55EhISUFFRYZ/9O/5oN5L19fVhc3NT0a6vr2N4eBhra2vKxApciE9OTkQyPz+PoqIitLS0oLCwUD4eGBjA4+Oj/c2v4UI8OzuL7u5uNDc3y8dEbGys7MbIKYsVOBFPT0+jt7dXBauurkZISIjGHx4ecHx8jMPDQ81ZgRMxNTw4OEBNTQ38/f3to8DNzY2ahqA7rMDxFrVdXFxEYGAgWltbnZqA0XJBymGlOQi1FnVbWFjA0tKS2pYbD5+NhycmJiRHZGSkZWJFzEYg2e7urqKiJCRmBmNjY5iZmUFYWBjS09PV0lagiOlNNgQ7q7GxER0dHdrVuH0yWvr5/PwcOTk5GieYJb8zWfn4+GjcQMTcZK6vr2Wr/Px8BAcHa5Ifbm1t6eIOV1tbqzFmNzo6iouLCwXDgjY0NCAvL08ZE5KC0fBiutHR0Zog2AwkZTRZWVkao+V4CERERKjIbW1tKCgoQH9/v9NhIGK2MI+gmJgYxMfHa4IpUmtemZmZsiCxsrIizbnhkzAtLQ3JyclqLPYBeQgRh4eHy2YBAQEO/1JfFo6LlpaW6syjn+kefmy0JhgEr42NjQ+/8w87jDKwIMZOJGAULBhPE4KElIYSmUOAMM/0u1PEBM802m5vb096j4yMKAoWjOQEi3x3d+cUgAGLauYIEVOC9vZ26dXZ2Ymuri5VuqenR9U2YGShoaFyAhc1INnt7a3ITcs78mHh6uvrtUVSPy6WlJRkn/0NjqWkpEiiz4cqF2HjJCYmIigoSGOiNwYnUXFxMXJzc5GamurwpAGJ6VV+zKIakJjF5/5t7Or54x16sghms7+/r0KxQehr/rAhcV1dnfYT4tunNPVcXV3VDxpaklmRoqSkRHuJyfKfj3866POnLOiHU4Bff50Uzvm0JRYAAAAASUVORK5CYII="
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <p style="line-height: 1em;">denotes the fitted values of the parameters in the model <i>M</i>
+      <sub>0</sub>.</p>
+   <a name="fig_y2j_qnl_nw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAeCAYAAAAsEj5rAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAOBSURBVEhLlVVZK7VhFF2OY5aZUIaMuTakkBshKdzIBYkbd1Iu/QU/wQ+QoWRIkaFEyg1lyJA5ZZ7n4XzvWt97TsR7DqvO8O7nefez915r78fLYQBu8PDwALvdDh8fH3h5eZlWa7h1uL29je7ubkRGRqKqqgqxsbHmijVs5u837O/vo7e3F2tra5iYmMDk5CTOzs7MVWt8i5CPdDYyMqLfwsJCXF1dYXd3F5mZmSgqKkJMTAxstp9j+dF6dHQEf39/VFdXo7y8HPX19cjJydHa9fW1DrXCjzV8enrC6+sr/Pz84OvrK9vj4yM+Pj5EjjuCPLL8V1g6pPn9/V2R8L+3t/ffZcO/zpeWlpYwPz+PoKAgpVtaWoqkpCStucMXUpzOZmdnMTg4iNvbW5EwOjqKsbGxX8nmG8uMqqurS1Jpb29HY2OjIuvv78f09LS5yxpfHFJ3nZ2dqldLS4siZh0TEhJwcnIiOXmCy+HLywv6+vqwvr6OlJQUpKeny06pPD8/4+LiAvf397K5g8shhwBbLTExEfn5+a56MkJGxnrSuSfI4dvbG1ZXV3FwcKDOKCgo0CJBJ2w7Hsju8QQ7v46PjzE1NSVGd3Z21McsATvi9PRUhwUGBkpCniCHh4eHkgZfYjRsO0bGFtzc3FTk7OX4+Hi95BYU9vj4uMOonaO5udmxvLxMk2Ac5Ojo6HCEhIQ42traHFtbW+aKNVRDpseo0tLSEBUVpYMIsst5SGJyc3ORmppqrljDxrSYkuFcDgMCAswl4PLyUg4/y8gTbIzu5uZGAzMrKwtGelo4Pz9Xu1EuDQ0NGq6/gZ1EhIeH6yIKDQ01zcDGxoYcMs3i4mIdxCyoT5aCZDEDBsKswsLC1KI2OoqLi5NEmD7Bes7NzUlONTU1yMjIkN0pdtp7enqwsLAAgygMDw9LatSzSGGETGlxcVE6HBoa0uaysjLU1dXp9M/Y29vToCCBlBOjZGtSapqHnCyMaGBgAMHBwWKVJNTW1iI6OtoVmRPca0hMZWIglZWVKCkp0RBxDVg2/srKil7gRorY6h4mUZyZvF75SU5ORlNTEyoqKv53CsG2ysvLM59+xt3dnRzx4NbWVmRnZ6u7WB5Kz1XD34JkkX1OJaO7ND8jIiJUa97fug2dKf8G1KzRmpiZmZEjPrNUzIwjj/iTQ24lk0zNCdoYGac8APwDFYEsuFn8+7IAAAAASUVORK5CYII="
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <p style="line-height: 1em;">denotes the fitted parameters for the full model (or saturated model).</p>
+   <p style="line-height: 1em;">Both sets of fitted values are implicitly functions of the observations <i>y</i>. In this case, the full model is a model with a parameter for every observation so that the data are fitted exactly.</p>
+   <p style="line-height: 1em;">The deviance is used to compare two models—in particular in the case of generalized linear models where it has a similar role to residual variance from ANOVA in linear models (RSS).</p>
+   <p style="line-height: 1em;">Suppose in the framework of the GLM that there are two nested models, <i>M</i>
+      <sub>1</sub> and <i>M</i>
+      <sub>2</sub>. In particular, suppose
+                that <i>M</i>
+      <sub>1</sub> contains the
+                parameters in <i>M</i>
+      <sub>2</sub>, and
+                    <i>k</i> additional parameters. Then, under the null
+                hypothesis that <i>M</i>
+      <sub>2</sub> is
+                the true model, the difference between the deviances for the two models follows an
+                approximate chi-squared distribution with <i>k</i>-degrees of freedom. This provides us an alternative way for computing
+                the log-likelihood ratio of two models.</p>
+   <p style="line-height: 1em;">Deviance is implemented in the GLM function. It computes residual deviance from model deviance and saturated deviance. The function does not compute null deviance.</p>
+
+   <a name="sbi1507150190639"> </a>
+   <h3>Wald Test</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">Significance tests can be performed for individual regression coefficients (that is, H<sub>0</sub> : β<sub>j</sub> = 0) by computing the Wald statistics, which are similar to the partial t-statistics from classical regression:</p>
+   <a name="fig_z4v_xnl_nw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <p style="line-height: 1em;">Under the null hypothesis that β<sub>j</sub> = 0, the Wald test statistic w<sub>j</sub> follows approximately a standard normal distribution (and its square is approximately a chi-square on one-degree of freedom).</p>
+   <p style="line-height: 1em;">This quantity is computed by the GLM function as the Wald Test, as well as the corresponding 'p_value'. It is in the output table, and also displayed on the screen.</p>
+
+   <a name="jie1507154111881"> </a>
+   <h3>Pearson’s Chi-squared Statistic</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">The deviance generalizes the sum of squared errors. Another generalization of sum of squared errors is Pearson’s chi-squared statistic. Given a generalized linear model with responses y<sub>i</sub>, weights w<sub>i</sub>, fitted means μ<sub>i</sub>, variance function v(μ) and dispersion φ = 1, the Pearson goodness-of-fit statistic is</p>
+   <a name="fig_kbc_v4l_nw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKQAAAAuCAYAAACmnrL/AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAA83SURBVHhe7Z0JtJTjG8Cf20J0r+xbKSmubvYllK1EFDlRVLriODoiZAllO5aDZImEUESoYytkSYsslX3fQxFyS1nqhsr7f37PvN/tm2lm7kzdmTv3/ud3zpz7ve/3zcw33/e8z/Y+73cLlq1Y6SRPnixTv349WbVqtfzzT7kUNiySgjqi26ukwCn+mDx5ssaSJUtk+rSpsnx5uZQtKpNePXtJkx12EJXLPLkAeqG26YbVq1f7rWh+++03GTNmjBS3KpE+paVSp05d6dW7twlpXkPmAN98843dvF133dX31A6+//57Wblypeyyyy6+J8Knn34q7du3l7feekt22mkn++2FhYUyefLkvIasbtAWI0aMkA033ND35C5//PGHjBo1yrcqZ/vtt5cHH3xQ3nvvPd8TASF85JFHZKuttrL2qlWr1H/8R+rVq5fXkNXJ8uXL5bzzzpOzzz5b9t13X9+bm3z55Zdy6623ykYbbSQtWrSw8y4oKPB7E8P7hg0bJnfffXfCQde/f38123Vk5MiReQ1Znbzxxhvy559/5rwwYlKfeeYZOf3002X48OFSt25dmTJlit+bHNyQHTRYeeihh3xPNOPGjZN///3XhNZAQ+apHvQGu4kTJ/pWbvP333/7rQjLli3zW5Xz8ccfu/3228+pP+l7Irz66qvutttus+1ff/3V/fLLLy6vIdPkr7/+Ms2mN8T3RCgvL/dbInpxZfHixb4Vn3nz5slnn30me+21l+9Zw48//ijvvvuu/Pfff74nggpFtUTifCfnFGbjjTc2vy8VmjVrJvXr15e3337b94jMmDFD7rjjDvMzn332Wbnmmmtk/vz5eZOdDkSMjz76qHz33Xdy6qmnmoAAgtWhQwcTQm7ewIED5bTTTrPjE/Htt9+aM7/tttv6ngh81pw5c+Sxxx6T22+/3fdGInG+g5uWbZ588kk555xzZMWKFb5H5Oabb5ZLL700pQGyySabWKSNPwkLFy6UW265RT744AO59tpr5YILLpBPPvnErkVeINOAiPGoo46yKDGsJWfOnClz586VLbfc0hz9Qw45xCJSBC7g/fffl6VLl/qWmGBtt912azn63PwePXpIWVmZfPTRR75X5LnnnrObv/nmm1ubz+czw9+RKfD/tt56awtoAMF84oknZJtttokKbPAFiajD1iIALck1AgSPFA9pIQYgg/O1116zY/ICmSI49jjnCOPzzz8vu+22mwkgkFdTH8m24dhjjzXBDUCQbrrppijthlkvKiryrQi4A/vvv79tY9IOPPBA2wZu4BFHHGHaBr744gu59957E2phNOq0adPsRid6qQ8nr7/+ugl3IhB4NFvbtm19j8iiRYtkwYIF0qZNG98TgX71CaMGXgADid9cmUatkrQPH4H0f/311zZq8IvIKWWar776SsaPHy8NGjQwf4vzSKYxGM0cF/zltcEGG1jKAZ8Is4Svkwwu9j777GMpkBNOOMHMNkJ00UUXmZmGN99807RIx44drR2Pq6++2kw/+bhYZs2aZVqSz9lxxx3tRrdq1Uoef/xxOfLII/1RieE6MBPyyiuv2LVJBL8fDY3JLCkp8b3RoPEOPfRQGwBNmza1Ps4Zk4tl2HTTTa2vMu655x77PWPHjrUoPRFVIpCzZ8829du8eXP7QjTH9ddf7/dmDvyOPfbYw7ZxjvFHIJ5QIoRoE3J/vHDSEWiNACtML2YR7ZaMd955xzTX77//bhoOTcHvxrwGN5VBcsABB1g/iW/OE80a3FAgL4fAkE6JBd+MoAYNB/zt3r27aVg0JH8xcwyEWC1b1SB8DFTSUwF9+/a1NueOdm3UqJH5hZ9//rnsvffestlmm/kj14DPqVF0lF8cFwRyfdAb49q1a+fUbFmb8F1PyGnkZO1Mc9999zkVNqca2enF872po2bSaaDi9EK6gw46yKlm83viM2nSJKe+n285p36cU61qKQtQrefUlDr1p6ytfqfTm+COO+44awfwOSq0vhUNx6pQ+pZzGoG6Fi1a2LZqKvtM1cb2N9OcddZZTn1i33JOB7MrLi52Ovidam43btw4t2TJEqc+pVMr4a666ip/ZDTnnnuuXYfKiPIh0RSMTBxNNB5R0A8//GD70C74Svgm/GUekj5MApohiDhxfoERkw3OPPNM0YtmWpHtcCCQCsyh9u7d27QVkWDsNFcszFI0bNjQrtNPP/0kL730kvXxvWgAfDP8S0w/1+Dwww83LYLDHob34PzHu04kynGBMNWcz8MPPyydOnWyfWj6ww47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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <p style="line-height: 1em;">If the fitted model is correct and the observations y<sub>i</sub> are approximately normal, X<sup>2</sup> is approximately distributed as X<sup>2</sup>on the residual degrees of freedom for the model. Both the deviance and the generalized Pearson X<sup>2</sup> have exact X<sup>2</sup> distributions for Normal-theory linear models (assuming of course that the model is true), and asymptotic results are available for the other distributions. The deviance has a general advantage as a measure of discrepancy in that it is additive for nested sets of models if maximum-likelihood estimates are used, whereas X<sup>2</sup> in general is not. However, X<sup>2</sup> may sometimes be preferred because of its more direct interpretation.</p>
+   <p style="line-height: 1em;">The GLM function computes the Pearson’s goodness of fit.</p>
+
+   <a name="xlp1510786373012"> </a>
+   <h2>GLM Examples</h2>
+   <a name="poj1507150410273"> </a>
+   <h3>GLM Example: Logistic Regression Analysis with Intercept</h3>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">In logistic regression, the dependent variable (Y) has only two possible values (0 and 1, 'yes' and 'no', or 'true' and 'false'). The algorithm applies the model to the data and predicts the most likely outcome.</p>
+
+   <a name="section_qpn_p1z_m2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The InputTable, admissions_train, contains data about applicants to an academic program. For each applicant, attributes in the table include a Masters Degree indicator, a grade point average (on a 4.0 scale), a statistical skills indicator, a programming skills indicator, and an indicator of whether the applicant was admitted. The Masters Degree, statistical skills, and programming skills indicators are categorical variables. Masters degree has two categories (yes or no), while the other two have three categories (Novice, Beginner and Advanced). For admitted status, 1 indicates that the student was admitted and 0 indicates otherwise.</p>
+   <a name="table_mg4_z1z_m2b"> </a>
+   <table class="introtable">
+      <a name="table_mg4_z1z_m2b"> </a>
+      <h4 style="text-align: center;">InputTable: admissions_train</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">masters</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">gpa</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">stats</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">programming</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">admitted</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.95</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.76</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.44</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.82</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.71</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">11</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">12</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.65</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">13</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">14</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.45</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">15</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">16</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.7</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">17</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.83</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">18</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.81</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">19</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.98</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">20</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">21</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.87</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">22</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.46</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">23</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.59</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">24</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1.87</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">25</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.96</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">26</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.57</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">27</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.96</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">28</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.93</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">29</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">30</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.79</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">31</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">32</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.46</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">33</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.55</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">34</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.85</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">35</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.68</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">36</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">37</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.52</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">38</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2.65</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">39</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.75</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Advanced</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">40</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">3.95</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Novice</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Beginner</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_q2y_p1z_m2b"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">The default option is to include the intercept with the step syntax element set to false. The response variable (admitted, in this example) must be specified as the first variable listed in the TargetColumns syntax element, followed by the other predictors.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE glm_admissions_model;
+
+SELECT * FROM GLM (
+  ON admissions_train AS InputTable
+  OUT TABLE OutputTable (glm_admissions_model)
+  USING
+  TargetColumns ('admitted','masters', 'gpa', 'stats', 'programming')
+  CategoricalColumns ('masters', 'stats', 'programming')
+  Family ('LOGISTIC')
+  LinkFunction ('LOGIT')
+  WeightColumn ('1')
+  StopThreshold (0.01)
+  MaxIterNum (25)
+  Step ('false')
+  Intercept ('true')
+) AS dt;</tt>
+   </pre>
+   <a name="section_crj_q1z_m2b"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The output table shows the model statistics.</p>
+   <pre>
+      <tt>
+ predictor               estimate             std_error          z_score              p_value              significance                            
+ ----------------------- -------------------- ------------------ -------------------- -------------------- --------------------------------------- 
+ (Intercept)               1.0775099992752075  2.920759916305542  0.36891400814056396   0.7121919989585876                                        
+ masters.no                  2.21655011177063 1.0199899673461914    2.173110008239746 0.029771899804472923 *                                      
+ gpa                     -0.11393500119447708  0.802573025226593 -0.14196200668811798   0.8871099948883057                                        
+ stats.novice             0.04068480059504509 1.1156699657440186 0.036466699093580246   0.9709100127220154                                        
+ stats.beginner            0.5266180038452148 1.2229000329971313  0.43063101172447205   0.6667360067367554                                        
+ programming.beginner      -1.769760012626648  1.069000005722046  -1.6555299758911133  0.09781769663095474 .                                      
+ programming.novice       -0.9803500175476074 1.1400400400161743  -0.8599230051040649    0.389831006526947                                        
+ ITERATIONS #                             4.0                0.0                  0.0                  0.0 Number of Fisher Scoring iterations    
+ ROWS #                                  40.0                0.0                  0.0                  0.0 Number of rows                         
+ Residual deviance          38.90380096435547                0.0                  0.0                  0.0 on 33 degrees of freedom               
+ Pearson goodness of fit    37.79050064086914                0.0                  0.0                  0.0 on 33 degrees of freedom               
+ AIC                        52.90380096435547                0.0                  0.0                  0.0 Akaike information criterion           
+ BIC                        64.72595977783203                0.0                  0.0                  0.0 Bayesian information criterion         
+ Wald Test                  9.896419525146484                0.0                  0.0  0.19451963901519775                                        
+ Dispersion parameter                     1.0                0.0                  0.0                  0.0 Taken to be 1 for BINOMIAL and POISSON.</tt>
+   </pre>
+   <p style="line-height: 1em;">For categorical variables, the model selects a reference category. This example uses the Advanced category as a reference for the stats variable.</p>
+   <p style="line-height: 1em;">This query returns the following table:</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM glm_admissions_model;</tt>
+   </pre>
+   <pre>
+      <tt>
+ attribute predictor   category estimate             std_err            z_score              p_value              significance family   
+ --------- ----------- -------- -------------------- ------------------ -------------------- -------------------- ------------ -------- 
+        -1 Loglik      NULL      -19.451900482177734               40.0                  6.0                  0.0 NULL         LOGISTIC
+         0 (Intercept) NULL       1.0775099992752075  2.920759916305542  0.36891400814056396   0.7121919989585876              LOGISTIC
+         1 masters     yes                      NULL               NULL                 NULL                 NULL NULL         LOGISTIC
+         2 masters     no           2.21655011177063 1.0199899673461914    2.173110008239746 0.029771899804472923 *            LOGISTIC
+         3 gpa         NULL     -0.11393500119447708  0.802573025226593 -0.14196200668811798   0.8871099948883057              LOGISTIC
+         4 stats       advanced                 NULL               NULL                 NULL                 NULL NULL         LOGISTIC
+         5 stats       novice    0.04068480059504509 1.1156699657440186 0.036466699093580246   0.9709100127220154              LOGISTIC
+         6 stats       beginner   0.5266180038452148 1.2229000329971313  0.43063101172447205   0.6667360067367554              LOGISTIC
+         7 programming advanced                 NULL               NULL                 NULL                 NULL NULL         LOGISTIC
+         8 programming beginner   -1.769760012626648  1.069000005722046  -1.6555299758911133  0.09781769663095474 .            LOGISTIC
+         9 programming novice    -0.9803500175476074 1.1400400400161743  -0.8599230051040649    0.389831006526947              LOGISTIC</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+   <a name="xpa1507150856449"> </a>
+  <h3>GLM Example: Logistic Regression Analysis with Step</h3>
+
+  
+    <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">This example creates the regression model using the Step syntax element with an intercept.</p>
+   <p style="line-height: 1em;">After each step, the function drops one predictor from the current predictor group. The next step starts with the GLM model that has the lowest AIC score model. The function repeats this process until only the intercept remains.</p>
+
+
+    <a name="section_qpn_p1z_m2b"> </a>
+   <h4>Input</h4>
+   <ul>
+        <li>InputTable: admissions_train, as in GLM Example: Logistic Regression Analysis with Intercept</li>
+
+      </ul>
+
+
+    <a name="section_q2y_p1z_m2b"> </a>
+   <h4>SQL
+      Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE glm_admissions_model1;
+
+SELECT * FROM GLM (
+  ON admissions_train AS InputTable
+  OUT TABLE OutputTable (glm_admissions_model1)
+  USING
+  TargetColumns ('admitted', 'masters', 'gpa', 'stats', 'programming')
+  CategoricalColumns ('masters', 'stats', 'programming')
+  Family ('LOGISTIC')
+  LinkFunction ('LOGIT')
+  WeightColumn ('1')
+  StopThreshold (0.01)
+  MaxIterNum (25)
+  Step ('true')
+  Intercept ('true')
+) AS dt;</tt>
+   </pre>
+
+    <a name="section_crj_q1z_m2b"> </a>
+   <h4>Output</h4>
+   <p style="line-height: 1em;">The model starts with 33 degrees of freedom and then consecutively
+        increases the degrees of freedom to 39, at which point the response is modeled with only the
+        intercept. The model parameters are obtained progressively by dropping one predictor
+        variable.</p>
+   <pre>
+      <tt>
+ predictor               estimate             std_error          z_score              p_value              significance                            
+ ----------------------- -------------------- ------------------ -------------------- -------------------- --------------------------------------- 
+ (Intercept)               1.0775099992752075  2.920759916305542  0.36891400814056396   0.7121919989585876                                        
+ masters.no                  2.21655011177063 1.0199899673461914    2.173110008239746 0.029771899804472923 *                                      
+ gpa                     -0.11393500119447708  0.802573025226593 -0.14196200668811798   0.8871099948883057                                        
+ stats.novice             0.04068480059504509 1.1156699657440186 0.036466699093580246   0.9709100127220154                                        
+ stats.beginner            0.5266180038452148 1.2229000329971313  0.43063101172447205   0.6667360067367554                                        
+ programming.beginner      -1.769760012626648  1.069000005722046  -1.6555299758911133  0.09781769663095474 .                                      
+ programming.novice       -0.9803500175476074 1.1400400400161743  -0.8599230051040649    0.389831006526947                                        
+ ITERATIONS #                             4.0                0.0                  0.0                  0.0 Number of Fisher Scoring iterations    
+ ROWS #                                  40.0                0.0                  0.0                  0.0 Number of rows                         
+ Residual deviance          38.90380096435547                0.0                  0.0                  0.0 on 33 degrees of freedom               
+ Pearson goodness of fit    37.79050064086914                0.0                  0.0                  0.0 on 33 degrees of freedom               
+ AIC                        52.90380096435547                0.0                  0.0                  0.0 Akaike information criterion           
+ BIC                        64.72595977783203                0.0                  0.0                  0.0 Bayesian information criterion         
+ Wald Test                  9.896419525146484                0.0                  0.0  0.19451963901519775                                        
+ Dispersion parameter                     1.0                0.0                  0.0                  0.0 Taken to be 1 for BINOMIAL and POISSON.
+ (Intercept)               1.3463000059127808  2.819309949874878  0.47752898931503296     0.63298499584198                                        
+ gpa                     0.027686599642038345 0.7638930082321167  0.03624410182237625   0.9710879921913147                                        
+ stats.novice              0.8634170293807983 0.9571099877357483   0.9021090269088745   0.3669990003108978                                        
+ stats.beginner           0.16730499267578125 1.1734999418258667  0.14257000386714935   0.8866299986839294                                        
+ programming.beginner      -2.361370086669922 0.9967899918556213  -2.3689699172973633  0.01783760078251362 *                                      
+ programming.novice       -0.8239459991455078 1.0408200025558472  -0.7916290163993835   0.4285770058631897                                        
+ ITERATIONS #                             3.0                0.0                  0.0                  0.0 Number of Fisher Scoring iterations    
+ ROWS #                                  40.0                0.0                  0.0                  0.0 Number of rows                         
+ Residual deviance          44.76940155029297                0.0                  0.0                  0.0 on 34 degrees of freedom               
+ Pearson goodness of fit    39.89500045776367                0.0                  0.0                  0.0 on 34 degrees of freedom               
+ AIC                        56.76940155029297                0.0                  0.0                  0.0 Akaike information criterion           
+ BIC                        66.90267944335938                0.0                  0.0                  0.0 Bayesian information criterion         
+ Wald Test                  8.555549621582031                0.0                  0.0   0.2001592367887497                                        
+ Dispersion parameter                     1.0                0.0                  0.0                  0.0 Taken to be 1 for BINOMIAL and POISSON.
+ (Intercept)               0.6764150261878967 0.7227180004119873   0.9359319806098938   0.3493080139160156                                        
+ masters.no                 2.201469898223877 1.0115900039672852   2.1762499809265137 0.029536699876189232 *                                      
+ stats.novice              0.0419435016810894  1.113700032234192  0.03766139969229698   0.9699580073356628                                        
+ stats.beginner             0.504393994808197 1.2106399536132812  0.41663599014282227   0.6769449710845947                                        
+ programming.beginner     -1.7793400287628174  1.067870020866394  -1.6662399768829346  0.09566470235586166 .                                      
+ programming.novice       -0.9461399912834167 1.1110800504684448  -0.8515459895133972  0.39446601271629333                                        
+ ITERATIONS #                             4.0                0.0                  0.0                  0.0 Number of Fisher Scoring iterations    
+ ROWS #                                  40.0                0.0                  0.0                  0.0 Number of rows                         
+ Residual deviance         38.924198150634766                0.0                  0.0                  0.0 on 34 degrees of freedom               
+ Pearson goodness of fit    37.71229934692383                0.0                  0.0                  0.0 on 34 degrees of freedom               
+ AIC                       50.924198150634766                0.0                  0.0                  0.0 Akaike information criterion           
+ BIC                        61.05747604370117                0.0                  0.0                  0.0 Bayesian information criterion         
+ Wald Test                  9.884750366210938                0.0                  0.0  0.12959010899066925                                        
+ Dispersion parameter                     1.0                0.0                  0.0                  0.0 Taken to be 1 for BINOMIAL and POISSON.
+ (Intercept)               0.9898110032081604 2.9018800258636475   0.3410930037498474   0.7330330014228821                                        
+ masters.no                 2.136090040206909 0.9219740033149719   2.3168599605560303  0.02051120065152645 *                                      
+ gpa                     -0.06874030083417892  0.793757975101471 -0.08660110086202621   0.9309890270233154                                        
+ programming.beginner     -1.7227200269699097 0.9303900003433228  -1.8516099452972412  0.06408239901065826 .                                      
+ programming.novice       -0.9160929918289185 1.0674799680709839  -0.8581849932670593   0.3907899856567383                                        
+ ITERATIONS #                             4.0                0.0                  0.0                  0.0 Number of Fisher Scoring iterations    
+ ROWS #                                  40.0                0.0                  0.0                  0.0 Number of rows                         
+ Residual deviance          39.09859848022461                0.0                  0.0                  0.0 on 35 degrees of freedom               
+ Pearson goodness of fit    38.03499984741211                0.0                  0.0                  0.0 on 35 degrees of freedom               
+ AIC                        49.09859848022461                0.0                  0.0                  0.0 Akaike information criterion           
+ BIC                        57.54299545288086                0.0                  0.0                  0.0 Bayesian information criterion         
+ Wald Test                  9.907159805297852                0.0                  0.0   0.0779089704155922 .                                      
+ Dispersion parameter                     1.0                0.0                  0.0                  0.0 Taken to be 1 for BINOMIAL and POISSON.
+ (Intercept)               0.6668530106544495 2.7522799968719482  0.24229200184345245   0.8085539937019348                                        
+ masters.no                2.5508100986480713 0.9602739810943604    2.656330108642578 0.007899539545178413 **                                     
+ gpa                     -0.20816700160503387 0.7709010243415833 -0.27003100514411926   0.7871360182762146                                        
+ stats.novice             -0.8480880260467529 0.9615479707717896  -0.8820019960403442  0.37777599692344666                                        
+ stats.beginner           0.16571399569511414 1.0986599922180176  0.15083299577236176   0.8801079988479614                                        
+ ITERATIONS #                             4.0                0.0                  0.0                  0.0 Number of Fisher Scoring iterations    
+ ROWS #                                  40.0                0.0                  0.0                  0.0 Number of rows                         
+ Residual deviance         41.898399353027344                0.0                  0.0                  0.0 on 35 degrees of freedom               
+ Pearson goodness of fit    41.86180114746094                0.0                  0.0                  0.0 on 35 degrees of freedom               
+ AIC                       51.898399353027344                0.0                  0.0                  0.0 Akaike information criterion           
+ BIC                       60.342796325683594                0.0                  0.0                  0.0 Bayesian information criterion         
+ Wald Test                  8.054160118103027                0.0                  0.0  0.15327592194080353                                        
+ Dispersion parameter                     1.0                0.0                  0.0                  0.0 Taken to be 1 for BINOMIAL and POISSON.
+ (Intercept)                1.040079951286316  2.745699882507324  0.37880200147628784   0.7048349976539612                                        
+ gpa                      0.11817099899053574 0.7419229745864868  0.15927700698375702   0.8734509944915771                                        
+ programming.beginner     -1.9427800178527832  0.859013020992279  -2.2616400718688965  0.02371940016746521 *                                      
+ programming.novice        -0.447378009557724 0.9628700017929077 -0.46463000774383545    0.642195999622345                                        
+ ITERATIONS #                             3.0                0.0                  0.0                  0.0 Number of Fisher Scoring iterations    
+ ROWS #                                  40.0                0.0                  0.0                  0.0 Number of rows                         
+ Residual deviance          45.63159942626953                0.0                  0.0                  0.0 on 36 degrees of freedom               
+ Pearson goodness of fit    39.70479965209961                0.0                  0.0                  0.0 on 36 degrees of freedom               
+ AIC                        53.63159942626953                0.0                  0.0                  0.0 Akaike information criterion           
+ BIC                        60.38711929321289                0.0                  0.0                  0.0 Bayesian information criterion         
+ Wald Test                  8.026900291442871                0.0                  0.0  0.09059777110815048 .                                      
+ Dispersion parameter                     1.0                0.0                  0.0                  0.0 Taken to be 1 for BINOMIAL and POISSON.
+ (Intercept)               0.7462490200996399 0.7035899758338928    1.060629963874817  0.28885799646377563                                        
+ masters.no                2.1295900344848633 0.9188539981842041    2.317660093307495  0.02046789973974228 *                                      
+ programming.beginner      -1.729099988937378  0.927944004535675  -1.8633699417114258  0.06241010129451752 .                                      
+ programming.novice       -0.8966760039329529 1.0433399677276611  -0.8594290018081665   0.3901039958000183                                        
+ ITERATIONS #                             4.0                0.0                  0.0                  0.0 Number of Fisher Scoring iterations    
+ ROWS #                                  40.0                0.0                  0.0                  0.0 Number of rows                         
+ Residual deviance            39.106201171875                0.0                  0.0                  0.0 on 36 degrees of freedom               
+ Pearson goodness of fit    37.95159912109375                0.0                  0.0                  0.0 on 36 degrees of freedom               
+ AIC                          47.106201171875                0.0                  0.0                  0.0 Akaike information criterion           
+ BIC                       53.861717224121094                0.0                  0.0                  0.0 Bayesian information criterion         
+ Wald Test                   9.89758014678955                0.0                  0.0  0.04218873009085655 *                                      
+ Dispersion parameter                     1.0                0.0                  0.0                  0.0 Taken to be 1 for BINOMIAL and POISSON.
+ (Intercept)              0.38512998819351196  2.611409902572632  0.14747999608516693   0.8827530145645142                                        
+ masters.no                2.2676401138305664 0.8647770285606384    2.622230052947998 0.008735660463571548 **                                     
+ gpa                      -0.1607159972190857  0.729777991771698  -0.2202250063419342   0.8256959915161133                                        
+ ITERATIONS #                             4.0                0.0                  0.0                  0.0 Number of Fisher Scoring iterations    
+ ROWS #                                  40.0                0.0                  0.0                  0.0 Number of rows                         
+ Residual deviance         42.825401306152344                0.0                  0.0                  0.0 on 37 degrees of freedom               
+ Pearson goodness of fit   40.705101013183594                0.0                  0.0                  0.0 on 37 degrees of freedom               
+ AIC                       48.825401306152344                0.0                  0.0                  0.0 Akaike information criterion           
+ BIC                        53.89204025268555                0.0                  0.0                  0.0 Bayesian information criterion         
+ Wald Test                  7.896420001983643                0.0                  0.0 0.048201605677604675 *                                      
+ Dispersion parameter                     1.0                0.0                  0.0                  0.0 Taken to be 1 for BINOMIAL and POISSON.
+ (Intercept)               1.4663399457931519  0.640513002872467   2.2893199920654297 0.022060999646782875 *                                      
+ programming.beginner     -1.9363399744033813 0.8574709892272949    -2.25819993019104 0.023933300748467445 *                                      
+ programming.novice        -0.485507994890213 0.9319819808006287  -0.5209410190582275   0.6024079918861389                                        
+ ITERATIONS #                             3.0                0.0                  0.0                  0.0 Number of Fisher Scoring iterations    
+ ROWS #                                  40.0                0.0                  0.0                  0.0 Number of rows                         
+ Residual deviance          45.65660095214844                0.0                  0.0                  0.0 on 37 degrees of freedom               
+ Pearson goodness of fit                 40.0                0.0                  0.0                  0.0 on 37 degrees of freedom               
+ AIC                        51.65660095214844                0.0                  0.0                  0.0 Akaike information criterion           
+ BIC                        56.72323989868164                0.0                  0.0                  0.0 Bayesian information criterion         
+ Wald Test                   8.01963996887207                0.0                  0.0   0.0456075444817543 *                                      
+ Dispersion parameter                     1.0                0.0                  0.0                  0.0 Taken to be 1 for BINOMIAL and POISSON.
+ (Intercept)             -0.18232199549674988 0.4281739890575409  -0.4258109927177429   0.6702449917793274                                        
+ masters.no                2.2617599964141846 0.8636159896850586   2.6189498901367188 0.008820169605314732 **                                     
+ ITERATIONS #                             4.0                0.0                  0.0                  0.0 Number of Fisher Scoring iterations    
+ ROWS #                                  40.0                0.0                  0.0                  0.0 Number of rows                         
+ Residual deviance           42.8744010925293                0.0                  0.0                  0.0 on 38 degrees of freedom               
+ Pearson goodness of fit                 40.0                0.0                  0.0                  0.0 on 38 degrees of freedom               
+ AIC                         46.8744010925293                0.0                  0.0                  0.0 Akaike information criterion           
+ BIC                       50.252159118652344                0.0                  0.0                  0.0 Bayesian information criterion         
+ Wald Test                  7.868579864501953                0.0                  0.0 0.019559580832719803 *                                      
+ Dispersion parameter                     1.0                0.0                  0.0                  0.0 Taken to be 1 for BINOMIAL and POISSON.
+ (Intercept)                0.619038999080658 0.3314970135688782   1.8674099445343018  0.06184479966759682 .                                      
+ ITERATIONS #                             3.0                0.0                  0.0                  0.0 Number of Fisher Scoring iterations    
+ ROWS #                                  40.0                0.0                  0.0                  0.0 Number of rows                         
+ Residual deviance         51.795799255371094                0.0                  0.0                  0.0 on 39 degrees of freedom               
+ Pearson goodness of fit                 40.0                0.0                  0.0                  0.0 on 39 degrees of freedom               
+ AIC                       53.795799255371094                0.0                  0.0                  0.0 Akaike information criterion           
+ BIC                        55.48468017578125                0.0                  0.0                  0.0 Bayesian information criterion         
+ Wald Test                 3.4872100353240967                0.0                  0.0 0.061844732612371445 .                                      
+ Dispersion parameter                     1.0                0.0                  0.0                  0.0 Taken to be 1 for BINOMIAL and POISSON.</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM glm_admissions_model1 ORDER BY attribute;</tt>
+   </pre>
+   <p style="line-height: 1em;">The example uses stepwise selection only to show which predictors are
+        included in the regression. The predicted output models are not used in any prediction
+        function. The following table is only a collection of the coefficients estimated in each
+        step.</p>
+   <pre>
+      <tt>
+ attribute predictor   category estimate             std_err            z_score              p_value              significance family   
+ --------- ----------- -------- -------------------- ------------------ -------------------- -------------------- ------------ -------- 
+        -1 Loglik      NULL      -22.384700775146484               40.0                  5.0                  0.0 NULL         LOGISTIC
+        -1 Loglik      NULL      -19.462099075317383               40.0                  5.0                  0.0 NULL         LOGISTIC
+        -1 Loglik      NULL      -19.549299240112305               40.0                  4.0                  0.0 NULL         LOGISTIC
+        -1 Loglik      NULL      -20.949199676513672               40.0                  4.0                  0.0 NULL         LOGISTIC
+        -1 Loglik      NULL        -19.5531005859375               40.0                  3.0                  0.0 NULL         LOGISTIC
+        -1 Loglik      NULL      -21.412700653076172               40.0                  2.0                  0.0 NULL         LOGISTIC
+        -1 Loglik      NULL       -22.82830047607422               40.0                  2.0                  0.0 NULL         LOGISTIC
+        -1 Loglik      NULL       -21.43720054626465               40.0                  1.0                  0.0 NULL         LOGISTIC
+        -1 Loglik      NULL      -25.897899627685547               40.0                  0.0                  0.0 NULL         LOGISTIC
+        -1 Loglik      NULL      -22.815799713134766               40.0                  3.0                  0.0 NULL         LOGISTIC
+        -1 Loglik      NULL      -19.451900482177734               40.0                  6.0                  0.0 NULL         LOGISTIC
+         0 (Intercept) NULL       0.6764150261878967 0.7227180004119873   0.9359319806098938   0.3493080139160156              LOGISTIC
+         0 (Intercept) NULL       0.6668530106544495 2.7522799968719482  0.24229200184345245   0.8085539937019348              LOGISTIC
+         0 (Intercept) NULL        1.040079951286316  2.745699882507324  0.37880200147628784   0.7048349976539612              LOGISTIC
+         0 (Intercept) NULL       0.7462490200996399 0.7035899758338928    1.060629963874817  0.28885799646377563              LOGISTIC
+         0 (Intercept) NULL       1.4663399457931519  0.640513002872467   2.2893199920654297 0.022060999646782875 *            LOGISTIC
+         0 (Intercept) NULL     -0.18232199549674988 0.4281739890575409  -0.4258109927177429   0.6702449917793274              LOGISTIC
+         0 (Intercept) NULL        0.619038999080658 0.3314970135688782   1.8674099445343018  0.06184479966759682 .            LOGISTIC
+         0 (Intercept) NULL      0.38512998819351196  2.611409902572632  0.14747999608516693   0.8827530145645142              LOGISTIC
+         0 (Intercept) NULL       0.9898110032081604 2.9018800258636475   0.3410930037498474   0.7330330014228821              LOGISTIC
+         0 (Intercept) NULL       1.3463000059127808  2.819309949874878  0.47752898931503296     0.63298499584198              LOGISTIC
+         0 (Intercept) NULL       1.0775099992752075  2.920759916305542  0.36891400814056396   0.7121919989585876              LOGISTIC
+         1 masters     yes                      NULL               NULL                 NULL                 NULL NULL         LOGISTIC
+         1 masters     yes                      NULL               NULL                 NULL                 NULL NULL         LOGISTIC
+         1 gpa         NULL      0.11817099899053574 0.7419229745864868  0.15927700698375702   0.8734509944915771              LOGISTIC
+         1 masters     yes                      NULL               NULL                 NULL                 NULL NULL         LOGISTIC
+         1 programming advanced                 NULL               NULL                 NULL                 NULL NULL         LOGISTIC
+         1 masters     yes                      NULL               NULL                 NULL                 NULL NULL         LOGISTIC
+         1 masters     yes                      NULL               NULL                 NULL                 NULL NULL         LOGISTIC
+         1 masters     yes                      NULL               NULL                 NULL                 NULL NULL         LOGISTIC
+         1 gpa         NULL     0.027686599642038345 0.7638930082321167  0.03624410182237625   0.9710879921913147              LOGISTIC
+         1 masters     yes                      NULL               NULL                 NULL                 NULL NULL         LOGISTIC
+         2 masters     no          2.201469898223877 1.0115900039672852   2.1762499809265137 0.029536699876189232 *            LOGISTIC
+         2 masters     no         2.5508100986480713 0.9602739810943604    2.656330108642578 0.007899539545178413 **           LOGISTIC
+         2 programming advanced                 NULL               NULL                 NULL                 NULL NULL         LOGISTIC
+         2 masters     no         2.1295900344848633 0.9188539981842041    2.317660093307495  0.02046789973974228 *            LOGISTIC
+         2 programming beginner  -1.9363399744033813 0.8574709892272949    -2.25819993019104 0.023933300748467445 *            LOGISTIC
+         2 masters     no         2.2617599964141846 0.8636159896850586   2.6189498901367188 0.008820169605314732 **           LOGISTIC
+         2 masters     no         2.2676401138305664 0.8647770285606384    2.622230052947998 0.008735660463571548 **           LOGISTIC
+         2 masters     no          2.136090040206909 0.9219740033149719   2.3168599605560303  0.02051120065152645 *            LOGISTIC
+         2 stats       advanced                 NULL               NULL                 NULL                 NULL NULL         LOGISTIC
+         2 masters     no           2.21655011177063 1.0199899673461914    2.173110008239746 0.029771899804472923 *            LOGISTIC
+         3 stats       advanced                 NULL               NULL                 NULL                 NULL NULL         LOGISTIC
+         3 gpa         NULL     -0.20816700160503387 0.7709010243415833 -0.27003100514411926   0.7871360182762146              LOGISTIC
+         3 programming beginner  -1.9427800178527832  0.859013020992279  -2.2616400718688965  0.02371940016746521 *            LOGISTIC
+         3 programming advanced                 NULL               NULL                 NULL                 NULL NULL         LOGISTIC
+         3 programming novice     -0.485507994890213 0.9319819808006287  -0.5209410190582275   0.6024079918861389              LOGISTIC
+         3 gpa         NULL      -0.1607159972190857  0.729777991771698  -0.2202250063419342   0.8256959915161133              LOGISTIC
+         3 gpa         NULL     -0.06874030083417892  0.793757975101471 -0.08660110086202621   0.9309890270233154              LOGISTIC
+         3 stats       novice     0.8634170293807983 0.9571099877357483   0.9021090269088745   0.3669990003108978              LOGISTIC
+         3 gpa         NULL     -0.11393500119447708  0.802573025226593 -0.14196200668811798   0.8871099948883057              LOGISTIC
+         4 stats       novice     0.0419435016810894  1.113700032234192  0.03766139969229698   0.9699580073356628              LOGISTIC
+         4 stats       advanced                 NULL               NULL                 NULL                 NULL NULL         LOGISTIC
+         4 programming novice     -0.447378009557724 0.9628700017929077 -0.46463000774383545    0.642195999622345              LOGISTIC
+         4 programming beginner   -1.729099988937378  0.927944004535675  -1.8633699417114258  0.06241010129451752 .            LOGISTIC
+         4 programming advanced                 NULL               NULL                 NULL                 NULL NULL         LOGISTIC
+         4 stats       beginner  0.16730499267578125 1.1734999418258667  0.14257000386714935   0.8866299986839294              LOGISTIC
+         4 stats       advanced                 NULL               NULL                 NULL                 NULL NULL         LOGISTIC
+         5 stats       beginner    0.504393994808197 1.2106399536132812  0.41663599014282227   0.6769449710845947              LOGISTIC
+         5 stats       novice    -0.8480880260467529 0.9615479707717896  -0.8820019960403442  0.37777599692344666              LOGISTIC
+         5 programming novice    -0.8966760039329529 1.0433399677276611  -0.8594290018081665   0.3901039958000183              LOGISTIC
+         5 programming beginner  -1.7227200269699097 0.9303900003433228  -1.8516099452972412  0.06408239901065826 .            LOGISTIC
+         5 programming advanced                 NULL               NULL                 NULL                 NULL NULL         LOGISTIC
+         5 stats       novice    0.04068480059504509 1.1156699657440186 0.036466699093580246   0.9709100127220154              LOGISTIC
+         6 programming advanced                 NULL               NULL                 NULL                 NULL NULL         LOGISTIC
+         6 stats       beginner  0.16571399569511414 1.0986599922180176  0.15083299577236176   0.8801079988479614              LOGISTIC
+         6 programming novice    -0.9160929918289185 1.0674799680709839  -0.8581849932670593   0.3907899856567383              LOGISTIC
+         6 programming beginner   -2.361370086669922 0.9967899918556213  -2.3689699172973633  0.01783760078251362 *            LOGISTIC
+         6 stats       beginner   0.5266180038452148 1.2229000329971313  0.43063101172447205   0.6667360067367554              LOGISTIC
+         7 programming beginner  -1.7793400287628174  1.067870020866394  -1.6662399768829346  0.09566470235586166 .            LOGISTIC
+         7 programming novice    -0.8239459991455078 1.0408200025558472  -0.7916290163993835   0.4285770058631897              LOGISTIC
+         7 programming advanced                 NULL               NULL                 NULL                 NULL NULL         LOGISTIC
+         8 programming novice    -0.9461399912834167 1.1110800504684448  -0.8515459895133972  0.39446601271629333              LOGISTIC
+         8 programming beginner   -1.769760012626648  1.069000005722046  -1.6555299758911133  0.09781769663095474 .            LOGISTIC
+         9 programming novice    -0.9803500175476074 1.1400400400161743  -0.8599230051040649    0.389831006526947              LOGISTIC</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+  
+   <a name="oec1507151560699"> </a>
+  <h3>GLM Example: Gaussian Distribution Analysis</h3>
+
+  
+    <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">For the Gaussian distribution the response variable must be a continuous numerical variable, where the data is grouped around a single mean and the graph looks like a normal or bell curve distribution. This example uses default options.</p>
+
+
+    <a name="section_qpn_p1z_m2b"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The InputTable, housing_train, is real estate data on homes, which models the home price with 12 predictors (six numerical and six categorical variables).</p>
+   <a name="table_ksh_ffz_m2b"> </a>
+   <table class="introtable">
+      <a name="table_ksh_ffz_m2b"> </a>
+        <h4 style="text-align: center;">Variable Definitions</h4>
+        
+          
+          
+          
+          
+            <tr>
+              <th align="left">
+            <div style="line-height: 1em;">Response Variable</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">Predictor</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+            </tr>
+          
+          
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">price</div>
+         </td>
+              <td align="left"> </td>
+              <td align="left"> </td>
+            </tr>
+            <tr>
+              <td align="left"> </td>
+              <td align="left">
+            <div style="line-height: 1em;">lotsize</div>
+         </td>
+              <td align="left"> </td>
+            </tr>
+            <tr>
+              <td align="left"> </td>
+              <td align="left">
+            <div style="line-height: 1em;">bedrooms</div>
+         </td>
+              <td align="left"> </td>
+            </tr>
+            <tr>
+              <td align="left"> </td>
+              <td align="left">
+            <div style="line-height: 1em;">bathrms</div>
+         </td>
+              <td align="left"> </td>
+            </tr>
+            <tr>
+              <td align="left"> </td>
+              <td align="left">
+            <div style="line-height: 1em;">stories</div>
+         </td>
+              <td align="left"> </td>
+            </tr>
+            <tr>
+              <td align="left"> </td>
+              <td align="left">
+            <div style="line-height: 1em;">driveway</div>
+         </td>
+              <td align="left"> </td>
+            </tr>
+            <tr>
+              <td align="left"> </td>
+              <td align="left">
+            <div style="line-height: 1em;">recroom</div>
+         </td>
+              <td align="left"> </td>
+            </tr>
+            <tr>
+              <td align="left"> </td>
+              <td align="left">
+            <div style="line-height: 1em;">fullbase</div>
+         </td>
+              <td align="left"> </td>
+            </tr>
+            <tr>
+              <td align="left"> </td>
+              <td align="left">
+            <div style="line-height: 1em;">gashw</div>
+         </td>
+              <td align="left"> </td>
+            </tr>
+            <tr>
+              <td align="left"> </td>
+              <td align="left">
+            <div style="line-height: 1em;">airco</div>
+         </td>
+              <td align="left"> </td>
+            </tr>
+            <tr>
+              <td align="left"> </td>
+              <td align="left">
+            <div style="line-height: 1em;">garagepl</div>
+         </td>
+              <td align="left"> </td>
+            </tr>
+            <tr>
+              <td align="left"> </td>
+              <td align="left">
+            <div style="line-height: 1em;">prefarea</div>
+         </td>
+              <td align="left"> </td>
+            </tr>
+            <tr>
+              <td align="left"> </td>
+              <td align="left">
+            <div style="line-height: 1em;">homestyle</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Architectural style of the house</div>
+         </td>
+            </tr>
+          
+        
+      </table>
+
+   <a name="table_x2s_nfz_m2b"> </a>
+   <table class="introtable">
+      <a name="table_x2s_nfz_m2b"> </a>
+        <h4 style="text-align: center;">InputTable: housing_train</h4>
+        
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+            <tr>
+              <th align="left">
+            <div style="line-height: 1em;">sn</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">price</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">lotsize</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">bedrooms</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">bathrms</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">stories</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">driveway</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">recroom</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">fullbase</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">gashw</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">airco</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">garagepl</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">prefarea</div>
+         </th>
+              <th align="left">
+            <div style="line-height: 1em;">homestyle</div>
+         </th>
+            </tr>
+          
+          
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">42000</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">5850</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">38500</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4000</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">49500</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3060</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Classic</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">60500</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">6650</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Eclectic</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">61000</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">6360</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Eclectic</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">66000</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4160</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Eclectic</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">7</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">66000</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3880</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Eclectic</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">69000</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4160</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Eclectic</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">83800</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4800</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Eclectic</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">10</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">88500</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">5500</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">yes</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">no</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">Eclectic</div>
+         </td>
+            </tr>
+            <tr>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+              <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+            </tr>
+          
+        
+      </table>
+
+
+
+    <a name="section_q2y_p1z_m2b"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">The family is GAUSSIAN and the default family link is IDENTITY.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+DROP TABLE glm_housing_model;
+
+SELECT * FROM GLM (
+  ON housing_train AS InputTable
+  OUT TABLE OutputTable (glm_housing_model)
+  USING
+  TargetColumns ('price', 'lotsize', 'bedrooms', 'bathrms',
+                'stories', 'garagepl', 'driveway', 'recroom',
+                'fullbase', 'gashw', 'airco', 'prefarea', 'homestyle')
+  CategoricalColumns ('driveway', 'recroom', 'fullbase', 'gashw',
+                       'airco', 'prefarea', 'homestyle')
+  Family ('GAUSSIAN')
+  LinkFunction ('IDENTITY')
+  WeightColumn ('1')
+  StopThreshold (0.01)
+  MaxIterNum (25)
+  Step ('false')
+  Intercept ('true')
+) AS dt;</tt>
+   </pre>
+
+    <a name="section_crj_q1z_m2b"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ predictor               estimate           std_error           t_score             p_value                significance                            
+ ----------------------- ------------------ ------------------- ------------------- ---------------------- --------------------------------------- 
+ (Intercept)                 36349.30078125   2733.462158203125  13.297897338867188                    0.0 ***                                    
+ lotsize                 2.0809500217437744 0.26133036613464355   7.962909698486328 1.2434497875801753E-14 ***                                    
+ bedrooms                  782.093017578125   766.8397216796875  1.0198911428451538     0.3082960247993469                                        
+ bathrms                   6772.31005859375  1106.7789306640625   6.118936538696289   1.963181173181283E-9 ***                                    
+ stories                    2445.6201171875   694.1449584960938   3.523212194442749   4.673068760894239E-4 ***                                    
+ garagepl                1483.0999755859375   623.5965576171875   2.378300666809082    0.01778467558324337 *                                      
+ driveway.no               -2822.6298828125  1481.2474365234375  -1.905576229095459    0.05730487406253815 .                                      
+ recroom.yes              1208.530029296875   1358.570556640625  0.8895599842071533     0.3741496801376343                                        
+ fullbase.yes             3588.300048828125  1167.3746337890625  3.0738205909729004  0.0022341914009302855 **                                     
+ gashw.yes                          5787.25   2405.470458984375  2.4058704376220703    0.01651271991431713 *                                      
+ airco.yes                  6478.7900390625  1152.1597900390625   5.623169422149658  3.1934060729099656E-8 ***                                    
+ prefarea.yes              6465.64013671875  1212.8397216796875   5.330992698669434  1.5088656368789088E-7 ***                                    
+ homestyle.classic         -16550.900390625   1308.585205078125 -12.647933959960938                    0.0 ***                                    
+ homestyle.bungalow          37577.69921875      1850.173828125  20.310361862182617                    0.0 ***                                    
+ ITERATIONS #                           2.0                 0.0                 0.0                    0.0 Number of Fisher Scoring iterations    
+ ROWS #                               492.0                 0.0                 0.0                    0.0 Number of rows                         
+ Residual deviance                 Infinity                 0.0                 0.0                    0.0 on 478 degrees of freedom              
+ Pearson goodness of fit    5.3066899456E10                 0.0                 0.0                    0.0 on 478 degrees of freedom              
+ AIC                               Infinity                 0.0                 0.0                    0.0 Akaike information criterion           
+ BIC                               Infinity                 0.0                 0.0                    0.0 Bayesian information criterion         
+ Wald Test                  23174.041015625                 0.0                 0.0                    0.0 ***                                    
+ Dispersion parameter          1.11018616E8                 0.0                 0.0                    0.0 Taken to be 1 for BINOMIAL and POISSON.</tt>
+   </pre>
+   <p style="line-height: 1em;">Many predictors are significant at 95% confidence level (p-value
+        &lt; 0.05).</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM glm_housing_model ORDER BY attribute;</tt>
+   </pre>
+   <pre>
+      <tt>
+ attribute predictor   category estimate           std_err             z_score             p_value                significance family   
+ --------- ----------- -------- ------------------ ------------------- ------------------- ---------------------- ------------ -------- 
+        -1 Loglik      NULL              -Infinity               492.0                13.0                    0.0 NULL         GAUSSIAN
+         0 (Intercept) NULL         36349.30078125   2733.462158203125  13.297897338867188                    0.0 ***          GAUSSIAN
+         1 lotsize     NULL     2.0809500217437744 0.26133036613464355   7.962909698486328 1.2434497875801753E-14 ***          GAUSSIAN
+         2 bedrooms    NULL       782.093017578125   766.8397216796875  1.0198911428451538     0.3082960247993469              GAUSSIAN
+         3 bathrms     NULL       6772.31005859375  1106.7789306640625   6.118936538696289   1.963181173181283E-9 ***          GAUSSIAN
+         4 stories     NULL        2445.6201171875   694.1449584960938   3.523212194442749   4.673068760894239E-4 ***          GAUSSIAN
+         5 garagepl    NULL     1483.0999755859375   623.5965576171875   2.378300666809082    0.01778467558324337 *            GAUSSIAN
+         6 driveway    yes                    NULL                NULL                NULL                   NULL NULL         GAUSSIAN
+         7 driveway    no         -2822.6298828125  1481.2474365234375  -1.905576229095459    0.05730487406253815 .            GAUSSIAN
+         8 recroom     no                     NULL                NULL                NULL                   NULL NULL         GAUSSIAN
+         9 recroom     yes       1208.530029296875   1358.570556640625  0.8895599842071533     0.3741496801376343              GAUSSIAN
+        10 fullbase    no                     NULL                NULL                NULL                   NULL NULL         GAUSSIAN
+        11 fullbase    yes       3588.300048828125  1167.3746337890625  3.0738205909729004  0.0022341914009302855 **           GAUSSIAN
+        12 gashw       no                     NULL                NULL                NULL                   NULL NULL         GAUSSIAN
+        13 gashw       yes                 5787.25   2405.470458984375  2.4058704376220703    0.01651271991431713 *            GAUSSIAN
+        14 airco       no                     NULL                NULL                NULL                   NULL NULL         GAUSSIAN
+        15 airco       yes         6478.7900390625  1152.1597900390625   5.623169422149658  3.1934060729099656E-8 ***          GAUSSIAN
+        16 prefarea    no                     NULL                NULL                NULL                   NULL NULL         GAUSSIAN
+        17 prefarea    yes        6465.64013671875  1212.8397216796875   5.330992698669434  1.5088656368789088E-7 ***          GAUSSIAN
+        18 homestyle   eclectic               NULL                NULL                NULL                   NULL NULL         GAUSSIAN
+        19 homestyle   classic    -16550.900390625   1308.585205078125 -12.647933959960938                    0.0 ***          GAUSSIAN
+        20 homestyle   bungalow     37577.69921875      1850.173828125  20.310361862182617                    0.0 ***          GAUSSIAN</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+  
+</t:intro>

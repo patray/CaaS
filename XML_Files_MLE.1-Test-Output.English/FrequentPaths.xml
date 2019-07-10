@@ -1,0 +1,2893 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:intro xmlns:t="http://knime.org/node/v2.10">
+   <a name="glr1507643101526"> </a>
+	  <h1>FrequentPaths</h1>
+
+	  <p style="line-height: 1em;">The FrequentPaths takes a table of sequences and outputs a table of subsequences (patterns) that frequently appear in the input table and, optionally, a table of sequence-pattern pairs.</p>
+   <a name="fig_mgj_1cb_mw"> </a>
+   <div style="text-align: center;">
+      <div style="margin: auto; display: inline-block">
+         <img src="data:image/png;base64,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"
+              width=""
+              height=""/>
+      </div>
+   </div>
+   <p style="line-height: 1em;">The function is useful for analyzing customer purchase behavior, web access patterns, disease treatments, and DNA sequences.</p>
+
+   <a name="wau1507643285635"> </a>
+   <h2>FrequentPaths Syntax</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Version 2.5</h3>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM FrequentPaths (
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS InputTable
+  ON { <i>table</i> | <i>view</i> | (<i>query</i>) } AS ItemDefinitionTable
+  OUT TABLE OutputTable (<i>output_table</i>)
+  [ OUT TABLE SeqPatternTable (<i>sequence_pattern_table</i>) ]
+  USING
+  PartitionColumns ( { '<i>partition_column</i>' | <i>partition_column_range</i> }[,...])
+  [ TimeColumn ('<i>time_column</i>') ]
+  [ PathFilters ([Separator (<i>symbol</i>),] '<i>filter</i>' [,...]) ]
+  [ GroupByColumns ({ '<i>group_column'</i> | <i>group_column_range</i>}[,...]) ]
+  { ItemColumn ('<i>sequence_column</i>') |
+    PathColumn ('<i>path_column</i>') |
+    ItemDefinitionColumns ('[<i>index_column</i>:<i>definition_column</i>:<i>item_column</i>]')
+  }
+  MinSupport (<i>minimum</i>)
+  [ MaxLength (<i>maximum_length</i>) ]
+  [ MinLength (<i>minimum_length</i>) ]
+  [ ClosedPattern ({'true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0'})]
+) AS <i>alias</i>;</tt>
+   </pre>
+   <p>
+      <b>Note:</b>  
+      <p style="line-height: 1em;">For the ItemDefinitionColumns syntax element, the brackets inside the parentheses are required. For example: </p>
+      <pre style="margin-left: 2em; font-family: monospace;">
+         <tt style="font-family: monospace; font-size: larger;">
+ItemDefinitionColumns ([id:def:item])</tt>
+      </pre>
+   </p>
+   <a name="mnl1507643365154"> </a>
+	  <h2>FrequentPaths Syntax Elements</h2>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <div style="border: 0px none #FFFFFF; border-radius: 0px;">
+      <dt>OutputTable</dt>
+      <dd>Specify the name of the table where the function outputs the subsequences.</dd>
+      <dt>SeqPatternTable</dt>
+      <dd>[Optional] Specify the name of the table where the function outputs sequence-pattern pairs. For example, if a sequence has a partition value of "1" and contains 3 patterns with IDs 2, 9, and 10, for that sequence the function outputs the sequence-pattern pairs ("1", 2), ("1", 9), and ("1", 10).</dd>
+      <dt>PartitionColumns</dt>
+      <dd>Specify the names of the columns that comprise the partition key of the InputTable sequences.</dd>
+      <dt>TimeColumn</dt>
+      <dd>[Required when ItemColumn or ItemDefinition is specified.] Specify the name of the InputTable column that determines the order of items in a sequence. Items in the same sequence that have the same time stamp belong to the same set.</dd>
+      <dt>PathFilters</dt>
+      <dd>[Optional] Specify the filters to use on the InputTable sequences. Only InputTable sequences that satisfy all constraints of at least one filter are input to the function.</dd>
+      <dd>Each <i>filter</i> has one or more constraints, which are separated by spaces. Each constraint has this syntax:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+               <i>constraint</i> (<i>item</i> [<i>symbol</i> ...])</tt>
+         </pre>
+      </dd>
+      <dd>
+         <a name="table_xjw_3fy_fdb"> </a>
+         <table class="introtable">
+            <a name="table_xjw_3fy_fdb"> </a>
+            <tr>
+               <th align="left">
+                  <div style="line-height: 1em;">
+                     <i>constraint</i>
+                  </div>
+               </th>
+               <th align="left">
+                  <div style="line-height: 1em;">Description</div>
+               </th>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">STW (<i>start-with_constraint</i>)</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">First item set of sequence must contain at least one <i>item</i>.<p style="line-height: 1em; margin: 0px;">
+                        <br/>For example, STW(c,d) requires first item set of sequence to contain c or d. Sequence "(a, c), e, (f, d)" meets this constraint because first item set, (a,c), contains c.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">EDW (<i>end-with_constraint</i>)</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Last item set of sequence must contain at least one <i>item</i>.<p style="line-height: 1em; margin: 0px;">
+                        <br/>For example, EDW(f,g) requires the last item set of the sequence to contain f or g. Sequence "(a, b), e, (f, d)" meets this constraint because last item set, (f,d), contains f.</p>
+                  </div>
+               </td>
+            </tr>
+            <tr>
+               <td align="left">
+                  <div style="line-height: 1em;">
+                     <tt style="font-family: monospace;">CTN (<i>containing_constraint</i>)</tt>
+                  </div>
+               </td>
+               <td align="left">
+                  <div style="line-height: 1em;">Sequence must contain at least one <i>item</i>.<p style="line-height: 1em; margin: 0px;">
+                        <br/>For example, CTN(a,b) requires sequence to contain a or b. Sequence "(a,c), d, (e,f)" meets this constraint but sequence "d, (e,f)" does not.</p>
+                  </div>
+               </td>
+            </tr>
+         </table>
+
+      </dd>
+      <dd>Constraints in the same <i>filter</i> must differ. For example:<ul>
+            <li>Valid: <tt style="font-family: monospace;">'STW(c,d) EDW(g,k) CTN(e)'</tt>
+            </li>
+            <li>Invalid: <tt style="font-family: monospace;">'STW(c,d) STW(e,h)'</tt>
+            </li>
+         </ul>
+      </dd>
+      <dd>This syntax element specifies a separator and uses it in two filters:</dd>
+      <dd>
+         <tt style="font-family: monospace;">PathFilters('Separator(#)', 'STW(c#d) EDW(g#k) CTN(e)', 'CTN(h#k)')</tt>
+      </dd>
+      <dd>If you specify <i>symbol</i>, it applies to all filters. Default <i>symbol</i>:  comma (,)</dd>
+      <dt>GroupByColumns</dt>
+      <dd>[Optional] Specify the names of the InputTable columns by which to group the InputTable sequences. If you specify this syntax element, the function operates on each group separately and copies each <i>group_column</i> to the output table.</dd>
+      <dt>ItemColumn</dt>
+      <dd>[Required if you specify neither ItemDefinitionColumns nor PathColumn.] Specify the names of the InputTable columns that contain the items.</dd>
+      <dt>PathColumn</dt>
+      <dd>[Required if you specify neither ItemDefinitionColumns nor ItemColumn.] Specify the name of the InputTable column that contains paths in the form of sequence strings. A sequence string has this syntax:<pre style="margin-left: 2em; font-family: monospace;">
+            <tt style="font-family: monospace; font-size: larger;">
+'[<i>item</i> 
+               <b>[</b>, ...]<b>]</b>'</tt>
+         </pre>
+         <p style="line-height: 1em;">In the sequence string syntax, you must type the outer brackets (bold). The sequence strings in this column can be created by the nPath function.</p>
+         <p style="line-height: 1em;">If you specify this syntax element, each item set can have only one item.</p>
+      </dd>
+      <dt>ItemDefinitionColumns</dt>
+      <dd>[Required if you specify neither ItemColumn nor PathColumn.] Specify the names of the index, definition, and item columns of the ItemDefinitionTable.</dd>
+      <dt>MinSupport</dt>
+      <dd>Determines the threshold for whether a sequential pattern is frequent. The <i>minimum</i> must be a positive real number.<p style="line-height: 1em;">If <i>minimum</i> is in the range (0,1], it is a relative threshold: If <i>N</i> is the total number of input sequences, the threshold is <i>T</i>=<i>N</i>*<i>minimum</i>. For example, if there are 1000 sequences in the InputTable and <i>minimum</i> is 0.05, the threshold is 50.</p>
+         <p style="line-height: 1em;">If <i>minimum</i> is in the range (1,+), it is an absolute threshold: Regardless of <i>N</i>, <i>T</i>=<i>minimum</i>. For example, if <i>minimum</i> is 50, the threshold is 50, regardless of <i>N</i>.</p>
+         <p style="line-height: 1em;">A pattern is frequent if its support value is at least <i>T</i>.</p>
+         <p style="line-height: 1em;">Because the function outputs only frequent patterns, <i>minimum</i> controls the number of output patterns. If <i>minimum</i> is small, processing time increases exponentially; therefore, Teradata recommends starting the trial with a larger value.—for example, 5% of the total sequence number if you know N and 0.05 otherwise.</p>
+         <p style="line-height: 1em;">If you specify a relative <i>minimum</i> and GroupByColumns, the function calculates <i>N</i> and <i>T</i> for each group.</p>
+         <p style="line-height: 1em;">If you specify a relative <i>minimum</i> and PathFilters, <i>N</i> is the number of sequences that meet the constraints of the filters.</p>
+      </dd>
+      <dt>MaxLength</dt>
+      <dd>[Optional] Specify the maximum length of the output sequential patterns. The length of a pattern is its number of sets.</dd>
+      <dd>Default: No maximum length</dd>
+      <dt>MinLength</dt>
+      <dd>[Optional] Specify the minimum length of the output sequential patterns.</dd>
+      <dd>Default: 1</dd>
+      <dt>ClosedPattern</dt>
+      <dd>[Optional] Specify whether to output only closed patterns.</dd>
+      <dd>Default: 'false'</dd>
+   </div>
+
+
+	
+   <a name="abh1507643436312"> </a>
+   <h2>FrequentPaths Input</h2>
+   <a name="section_fbz_f5m_wcb"> </a>
+   <a name="table_hlt_h5m_wcb"> </a>
+   <table class="introtable">
+      <a name="table_hlt_h5m_wcb"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Table</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">InputTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Contains sequence data to process, in either of these formats:<p style="line-height: 1em; margin: 0px;">
+                  <br/>
+                  <a name="table_nnq_vhd_1db"> </a>
+                  <table class="introtable">
+                     <a name="table_nnq_vhd_1db"> </a>
+                     <tr>
+                        <th align="left">
+                           <div style="line-height: 1em;">Format</div>
+                        </th>
+                        <th align="left">
+                           <div style="line-height: 1em;">Description</div>
+                        </th>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">Sequence/path</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Each row contains a string of format <tt style="font-family: monospace;">'[<i>item</i>[,...]]'</tt>. Outer brackets belong to string (for example, '[A, B, C, D]').<p style="line-height: 1em; margin: 0px;">
+                                 <br/>To output strings in this format, use Introduction to nPath function with its Accumulate syntax element.</p>
+                           </div>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td align="left">
+                           <div style="line-height: 1em;">Item</div>
+                        </td>
+                        <td align="left">
+                           <div style="line-height: 1em;">Each row represents one item in a sequence. <p style="line-height: 1em; margin: 0px;">
+                                 <br/>With this format, specify either ItemDefinitionTable or ItemColumn syntax element.</p>
+                           </div>
+                        </td>
+                     </tr>
+                  </table>
+
+               </p>
+            </div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;"> ItemDefinitionTable</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Required if you omit both ItemColumn and PathColumn syntax elements.</div>
+         </td>
+      </tr>
+   </table>
+
+   <p>
+      <b>Note:</b>  The function ignores input rows with NULL values.</p>
+   <a name="section_dts_ztm_wcb"> </a>
+   <h3>InputTable Schema</h3>
+   <a name="table_N1002F_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N1002F_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>partition_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, SHORT, or LONG</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sequence index. Rows with same index belong to same sequence.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>item_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CHARACTER or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only if you omit ItemDefinitionTable.] Sequence item.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>time_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Any except DOUBLE PRECISION</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Sequence item timestamp. Items in same sequence with same time stamp belong to same item set.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>path_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CHARACTER or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Optional] Paths (as sequence strings).</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_xv2_25m_wcb"> </a>
+   <h3>ItemDefinitionTable Schema</h3>
+   <a name="table_N10096_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10096_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>index_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER, SHORT, or LONG</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Used to determine when more than one predicate in <i>definition_column</i> is satisfied, in which case <i>item_column</i> applies.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>definition_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CHARACTER or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Predicate definition.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>item_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CHARACTER or VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Sequence item for which predicate is true.<p style="line-height: 1em; margin: 0px;">
+                  <br/>Function applies predicates to InputTable in index order. If more than one predicate is true for a row, function assigns row the value that corresponds to predicate with smallest index.</p>
+               <p style="line-height: 1em; margin: 0px;">
+                  <br/>If InputTable row has no corresponding definition in item definition table, function skips that row.</p>
+            </div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="aki1507643470516"> </a>
+   <h2>FrequentPaths Output</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <h3>Output Message Schema</h3>
+   <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10014_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">message</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Reports number of patterns found.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_tt5_5vm_wcb"> </a>
+   <h3>Output Table Schema</h3>
+   <a name="table_N10049_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N10049_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">pattern</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CLOB</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Pattern (subsequence) in string format (<tt style="font-family: monospace;">'<i>item</i> [,...]'</tt>).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">support</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Pattern support value (number of InputTable sequences that contain the pattern).</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">length</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">INTEGER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Pattern length.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>group_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Appears only with GroupByColumns syntax element.] Copied from InputTable.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="section_ev3_vvm_wcb"> </a>
+   <h3>Sequence Pattern Table Schema</h3>
+   <p style="line-height: 1em;">The table appears only with the SeqPatternTable syntax element.</p>
+   <a name="table_N100AE_N1000E_N1000C_N10001"> </a>
+   <table class="introtable">
+      <a name="table_N100AE_N1000E_N1000C_N10001"> </a>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">Column</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Data Type</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">Description</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">
+               <i>partition_column</i>
+            </div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Same as in Input table</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">[Column appears once for each specified <i>partition_column</i>.] Column that is, or is part of, the partition key of the input table sequences.</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">pattern</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VARCHAR</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">Pattern found in sequence specified by <i>partition_column</i>.</div>
+         </td>
+      </tr>
+   </table>
+
+
+   <a name="bqe1507643538939"> </a>
+   <h2>FrequentPaths Examples</h2>
+   <a name="section_N1000E_N1000C_N10001"> </a>
+   <p style="line-height: 1em;">These examples apply the FrequentPaths function to browsing sequences of different users on a banking website.</p>
+
+   <a name="rrp1523479136479"> </a>
+	  <h3>FrequentPaths Example: ItemColumn</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <p style="line-height: 1em;">The input table has web clickstream data from a set of users with multiple sessions or sequences.</p>
+   <a name="table_uwn_vlw_ldb"> </a>
+   <table class="introtable">
+      <a name="table_uwn_vlw_ldb"> </a>
+      <h4 style="text-align: center;">InputTable: bank_web_clicks1</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">session_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">page</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">datestamp</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:35:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">FAQ</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:38:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT HISTORY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:42:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">FUNDS TRANSFER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:45:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ONLINE STATEMENT ENROLLMENT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:49:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">PROFILE UPDATE</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:50:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:51:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CUSTOMER SUPPORT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:53:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VIEW DEPOSIT DETAILS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:57:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:16:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:18:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">FAQ</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:20:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:21:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">FUNDS TRANSFER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:24:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT HISTORY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:25:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VIEW DEPOSIT DETAILS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:27:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:27:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT HISTORY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:28:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 09:22:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 09:23:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 09:25:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT HISTORY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 09:27:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">FUNDS TRANSFER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 09:31:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 09:31:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">FAQ</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 09:33:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">FAQ</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 09:36:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 22:41:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT HISTORY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 22:45:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 22:47:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT HISTORY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 22:49:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">FAQ</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 22:50:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 22:53:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 22:55:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-19 08:33:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">FAQ</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-19 08:36:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VIEW DEPOSIT DETAILS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-19 08:38:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">FAQ</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-19 08:41:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-19 10:06:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">FUNDS TRANSFER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-19 10:09:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VIEW DEPOSIT DETAILS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-19 10:11:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VIEW DEPOSIT DETAILS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-19 10:13:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT HISTORY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-19 10:14:00</div>
+         </td>
+      </tr>
+   </table>
+
+
+		
+   <a name="section_wsg_nlw_ldb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM FrequentPaths(
+  ON bank_web_clicks1 AS InputTable
+  OUT TABLE OutputTable(output1)
+  USING
+  PartitionColumns('session_id')
+  TimeColumn('datestamp')
+  ItemColumn('page')
+  MinSupport(2)
+) AS dt ;
+</tt>
+   </pre>
+   <a name="section_kct_nlw_ldb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ message                           
+ --------------------------------- 
+ Finished. 69 patterns were found.
+
+SELECT CAST(pattern AS varchar(500)), support, length FROM output1 ORDER BY 3 DESC, 2 DESC;
+
+ pattern                                                                         support length 
+ ------------------------------------------------------------------------------- ------- ------ 
+ account summary;account summary;faq;account summary;account summary                   2      5
+ account summary;account summary;account summary;account history;account summary       2      5
+ account summary;account summary;account history;account summary                       3      4
+ account summary;account summary;account summary;account summary                       3      4
+ account summary;funds transfer;view deposit details;account history                   2      4
+ account summary;faq;account summary;account summary                                   2      4
+ account summary;account history;account summary;faq                                   2      4
+ account summary;account history;account summary;account history                       2      4
+ account summary;account summary;account summary;account history                       2      4
+ account summary;faq;funds transfer;view deposit details                               2      4
+ account summary;faq;account history;account summary                                   2      4
+ account summary;account summary;account history;faq                                   2      4
+ account summary;account summary;faq;account summary                                   2      4
+ account summary;faq;account summary;view deposit details                              2      4
+ account summary;account summary;account summary;funds transfer                        2      4
+ account summary;faq;account history;view deposit details                              2      4
+ account summary;faq;funds transfer;account summary                                    2      4
+ account summary;account history;account summary                                       4      3
+ account summary;faq;view deposit details                                              3      3
+ account summary;account summary;account history                                       3      3
+ account summary;account summary;account summary                                       3      3
+ account summary;funds transfer;view deposit details                                   3      3
+ account summary;faq;account summary                                                   3      3
+ account summary;account summary;faq                                                   3      3
+ account summary;account history;view deposit details                                  2      3
+ account summary;account summary;view deposit details                                  2      3
+ faq;account history;view deposit details                                              2      3
+ account summary;funds transfer;account history                                        2      3
+ account summary;faq;funds transfer                                                    2      3
+ faq;funds transfer;account summary                                                    2      3
+ account summary;faq;faq                                                               2      3
+ account summary;account history;funds transfer                                        2      3
+ account summary;view deposit details;account history                                  2      3
+ account summary;funds transfer;account summary                                        2      3
+ faq;account summary;view deposit details                                              2      3
+ account summary;account summary;funds transfer                                        2      3
+ faq;funds transfer;view deposit details                                               2      3
+ account summary;account history;faq                                                   2      3
+ faq;account summary;account summary                                                   2      3
+ account history;account summary;faq                                                   2      3
+ account history;account summary;account history                                       2      3
+ account summary;account history;account history                                       2      3
+ funds transfer;view deposit details;account history                                   2      3
+ account summary;faq;account history                                                   2      3
+ faq;account history;account summary                                                   2      3
+ account summary;faq                                                                   5      2
+ account summary;account history                                                       5      2
+ account summary;account summary                                                       4      2
+ account history;account summary                                                       4      2
+ account summary;funds transfer                                                        4      2
+ account summary;view deposit details                                                  4      2
+ faq;account summary                                                                   3      2
+ funds transfer;view deposit details                                                   3      2
+ faq;view deposit details                                                              3      2
+ account history;faq                                                                   2      2
+ faq;account history                                                                   2      2
+ account history;account history                                                       2      2
+ funds transfer;account history                                                        2      2
+ account history;funds transfer                                                        2      2
+ faq;funds transfer                                                                    2      2
+ account history;view deposit details                                                  2      2
+ view deposit details;account history                                                  2      2
+ faq;faq                                                                               2      2
+ funds transfer;account summary                                                        2      2
+ account summary                                                                       6      1
+ account history                                                                       5      1
+ faq                                                                                   5      1
+ funds transfer                                                                        4      1
+ view deposit details                                                                  4      1</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="yeo1523480104075"> </a>
+	  <h3>FrequentPaths Example: ItemDefinitionTable</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable:  bank_web_url, which has the URL of each page browsed by the customer</li>
+      <li>ItemDefinitionTable: ref_url, which has the definitions of the browser pages</li>
+   </ul>
+   <a name="table_ov3_tnw_ldb"> </a>
+   <table class="introtable">
+      <a name="table_ov3_tnw_ldb"> </a>
+      <h4 style="text-align: center;">InputTable: bank_web_url</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">session_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">page_url</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">datestamp</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/acsum</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:35:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/faq</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:38:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/achist</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:42:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/fundsxfer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:45:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/onlinestat</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:49:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/profile</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:50:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/acsum</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:51:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/customer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:53:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/deposit</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:57:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/acsum</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:16:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/acsum</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:18:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/faq</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:20:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/acsum</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:21:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/fundsxfer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:24:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/achist</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:25:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/deposit</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:27:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/acsum</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:27:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/achist</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:28:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/acsum</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 09:22:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/acsum</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 09:23:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/acsum</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 09:25:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/achist</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 09:27:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/fundsxfer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 09:31:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/acsum</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 09:31:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/faq</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 09:33:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/faq</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 09:36:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/acsum</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 22:41:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/achist</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 22:45:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/acsum</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 22:47:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/achist</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 22:49:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/faq</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 22:50:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/acsum</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 22:53:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/acsum</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 22:55:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/acsum</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-19 08:33:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/faq</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-19 08:36:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/deposit</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-19 08:38:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/faq</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-19 08:41:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/acsum</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-19 10:06:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/fundsxfer</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-19 10:09:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/deposit</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-19 10:11:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/deposit</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-19 10:13:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">www.bank.com/achist</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-19 10:14:00</div>
+         </td>
+      </tr>
+   </table>
+
+   <a name="table_f4s_q4w_ldb"> </a>
+   <table class="introtable">
+      <a name="table_f4s_q4w_ldb"> </a>
+      <h4 style="text-align: center;">ItemDefinitionTable: ref_url</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">page_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">pagedef</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">page</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">page_url like '%acsum%'</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">page_url like '%faq%'</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">FAQ</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">page_url like '%achist%'</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT HISTORY</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">4</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">page_url like '%fundsxfer%'</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">FUNDS TRANSFER</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">5</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">page_url like '%onlinestat%'</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ONLINE STATEMENT ENROLLMENT</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">6</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">page_url like '%profile%'</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">PROFILE UPDATE</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">8</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">page_url like '%customer%'</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CUSTOMER SUPPORT</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">9</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">page_url like '%deposit%'</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VIEW DEPOSIT DETAILS</div>
+         </td>
+      </tr>
+   </table>
+
+
+		
+   <a name="section_yxx_mnw_ldb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM FrequentPaths(
+  ON bank_web_url AS InputTable
+  ON ref_url AS ItemDefinitionTable
+  OUT TABLE OutputTable(output2)
+  USING
+  PartitionColumns('session_id')
+  TimeColumn('datestamp')
+  ItemDefinitionColumns('[page_id:pagedef:page]')
+  MinSupport(2)
+) AS dt ;</tt>
+   </pre>
+   <a name="section_nzf_nnw_ldb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+message                           
+ --------------------------------- 
+ Finished. 69 patterns were found.
+
+SELECT CAST(pattern AS varchar(500)), support, length FROM output2 ORDER BY 3 DESC, 2 DESC;
+
+ pattern                                                                         support length 
+ ------------------------------------------------------------------------------- ------- ------ 
+ account summary;account summary;account summary;account history;account summary       2      5
+ account summary;account summary;faq;account summary;account summary                   2      5
+ account summary;account summary;account history;account summary                       3      4
+ account summary;account summary;account summary;account summary                       3      4
+ account summary;account summary;account summary;funds transfer                        2      4
+ account summary;account summary;account summary;account history                       2      4
+ account summary;account history;account summary;account history                       2      4
+ account summary;funds transfer;view deposit details;account history                   2      4
+ account summary;account history;account summary;faq                                   2      4
+ account summary;faq;account history;view deposit details                              2      4
+ account summary;account summary;account history;faq                                   2      4
+ account summary;faq;account history;account summary                                   2      4
+ account summary;faq;account summary;view deposit details                              2      4
+ account summary;faq;funds transfer;view deposit details                               2      4
+ account summary;faq;funds transfer;account summary                                    2      4
+ account summary;account summary;faq;account summary                                   2      4
+ account summary;faq;account summary;account summary                                   2      4
+ account summary;account history;account summary                                       4      3
+ account summary;account summary;account summary                                       3      3
+ account summary;account summary;account history                                       3      3
+ account summary;funds transfer;view deposit details                                   3      3
+ account summary;faq;account summary                                                   3      3
+ account summary;faq;view deposit details                                              3      3
+ account summary;account summary;faq                                                   3      3
+ funds transfer;view deposit details;account history                                   2      3
+ account summary;account summary;funds transfer                                        2      3
+ account summary;account summary;view deposit details                                  2      3
+ account summary;funds transfer;account summary                                        2      3
+ account history;account summary;account history                                       2      3
+ account summary;account history;funds transfer                                        2      3
+ account summary;funds transfer;account history                                        2      3
+ account summary;account history;account history                                       2      3
+ account summary;account history;view deposit details                                  2      3
+ account summary;view deposit details;account history                                  2      3
+ account summary;faq;faq                                                               2      3
+ account summary;account history;faq                                                   2      3
+ faq;account summary;account summary                                                   2      3
+ account history;account summary;faq                                                   2      3
+ account summary;faq;account history                                                   2      3
+ faq;account summary;view deposit details                                              2      3
+ faq;account history;account summary                                                   2      3
+ faq;account history;view deposit details                                              2      3
+ account summary;faq;funds transfer                                                    2      3
+ faq;funds transfer;account summary                                                    2      3
+ faq;funds transfer;view deposit details                                               2      3
+ account summary;account history                                                       5      2
+ account summary;faq                                                                   5      2
+ account history;account summary                                                       4      2
+ account summary;view deposit details                                                  4      2
+ account summary;account summary                                                       4      2
+ account summary;funds transfer                                                        4      2
+ funds transfer;view deposit details                                                   3      2
+ faq;view deposit details                                                              3      2
+ faq;account summary                                                                   3      2
+ view deposit details;account history                                                  2      2
+ funds transfer;account history                                                        2      2
+ account history;view deposit details                                                  2      2
+ account history;funds transfer                                                        2      2
+ funds transfer;account summary                                                        2      2
+ faq;faq                                                                               2      2
+ account history;account history                                                       2      2
+ faq;account history                                                                   2      2
+ account history;faq                                                                   2      2
+ faq;funds transfer                                                                    2      2
+ account summary                                                                       6      1
+ account history                                                                       5      1
+ faq                                                                                   5      1
+ view deposit details                                                                  4      1
+ funds transfer                                                                        4      1</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="bwp1523481146668"> </a>
+	  <h3>FrequentPaths Example: GroupByColumns</h3>
+
+	
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <a name="table_jt3_dqw_ldb"> </a>
+   <table class="introtable">
+      <a name="table_jt3_dqw_ldb"> </a>
+      <h4 style="text-align: center;">InputTable: bank_web_clicks2</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">customer_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">session_id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">page</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">datestamp</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:35:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">FAQ</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:38:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT HISTORY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:42:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">FUNDS TRANSFER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:45:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ONLINE STATEMENT ENROLLMENT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:49:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">PROFILE UPDATE</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:50:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:51:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">CUSTOMER SUPPORT</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:53:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">0</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VIEW DEPOSIT DETAILS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:57:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:16:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:18:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">FAQ</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:20:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:21:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">FUNDS TRANSFER</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:24:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT HISTORY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:25:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">VIEW DEPOSIT DETAILS</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:27:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT SUMMARY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:27:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">529</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">ACCOUNT HISTORY</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:28:00</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">...</div>
+         </td>
+      </tr>
+   </table>
+
+
+		
+   <a name="section_xtd_5pw_ldb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM FrequentPaths(
+  ON bank_web_clicks2 AS InputTable
+  OUT TABLE OutputTable(output3)
+  USING
+  PartitionColumns('session_id')
+  GroupByColumns('customer_id')
+  TimeColumn('datestamp')
+  ItemColumn('page')
+  MinSupport(2)
+) AS dt;</tt>
+   </pre>
+   <a name="section_tlj_5pw_ldb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ message                            
+ ---------------------------------- 
+ Finished. 213 patterns were found.
+
+SELECT CAST(pattern AS varchar(500)), support, length FROM output3 ORDER BY 3 DESC, 2 DESC;
+
+ pattern                                                                                           support length 
+ ------------------------------------------------------------------------------------------------- ------- ------ 
+ account summary;account summary;funds transfer;account history;faq;account summary;funds transfer       2      7
+ account summary;account summary;funds transfer;account history;faq;account summary                      2      6
+ account summary;account summary;account history;faq;account summary;funds transfer                      2      6
+ account summary;funds transfer;account history;faq;account summary;funds transfer                       2      6
+ account summary;account summary;funds transfer;faq;account summary;funds transfer                       2      6
+ account summary;account summary;funds transfer;account history;faq;funds transfer                       2      6
+ account summary;account summary;funds transfer;account history;account summary;funds transfer           2      6
+ account summary;funds transfer;faq;account summary;funds transfer                                       2      5
+ account summary;funds transfer;account history;faq;funds transfer                                       2      5
+ account summary;account summary;account summary;account history;account summary                         2      5
+ account summary;funds transfer;account summary;faq;funds transfer                                       2      5
+ funds transfer;account history;faq;account summary;funds transfer                                       2      5
+ account summary;account summary;faq;account summary;account summary                                     2      5
+ account summary;faq;faq;account summary;view deposit details                                            2      5
+ account summary;account summary;funds transfer;account summary;funds transfer                           2      5
+ account summary;account summary;funds transfer;faq;funds transfer                                       2      5
+ account summary;account summary;account history;faq;account summary                                     2      5
+ account summary;funds transfer;account history;account summary;funds transfer                           2      5
+ account summary;funds transfer;account history;account summary;view deposit details                     2      5
+ account summary;account summary;funds transfer;account history;funds transfer                           2      5
+ account summary;account summary;faq;account summary;funds transfer                                      2      5
+ account summary;faq;faq;funds transfer;view deposit details                                             2      5
+ account summary;account summary;account history;account summary;funds transfer                          2      5
+ account summary;account summary;account history;faq;funds transfer                                      2      5
+ account summary;account summary;funds transfer;account history;faq                                      2      5
+ account summary;account history;account summary;faq;funds transfer                                      2      5
+ account summary;funds transfer;account history;faq;account summary                                      2      5
+ account summary;account summary;funds transfer;faq;account summary                                      2      5
+ account summary;account history;faq;account summary;funds transfer                                      2      5
+ account summary;account summary;funds transfer;account history;account summary                          2      5
+ account summary;funds transfer;faq;account summary                                                      3      4
+ account summary;funds transfer;account history;account summary                                          3      4
+ account summary;account summary;account summary;account summary                                         3      4
+ account summary;account summary;account history;account summary                                         3      4
+ account summary;account history;account summary;funds transfer                                          2      4
+ account summary;faq;account history;view deposit details                                                2      4
+ account summary;faq;faq;account summary                                                                 2      4
+ account summary;funds transfer;account summary;account history                                          2      4
+ account summary;faq;account summary;funds transfer                                                      2      4
+ account summary;account summary;funds transfer;account summary                                          2      4
+ account summary;account summary;account history;funds transfer                                          2      4
+ faq;faq;funds transfer;view deposit details                                                             2      4
+ account summary;account summary;funds transfer;account history                                          2      4
+ account summary;account history;faq;funds transfer                                                      2      4
+ account summary;account summary;faq;funds transfer                                                      2      4
+ account summary;funds transfer;account history;faq                                                      2      4
+ account summary;funds transfer;account summary;faq                                                      2      4
+ account summary;faq;account summary;view deposit details                                                2      4
+ account summary;view deposit details;account summary;account history                                    2      4
+ funds transfer;account history;faq;account summary                                                      2      4
+ account summary;account summary;view deposit details;account history                                    2      4
+ account summary;account history;account summary;view deposit details                                    2      4
+ account history;account summary;faq;funds transfer                                                      2      4
+ account history;faq;account summary;funds transfer                                                      2      4
+ account summary;faq;account summary;view deposit details                                                2      4
+ account summary;faq;funds transfer;account summary                                                      2      4
+ account summary;account summary;account summary;funds transfer                                          2      4
+ account summary;view deposit details;account history;account history                                    2      4
+ account summary;account summary;funds transfer;faq                                                      2      4
+ account summary;account summary;account summary;funds transfer                                          2      4
+ account summary;account history;account summary;account history                                         2      4
+ funds transfer;account history;account summary;view deposit details                                     2      4
+ account summary;funds transfer;account history;view deposit details                                     2      4
+ funds transfer;account summary;faq;funds transfer                                                       2      4
+ account summary;funds transfer;account summary;view deposit details                                     2      4
+ account summary;account summary;faq;account summary                                                     2      4
+ account summary;faq;funds transfer;view deposit details                                                 2      4
+ account summary;account summary;account history;account summary                                         2      4
+ funds transfer;account history;account summary;funds transfer                                           2      4
+ account summary;funds transfer;view deposit details;account history                                     2      4
+ funds transfer;faq;account summary;funds transfer                                                       2      4
+ account summary;account summary;faq;account summary                                                     2      4
+ account summary;faq;faq;funds transfer                                                                  2      4
+ account summary;funds transfer;faq;funds transfer                                                       2      4
+ account summary;faq;funds transfer;view deposit details                                                 2      4
+ account summary;account summary;account summary;account history                                         2      4
+ account summary;account summary;account history;faq                                                     2      4
+ account summary;account history;account summary;faq                                                     2      4
+ account summary;funds transfer;account summary;funds transfer                                           2      4
+ account summary;account summary;funds transfer;funds transfer                                           2      4
+ account summary;account history;faq;account summary                                                     2      4
+ account summary;account history;account summary;account history                                         2      4
+ account summary;faq;account summary;account summary                                                     2      4
+ faq;faq;account summary;view deposit details                                                            2      4
+ account summary;faq;faq;view deposit details                                                            2      4
+ account summary;faq;account history;account summary                                                     2      4
+ account summary;funds transfer;account history;funds transfer                                           2      4
+ account summary;account summary;account history;faq                                                     2      4
+ funds transfer;account history;faq;funds transfer                                                       2      4
+ account summary;account history;account summary;faq                                                     2      4
+ account summary;faq;account summary                                                                     4      3
+ account summary;account history;account summary                                                         4      3
+ account summary;account summary;account history                                                         4      3
+ account summary;funds transfer;account summary                                                          4      3
+ account summary;faq;account summary                                                                     3      3
+ account summary;account summary;account summary                                                         3      3
+ account summary;account summary;faq                                                                     3      3
+ account summary;account history;account history                                                         3      3
+ account summary;account summary;account summary                                                         3      3
+ account summary;account summary;account history                                                         3      3
+ account summary;account history;account summary                                                         3      3
+ account summary;funds transfer;view deposit details                                                     3      3
+ funds transfer;account history;account summary                                                          3      3
+ account summary;account summary;view deposit details                                                    3      3
+ account summary;funds transfer;account history                                                          3      3
+ account summary;faq;funds transfer                                                                      3      3
+ account summary;funds transfer;faq                                                                      3      3
+ account summary;view deposit details;account history                                                    3      3
+ funds transfer;faq;account summary                                                                      3      3
+ account summary;faq;view deposit details                                                                3      3
+ account history;account summary;faq                                                                     2      3
+ account summary;account history;account history                                                         2      3
+ account history;account summary;account history                                                         2      3
+ funds transfer;account history;funds transfer                                                           2      3
+ funds transfer;view deposit details;account history                                                     2      3
+ faq;account history;account summary                                                                     2      3
+ funds transfer;faq;funds transfer                                                                       2      3
+ account summary;faq;account history                                                                     2      3
+ funds transfer;account summary;funds transfer                                                           2      3
+ account summary;funds transfer;funds transfer                                                           2      3
+ account history;account summary;account history                                                         2      3
+ account summary;account history;faq                                                                     2      3
+ funds transfer;account summary;view deposit details                                                     2      3
+ account history;account summary;faq                                                                     2      3
+ account summary;funds transfer;view deposit details                                                     2      3
+ funds transfer;account history;view deposit details                                                     2      3
+ account summary;account summary;faq                                                                     2      3
+ faq;funds transfer;view deposit details                                                                 2      3
+ faq;faq;funds transfer                                                                                  2      3
+ faq;account summary;account summary                                                                     2      3
+ faq;funds transfer;view deposit details                                                                 2      3
+ account history;faq;account summary                                                                     2      3
+ faq;faq;view deposit details                                                                            2      3
+ account summary;account history;faq                                                                     2      3
+ faq;account history;view deposit details                                                                2      3
+ account summary;faq;faq                                                                                 2      3
+ account summary;view deposit details;account summary                                                    2      3
+ funds transfer;account summary;account history                                                          2      3
+ account summary;account history;funds transfer                                                          2      3
+ account history;account summary;funds transfer                                                          2      3
+ account summary;account summary;view deposit details                                                    2      3
+ account summary;account summary;funds transfer                                                          2      3
+ account summary;faq;faq                                                                                 2      3
+ account summary;funds transfer;account summary                                                          2      3
+ faq;account summary;funds transfer                                                                      2      3
+ funds transfer;account summary;faq                                                                      2      3
+ view deposit details;account summary;account history                                                    2      3
+ account summary;funds transfer;account history                                                          2      3
+ account summary;account history;view deposit details                                                    2      3
+ account summary;account history;funds transfer                                                          2      3
+ faq;account summary;view deposit details                                                                2      3
+ account summary;faq;view deposit details                                                                2      3
+ account history;account summary;view deposit details                                                    2      3
+ faq;funds transfer;account summary                                                                      2      3
+ account summary;faq;funds transfer                                                                      2      3
+ account summary;view deposit details;account history                                                    2      3
+ funds transfer;account history;faq                                                                      2      3
+ account history;faq;funds transfer                                                                      2      3
+ faq;account summary;view deposit details                                                                2      3
+ account summary;account history;view deposit details                                                    2      3
+ account summary;account summary;funds transfer                                                          2      3
+ faq;faq;account summary                                                                                 2      3
+ view deposit details;account history;account history                                                    2      3
+ account summary;funds transfer                                                                          5      2
+ account summary;account history                                                                         5      2
+ account summary;account summary                                                                         5      2
+ account summary;account history                                                                         5      2
+ account summary;faq                                                                                     5      2
+ account summary;funds transfer                                                                          4      2
+ account summary;view deposit details                                                                    4      2
+ funds transfer;account summary                                                                          4      2
+ account summary;view deposit details                                                                    4      2
+ faq;account summary                                                                                     4      2
+ account summary;faq                                                                                     4      2
+ account summary;account summary                                                                         4      2
+ account history;account summary                                                                         4      2
+ faq;view deposit details                                                                                3      2
+ funds transfer;account history                                                                          3      2
+ faq;funds transfer                                                                                      3      2
+ view deposit details;account history                                                                    3      2
+ funds transfer;faq                                                                                      3      2
+ account history;account history                                                                         3      2
+ account history;account summary                                                                         3      2
+ funds transfer;view deposit details                                                                     3      2
+ faq;account summary                                                                                     3      2
+ funds transfer;account summary                                                                          2      2
+ faq;faq                                                                                                 2      2
+ funds transfer;account history                                                                          2      2
+ account history;funds transfer                                                                          2      2
+ faq;faq                                                                                                 2      2
+ view deposit details;account history                                                                    2      2
+ account history;view deposit details                                                                    2      2
+ view deposit details;account summary                                                                    2      2
+ account history;funds transfer                                                                          2      2
+ faq;view deposit details                                                                                2      2
+ account history;view deposit details                                                                    2      2
+ faq;funds transfer                                                                                      2      2
+ faq;account history                                                                                     2      2
+ account history;faq                                                                                     2      2
+ funds transfer;funds transfer                                                                           2      2
+ funds transfer;view deposit details                                                                     2      2
+ account history;account history                                                                         2      2
+ account history;faq                                                                                     2      2
+ account summary                                                                                         7      1
+ account summary                                                                                         6      1
+ account history                                                                                         5      1
+ account history                                                                                         5      1
+ faq                                                                                                     5      1
+ funds transfer                                                                                          5      1
+ faq                                                                                                     4      1
+ view deposit details                                                                                    4      1
+ view deposit details                                                                                    4      1
+ funds transfer                                                                                          4      1</tt>
+   </pre>
+   <p style="line-height: 1em;">(Row order can vary.)</p>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+   <a name="znt1523552258270"> </a>
+	  <h3>FrequentPaths Example: SeqPatternTable</h3>
+
+	  <a name="section_ud2_tpc_mdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: bank_web_clicks1, as in FrequentPaths Example: ItemColumn</li>
+   </ul>
+
+   <a name="section_pvz_ppc_mdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM FrequentPaths(
+  ON bank_web_clicks1 AS InputTable
+  OUT TABLE OutputTable(output4)
+  OUT TABLE SeqPatternTable(sp_table)
+  USING
+  PartitionColumns('session_id')
+  TimeColumn('datestamp')
+  ItemColumn('page')
+  MinSupport(2)
+) AS dt;</tt>
+   </pre>
+   <a name="section_p5h_qpc_mdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+The output table "output4" is identical to the output table shown in FrequentPaths Example: ItemColumn, "output1".
+
+The SequencePatternTable can be shown with the following query:
+
+SELECT session_id, CAST(pattern AS varchar(500)) FROM sp_table ORDER BY 1;
+
+ session_id pattern                                                                         
+ ---------- ------------------------------------------------------------------------------- 
+          0 account summary;account summary;view deposit details                           
+          0 funds transfer;account summary                                                 
+          0 account summary;account history;funds transfer                                 
+          0 account history;funds transfer                                                 
+          0 account summary;account history;view deposit details                           
+          0 account summary;funds transfer;view deposit details                            
+          0 funds transfer;view deposit details                                            
+          0 account history;view deposit details                                           
+          0 account summary;funds transfer;account summary                                 
+          0 account history;account summary                                                
+          0 account summary;funds transfer                                                 
+          0 account history                                                                
+          0 account summary;view deposit details                                           
+          0 account summary;account history;account summary                                
+          0 funds transfer                                                                 
+          0 account summary                                                                
+          0 account summary;account summary                                                
+          0 account summary;account history                                                
+          0 view deposit details                                                           
+          0 account summary;faq;view deposit details                                       
+          0 faq;account summary;view deposit details                                       
+          0 faq;funds transfer;account summary                                             
+          0 faq;account history                                                            
+          0 faq;account summary                                                            
+          0 account summary;faq;account summary                                            
+          0 account summary;faq                                                            
+          0 faq                                                                            
+          0 account summary;faq;funds transfer                                             
+          0 faq;account history;account summary                                            
+          0 faq;account history;view deposit details                                       
+          0 faq;funds transfer                                                             
+          0 account summary;faq;account history                                            
+          0 account summary;faq;funds transfer;account summary                             
+          0 faq;view deposit details                                                       
+          0 account summary;faq;account history;view deposit details                       
+          0 account summary;faq;funds transfer;view deposit details                        
+          0 account summary;faq;account summary;view deposit details                       
+          0 faq;funds transfer;view deposit details                                        
+          0 account summary;faq;account history;account summary                            
+          1 account summary                                                                
+          1 funds transfer;account summary                                                 
+          1 account history;account summary                                                
+          1 account history;account history                                                
+          1 view deposit details                                                           
+          1 account summary;view deposit details                                           
+          1 account summary;account summary;account summary                                
+          1 account summary;view deposit details;account history                           
+          1 funds transfer;view deposit details                                            
+          1 account summary;funds transfer;account history                                 
+          1 account summary;account history;view deposit details                           
+          1 view deposit details;account history                                           
+          1 account summary;account summary;account history;account summary                
+          1 account history;account summary;account history                                
+          1 funds transfer;view deposit details;account history                            
+          1 account summary;funds transfer;account summary                                 
+          1 account summary;account summary;account summary;account summary                
+          1 funds transfer;account history                                                 
+          1 account history                                                                
+          1 account summary;funds transfer;view deposit details;account history            
+          1 account history;view deposit details                                           
+          1 account summary;account history;account summary;account history                
+          1 account summary;account history;account summary                                
+          1 account summary;account history                                                
+          1 account summary;account summary                                                
+          1 account summary;funds transfer;view deposit details                            
+          1 account summary;account history;account history                                
+          1 funds transfer                                                                 
+          1 account summary;funds transfer                                                 
+          1 account summary;account summary;view deposit details                           
+          1 account summary;account summary;account history                                
+          1 account summary;account summary;funds transfer                                 
+          1 account summary;account summary;account summary;account history                
+          1 account summary;account summary;account summary;account history;account summary
+          1 account summary;account summary;account summary;funds transfer                 
+          1 account summary;faq;view deposit details                                       
+          1 account summary;faq;funds transfer;view deposit details                        
+          1 account summary;faq;funds transfer                                             
+          1 account summary;faq;account summary                                            
+          1 account summary;faq;account summary;account summary                            
+          1 faq;account summary                                                            
+          1 account summary;faq                                                            
+          1 account summary;account summary;faq;account summary;account summary            
+          1 account summary;faq;funds transfer;account summary                             
+          1 account summary;account summary;faq;account summary                            
+          1 account summary;faq;account summary;view deposit details                       
+          1 account summary;account summary;faq                                            
+          1 account summary;faq;account history;account summary                            
+          1 faq                                                                            
+          1 faq;view deposit details                                                       
+          1 faq;account summary;account summary                                            
+          1 faq;account history;view deposit details                                       
+          1 faq;funds transfer                                                             
+          1 faq;account history                                                            
+          1 faq;funds transfer;account summary                                             
+          1 faq;funds transfer;view deposit details                                        
+          1 faq;account history;account summary                                            
+          1 account summary;faq;account history;view deposit details                       
+          1 account summary;faq;account history                                            
+          1 faq;account summary;view deposit details                                       
+          2 faq;faq                                                                        
+          2 account history;funds transfer                                                 
+          2 account history                                                                
+          2 account summary;account history;account summary                                
+          2 account summary;funds transfer                                                 
+          2 account summary;account summary;account history                                
+          2 account summary;account summary;account summary;funds transfer                 
+          2 account summary;account summary;account summary;account history;account summary
+          2 account summary;account summary;account summary                                
+          2 account history;account summary                                                
+          2 account summary;faq;faq                                                        
+          2 account summary;account history;funds transfer                                 
+          2 account summary                                                                
+          2 account summary;account summary;funds transfer                                 
+          2 account summary;account summary;account history;account summary                
+          2 account summary;account summary;account summary;account summary                
+          2 account summary;account history                                                
+          2 funds transfer                                                                 
+          2 account summary;account summary;account summary;account history                
+          2 account summary;account summary                                                
+          2 faq                                                                            
+          2 account history;account summary;faq                                            
+          2 account summary;account history;faq                                            
+          2 account summary;account summary;faq                                            
+          2 account history;faq                                                            
+          2 account summary;faq                                                            
+          2 account summary;account history;account summary;faq                            
+          2 account summary;account summary;account history;faq                            
+          3 account summary;account history;account history                                
+          3 account summary;account history;account summary                                
+          3 account summary                                                                
+          3 account history;account summary;account history                                
+          3 account history;account history                                                
+          3 account history;account summary                                                
+          3 account history                                                                
+          3 account summary;account summary;account summary;account summary                
+          3 account summary;account summary;account history;account summary                
+          3 account summary;account summary                                                
+          3 account summary;account history;account summary;account history                
+          3 account summary;account summary;account summary                                
+          3 account summary;account history                                                
+          3 account summary;account summary;account history                                
+          3 account summary;account summary;faq;account summary                            
+          3 account summary;account summary;account history;faq                            
+          3 faq;account summary;account summary                                            
+          3 faq                                                                            
+          3 account history;account summary;faq                                            
+          3 account summary;account history;account summary;faq                            
+          3 account summary;faq;account summary                                            
+          3 account summary;account summary;faq;account summary;account summary            
+          3 account summary;account summary;faq                                            
+          3 account summary;account history;faq                                            
+          3 faq;account summary                                                            
+          3 account history;faq                                                            
+          3 account summary;faq;account summary;account summary                            
+          3 account summary;faq                                                            
+          4 faq;faq                                                                        
+          4 account summary;view deposit details                                           
+          4 account summary                                                                
+          4 view deposit details                                                           
+          4 account summary;faq;faq                                                        
+          4 account summary;faq;view deposit details                                       
+          4 faq;view deposit details                                                       
+          4 faq                                                                            
+          4 account summary;faq                                                            
+          5 view deposit details                                                           
+          5 account history                                                                
+          5 view deposit details;account history                                           
+          5 account summary;account history                                                
+          5 account summary;view deposit details;account history                           
+          5 funds transfer;account history                                                 
+          5 funds transfer                                                                 
+          5 funds transfer;view deposit details                                            
+          5 account summary;funds transfer;account history                                 
+          5 account summary;funds transfer;view deposit details;account history            
+          5 funds transfer;view deposit details;account history                            
+          5 account summary;view deposit details                                           
+          5 account summary;funds transfer;view deposit details                            
+          5 account summary;funds transfer                                                 
+          5 account summary</tt>
+   </pre>
+   <p style="line-height: 1em;">(Row order can vary.)</p>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="mvm1523552301955"> </a>
+	  <h3>FrequentPaths Example: PathFilters</h3>
+
+	  <a name="section_w3r_spc_mdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: bank_web_clicks1, as in FrequentPaths Example: ItemColumn</li>
+   </ul>
+
+   <a name="section_pvz_ppc_mdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM FrequentPaths(
+  ON bank_web_clicks1 AS InputTable
+  OUT TABLE OutputTable(output5)
+  USING
+  PartitionColumns('session_id')
+  TimeColumn('datestamp')
+  ItemColumn('page')
+  PathFilters('STW(account summary) EDW(account history)')
+  MinSupport(2)
+) AS dt ;</tt>
+   </pre>
+   <a name="section_p5h_qpc_mdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ message                           
+ --------------------------------- 
+ Finished. 15 patterns were found.
+
+
+SELECT CAST(pattern AS varchar(500)), support, length FROM output5 ORDER BY 3 DESC, 2 DESC;
+
+ pattern                                                             support length 
+ ------------------------------------------------------------------- ------- ------ 
+ account summary;funds transfer;view deposit details;account history       2      4
+ funds transfer;view deposit details;account history                       2      3
+ account summary;funds transfer;view deposit details                       2      3
+ account summary;funds transfer;account history                            2      3
+ account summary;view deposit details;account history                      2      3
+ account summary;funds transfer                                            2      2
+ funds transfer;account history                                            2      2
+ account summary;view deposit details                                      2      2
+ view deposit details;account history                                      2      2
+ account summary;account history                                           2      2
+ funds transfer;view deposit details                                       2      2
+ account summary                                                           2      1
+ account history                                                           2      1
+ view deposit details                                                      2      1
+ funds transfer                                                            2      1</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="bnn1523552331946"> </a>
+	  <h3>FrequentPaths Example: ClosedPattern ('true')</h3>
+
+	  <a name="section_bj2_spc_mdb"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: bank_web_clicks1, as in FrequentPaths Example: ItemColumn</li>
+   </ul>
+
+   <a name="section_pvz_ppc_mdb"> </a>
+   <h4>SQL Call</h4>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM FrequentPaths(
+  ON bank_web_clicks1 AS InputTable
+  OUT TABLE OutputTable(output6)
+  USING
+  PartitionColumns('session_id')
+  TimeColumn('datestamp')
+  ItemColumn('page')
+  MinSupport(2)
+  ClosedPattern('true')
+) AS dt ;</tt>
+   </pre>
+   <a name="section_p5h_qpc_mdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ message                           
+ --------------------------------- 
+ Finished. 26 patterns were found.
+
+SELECT CAST(pattern AS varchar(500)), support, length FROM output6 ORDER BY 3 DESC, 2 DESC;
+
+ pattern                                                                         support length 
+ ------------------------------------------------------------------------------- ------- ------ 
+ account summary;account summary;account summary;account history;account summary       2      5
+ account summary;account summary;faq;account summary;account summary                   2      5
+ account summary;account summary;account summary;account summary                       3      4
+ account summary;account summary;account history;account summary                       3      4
+ account summary;account summary;account summary;funds transfer                        2      4
+ account summary;faq;funds transfer;account summary                                    2      4
+ account summary;account history;account summary;account history                       2      4
+ account summary;funds transfer;view deposit details;account history                   2      4
+ account summary;faq;account summary;view deposit details                              2      4
+ account summary;faq;account history;view deposit details                              2      4
+ account summary;account summary;account history;faq                                   2      4
+ account summary;account history;account summary;faq                                   2      4
+ account summary;faq;account history;account summary                                   2      4
+ account summary;faq;funds transfer;view deposit details                               2      4
+ account summary;account history;account summary                                       4      3
+ account summary;funds transfer;view deposit details                                   3      3
+ account summary;faq;account summary                                                   3      3
+ account summary;account summary;faq                                                   3      3
+ account summary;faq;view deposit details                                              3      3
+ account summary;faq;faq                                                               2      3
+ account summary;account history;funds transfer                                        2      3
+ account summary;account history                                                       5      2
+ account summary;faq                                                                   5      2
+ account summary;view deposit details                                                  4      2
+ account summary;funds transfer                                                        4      2
+ account summary                                                                       6      1</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+   <a name="sib1523552363751"> </a>
+	  <h3>FrequentPaths Example: Use with nPath to Select Sequences</h3>
+
+	  <a name="section_tbc_zjy_xgb"> </a>
+   <p style="line-height: 1em;">This example uses nPath and FrequentPaths to select sequences.</p>
+
+
+		<a name="section_N10011_N1000E_N10001"> </a>
+   <h4>Input</h4>
+   <ul>
+      <li>InputTable: nPath_output, which the example creates by inputting the following table, sequence_table, to the nPath function</li>
+   </ul>
+   <a name="table_a4v_zsc_mdb"> </a>
+   <table class="introtable">
+      <a name="table_a4v_zsc_mdb"> </a>
+      <h4 style="text-align: center;">sequence_table</h4>
+      <tr>
+         <th align="left">
+            <div style="line-height: 1em;">id</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">datestamp</div>
+         </th>
+         <th align="left">
+            <div style="line-height: 1em;">item</div>
+         </th>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:35:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">A</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:38:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">B</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">1</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-17 16:42:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">C</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:16:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">B</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:18:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">C</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">2</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-18 01:20:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">D</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-19 08:33:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">A</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-19 08:36:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">D</div>
+         </td>
+      </tr>
+      <tr>
+         <td align="left">
+            <div style="line-height: 1em;">3</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">2004-03-19 08:38:00</div>
+         </td>
+         <td align="left">
+            <div style="line-height: 1em;">C</div>
+         </td>
+      </tr>
+   </table>
+
+   <p style="line-height: 1em;">The following statement creates nPath_output, populating it with sequences that start with "A" and end with "C", and using the Accumulate syntax element to output the full sequence.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+CREATE MULTISET TABLE nPath_output AS (
+  SELECT * FROM nPath@coprocessor (
+    ON sequence_table PARTITION BY id ORDER BY datestamp
+    USING
+    Pattern ('itemA.itemAny*.itemC')
+    Symbols (item='a' as itemA, item='c' as itemC, true as itemAny)
+    Result (FIRST(id OF itemA) AS id, 
+    ACCUMULATE(item OF ANY (itemA, itemAny, itemC)) AS path1)
+    Mode (NONOVERLAPPING)
+) AS dt
+) WITH DATA;</tt>
+   </pre>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM nPath_output ORDER BY id;</tt>
+   </pre>
+   <pre>
+      <tt>
+ id path1     
+ -- --------- 
+  1 [a, b, c]
+  3 [a, d, c]</tt>
+   </pre>
+		
+   <a name="section_pvz_ppc_mdb"> </a>
+   <h4>SQL Call</h4>
+   <p style="line-height: 1em;">The FrequentPaths function outputs the sequences that start start with 'A' and end with 'C'.</p>
+   <pre style="margin-left: 2em; font-family: monospace;">
+      <tt style="font-family: monospace; font-size: larger;">
+SELECT * FROM FrequentPaths (
+  ON nPath_output AS InputTable
+  OUT TABLE OutputTable (output7)
+  USING
+  PartitionColumns ('id')
+  PathColumn ('path1')
+  MinSupport (2)
+) AS dt;</tt>
+   </pre>
+   <a name="section_p5h_qpc_mdb"> </a>
+   <h4>Output</h4>
+   <pre>
+      <tt>
+ message                          
+ -------------------------------- 
+ Finished. 3 patterns were found.
+
+SELECT CAST(pattern AS varchar(10)), support, length FROM output7 ORDER BY 3 DESC, 2 DESC;
+
+ pattern support length 
+ ------- ------- ------ 
+ a;c           2      2
+ a             2      1
+ c             2      1</tt>
+   </pre>
+   <p style="line-height: 1em;">Download a zip file of all examples and a SQL script file that creates their input tables from the download tab <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAB3RJTUUH4goBFgI6icULHwAAAAd0RVh0QXV0aG9yAKmuzEgAAAAMdEVYdERlc2NyaXB0aW9uABMJISMAAAAKdEVYdENvcHlyaWdodACsD8w6AAAADnRFWHRDcmVhdGlvbiB0aW1lADX3DwkAAAAJdEVYdFNvZnR3YXJlAF1w/zoAAAALdEVYdERpc2NsYWltZXIAt8C0jwAAAAh0RVh0V2FybmluZwDAG+aHAAAAB3RFWHRTb3VyY2UA9f+D6wAAAAh0RVh0Q29tbWVudAD2zJa/AAAABnRFWHRUaXRsZQCo7tInAAABFElEQVQokX2SMUvDUBSFv1cM6HPIVLq4CC1i6eriatvBRQcnIUaKi5MOZnFp/Qdd3LoIxcVFF/+A6NJdEAfjYIlG5BXto9DhObS2SaS50z2cj8O9lyuCIDBESj9d0WyHrNX2qSzLqEUmpnjmunnD48sDF+17enEzCQ8Zfo9b1efHmBT46w3/r39XqNRkrSOAT/czDVaKcCK6hInoudGoGj2Aj1c/YmlUqOnnQCwsIi0QQXBnLg/OuB0wu+Y3qbd2yUCB7eMK9kzSpny0Rd6Y0cyy5NLYK2D9Ay3yTh23JBFCTBfMVj28cjzf3jjBq2YnOnINSdFp4K6M85d2OHWKSEAIAYBI/ga9Dq3zDqu1Q9ZzUxDgFyRVVSE6DqNfAAAAAElFTkSuQmCC"
+           width=""
+           height=""/> in the left pane.</p>
+
+
+	
+</t:intro>
